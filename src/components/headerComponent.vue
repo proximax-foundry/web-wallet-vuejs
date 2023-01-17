@@ -715,7 +715,7 @@ export default defineComponent({
           summary: t('transaction.txError'), 
           detail: "Transaction Failed with error",
           detail2: "Transaction Hash: ", 
-          detail3: txnHash,
+          detail3: txnHash.slice(0,20) + "...",
           detail4: statusMessage,
           group: 'br-custom',
           life: 10000
@@ -728,7 +728,7 @@ export default defineComponent({
             summary: t('transaction.txAdded', 1), 
             detail:  t('transaction.txUnconfirmed', 1),
             detail2: "Transaction Hash: ",
-            detail3: txnHash,
+            detail3: txnHash.slice(0,20) + "...",
             url: txnHashExplorerLink,
             group: 'br-custom', 
             life: 5000
@@ -740,7 +740,7 @@ export default defineComponent({
               severity:'warn', 
               summary: t('transaction.partialAdded',1),
               detail: "Transaction Hash: ", 
-              detail3: txnHash,
+              detail3: txnHash.slice(0,20) + "...",
               url: txnHashExplorerLink,
               group: 'br-custom', 
               life: 6000
@@ -752,7 +752,7 @@ export default defineComponent({
             severity:'success', 
             summary: t('transaction.swapTx',1),
             detail: "Transaction Hash: ", 
-            detail3: txnHash,
+            detail3: txnHash.slice(0,20) + "...",
             url: txnHashExplorerLink,
             group: 'br-custom', 
             life: 8000
@@ -764,7 +764,7 @@ export default defineComponent({
               severity:'success', 
               summary:  t('transaction.txConfirmed',1),
               detail: "Transaction Hash: ", 
-              detail3: txnHash, 
+              detail3: txnHash.slice(0,20) + "...", 
               url: txnHashExplorerLink,
               group: 'br-custom', 
               life: 8000
@@ -787,7 +787,7 @@ export default defineComponent({
             severity:'info', 
             summary: "Transaction announced",
             detail: "Transaction Hash:", 
-            detail3: data.txnHash,
+            detail3: data.txnHash.slice(0,20) + "...",
             group: 'br-custom', 
             life: 5000
           }
@@ -806,7 +806,7 @@ export default defineComponent({
             severity:'info', 
             summary: "Transaction Cosigned",
             detail: "Transaction Hash:", 
-            detail3: data.txnHash,
+            detail3: data.txnHash.slice(0,20) + "...",
             url: createTxnHashExplorerLink(data.txnHash),
             group: 'br-custom', 
             life: 5000
