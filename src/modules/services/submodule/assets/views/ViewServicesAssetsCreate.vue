@@ -31,70 +31,7 @@
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
-        <div v-if="!isMultiSig(selectedAccAdd)" class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
-        <div v-else class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.multisigAcc')}}</div>
-        <div class="grid grid-cols-5 text-gray-200 my-1">
-          <div class='font-semibold text-xxs mt-2 col-span-2 text-blue-primary uppercase'>{{$t('general.currentBalance')}}</div>
-          <span class='ml-auto col-span-2' v-html="splitCurrency(balance)"></span>
-          <div class="flex">
-            <div class ='ml-1 text-blue-400 font-bold'>{{currentNativeTokenName}}</div>
-            <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
-          </div>
-        </div>
-        <div class='border-b-2 border-gray-600 mt-2'/>
-        <div class="grid grid-cols-5 justify-between items-center text-gray-200 text-xs pt-2">
-            <div class="font-semibold col-span-2">{{$t('general.assetRentalFee')}}</div>
-            <div class="col-span-2 ml-auto" v-html="splitCurrency(rentalFeeCurrency)"></div>
-            <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
-          </div>
-        <div v-if="!isMultiSig(selectedAccAdd)">
-          <div class="grid grid-cols-5 justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-            <div class="font-semibold col-span-2">{{$t('general.transactionFee')}}</div>
-            <div class="col-span-2 ml-auto" v-html="splitCurrency(transactionFee)"></div>
-            <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
-          </div>
-          <div class="grid grid-cols-5 justify-between border-gray-600 text-white text-xs py-5">
-            <div class="font-bold uppercase col-span-2">{{$t('general.total')}}</div>
-            <div class="col-span-2 ml-auto" v-html="splitCurrency(totalFeeFormatted)"></div>
-            <div class ='ml-1 mt-0.5 text-blue-400'>{{currentNativeTokenName}}</div>
-          </div>
-        </div>
-        <div v-else>
-          <div v-if="getMultiSigCosigner.cosignerList.length > 0">
-            <div class="flex justify-between border-600 border-b items-center text-gray-200 text-xs my-5" />
-              <div class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
-              <div class="grid grid-cols-5 text-gray-200 my-1">
-                <div class='font-semibold text-xxs mt-2  col-span-2 text-blue-primary uppercase'>{{$t('general.currentBalance')}}</div>
-                <span class='ml-auto font-bold col-span-2' v-if="getMultiSigCosigner.cosignerList.length == 1">{{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }}</span>
-                <span class='ml-auto font-bold col-span-2' v-else>{{ checkCosignBalance }}</span>
-                <div class="flex">
-                  <div class ='ml-1 text-blue-400 font-bold'>{{currentNativeTokenName}}</div> 
-                  <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
-                </div>
-              </div>
-            <div class='border-b-2 border-gray-600 mt-2'/>
-            <div class="grid grid-cols-5 justify-between items-center text-gray-200 text-xs py-3">
-              <div class="font-semibold col-span-2">{{$t('general.aggregateFee')}}</div>
-              <div class="col-span-2 ml-auto" v-html="splitCurrency(transactionFee)"></div>
-              <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
-            </div>
-            <div class="grid grid-cols-5 justify-between items-center text-gray-200 text-xs py-3">
-              <div class="font-semibold col-span-2">{{$t('general.lockFund')}}</div>
-              <div class="col-span-2 ml-auto" v-html="splitCurrency(lockFundCurrency)"></div>
-              <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
-            </div>
-            <div class="grid grid-cols-5 justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-              <div class="font-semibold col-span-2">{{$t('general.lockFundTxFee')}}</div>
-              <div class="col-span-2 ml-auto" v-html="splitCurrency(lockFundTxFee)"></div>
-              <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
-            </div>
-            <div class="grid grid-cols-5 justify-between border-gray-600 text-white text-xs py-5">
-              <div class="font-bold uppercase col-span-2">{{$t('general.total')}}</div>
-              <div class="col-span-2 ml-auto" v-html="splitCurrency(totalFeeFormatted)"></div>
-              <div class ='ml-1 mt-0.5 text-blue-400'>{{currentNativeTokenName}}</div>
-            </div>
-          </div>
-        </div>
+        <TransactionFeeDisplay :asset-rental-fee-currency="rentalFeeCurrency" :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="lockFundTxFee" :balance="balance" :selected-acc-add="selectedAccAdd"/>
         <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="createAsset">{{$t('asset.createAssets')}}</button>
@@ -126,6 +63,7 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
 import CheckInput from '@/components/CheckInput.vue';
 import NumberInputClean from '@/modules/services/submodule/assets/components/NumberInputClean.vue';
+import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
 import {useI18n} from 'vue-i18n'
 import { ChainProfileConfig } from "@/models/stores/";
 import { Wallet } from "@/models/wallet";
@@ -150,6 +88,7 @@ export default {
     SupplyInputClean,
     NumberInputClean,
     SelectInputAccount,
+    TransactionFeeDisplay,
   },
   setup(){
     const router = useRouter();
