@@ -161,8 +161,6 @@ export default {
       }
       return walletState.currentLoggedInWallet.accounts.find(acc =>acc.address ===p.address)
     }) 
-    const accountName = ref(acc.value?acc.value.name:'');
-    const accountNameDisplay = ref(acc.value?acc.value.name:'');
     
 
     let isMultisig = computed(()=>{
@@ -432,8 +430,6 @@ export default {
       maxNumApproveTransaction,
       maxNumDeleteUser,
       fundStatus,
-      accountNameDisplay,
-      accountName,
       acc,
       passwd,
       showPasswdError,
