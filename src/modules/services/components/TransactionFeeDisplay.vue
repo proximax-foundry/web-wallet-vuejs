@@ -45,7 +45,8 @@
         </div>
         <div v-if="isMultiSig(selectedAccAdd)">
           <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-3"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
-              <div class="lg:col-span-4 col-span-6 ml-auto">{{selectedMosaic[index].amount}}</div>
+              <div v-if="isNaN(parseFloat(selectedMosaic[index].amount))" class="lg:col-span-4 col-span-6 ml-auto">0</div>
+              <div v-else class="lg:col-span-4 col-span-6 ml-auto">{{selectedMosaic[index].amount}}</div>
               <div class="ml-1 text-blue-400" :index="index"> {{displayAssetId(selectedMosaic[index].id)}} </div>
           </div>
         </div>
@@ -80,9 +81,10 @@
             <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(totalFeeFormatted)"></div>
             <div class ='ml-1 mt-0.5 text-blue-400'>{{currentNativeTokenName}}</div>
           </div>
-          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
-            <div class="text-xs lg:col-span-4 col-span-6 ml-auto">{{selectedMosaic[index].amount}}</div>
-            <div class="ml-1 text-xs text-blue-400" :index="index "> {{displayAssetId(selectedMosaic[index].id)}} </div>
+          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white text-xs"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
+            <div v-if="isNaN(parseFloat(selectedMosaic[index].amount))" class="lg:col-span-4 col-span-6 ml-auto">0</div>
+            <div v-else class="lg:col-span-4 col-span-6 ml-auto">{{selectedMosaic[index].amount}}</div>
+            <div class="ml-1 text-blue-400" :index="index "> {{displayAssetId(selectedMosaic[index].id)}} </div>
         </div>
         </div>
         <div v-else>
