@@ -602,7 +602,7 @@ export default {
 
   const displayMosaicsOption = () => {
     mosaicsCreated.value.push(0);
-    selectedMosaic.value.push({ id: 0, amount: "0" });
+    selectedMosaic.value.push({ id: 0, amount: "0" , namespace: ""});
   };
   // update mosaic
   const updateMosaic = (e) => {
@@ -622,6 +622,14 @@ export default {
       }
     }));
 
+    // check is namespace is link to asset
+    if (mosaic.namespaceNames.length >= 1){
+      selectedMosaic.value[e.index].namespace = mosaic.namespaceNames[0]
+    }
+    else{
+      selectedMosaic.value[e.index].namespace = mosaic.idHex
+    }
+    console.log(selectedMosaic.value)
     selectedMosaic.value[e.index].amount = "0";
     mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
     emitter.emit("CLOSE_MOSAIC_INSUFFICIENT_ERR", false);

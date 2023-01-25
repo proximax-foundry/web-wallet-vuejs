@@ -47,7 +47,7 @@
           <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-3"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
               <div v-if="isNaN(parseFloat(selectedMosaic[index].amount))" class="lg:col-span-4 col-span-6 ml-auto">0</div>
               <div v-else class="lg:col-span-4 col-span-6 ml-auto">{{selectedMosaic[index].amount}}</div>
-              <div class="ml-1 text-blue-400" :index="index"> {{displayAssetId(selectedMosaic[index].id)}} </div>
+              <div class="ml-1 text-blue-400" :index="index"> {{displayAssetName(selectedMosaic[index].namespace)}} </div>
           </div>
         </div>
         <div v-if="assetRentalFeeCurrency" class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-3">
@@ -84,7 +84,7 @@
           <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white text-xs"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
             <div v-if="isNaN(parseFloat(selectedMosaic[index].amount))" class="lg:col-span-4 col-span-6 ml-auto">0</div>
             <div v-else class="lg:col-span-4 col-span-6 ml-auto">{{selectedMosaic[index].amount}}</div>
-            <div class="ml-1 text-blue-400" :index="index "> {{displayAssetId(selectedMosaic[index].id)}} </div>
+            <div class="ml-1 text-blue-400" :index="index "> {{displayAssetName(selectedMosaic[index].namespace)}} </div>
         </div>
         </div>
         <div v-else>
@@ -171,11 +171,17 @@ const splitCurrency = (amount) => {
         return '<span class="font-semibold text-sm">' + split[0] + '</span>';
       }
     };
-const displayAssetId = asset =>{
-      let assetId = asset.toString()
-      let part1 = assetId.slice(0,3)
-      let part2 = assetId.slice(-4)
-      return part1 + "..." + part2
+  const displayAssetName = asset =>{
+      let assetName = asset.toString()
+      // if there name less than 7 word, does not need to truncate
+      if (assetName.length <= 7){
+        return assetName
+      }
+      else{
+        let part1 = assetName.slice(0,3)
+        let part2 = assetName.slice(-4)
+        return part1 + "..." + part2
+      }
     }
 const topUpUrl = computed(()=>{
   if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
