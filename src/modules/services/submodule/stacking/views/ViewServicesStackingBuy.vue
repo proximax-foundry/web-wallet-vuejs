@@ -250,6 +250,8 @@ export default {
       else{
         isChainIdValid.value = false;
       }
+
+      return isChainIdValid.value;
     }
 
     const checkChainSupported = ()=>{
@@ -259,6 +261,8 @@ export default {
       else if(selectedChainId.value === bscChainId){
         isSupportedChainId.value = !bscDisabled.value;
       }
+
+      return isSupportedChainId.value;
     }
 
     const searchAccountStableCoinsBalance = async()=>{
@@ -284,6 +288,11 @@ export default {
       const address = await signer.getAddress();
 
       for(let i=0; i < contracts.length; ++i){
+
+        if(contracts[i].disabled){
+          continue;
+        }
+
         const contract = new ethers.Contract(contracts[i].contractAddress, abi, web3Provider);
         const decimals= contracts[i].decimals;
         const currentName = contracts[i].name;
@@ -700,12 +709,15 @@ export default {
     });
 
     watch([selectedChainId, connectedAddress], (newChainId)=>{
-      checkValidSelectedChainId();
-      checkChainSupported();
 
-      searchAccountStableCoinsBalance();
-      updateSelectedContractAddress();
-      checkSelectedTokenSupported(); 
+      let isValid = checkValidSelectedChainId();
+      let isSupported = checkChainSupported();
+
+      if(isValid && isSupported){
+        searchAccountStableCoinsBalance();
+        updateSelectedContractAddress();
+        checkSelectedTokenSupported();
+      }
     })
     // watcher section end
 
