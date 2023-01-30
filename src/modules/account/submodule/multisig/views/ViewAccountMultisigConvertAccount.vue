@@ -22,8 +22,12 @@
                 <div class='text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.select')}}</div>
               </div>
             </div>
-            
-            <div v-if="toggleContact[index]" class="pl-6 ">
+            <div v-if="toggleContact[index]">
+              <Sidebar v-model:visible="toggleContact[index]" :baseZIndex="10000" position="full">
+                <SelectAccountAndContact v-bind="index" :contacts="contact" :index="index" :selectedNode="selectedNode[index]" @node-select="onNodeSelect($event,index)"/>
+              </Sidebar>
+            </div>
+            <!-- <div v-if="toggleContact[index]" class="pl-6 ">
               <div class=" border">
                 <div class='text-xxs text-gray-300 font-semibold py-2 px-2 uppercase'>{{$t('general.importFromAB')}}</div>
                 <div v-for="(item, number) in contact" :key="number" class="cursor-pointer">
@@ -35,7 +39,7 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
 
           </div>
        </div>
@@ -87,7 +91,7 @@ import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeD
 import TextInputClean from '@/components/TextInputClean.vue'
 import { multiSign } from '@/util/multiSignatory';
 import { walletState } from '@/state/walletState';
-
+import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import {
@@ -105,6 +109,7 @@ export default {
     PasswordInput,
     TextInput,
     TextInputClean,
+    SelectAccountAndContact,
     AccountComponent,
     AccountTabs,
     TransactionFeeDisplay
@@ -131,15 +136,15 @@ export default {
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
     const coSign = ref([]);
+    const selectedNode = ref([])
     const contactName = ref([])
     const selectedAddresses = ref([]);
     const showAddressError = ref([]);
     const toggleContact = ref([])
     const onPartial = ref(false);
-    const space=ref(false)
-    const defaultAcc = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount(): null
-    const selectedAccAdd = ref(defaultAcc?defaultAcc.address:'');
-    const accBalance = ref(Helper.toCurrencyFormat(defaultAcc?defaultAcc.balance:0, AppState.nativeToken.divisibility));
+    const space=ref(false);
+    const currentIndex = ref(0);
+
      const lockFundCurrency = computed(() =>
       Helper.convertToCurrency(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
@@ -161,7 +166,6 @@ export default {
       }
       return walletState.currentLoggedInWallet.accounts.find(acc =>acc.address ===p.address)
     }) 
-    
 
     let isMultisig = computed(()=>{
       if(!acc.value){
@@ -200,8 +204,85 @@ export default {
       if(!acc.value){
         return false
       }
-      return multiSign.generateContact(acc.value.address,acc.value.name)
+      const wallet = walletState.currentLoggedInWallet;
+
+      let accounts = wallet.accounts.map(
+        (account)=>{
+          return { 
+            name: account.name,
+            publicKey: account.publicKey,
+          }
+        });
+      
+      let addressBook = wallet.contacts
+      var contacts = [];
+      var indexNo = 0
+      
+      contacts.push({
+        "key" : "0",
+        "label" : t('general.ownerAcc'),
+        "selectable" : false,
+        "children" : []
+        }
+      )
+      accounts.forEach((element) => {
+        contacts[0].children.push(
+          {
+            "key" : "0-" + indexNo.toString(),
+            "label" : element.name,
+            "data" : element.publicKey
+          }
+        )
+        indexNo++
+      })
+
+      indexNo = 0
+      // getting address book contacts
+      contacts.push({
+        "key" : "1",
+        "label" : t('general.contact'),
+        "selectable" : false,
+        "children" : []
+        }
+      )
+      
+      if (addressBook != undefined) {
+        addressBook.forEach((element) => {
+          contacts[1].children.push(
+          {
+            "key" : "1-" + indexNo.toString(),
+            "label" : element.name,
+            "data" : element.address
+          }
+        )
+        indexNo++
+        });
+      }
+      return contacts
+      // return multiSign.generateContact(acc.value.address,acc.value.name)
     });
+
+      function onNodeSelect(node, index){
+        coSign.value[index] = node.data
+        toggleContact.value[index] = false
+        // this is too make it turn blue
+        selectedNode.value[index][node.key] = true
+        // recipientInput.value = node.data
+        // // this is too make it turn blue
+        // selectedNode.value[node.key] = true
+        // node.selectable = false
+      } 
+
+    
+      const makeNodeSelectable = () => {
+        // if there is previously unselectable value make it selectable
+        if (Object.keys(selectedNode.value).length !== 0){
+          selectedNodeIndex.value = Object.keys(selectedNode.value)[0].split('-')
+          contact.value[selectedNodeIndex.value[0]].children[selectedNodeIndex.value[1]].selectable = true
+          selectedNode.value = {}
+        }
+      }
+
      const splitBalance = computed(()=>{
       let split = accountBalance.value.split(".")
       if (split[1]!=undefined){
@@ -298,6 +379,7 @@ export default {
  
     const addCoSig = () => {
       coSign.value.push('');
+      selectedNode.value.push({})
       // addresses.value.push('');
       showAddressError.value.push(false);
       maxNumApproveTransaction.value += 1;
@@ -437,7 +519,9 @@ export default {
       addCoSig,
       coSign,
       addCoSigButton,
+      selectedNode,
       deleteCoSigAddressInput,
+      onNodeSelect,
       selectedAddresses,
       clear,
       convertAccount,
