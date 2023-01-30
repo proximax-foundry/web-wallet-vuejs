@@ -28,7 +28,6 @@
             </div>
         </div>
     </div>
-    <div class=" mb-3"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
   </div>
 </template>
 
@@ -43,7 +42,6 @@ export default{
   props: {
     placeholder: String,
     logo: Boolean,
-    errorMessage: String,
     icon: String,
     showError: Boolean,
     modelValue: String,
