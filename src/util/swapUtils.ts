@@ -655,7 +655,7 @@ export class SwapUtils {
     return qr.createDataURL();
   }
 
-  static generateIncomingPdfCert = (networkName: string, swapTimestamp: string, siriusAddress: string, swapId: string, transactionHash: string, qrImage: string) => {
+  static generateIncomingPdfCert = (networkName: string, swapTimestamp: string, siriusAddress: string, swapToken: string, transactionHash: string, qrImage: string) => {
     const imgData = pdfImg;
     let doc = new jsPDF({
       orientation: 'landscape',
@@ -675,8 +675,8 @@ export class SwapUtils {
     doc.text('Sirius Address:', leftCol, addressRow);
     doc.text(siriusAddress, secCol, addressRow );
 
-    doc.text('SwapID:', leftCol, swapIDRow);
-    doc.text(swapId, secCol, swapIDRow);
+    doc.text('Swap Token:', leftCol, swapIDRow);
+    doc.text(swapToken, secCol, swapIDRow);
 
     doc.text( networkName + ' Transaction Hash:', leftCol, hashRow);
     doc.text(transactionHash, secCol, hashRow);
