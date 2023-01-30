@@ -15,7 +15,7 @@
             <div class="flex">
               <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
               <TextInput class='w-5/12 mr-2 ' :placeholder="$t('multisig.cosignatory') + `${index+1}`"  v-model="contactName[index]" :disabled="true"  />
-              <TextInputClean class='w-7/12 mr-2 ' :placeholder="$t('general.publicKey')" :errorMessage="$t('general.invalidInput')" :showError="showAddressError[index]" v-model="coSign[index]" />
+              <TextInputClean class='w-7/12 mr-2 ' :placeholder="$t('multisig.addressOrPk')" :errorMessage="$t('general.invalidInput')" :showError="showAddressError[index]" v-model="coSign[index]" />
               <div v-if="showAddressError[index]==true " class="mt-16"/>
               <div @click="toggleContact[index]=!toggleContact[index]" class=' border  cursor-pointer flex flex-col justify-center  p-2' style="height:2.66rem">
                 <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
@@ -309,14 +309,17 @@ export default {
     };
     watch(() => [...coSign.value], (n) => {
       for(var i = 0; i < coSign.value.length; i++){
-        if(coSign.value[i].length == 64){
-          // check own account is the cosigner
-          if(coSign.value[i]==acc.value.publicKey ){
+        if((coSign.value[i].length == 64) || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)){
+          checkCosign(i)
+          if(coSign.value[i]==acc.value.address || coSign.value[i]==Helper.createAddress(acc.value.address).pretty() || coSign.value[i]==acc.value.publicKey ){
             showAddressError.value[i] = true;
             err.value = t('multisig.selectedAccErr')
           }
-          // check if the input has public Key Pattern
-          else if(!coSign.value[i].match(publicKeyPattern)){
+          else if(!coSign.value[i].match(publicKeyPattern) && (coSign.value[i].length == 64)){
+            showAddressError.value[i] = true;
+          }else if(!coSign.value[i].match(addressPatternLong) && (coSign.value[i].length == 46)){
+            showAddressError.value[i] = true;
+          }else if(!coSign.value[i].match(addressPatternShort) && (coSign.value[i].length == 40)){
             showAddressError.value[i] = true;
           }else{
             showAddressError.value[i] = false;
@@ -424,6 +427,20 @@ export default {
     )
     }
     
+    
+    const checkCosign = (index) =>{
+      if (coSign.value[index].length == 40 || coSign.value[index].length == 46) {
+        try {
+          multiSign.verifyContactPublicKey(coSign.value[index]).then(result=>{
+            if(result.status==false){
+              showAddressError.value[index] = true
+            }
+          })
+        } catch (error) {
+          console.log(error)
+        }
+      }
+    }
    
     if(acc.value){
       if(acc.value.balance<totalFee.value){
