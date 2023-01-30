@@ -7,7 +7,7 @@
           <div><b>Swap Timestamp:</b> {{ swapTimestamp }}</div>
         </div> -->
         <!-- <div class="text-left text-tsm mt-2">
-          <div class="font-bold inline-block">Swap ID:</div> <div class=" inline-block break-all">{{ swapId }}</div>
+          <div class="font-bold inline-block">Swap ID:</div> <div class=" inline-block break-all">{{ swapToken }}</div>
         </div> -->
         <div class="sm:grid sm:grid-cols-5 mt-3">
           <div class="sm:col-span-1">
@@ -56,7 +56,7 @@ export default{
   props: {
     networkTerm: String,
     swapType: String,
-    swapId: String,
+    swapToken: String,
     swapTimestamp: String,
     transactionHash: String,
     siriusAddress: String,

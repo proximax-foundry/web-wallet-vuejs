@@ -1,6 +1,7 @@
 var name = "Selenium"
 var password = "abcd1234"
 var password2 = 'abcd12345'
+var privatekey = '834385BA668A16CF47BCCA10FB9DA6DBDAEBE95045EE5776FCE99B80B25F5E39'
 
 
 module.exports = {
@@ -19,8 +20,8 @@ module.exports = {
         create
             .navigate()
             .change_network()
-            .navigate_createnewwallet(browser.launch_url)
-            .create_wallet(name, password)
+            .navigate_createpkwallet2(browser.launch_url)
+            .create_pkwallet(privatekey,name, password)
 
         // sign in
         signin
@@ -29,12 +30,12 @@ module.exports = {
         // account details
         account
             .navigate_accountdetails()
+            .delegate_account(password)
             .empty_input()
             .edit_accountname(name)
             .existing_name(name)
             .show_privatekey(password, password2)
             .copy_instances()
-
     },
 
     // to test delete account

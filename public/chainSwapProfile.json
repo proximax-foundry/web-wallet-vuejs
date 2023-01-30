@@ -3,7 +3,7 @@
       "swapData":{
         "swap_XPX_ETH_URL": "https://swap-gateway.xpxsirius.io/eth",
         "swap_XPX_BSC_URL": "https://swap-gateway.xpxsirius.io/bsc",
-        "swap_IN_SERVICE_URL": "https://swap-gateway.xpxsirius.io",
+        "swap_IN_SERVICE_URL": "https://swap-gateway.xpxsirius.io/sirius",
         "swap_SERVICE_URL": "https://swap-gateway.xpxsirius.io",
         "gasPriceConsultURL": "https://swap-gateway.xpxsirius.io/gas",
         "priceConsultURL": "https://swap-gateway.xpxsirius.io",
@@ -35,7 +35,7 @@
       "swapData":{
         "swap_XPX_ETH_URL": "https://bctestnet-swap-gateway.xpxsirius.io/eth",
         "swap_XPX_BSC_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bsc",
-        "swap_IN_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
+        "swap_IN_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io/sirius",
         "swap_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io",
         "gasPriceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io/gas",
         "priceConsultURL": "https://bctestnet-swap-gateway.xpxsirius.io",

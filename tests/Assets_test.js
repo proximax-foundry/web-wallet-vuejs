@@ -1,5 +1,6 @@
 var name = "Selenium"
 var password = "abcd1234"
+var wrpassword = "1234abcd"
 var supply = "0.000001"
 var divisibility = "6"
 var forasset = "694D033164D2E96BF383F071AD0FCE9AE4A0520862F296EF18215D99BDC5F857"
@@ -32,7 +33,9 @@ module.exports = {
             .navigation_assets(browser.launch_url)
             .empty_password()
             .create_asset(supply, divisibility, password)
-
+            .navigation_assets(browser.launch_url)
+            .wrong_password(supply, divisibility, wrpassword)
+            .cancel_create(browser.launch_url)
     }
 
 }

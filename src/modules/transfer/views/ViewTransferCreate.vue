@@ -8,7 +8,7 @@
         <div class="text-sm font-semibold ">{{$t('transfer.newTransfer')}}</div>
         <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <div class="mt-4"/>
-        <SelectInputSender  v-model="selectedAccAdd" :selectDefault="selectedAccAdd"/>
+        <SelectInputAccount v-model="selectedAccAdd" :selectDefault="selectedAccAdd"/>
         <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
             <div v-if="getWalletCosigner.cosignerList.length > 0">
               <div class="text-tsm">
@@ -39,18 +39,12 @@
             <div class='text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.select')}}</div>
           </div>
         </div>
-        <div v-if="toggleContact" class=" border max-h-40 overflow-auto">
-          <div class='text-xxs text-gray-300 font-semibold py-2 px-2 uppercase'>{{$t('general.importFromAB')}}</div>
-          <input v-model="filterQuery" type="text" class="py-2 px-2 outline-none text-xs text-black" :placeholder="$t('general.search')">
-          <div v-for="(item, number) in filteredContacts" :key="number" class="cursor-pointer overflow-auto">
-            <div @click="recipientInput=item.value;toggleContact=false" class="flex justify-center">
-              <div v-if="number%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full">{{item.label}}</div>
-              <div v-if="number%2==1" class="text-xs py-2 pl-2 w-full">{{item.label}}</div>
-              <div v-if="number%2==0" class="ml-auto pr-2 text-xxs py-2 font-semibold text-blue-primary bg-gray-100 uppercase">{{$t('general.select')}}</div>
-              <div v-if="number%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold text-blue-primary uppercase">{{$t('general.select')}}</div>
-            </div>
-          </div>
-        </div>
+        <!-- Pop Up when select icon is clicked -->
+        <Sidebar v-model:visible="toggleContact" :baseZIndex="10000" position="full">
+          <Tree :value="contacts" selectionMode="single" v-model:selectionKeys="selectedNode" :expandedKeys="expandedKeys" :filter="true" filterMode="strict" @node-select="onNodeSelect" @node-expand="expandTree" @node-collapse="collapseTree" >
+        </Tree>
+        </Sidebar>
+        
         <div v-for="(mosaic, index) in mosaicsCreated" :key="index">
           <MosaicInput :placeholder="$t('transfer.selectAsset')" errorMessage="" v-model="selectedMosaic[index].id" :index="index" :options="mosaics" :disableOptions="selectedMosaic" @show-mosaic-selection="updateMosaic" @remove-mosaic-selected="removeMosaic"/>
           <TransferInputClean v-if="selectedMosaic[index].id != 0" v-model="selectedMosaic[index].amount" :placeholder="$t('transfer.assetAmount')" type="text" :showError="showAssetBalanceErr[index]" :errorMessage="$t('general.insufficientBalance')" :decimal="mosaicSupplyDivisibility[index]"  />
@@ -81,7 +75,7 @@
           </div>
           <div class="flex">
             <div class = 'ml-1 font-bold text-blue-400'>{{currentNativeTokenName}}</div>
-            <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
+            <img src="@/modules/account/img/proximax-logo.svg" class='h-7 w-7'>
           </div>
         </div>
         <div class='border-b-2 border-gray-600 my-2'/>
@@ -199,7 +193,7 @@ import { TransactionUtils } from "@/util/transactionUtils";
 import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from '@/util/chainUtils';
 import { NamespaceUtils } from '@/util/namespaceUtils';
-import SelectInputSender from "@/modules/transfer/components/SelectInputSender.vue";
+import SelectInputAccount from "@/components/SelectInputAccount.vue";
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
 import { AppState } from '@/state/appState';
@@ -210,13 +204,13 @@ export default {
   name: "ViewTransferCreate",
   components: {
     AddressInputClean,
-    SelectInputSender,
+    SelectInputAccount,
     TransferInputClean,
     TransferTextareaInput,
     PasswordInput,
     AddContactModal,
     ConfirmSendModal,
-    MosaicInput
+    MosaicInput,
   },
   setup() {
     const router = useRouter()
@@ -229,6 +223,9 @@ export default {
     const showAssetBalanceErr = ref([])
     const selectContact = ref("0");
     const recipientInput = ref("");
+    const expandedKeys = ref({})
+    const selectedNode = ref({})
+    const selectedNodeIndex = ref()
     const msgOption = ref("regular");
     const messageText = ref("");
     const walletPassword = ref("");
@@ -375,7 +372,6 @@ export default {
           return isMultiSig(selectedAccAdd.value)
       }
     )
-        
 
     const effectiveFee = ref(isMultiSigBool.value?makeTransaction.calculate_aggregate_fee(
       messageText.value,
@@ -432,31 +428,81 @@ export default {
     const moreThanOneAccount = computed(() => {
       return accounts.value.length> 1;
     });
- 
+
     const contacts = computed(() => {
       if(!walletState.currentLoggedInWallet){
         return [];
       }
       const wallet = walletState.currentLoggedInWallet;
       var contact = [];
+      var indexNo = 0
+      contact.push({
+        "key" : "0",
+        "label" : t('general.ownerAcc'),
+        "selectable" : false,
+        "children" : []
+        }
+      )
       accounts.value.forEach((element) => {
-        contact.push({
-          value: Address.createFromRawAddress(element.address).pretty() ,
-          label: element.name + " - "+t('general.ownerAcc'),
-        });
-      });
+        contact[0].children.push(
+          {
+            "key" : "0-" + indexNo.toString(),
+            "label" : element.name,
+            "data" : Address.createFromRawAddress(element.address).pretty()
+          }
+        )
+        indexNo++
+      })
+      indexNo = 0
+      // adding from contact book
+      contact.push({
+        "key" : "1",
+        "label" : t('general.contact'),
+        "selectable" : false,
+        "children" : []
+        }
+      )
+
       if (wallet.contacts != undefined) {
         wallet.contacts.forEach((element) => {
-          contact.push({
-            value: Address.createFromRawAddress(element.address).pretty(),
-            label: element.name + " - "+t('general.contact'),
-          });
+          contact[1].children.push(
+          {
+            "key" : "1-" + indexNo.toString(),
+            "label" : element.name,
+            "data" : Address.createFromRawAddress(element.address).pretty()
+          }
+        )
+        indexNo++
         });
       }
-      return contact;
-     
+      return contact
     });
-  
+
+    const onNodeSelect = (node) => {
+      makeNodeSelectable()
+      toggleContact.value = false
+      recipientInput.value = node.data
+      selectedNode.value = node.key
+      node.selectable = false
+    }
+
+    const makeNodeSelectable = () => {
+      // if there is previously unselectable value make it selectable
+      if (Object.keys(selectedNode.value).length !== 0){
+        selectedNodeIndex.value = Object.keys(selectedNode.value)[0].split('-')
+        contacts.value[selectedNodeIndex.value[0]].children[selectedNodeIndex.value[1]].selectable = true
+      }
+    }
+
+    const expandTree = (expanded) => {
+      expandedKeys.value = {}
+      expandedKeys.value[expanded.key] = true
+    }
+
+    const collapseTree = () =>{
+      expandedKeys.value = {}
+    }
+
     const clearInput = () => {
       selectContact.value = "0";
       walletPassword.value = "";
@@ -623,8 +669,10 @@ export default {
         if(!asset.namespaceNames.includes(AppState.nativeToken.fullNamespace)){
           mosaicOption.push({
             val: asset.idHex,
-            text: (asset.namespaceNames.length>0?asset.namespaceNames:asset.idHex) + " >"+t('general.balance') +": " +Helper.toCurrencyFormat(asset.amount,asset.divisibility),
+            balance: t('general.balance')+":"+Helper.toCurrencyFormat(asset.amount,asset.divisibility),
+            label: (asset.namespaceNames.length>0?asset.namespaceNames[0]:asset.idHex),
             id: index + 1,
+            disabled: false
           });
           index += 1;
         }
@@ -647,15 +695,31 @@ export default {
     let mosaic = account.assets.find(
       (asset) => asset.idHex == selectedMosaic.value[e.index].id
     );
+    // enable back the option
+    for (let i in mosaics.value){
+      mosaics.value[i].disabled = false
+    }
+    // disable all the options choosen
+    mosaics.value.forEach(o1 => selectedMosaic.value.some(o2 => {
+      if(o1.val == o2.id){
+        o1.disabled = true;
+      }
+    }));
+
     selectedMosaic.value[e.index].amount = "0";
     mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
     emitter.emit("CLOSE_MOSAIC_INSUFFICIENT_ERR", false);
   };
+
   const removeMosaic = (e) => {
-    mosaicsCreated.value.splice(e.index, 1);
+    if(selectedMosaic.value[e.index]!= undefined && selectedMosaic.value[e.index].id != 0){
+      // enabling back the option
+      mosaics.value[mosaics.value.findIndex(item => item.val === selectedMosaic.value[e.index].id)].disabled = false
+    }
     selectedMosaic.value.splice(e.index, 1);
     showAssetBalanceErr.value.splice(e.index,1)
     mosaicSupplyDivisibility.value.splice(e.index, 1);
+    mosaicsCreated.value.splice(e.index, 1);
   };
   
   const getSelectedMosaicBalance = (index) => {
@@ -782,7 +846,10 @@ export default {
   }
   watch(selectedAccName, (n, o) => {
     if (n != o) {
+      makeNodeSelectable()
       recipientInput.value = "";
+      selectedNode.value = {};
+      expandedKeys.value = {};
       updateFee()
     }
   });
@@ -881,18 +948,6 @@ export default {
       makeTransfer();
     }
   });
-  const filterQuery = ref("");
-  const filteredContacts = computed(() => {
-    const query = filterQuery.value.toLowerCase();
-      if(filterQuery.value == ""){
-        return contacts.value;
-      }
-      return contacts.value.filter((item) =>{
-        return Object.values(item).some((word) =>
-          String(word).toLowerCase().includes(query));
-      });
-  });
-
   const displayAssetId = asset =>{
       let assetId = asset.toString()
       let part1 = assetId.slice(0,3)
@@ -905,6 +960,11 @@ export default {
       findAcc,
       totalFee,
       contacts,
+      onNodeSelect,
+      expandedKeys,
+      collapseTree,
+      expandTree,
+      selectedNode,
       toggleContact,
       splitBalance,
       moreThanOneAccount,
@@ -971,8 +1031,6 @@ export default {
       checkNamespace,
       currentNativeTokenName,
       showLimitErr,
-      filterQuery,
-      filteredContacts,
       checkCosignBalance,
       displayAssetId
     };
@@ -1013,4 +1071,12 @@ export default {
 .optionDiv:hover {
   background: #d9ebff;
 }
+
+.p-tree::v-deep{
+  .p-tree-container .p-treenode .p-treenode-content{
+    padding-left:2px;
+    padding-top:2px
+  }
+}
+
 </style>
