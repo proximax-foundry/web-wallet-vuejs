@@ -198,8 +198,8 @@ export default {
     }
 
     // connect wallet section
-    const ethereumChainId = networkState.chainNetwork === NetworkType.MAIN_NET ? 1 : 5;
-    const bscChainId = networkState.chainNetwork === NetworkType.MAIN_NET ? 56: 97;
+    const ethereumChainId = networkState.currentNetworkProfile.network.type === NetworkType.MAIN_NET ? 1 : 5;
+    const bscChainId = networkState.currentNetworkProfile.network.type === NetworkType.MAIN_NET ? 56: 97;
     const remoteNetworkType = ethereumChainId === 1 ? "mainnet": "testnet";
     const selectedChainId = ref(0);
     const isWalletConnected = ref(false);
