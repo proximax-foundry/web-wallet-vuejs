@@ -22,11 +22,12 @@
           <div class="flex justify-center mt-10 error_box error error-text" v-if="customErrorMessage">
             {{ customErrorMessage }}
           </div>
-          <div class="flex justify-center mt-10 success_box success success-text" v-if="processing">
-            Submission success
+          <div class="mt-10 success_box success success-text" v-if="processing">
+            <div class="mb-2">Submission is successful.</div>
+            <div class="font-normal relative"><b>Transaction hash: </b><a :href="explorerLink + transactionHash" target=_new class="hover:underline">{{ transactionHash.substr(0, 7) + '...' + transactionHash.substr(-7) }} <font-awesome-icon icon="external-link-alt" class="ml-1 w-3 h-3 self-center inline-block"></font-awesome-icon></a></div>
           </div>
           <div class="flex justify-center mt-10 success_box success success-text" v-if="dispalyWaitForConfirmationMessage">
-            Please wait until transaction confirmed
+            <div style="border-top-color:transparent" class="inline-block mr-2 relative top-2 w-4 h-4 border-4 border-green-500 border-solid rounded-full animate-spin"></div> Please wait until transaction is confirmed
           </div>
           <div v-if="isWalletConnected" class="text-xs flex items-center justify-end">
             <div v-if="connectedWalletName === 'WC'" class="flex items-center gray-text-300">
@@ -131,6 +132,9 @@ export default {
     const recipient = ref(walletState.currentLoggedInWallet.accounts.find(x => x.default).address);
     const isSubmit = shallowRef(false);
     const tokenInvalid = ref(false);
+
+    const transactionHash = ref('');
+    const explorerLink = ref('');
     
     const isChainIdValid = ref(false);
     let provider;
@@ -660,6 +664,9 @@ export default {
 
         let txnHash = receipt.hash;
         let nonce = receipt.nonce;
+        console.log(txnHash)
+        transactionHash.value = txnHash;
+        explorerLink.value = selectedChainId.value === bscChainId?swapData.BSCScanUrl:swapData.ETHScanUrl;
 
         const data = {
           fromToken: selectedFromToken.value,
@@ -874,7 +881,9 @@ export default {
       submitFailed,
       fee,
       dispalyWaitForConfirmationMessage,
-      customErrorMessage
+      customErrorMessage,
+      explorerLink,
+      transactionHash,
     }
   }
 }
