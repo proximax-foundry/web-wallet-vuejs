@@ -161,9 +161,17 @@ export default {
       let findAcc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address ==address) || walletState.currentLoggedInWallet.others.find(acc=>acc.address ==address)
       return findAcc.name
     }
+
+    const setDefaultAccInStorage = (address) =>{
+     
+     sessionStorage.setItem('defaultAcc',address)
+     walletState.currentLoggedInWallet.setDefaultAccountByAddress(address)
+   }
+
     const navigate = (address) =>{
       if(findAccountWithAddress(address) && !isHover.value){
         setDefaultAcc(getAccountNameByAddress(Address.createFromRawAddress(address).plain()))
+        setDefaultAccInStorage(Address.createFromRawAddress(address).plain())
         router.push({ name: 'ViewAccountDetails', params: { address:getPlainAddress(address) }})
       }
     }
