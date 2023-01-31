@@ -10,6 +10,24 @@
           <div v-if="!isSupportedChainId && isWalletConnected" class="error_box error error-text">
             <div>Chain unsupported, please change to supported chain</div>
           </div>
+          <div class="flex justify-center mt-10 error_box error error-text" v-if="tokenInvalid">
+            Unsupported token
+          </div>
+          <div class="flex justify-center mt-10 error_box error error-text" v-if="!settingDone">
+            Configuration error
+          </div>
+          <div class="flex justify-center mt-10 error_box error error-text" v-if="submitFailed">
+            Submission failed
+          </div>
+          <div class="flex justify-center mt-10 error_box error error-text" v-if="customErrorMessage">
+            {{ customErrorMessage }}
+          </div>
+          <div class="flex justify-center mt-10 success_box success success-text" v-if="processing">
+            Submission success
+          </div>
+          <div class="flex justify-center mt-10 success_box success success-text" v-if="dispalyWaitForConfirmationMessage">
+            Please wait until transaction confirmed
+          </div>
           <div v-if="isWalletConnected" class="text-xs flex items-center justify-end">
             <div v-if="connectedWalletName === 'WC'" class="flex items-center gray-text-300">
               <img src="@/modules/services/submodule/mainnetSwap/img/icon-walletconnect.svg" class="w-4 h-4 inline-block" />&nbsp;{{ tokenType(selectedChainId) }}&nbsp;{{ connectedAddress }}
@@ -52,24 +70,6 @@
             <div>{{ selectedToToken }} Price: {{ selectedToTokenPrice }} USD</div>
           </div>
         </div>
-        <div class="flex justify-center mt-10 error_box error error-text" v-if="tokenInvalid">
-          Unsupported token
-        </div>
-        <div class="flex justify-center mt-10 error_box error error-text" v-if="!settingDone">
-          Configuration error
-        </div>
-        <div class="flex justify-center mt-10 error_box error error-text" v-if="submitFailed">
-          Submission failed
-        </div>
-        <div class="flex justify-center mt-10 error_box error error-text" v-if="customErrorMessage">
-          {{ customErrorMessage }}
-        </div>
-        <div class="flex justify-center mt-10 success_box success success-text" v-if="processing">
-          Submission success
-        </div>
-        <div class="flex justify-center mt-10 success_box success success-text" v-if="dispalyWaitForConfirmationMessage">
-          Please wait until transaction confirmed
-        </div>
         <div class="flex justify-center mt-10">
           <button class="blue-btn font-semibold py-2 cursor-pointer text-center w-32 disabled:opacity-50 disabled:cursor-auto" :disabled="disabledBuy" @click="buySiriusToken">Buy</button>
         </div>
@@ -100,6 +100,8 @@ import { Address, NetworkType } from 'tsjs-xpx-chain-sdk';
 import toggleSwitch from '@/modules/services/submodule/stacking/components/toggleSwitch.vue';
 import { getCurrentPriceUSD } from "@/util/functions";
 import { Utilities } from "@/util/utilities";
+import { Helper } from "@/util/typeHelper";
+
 
 export default {
   name: "ViewServicesStackingBuy",
@@ -119,7 +121,7 @@ export default {
     const submitFailed = ref(false);
     const buyFromComponent = ref(null);
     let stableCoins = availableTokens;
-    let siriusTokens = availableToTokens;
+    let siriusTokens = ref(availableToTokens);
     const selectedContractAddress = ref("");
     const selectedStableCoins = ref([]);
     const toAmount = ref(12345.54);
@@ -157,12 +159,12 @@ export default {
 
     const selectedToTokenPrice = computed(()=>{
       priceUpdated.value; // just to trigger auto recompute
-      return siriusTokens.find(x => x.name === selectedToToken.value).price;
+      return siriusTokens.value.find(x => x.name === selectedToToken.value).price;
     });
 
     const fee = computed(()=>{
       settingDone.value; // just to trigger auto recompute
-      return siriusTokens.find(x => x.name === selectedToToken.value).fee;
+      return siriusTokens.value.find(x => x.name === selectedToToken.value).fee;
     });
 
     let siriusTokenAtomicUnits = 1000000;
@@ -288,7 +290,7 @@ export default {
       const address = await signer.getAddress();
 
       for(let i=0; i < contracts.length; ++i){
-
+        console.log(contracts[i].disabled);
         if(contracts[i].disabled){
           continue;
         }
@@ -355,7 +357,7 @@ export default {
 
         for(let siriusToken of siriusTokensInfo){
 
-          let currentSiriusToken = siriusTokens.find(x => x.name == siriusToken.name.toUpperCase()); 
+          let currentSiriusToken = siriusTokens.value.find(x => x.name == siriusToken.name.toUpperCase()); 
 
           if(currentSiriusToken){
             currentSiriusToken.fee = siriusToken.feeAmount;
@@ -554,6 +556,8 @@ export default {
 
       isWalletConnected.value = false;
       connectedWalletName.value = "";
+      setDisconnected()
+      resetStableCoinsBalanceZero();
     }
 
     const checkWalletConnected = ()=>{
@@ -719,12 +723,27 @@ export default {
         checkSelectedTokenSupported();
       }
     })
+
+    // get balance of xpx and metc for currect sirius wallet
+    watch(walletState.currentLoggedInWallet.selectDefaultAccount().assets, () =>{
+      const assets = walletState.currentLoggedInWallet.selectDefaultAccount().assets;
+      for(let i =0; i < siriusTokens.value.length ;++i){
+        const searchedasset = assets.find(asset1 => asset1.namespaceNames.includes(siriusTokens.value[i].namespaceName));
+        if(searchedasset){
+          siriusTokens.value[i].balance = searchedasset.amount;
+        }else{
+          siriusTokens.value[i].balance = 0;
+        }
+      }
+    });
+
     // watcher section end
+
 
     // address
     const showAddressError = shallowRef(true);
     const toggleContact = shallowRef(false);
-    const siriusAddress = ref('');
+    const siriusAddress = ref(Helper.createAddress(walletState.currentLoggedInWallet.selectDefaultAccount().address).pretty());
     watch(siriusAddress, n => {
       if(n.length==40 || n.length==46){
         checkRecipient();
