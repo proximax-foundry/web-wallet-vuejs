@@ -136,26 +136,20 @@ export default defineComponent({
   setup() {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance!.appContext.config.globalProperties.emitter;
-
-  interface defaultAcc{
-    defaultAcc: string
-  }
-    watch(walletState,n=>{
-      if(n.currentLoggedInWallet){
-        let findAcc = sessionStorage.getItem('defaultAcc')
-        //first time
-        if(!findAcc){
-          let data = {
-            defaultAcc:walletState.currentLoggedInWallet.accounts[0].address
-          }
-          sessionStorage.setItem('defaultAcc',JSON.stringify(data))
+    watch(AppState ,n=>{
+      if(n.isReady && walletState.currentLoggedInWallet){
+        let address  = sessionStorage.getItem('defaultAcc')
+        let findAcc = walletState.currentLoggedInWallet.accounts.find(account=>account.address == address)
+        //validations
+        if(!address || !findAcc){
+          let address = walletState.currentLoggedInWallet.accounts[0].address
+          sessionStorage.setItem('defaultAcc',address)
           return
         }
-        let data :defaultAcc = JSON.parse(findAcc)
-        let findData = Object.values(data).find(value=> value == data.defaultAcc)
-        walletState.currentLoggedInWallet.setDefaultAccountByAddress(findData)
+        walletState.currentLoggedInWallet.setDefaultAccountByAddress(address)
       }
-    },{immediate:true})
+    })
+    
 
     const overflowScreen = ref(false);
     const mainFrame = ref(null);
