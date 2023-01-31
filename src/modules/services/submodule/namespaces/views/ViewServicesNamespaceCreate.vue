@@ -764,4 +764,10 @@ export default {
 .optionDiv:hover{
   background: #D9EBFF;
 }
+
+::v-deep(.p-inputtext) {
+      font-size: 1rem;
+      text-align: left;
+      padding: 0.5rem;
+    }
 </style>

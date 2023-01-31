@@ -57,12 +57,6 @@ export default{
 </script>
 <style lang="scss">
 
-.p-inputtext{
-  border: 0px;
-  padding: 0;
-  font-size: 14px;
-  text-align: right;
-}
 
 .p-datepicker {
   padding: 0.5rem;
