@@ -735,7 +735,7 @@ export default {
     watch(walletState.currentLoggedInWallet.selectDefaultAccount().assets, () =>{
       const assets = walletState.currentLoggedInWallet.selectDefaultAccount().assets;
       for(let i =0; i < siriusTokens.value.length ;++i){
-        const searchedasset = assets.find(asset1 => asset1.namespaceNames.includes(siriusTokens.value[i].namespaceName));
+        const searchedasset = assets.find(asset => asset.namespaceNames.includes(siriusTokens.value[i].namespaceName));
         if(searchedasset){
           siriusTokens.value[i].balance = searchedasset.amount;
         }else{
@@ -748,9 +748,54 @@ export default {
 
 
     // address
+    const refreshSiriusTokenBalance = () => {
+      const addressRaw = Helper.createAddress(siriusAddress.value).plain();
+      const selectedAccount = accounts.value.find(account => account.address === addressRaw);
+      const assets = selectedAccount.assets;
+      for(let i =0; i < siriusTokens.value.length ;++i){
+        const searchedasset = assets.find(asset => asset.namespaceNames.includes(siriusTokens.value[i].namespaceName));
+        if(searchedasset){
+          siriusTokens.value[i].balance = searchedasset.amount;
+        }else{
+          siriusTokens.value[i].balance = 0;
+        }
+      }
+    }
     const showAddressError = shallowRef(true);
     const toggleContact = shallowRef(false);
-    const siriusAddress = ref(Helper.createAddress(walletState.currentLoggedInWallet.selectDefaultAccount().address).pretty());
+    const siriusAddress = ref('');
+    const checkRecipient = () =>{
+      if(!walletState.currentLoggedInWallet){
+        return;
+      }
+      try {
+        let recipientAddress = Helper.createAddress(siriusAddress.value);
+        let networkOk = Helper.checkAddressNetwork(recipientAddress, AppState.networkType);
+        if(!networkOk){
+          showAddressError.value = true;
+        }
+        else{
+          showAddressError.value = false;
+          refreshSiriusTokenBalance();
+        }
+      } catch (error) {
+        try{
+          let namespaceId = Helper.createNamespaceId(siriusAddress.value);
+          checkNamespace(namespaceId).then((address)=>{
+            siriusAddress.value = address.plain();
+            showAddressError.value = false;
+            refreshSiriusTokenBalance();
+          }).catch((error)=>{
+            showAddressError.value = true;
+          });
+        }
+        catch(error){
+          showAddressError.value = true;
+        }
+      }
+    };
+    siriusAddress.value = Helper.createAddress(walletState.currentLoggedInWallet.selectDefaultAccount().address).pretty();
+    checkRecipient();
     watch(siriusAddress, n => {
       if(n.length==40 || n.length==46){
         checkRecipient();
@@ -769,6 +814,7 @@ export default {
           balance: acc.balance,
           address: acc.address,
           publicKey: acc.publicKey,
+          assets: acc.assets,
           isMultisig: acc.getDirectParentMultisig().length ? true: false
         };
       });
@@ -779,6 +825,7 @@ export default {
           balance: acc.balance,
           address: acc.address,
           publicKey: acc.publicKey,
+          assets: acc.assets,
           isMultisig: true
         };
       });
@@ -808,35 +855,6 @@ export default {
       }
       return contact;
     });
-
-    const checkRecipient = () =>{
-      if(!walletState.currentLoggedInWallet){
-          return;
-      }
-      try {
-        let recipientAddress = Helper.createAddress(siriusAddress.value);
-        let networkOk = Helper.checkAddressNetwork(recipientAddress, AppState.networkType);
-        if(!networkOk){
-          showAddressError.value = true;
-        }
-        else{
-          showAddressError.value = false;
-        }
-      } catch (error) {
-        try{
-          let namespaceId = Helper.createNamespaceId(siriusAddress.value);
-          checkNamespace(namespaceId).then((address)=>{
-            siriusAddress.value = address.plain();
-            showAddressError.value = false;
-          }).catch((error)=>{
-            showAddressError.value = true;
-          });
-        }
-        catch(error){
-          showAddressError.value = true;
-        }
-      }
-    };
 
     const isChecked = ref(false);
 
