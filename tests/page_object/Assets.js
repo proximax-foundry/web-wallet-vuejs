@@ -5,6 +5,7 @@ const elements = {
     createnew_asset: 'a[href="#/create-asset"]',
     input_password: 'input.w-full',
     error_emptypassword: '.error',
+    error_wrongpassword: 'div.error_box:nth-child(2)',
     input_supply: '.supply_input',
     input_divisibility: '.number_input',
     transferable: 'div.mb-5:nth-child(1) > div:nth-child(1) > div:nth-child(1)',
@@ -13,6 +14,7 @@ const elements = {
     transaction_confirmpopup: 'div.p-toast:nth-child(12) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)',
     asset_id: '.p-datatable-tbody > tr:nth-child(2)',
     confirmed_button: 'div:nth-child(3) > a.py-2.px-4:nth-child(1)',
+    cancel_button: 'a[href="#/dashboard"].content-center.border-white',
 }
 
 const commands = {
@@ -32,6 +34,27 @@ const commands = {
         .isVisible('@error_emptypassword', callback = result => {
             this.assert.equal(result.value, true, "If user does not enter password, an error is shown")
         })
+    },
+
+    wrong_password(supply, divisibility, password){
+        return this
+        .click("@input_supply")
+        .setValue("@input_supply", supply)
+        .click("@input_divisibility")
+        .setValue("@input_divisibility", divisibility)
+        .click("@transferable")
+        .click("@supply_mutable")
+        .setValue("@input_password", password)
+        .click("@createasset_button")
+        .isVisible('@error_wrongpassword', callback = result => {
+            this.assert.equal(result.value, true, "If user enter a wrong password, an error is shown")
+        })
+    },
+    
+    cancel_create(browser){
+        return this
+        .click("@cancel_button")
+        .assert.urlEquals(browser + 'dashboard', 'User is directed back to dashboard home page')
     },
 
     create_asset(supply, divisibility, password){

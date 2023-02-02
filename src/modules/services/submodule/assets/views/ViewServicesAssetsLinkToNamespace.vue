@@ -64,27 +64,7 @@
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
-        <div class="font-semibold text-xxs text-blue-primary uppercase">{{$t('general.accCurrentBalance')}}</div>
-        <div class="flex text-gray-200 mb-5">
-          <span v-html="splitCurrency(balance)"></span>
-          <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
-        </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
-          <div class="font-semibold">{{$t('general.transactionFee')}}</div>
-          <div v-html="splitCurrency(transactionFee)"></div>
-        </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">{{$t('general.lockFund')}}</div>
-          <div v-html="splitCurrency(lockFundCurrency)"></div>
-        </div>
-        <div class="flex justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3" v-if="isMultiSig(selectedAccAdd)">
-          <div class="font-semibold">{{$t('general.lockFundTxFee')}}</div>
-          <div v-html="splitCurrency(lockFundTxFee)"></div>
-        </div>
-        <div class="flex justify-between border-gray-600 text-white text-xs py-5">
-          <div class="font-bold uppercase">{{$t('general.total')}}</div>
-          <div v-html="splitCurrency(totalFeeFormatted)"></div>
-        </div>
+        <TransactionFeeDisplay :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="lockFundTxFee" :balance="balance" :selected-acc-add="selectedAccAdd"/>
         <div class='text-xs text-white mt-5 mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="linkNamespace">{{ (selectAction=='link')?$t('general.linkToNamespace'):$t('namespace.unlinkNamespace') }}</button>
@@ -102,6 +82,7 @@ import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectLinkType from '@/modules/services/submodule/assets/components/SelectLinkType.vue';
 import SelectInputNamespace from '@/modules/services/submodule/assets/components/SelectInputNamespace.vue';
+import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { Helper } from '@/util/typeHelper';
@@ -123,6 +104,7 @@ export default {
     PasswordInput,
     SelectLinkType,
     SelectInputNamespace,
+    TransactionFeeDisplay,
   },
   props: {
     assetId: String,
@@ -396,6 +378,18 @@ export default {
       }
     };
 
+    const findAccWithAddress = address =>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
+      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)
+    }
+
+    const checkCosignBalance = computed(() => {
+      let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
+      return Helper.toCurrencyFormat(cosignBalance);
+    })
+
     return{
       currentNativeTokenName,
       selectedAccName,
@@ -435,6 +429,7 @@ export default {
       splitCurrency,
       Helper,
       svgString,
+      checkCosignBalance,
     }
   },
 

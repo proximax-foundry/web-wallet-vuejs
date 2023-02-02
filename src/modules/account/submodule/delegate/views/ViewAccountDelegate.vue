@@ -55,62 +55,7 @@
         </div>
       </div>
       <div class='bg-navy-primary p-6 lg:col-span-1'>
-        <div v-if="!isMultisig" class='font-semibold text-xxs text-blue-primary uppercase'>{{$t('general.accCurrentBalance')}}</div>
-        <div v-else class='font-semibold text-xxs text-blue-primary uppercase'>{{$t('general.initiatorCurrentBalance')}}</div>
-        <div class='flex text-white'>
-          <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
-          <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
-          <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
-          <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
-          <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
-        </div>
-        <div v-if="fundStatus" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
-          <div class="flex gap-2">
-            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-            <div class="flex-cols">
-               <div class="text-txs">{{$t('general.insufficientBalanceWarning',{tokenName:currentNativeTokenName})}}</div>
-               <a v-if="networkType ==168" class="text-xs text-blue-primary font-semibold underline " :href="topUpUrl" target="_blank">{{$t('general.topUp',{tokenName: currentNativeTokenName})}}<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
-            </div>
-          </div>
-        </div>
-        <div v-if="isMultisig && !isCosigner " class="mt-2 bg-yellow-50 p-3 rounded-md mb-2" >
-          <div class="flex items-center gap-2">
-            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-            <div class="text-txs">{{$t('general.noCosigner')}}</div>
-          </div>
-        </div>
-        <div v-if="onPartial " class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
-          <div class="flex gap-2">
-            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-            <div class="text-txs">{{$t('general.hasPartial')}}</div>
-          </div>
-        </div>
-        <div v-if="!(isMultisig)" class="flex mt-4 text-white">
-          <div class='text-xs '>{{$t('general.transactionFee')}}</div>
-          <div class="text-xs  ml-auto">{{transactionFee}}</div>
-          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-        </div>
-        <div v-if="isMultisig" class="flex mt-4 text-white">
-          <div class='text-xs '>{{$t('general.aggregateFee')}}</div>
-          <div class="text-xs  ml-auto">{{transactionFee}}</div>
-          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-        </div>
-        <div v-if=" isMultisig" class="flex mt-4 text-white">
-          <div class='text-xs '>{{$t('general.lockFund')}}</div>
-          <div class="text-xs  ml-auto">{{lockFund}}</div>
-          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-        </div>
-        <div v-if=" isMultisig" class="flex mt-4 text-white">
-          <div class='text-xs '>{{$t('general.lockFundTxFee')}}</div>
-          <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
-          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-        </div>
-        <div class='border-b-2 border-gray-600 my-2'/>
-        <div class="flex text-white">
-          <div class=' font-bold text-xs uppercase'>{{$t('general.total')}}</div>
-          <div class="text-xs  ml-auto">{{totalFee}}</div>
-          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-        </div>
+        <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig="isMultisig" :is-cosigner="isCosigner" :on-partial="onPartial" :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFund" :lock-fund-tx-fee="lockFundTxFee" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" />
@@ -130,6 +75,7 @@
 
 import { ref, computed, getCurrentInstance,watch } from "vue";
 import PasswordInput from '@/components/PasswordInput.vue';
+import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
 import { walletState } from '@/state/walletState';
 import { WalletUtils } from "@/util/walletUtils";
 import { networkState } from "@/state/networkState";
@@ -154,7 +100,8 @@ export default {
   components: {
     AccountComponent,
     PasswordInput,
-    AccountTabs
+    AccountTabs,
+    TransactionFeeDisplay
   },
   props: {
     address: String,
@@ -166,7 +113,10 @@ export default {
     let showPrivateKeyError = ref(true)
     const walletPassword = ref("");
     const showPasswdError = ref(false);
-    const err = ref(false); 
+    const err = ref(false);
+    const defaultAcc = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount(): null
+    const selectedAccAdd = ref(defaultAcc?defaultAcc.address:'');
+    const accBalance = ref(Helper.toCurrencyFormat(defaultAcc?defaultAcc.balance:0, AppState.nativeToken.divisibility)); 
     const acc = computed(()=>{
       if(!walletState.currentLoggedInWallet){
         return null
@@ -412,18 +362,70 @@ export default {
         err.value = t('general.walletPasswordInvalid',{name : walletName});
       }
     };
-    
-    const topUpUrl = computed(()=>{
-      if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
-        return 'https://bctestnetfaucet.xpxsirius.io/#/'
-      }else if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
-        return 'https://bctestnet2faucet.xpxsirius.io/#/'
-      }else{
-        return ''
-      }
-    }) 
 
-    const networkType = computed(()=>AppState.networkType)
+    const accounts = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
+      let accounts = walletState.currentLoggedInWallet.accounts.map(
+        (acc)=>{ 
+          return { 
+            name: acc.name,
+            balance: acc.balance,
+            address: acc.address,
+            publicKey: acc.publicKey,
+            isMultisig: acc.getDirectParentMultisig().length ? true: false
+          }; 
+        });
+        
+       
+       let otherAccounts =walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map(
+        (acc)=>{ 
+          return { 
+            name: acc.name,
+            balance: acc.balance,
+            address: acc.address,
+            publicKey: acc.publicKey,
+            isMultisig: true
+          }; 
+        });
+        return accounts.concat(otherAccounts);
+      
+    });
+
+    const totalFeeFormatted = computed(() => {
+      return Helper.amountFormatterSimple(totalFee.value, 0);
+    });
+
+    const fetchAccount = (publicKey) => {
+      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
+    };
+
+    const getMultiSigCosigner = computed(() => {
+      if(networkState.currentNetworkProfileConfig){
+        let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
+        let list = [];
+        cosigners.cosignerList.forEach( publicKey => {
+          list.push({
+            publicKey,
+            name: fetchAccount(publicKey).name,
+            balance: fetchAccount(publicKey).balance,
+            address: fetchAccount(publicKey).address
+          });
+        });
+
+        cosigners.cosignerList = list;
+        return cosigners;
+      }else{
+        return {hasCosigner:false,cosignerList:[]}
+      }
+      
+    });
+
+    const checkCosignBalance = computed(() => {
+      let cosignBalance = findAcc(selectedCosignPublicKey.value)?findAcc(selectedCosignPublicKey.value).balance:0;
+      return Helper.toCurrencyFormat(cosignBalance,3);
+    })
     
 
     return {
@@ -456,9 +458,12 @@ export default {
       selectedCosignPublicKey,
       findAcc,
       fundStatus,
-      topUpUrl,
-      networkType,
-      generatePrivateKey
+      generatePrivateKey,
+      totalFeeFormatted,
+      selectedAccAdd,
+      accBalance,
+      getMultiSigCosigner,
+      checkCosignBalance
     };
   },
 }

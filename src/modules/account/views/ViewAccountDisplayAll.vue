@@ -217,12 +217,27 @@ export default {
     const filteredAccounts = computed(() => {
     const query = filterQuery.value.toLowerCase();
       if(filterQuery.value == ""){
-        return accounts.value;
+        return filterDuplicate(accounts.value);
       }
       return accounts.value.filter(item => {
         return item.name.toLowerCase().includes(query) || item.address.toLowerCase().includes(query.replace(/-/g, ""))
       });
   });
+
+  function filterDuplicate(data){
+        if(data===null){
+          return
+        }
+        else{
+          var result = data.reduce((unique, o) => {
+          if(!unique.some(obj => obj.address === o.address && obj.name === o.name)){
+          unique.push(o);
+          }
+          return unique;
+          },[]);
+          return result 
+        }
+        }
 
     return {
       accounts,

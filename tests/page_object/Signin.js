@@ -42,6 +42,17 @@ const commands = {
         })
     },
 
+    less_password(password){
+        return this
+        .click("@wallet_dropdown")
+        .click("@select_wallet")
+        .click("@input_password")
+        .setValue("@input_password", [password, "\ue004"])
+        .isVisible('@error_emptypassword', callback = result => {
+            this.assert.equal(result.value, true, "If password field place less than required values, error is shown")
+        })
+    },
+
     wrong_password(password){
         return this
         .click("@wallet_dropdown")
