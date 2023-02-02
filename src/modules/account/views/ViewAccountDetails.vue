@@ -72,21 +72,21 @@
         </div>
         <div class='my-6 gray-line'></div>
 
-        <div class="flex  flex-col">
-          <div class="text-xxs text-blue-primary font-semibold uppercase ">Linked Account</div>
-          <div class="flex items-center">
-            <router-link class="truncate" v-if="linkedAccountKey != '' && linkedAccountKey != '0'.repeat(64)"
-              :to="{ name: 'ViewAccountDetails', params: { address: findAccountAddress(linkedAccountKey) } }">
-              <div class="text-xs mt-1 font-semibold break-all  truncate md:text-clip md:w-auto">{{ linkedAccountKey }}
+        <div  class="flex  flex-col">
+            <div class="text-xxs text-blue-primary font-semibold uppercase ">Linked Account</div>
+            <div class="flex items-center">
+              <div v-if="other_acc">
+                <a :href="explorerAccountLink(linkedAccountKey)" target="_blank" v-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" class="text-xs mt-1 font-semibold break-all text-black truncate md:text-clip md:w-auto">{{linkedAccountKey}}</a>
+                <div v-else class="text-xs ">No Linked Account</div>
               </div>
-            </router-link>
-            <div v-else class="text-xs ">No Linked Account</div>
-            <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address } }">
-              <font-awesome-icon v-if="linkedAccountKey != '' && linkedAccountKey != '0'.repeat(64)" title="Unlink account"
-                icon="unlink" class="ml-2 w-4 h-4 text-blue-primary cursor-pointer"></font-awesome-icon>
-              <font-awesome-icon v-else title="Delegate account" icon="link"
-                class="ml-2 w-4 h-4 text-blue-primary cursor-pointer"></font-awesome-icon>
-            </router-link>
+              <router-link class="truncate" v-else-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" :to="{ name: 'ViewAccountDetails', params: { address: findAccountAddress(linkedAccountKey)}}">
+                <div class="text-xs mt-1 font-semibold break-all  truncate md:text-clip md:w-auto">{{linkedAccountKey}}</div>
+              </router-link>
+              <div v-else class="text-xs ">No Linked Account</div>
+              <router-link v-if="!isDelegate()" :to="{ name: 'ViewAccountDelegate', params: { address: address}}">
+                <font-awesome-icon v-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" title="Unlink account" icon="unlink"  class="ml-2 w-4 h-4 text-blue-primary cursor-pointer"></font-awesome-icon>
+                <font-awesome-icon v-else title="Delegate account" icon="link"  class="ml-2 w-4 h-4 text-blue-primary cursor-pointer"></font-awesome-icon>
+              </router-link>
 
           </div>
         </div>
@@ -314,6 +314,13 @@ const explorerLink = namespace => {
   return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespace
 }
 
+const explorerAccountLink = publicKey=>{ 
+   if(!networkState.currentNetworkProfile){
+     return ''
+   }
+   return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.publicKeyRoute + '/' + publicKey
+}
+
 const findAccountAddress = publicKey => {
   if (!walletState.currentLoggedInWallet) {
     return ''
@@ -344,6 +351,7 @@ const init = () => {
         readyWatcher();
       }
     });
+
   }
 }
 
