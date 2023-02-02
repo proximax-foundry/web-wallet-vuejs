@@ -44,39 +44,39 @@
           <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
         </div>
         <div v-if="isMultiSig(selectedAccAdd)">
-          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-3"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
+          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
               <div v-if="isNaN(parseFloat(selectedMosaic[index].amount))" class="lg:col-span-4 col-span-6 ml-auto">0</div>
               <div v-else class="lg:col-span-4 col-span-6 ml-auto">{{selectedMosaic[index].amount}}</div>
               <div class="ml-1 text-blue-400" :index="index"> {{displayAssetName(selectedMosaic[index].namespace)}} </div>
           </div>
         </div>
-        <div v-if="assetRentalFeeCurrency" class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-3">
+        <div v-if="assetRentalFeeCurrency" class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-2">
             <div class="font-semibold lg:col-span-2 col-span-3">{{$t('general.assetRentalFee')}}</div>
             <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(assetRentalFeeCurrency)"></div>
             <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
         </div>
-        <div v-if="namespaceRentalFeeCurrency" class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-3">
+        <div v-if="namespaceRentalFeeCurrency" class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-2">
             <div class="font-semibold lg:col-span-2 col-span-3">{{$t('general.namespacerentalFee')}}</div>
             <div class='ml-auto lg:col-span-2 col-span-3' v-html="splitCurrency(namespaceRentalFeeCurrency)"></div>
             <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
         </div>
         <div v-if="!isMultiSig(selectedAccAdd)">
-          <div v-if="lockFundCurrencyConvert" class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs py-3">
+          <div v-if="lockFundCurrencyConvert" class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-2">
             <div class="font-semibold lg:col-span-2 col-span-3">{{$t('general.lockFund')}}</div>
             <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(lockFundCurrencyConvert)"></div>
             <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
           </div>
-          <div v-if="lockFundTxFeeConvert" class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs py-3">
+          <div v-if="lockFundTxFeeConvert" class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-2">
             <div class="font-semibold lg:col-span-2 col-span-3">{{$t('general.lockFundTxFee')}}</div>
             <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(lockFundTxFeeConvert)"></div>
             <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
           </div>
-          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
+          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-2">
             <div class="font-semibold lg:col-span-2 col-span-3">{{$t('general.transactionFee')}}</div>
             <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(transactionFee)"></div>
             <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
           </div>
-          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between border-gray-600 text-white text-xs pt-5">
+          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between border-gray-600 text-white text-xs pt-3">
             <div class="font-bold uppercase lg:col-span-2 col-span-3">{{$t('general.total')}}</div>
             <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(totalFeeFormatted)"></div>
             <div class ='ml-1 mt-0.5 text-blue-400'>{{currentNativeTokenName}}</div>
@@ -100,22 +100,22 @@
                 </div>
               </div>
             <div class='border-b-2 border-gray-600 mt-2'/>
-            <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs py-3">
+            <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-2">
               <div class="font-semibold lg:col-span-2 col-span-3">{{$t('general.aggregateFee')}}</div>
               <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(transactionFee)"></div>
               <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
             </div>
-            <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs py-3">
+            <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-2">
               <div class="font-semibold lg:col-span-2 col-span-3">{{$t('general.lockFund')}}</div>
               <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(lockFundCurrency)"></div>
               <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
             </div>
-            <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-3">
+            <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-2">
               <div class="font-semibold lg:col-span-2 col-span-3">{{$t('general.lockFundTxFee')}}</div>
               <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(lockFundTxFee)"></div>
               <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
             </div>
-            <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between border-gray-600 text-white text-xs py-5">
+            <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between border-gray-600 text-white text-xs pt-3">
               <div class="font-bold uppercase lg:col-span-2 col-span-3">{{$t('general.total')}}</div>
               <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(totalFeeFormatted)"></div>
               <div class ='ml-1 mt-0.5 text-blue-400'>{{currentNativeTokenName}}</div>
