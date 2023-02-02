@@ -46,7 +46,7 @@
             <div class="flex">
               <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
               <TextInput class='w-5/12 mr-2 ' :placeholder="$t('multisig.cosignatory')+`${index+1}`"  v-model="contactName[index]" :disabled="true"  />
-              <TextInput class='w-7/12 mr-2 ' :placeholder="$t('multisig.addressOrPk')" :errorMessage="$t('general.invalidInput')" :showError="showAddressError[index]"  v-model="coSign[index]" />
+              <TextInputClean class='w-7/12 mr-2 ' :placeholder="$t('multisig.addressOrPk')" :errorMessage="$t('general.invalidInput')" :showError="showAddressError[index]"  v-model="coSign[index]" />
               <!-- <div v-if="showAddressError[index]==true " class=""/> -->
               <div @click="toggleContact[index]=!toggleContact[index]" class=' border  cursor-pointer flex flex-col justify-center  p-2' style="height:2.66rem">
                 <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
@@ -115,6 +115,7 @@ import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
+import TextInputClean from '@/components/TextInputClean.vue'
 import { multiSign } from '@/util/multiSignatory';
 import { walletState } from '@/state/walletState';
 import {
@@ -132,6 +133,7 @@ export default {
   components: {
     PasswordInput,
     TextInput,
+    TextInputClean,
     AccountComponent,
     AccountTabs,
     TransactionFeeDisplay

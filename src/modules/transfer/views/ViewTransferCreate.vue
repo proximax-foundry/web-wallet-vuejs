@@ -7,6 +7,12 @@
       <div class="xl:col-span-2 p-12">
         <div class="text-sm font-semibold ">{{$t('transfer.newTransfer')}}</div>
         <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
+        <div v-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
+          <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.noCosigner')}}</div>
+        </div>
+        <div v-else-if="showBalanceErr" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
+        </div>
         <div class="mt-4"/>
         <SelectInputAccount v-model="selectedAccAdd" :selectDefault="selectedAccAdd"/>
         <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
@@ -28,9 +34,6 @@
                 </div>
               </div>
             </div>
-            <div class="error" v-else>
-             {{$t('general.noCosigner')}} 
-            </div>
           </div>
         <div class="flex mt-3 gap-1">
           <AddressInputClean :placeholder="$t('transfer.transferPlaceholder')" v-model="recipientInput" v-debounce:1000="checkRecipient" :showError="showAddressError" :disabled="disableRecipient"/>
@@ -47,15 +50,15 @@
         
         <div v-for="(mosaic, index) in mosaicsCreated" :key="index">
           <MosaicInput :placeholder="$t('transfer.selectAsset')" errorMessage="" v-model="selectedMosaic[index].id" :index="index" :options="mosaics" :disableOptions="selectedMosaic" @show-mosaic-selection="updateMosaic" @remove-mosaic-selected="removeMosaic"/>
-          <TransferInputClean v-if="selectedMosaic[index].id != 0" v-model="selectedMosaic[index].amount" :placeholder="$t('transfer.assetAmount')" type="text" :showError="showAssetBalanceErr[index]" :errorMessage="$t('general.insufficientBalance')" :decimal="mosaicSupplyDivisibility[index]"  />
+          <TransferInputClean v-if="selectedMosaic[index].id != 0" v-model="selectedMosaic[index].amount" :placeholder="$t('transfer.assetAmount')" type="text" :showError="showAssetBalanceErr[index]" :decimal="mosaicSupplyDivisibility[index]"  />
         </div>
         <div>
           <button class="my-2 font-semibold text-xs text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton || mosaics.length==0" @click="displayMosaicsOption">
            + {{$t('transfer.addAssets')}}
           </button>
         </div>
-        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" :errorMessage="$t('general.insufficientBalance')" :decimal="6"  :disabled="disableSupply"/>
-        <TransferTextareaInput :placeholder="$t('general.message')" :errorMessage="$t('general.limitExceed')" v-model="messageText" :remainingChar="remainingChar" :showError="showLimitErr"   :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
+        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" :decimal="6"  :disabled="disableSupply"/>
+        <TransferTextareaInput class="pt-4" :placeholder="$t('general.message')" :errorMessage="$t('general.limitExceed')" v-model="messageText" :remainingChar="remainingChar" :showError="showLimitErr"   :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
           <label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">
@@ -155,8 +158,9 @@ export default {
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
-    
+    const isNotCosigner = ref(false);
     const cosignAddress = ref("");
+    
     const disableAllInput = ref(false);
     const disableRecipient = computed(() => disableAllInput.value);
     const disableSupply = computed(() => disableAllInput.value);
@@ -185,7 +189,7 @@ export default {
         AppState.nativeToken.divisibility
       )
     );
-    
+
     const lockFundTxFee = computed(()=>{
       if(networkState.currentNetworkProfile){
         return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
@@ -536,13 +540,13 @@ export default {
 
   const showBalanceErr = computed(()=>{
     if(isMultiSigBool.value){
-      if (sendXPX.value>balance.value){
+      if (sendXPX.value>balance.value || !(showAssetBalanceErr.value.every(value => value == false))){
         return true
       }else{
         return false
       }
     }else{
-      if(totalFee.value > balance.value){
+      if(totalFee.value > balance.value || !(showAssetBalanceErr.value.every(value => value == false))){
         return true
       }else{
         return false
@@ -581,8 +585,10 @@ export default {
         if(!asset.namespaceNames.includes(AppState.nativeToken.fullNamespace)){
           mosaicOption.push({
             val: asset.idHex,
-            text: (asset.namespaceNames.length>0?asset.namespaceNames:asset.idHex) + " >"+t('general.balance') +": " +Helper.toCurrencyFormat(asset.amount,asset.divisibility),
+            balance: t('general.balance')+":"+Helper.toCurrencyFormat(asset.amount,asset.divisibility),
+            label: (asset.namespaceNames.length>0?asset.namespaceNames[0]:asset.idHex),
             id: index + 1,
+            disabled: false
           });
           index += 1;
         }
@@ -605,15 +611,31 @@ export default {
     let mosaic = account.assets.find(
       (asset) => asset.idHex == selectedMosaic.value[e.index].id
     );
+    // enable back the option
+    for (let i in mosaics.value){
+      mosaics.value[i].disabled = false
+    }
+    // disable all the options choosen
+    mosaics.value.forEach(o1 => selectedMosaic.value.some(o2 => {
+      if(o1.val == o2.id){
+        o1.disabled = true;
+      }
+    }));
+
     selectedMosaic.value[e.index].amount = "0";
     mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
     emitter.emit("CLOSE_MOSAIC_INSUFFICIENT_ERR", false);
   };
+
   const removeMosaic = (e) => {
-    mosaicsCreated.value.splice(e.index, 1);
+    if(selectedMosaic.value[e.index]!= undefined && selectedMosaic.value[e.index].id != 0){
+      // enabling back the option
+      mosaics.value[mosaics.value.findIndex(item => item.val === selectedMosaic.value[e.index].id)].disabled = false
+    }
     selectedMosaic.value.splice(e.index, 1);
     showAssetBalanceErr.value.splice(e.index,1)
     mosaicSupplyDivisibility.value.splice(e.index, 1);
+    mosaicsCreated.value.splice(e.index, 1);
   };
   
   const getSelectedMosaicBalance = (index) => {
@@ -633,6 +655,7 @@ export default {
   };
   
   watch(selectedAccAdd, (n, o) => {
+    isNotCosigner.value = false
     showAssetBalanceErr.value = []
     for(let i=0;i<mosaics.value.length;i++){
       showAssetBalanceErr.value.push(false)
@@ -649,6 +672,7 @@ export default {
             disableAllInput.value = false;
           }
         } else {
+          isNotCosigner.value = true
           disableAllInput.value = true;
         }
     }
@@ -805,15 +829,15 @@ export default {
    watch(() => [...selectedMosaic.value], (n) => {
      updateFee()
       for(let i = 0; i < n.length; i++){
-           if(n[i].amount> getMosaicBalanceById(n[i].id)){
+          if(n[i].amount> getMosaicBalanceById(n[i].id)){
           showAssetBalanceErr.value[i]= true
           }else{
             showAssetBalanceErr.value[i]= false
           }
-         
-        
       }
     }, {deep:true});
+    
+
   emitter.on("CLOSE_CONTACT_MODAL", (payload) => {
     togglaAddContact.value = payload;
     router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
@@ -904,6 +928,7 @@ export default {
       isMultiSig,
       isMultiSigBool,
       effectiveFee,
+      isNotCosigner,
       cosignAddress,
       getWalletCosigner,
       disableRecipient,
@@ -971,6 +996,22 @@ export default {
     padding-left:2px;
     padding-top:2px
   }
+  .p-link{
+  padding: 0;
+  margin: 0;
+  }
+  .p-inputtext{
+      font-size: 1rem;
+      text-align: left;
+      padding: 0.5rem;
+      border: 1px solid #ced4da;
+    }
 }
+  ::v-deep(.p-inputtext) {
+      font-size: 1rem;
+      text-align: left;
+      padding: 0.5rem;
+    }
+  
 
 </style>
