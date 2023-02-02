@@ -294,7 +294,7 @@ export default {
       const address = await signer.getAddress();
 
       for(let i=0; i < contracts.length; ++i){
-        console.log(contracts[i].disabled);
+        // console.log(contracts[i].disabled);
         if(contracts[i].disabled){
           continue;
         }
@@ -413,7 +413,7 @@ export default {
 
       let prices = await getCurrentPriceUSD(SwapUtils.checkSwapPrice(swapData.priceConsultURL));
 
-      for(let siriusToken of siriusTokens){
+      for(let siriusToken of siriusTokens.value){
         if(prices[siriusToken.name.toLowerCase()]){
           siriusToken.price = prices[siriusToken.name.toLowerCase()];
         }
@@ -664,7 +664,6 @@ export default {
 
         let txnHash = receipt.hash;
         let nonce = receipt.nonce;
-        console.log(txnHash)
         transactionHash.value = txnHash;
         explorerLink.value = selectedChainId.value === bscChainId?swapData.BSCScanUrl:swapData.ETHScanUrl;
 
@@ -709,101 +708,7 @@ export default {
 
     // section end
 
-    // watcher section
-    watch([fromInputAmount, exchangeRate], (newValue)=>{
-      toInputAmount.value = newValue[0] * newValue[1];
-    });
-
-    watch(selectedFromToken, (newValue)=>{
-      updateSelectedContractAddress();
-      checkSelectedTokenSupported();
-    });
-
-    watch([selectedChainId, connectedAddress], (newChainId)=>{
-
-      let isValid = checkValidSelectedChainId();
-      let isSupported = checkChainSupported();
-
-      if(isValid && isSupported){
-        searchAccountStableCoinsBalance();
-        updateSelectedContractAddress();
-        checkSelectedTokenSupported();
-      }
-    })
-
-    // get balance of xpx and metc for currect sirius wallet
-    watch(walletState.currentLoggedInWallet.selectDefaultAccount().assets, () =>{
-      const assets = walletState.currentLoggedInWallet.selectDefaultAccount().assets;
-      for(let i =0; i < siriusTokens.value.length ;++i){
-        const searchedasset = assets.find(asset => asset.namespaceNames.includes(siriusTokens.value[i].namespaceName));
-        if(searchedasset){
-          siriusTokens.value[i].balance = searchedasset.amount;
-        }else{
-          siriusTokens.value[i].balance = 0;
-        }
-      }
-    });
-
-    // watcher section end
-
-
     // address
-    const refreshSiriusTokenBalance = () => {
-      const addressRaw = Helper.createAddress(siriusAddress.value).plain();
-      const selectedAccount = accounts.value.find(account => account.address === addressRaw);
-      const assets = selectedAccount.assets;
-      for(let i =0; i < siriusTokens.value.length ;++i){
-        const searchedasset = assets.find(asset => asset.namespaceNames.includes(siriusTokens.value[i].namespaceName));
-        if(searchedasset){
-          siriusTokens.value[i].balance = searchedasset.amount;
-        }else{
-          siriusTokens.value[i].balance = 0;
-        }
-      }
-    }
-    const showAddressError = shallowRef(true);
-    const toggleContact = shallowRef(false);
-    const siriusAddress = ref('');
-    const checkRecipient = () =>{
-      if(!walletState.currentLoggedInWallet){
-        return;
-      }
-      try {
-        let recipientAddress = Helper.createAddress(siriusAddress.value);
-        let networkOk = Helper.checkAddressNetwork(recipientAddress, AppState.networkType);
-        if(!networkOk){
-          showAddressError.value = true;
-        }
-        else{
-          showAddressError.value = false;
-          refreshSiriusTokenBalance();
-        }
-      } catch (error) {
-        try{
-          let namespaceId = Helper.createNamespaceId(siriusAddress.value);
-          checkNamespace(namespaceId).then((address)=>{
-            siriusAddress.value = address.plain();
-            showAddressError.value = false;
-            refreshSiriusTokenBalance();
-          }).catch((error)=>{
-            showAddressError.value = true;
-          });
-        }
-        catch(error){
-          showAddressError.value = true;
-        }
-      }
-    };
-    siriusAddress.value = Helper.createAddress(walletState.currentLoggedInWallet.selectDefaultAccount().address).pretty();
-    checkRecipient();
-    watch(siriusAddress, n => {
-      if(n.length==40 || n.length==46){
-        checkRecipient();
-      }else{
-        showAddressError.value = true;
-      }
-    });
-
     const accounts = computed(()=>{
       if(!walletState.currentLoggedInWallet){
         return [];
@@ -833,6 +738,140 @@ export default {
       return accounts.concat(otherAccounts);
     });
 
+    const refreshSiriusTokenBalance = () => {
+      const addressRaw = Helper.createAddress(siriusAddress.value).plain();
+      const selectedAccount = accounts.value.find(account => account.address === addressRaw);
+      let assets = [];
+      if(selectedAccount){
+        assets = selectedAccount.assets;
+      }
+
+      for(let i =0; i < siriusTokens.value.length ;++i){
+        const searchedasset = assets.find(asset => asset.namespaceNames.includes(siriusTokens.value[i].namespaceName));
+        if(searchedasset){
+          siriusTokens.value[i].balance = searchedasset.amount;
+        }else{
+          siriusTokens.value[i].balance = 0;
+        }
+      }
+    }
+
+    const showAddressError = shallowRef(true);
+    const toggleContact = shallowRef(false);
+    const siriusAddress = ref('');
+
+    const checkNamespace = async (nsId)=>{
+      return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
+    }
+
+    const checkRecipient = () =>{
+      if(!walletState.currentLoggedInWallet){
+        return;
+      }
+      try {
+        let recipientAddress = Helper.createAddress(siriusAddress.value);
+        let networkOk = Helper.checkAddressNetwork(recipientAddress, AppState.networkType);
+        if(!networkOk){
+          showAddressError.value = true;
+        }
+        else{
+          showAddressError.value = false;
+          refreshSiriusTokenBalance();
+        }
+      } catch (error) {
+        // console.log(error)
+        try{
+          let namespaceId = Helper.createNamespaceId(Helper.createAddress(siriusAddress.value).plain().toLowerCase());
+          checkNamespace(namespaceId).then((address)=>{
+            siriusAddress.value = address.plain();
+            showAddressError.value = false;
+            refreshSiriusTokenBalance();
+          }).catch((error)=>{
+            showAddressError.value = true;
+          });
+        }
+        catch(error){
+          // console.log(error)
+          showAddressError.value = true;
+        }
+      }
+    };
+    siriusAddress.value = Helper.createAddress(walletState.currentLoggedInWallet.selectDefaultAccount().address).pretty();
+    checkRecipient();
+    watch(siriusAddress, n => {
+      if(n.length==40 || n.length==46){
+        checkRecipient();
+      }else{
+        showAddressError.value = true;
+      }
+    });
+
+
+    // watcher section
+    watch([fromInputAmount, exchangeRate], (newValue)=>{
+      toInputAmount.value = newValue[0] * newValue[1];
+    });
+
+    watch(selectedFromToken, (newValue)=>{
+      updateSelectedContractAddress();
+      checkSelectedTokenSupported();
+    });
+
+    watch([selectedChainId, connectedAddress], (newChainId)=>{
+
+      let isValid = checkValidSelectedChainId();
+      let isSupported = checkChainSupported();
+
+      if(isValid && isSupported){
+        searchAccountStableCoinsBalance();
+        updateSelectedContractAddress();
+        checkSelectedTokenSupported();
+      }
+    })
+
+    // get balance of xpx and metc for currect sirius wallet
+    // watch(walletState.currentLoggedInWallet.selectDefaultAccount().assets, () =>{
+    watch(showAddressError, (showAddressErrorStatus) =>{
+      if(!showAddressErrorStatus){
+        (async() => {
+          const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Helper.createAddress(siriusAddress.value));
+          let assetIdList = [];
+          let assetAmountList = [];
+          accountInfo.mosaics.map((mosaic) => {
+            assetIdList.push(mosaic.id)
+            assetAmountList.push(mosaic.amount)
+          });
+          const mosaicInfo = await AppState.chainAPI.assetAPI.getMosaicsNames(assetIdList);
+          const filteredMosaics = mosaicInfo.reduce((filtered, mosaic) => {
+            if(mosaic.names.length > 0){
+              let amount = assetAmountList[assetIdList.findIndex(asset => asset.toHex() == mosaic.mosaicId.toHex())];
+              let nsNames = [];
+              mosaic.names.forEach(name => {
+                nsNames.push(name.name)
+              });
+              let filterAsset = { names: nsNames, id: mosaic.mosaicId, amount: amount.compact() };
+              filtered.push(filterAsset);
+            }
+            return filtered;
+          }, []);
+
+          for(let i =0; i < siriusTokens.value.length ;++i){
+          const searchedAsset = filteredMosaics.find(asset => asset.names.includes(siriusTokens.value[i].namespaceName));
+          if(searchedAsset){
+            let formattedAmount = await AppState.chainAPI.assetAPI.getMosaic(searchedAsset.id);
+            siriusTokens.value[i].balance = Helper.convertToExact(searchedAsset.amount, formattedAmount.divisibility);
+          }else{
+            siriusTokens.value[i].balance = 0;
+          }
+        }
+        })();
+      }
+    });
+
+    // watcher section end
+
+
+    
     const contacts = computed(() => {
       if(!walletState.currentLoggedInWallet){
         return [];

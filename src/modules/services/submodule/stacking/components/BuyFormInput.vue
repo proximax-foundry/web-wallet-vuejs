@@ -65,11 +65,8 @@ export default {
     'confirmedSelectToken', 'update:modelValue'
   ],
   setup(props, { emit, expose }){
-    console.log(props.tokens)
-    console.log(props.selectedToken)
 
     const balance = ref(props.tokens.find(token => token.name === props.selectedToken).balance);
-    console.log(balance.value)
 
     const tokenName = computed(() => {
       return props.tokens.find(token => token.name === props.selectedToken).name;
