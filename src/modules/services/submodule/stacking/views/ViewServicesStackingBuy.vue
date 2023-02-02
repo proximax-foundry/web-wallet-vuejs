@@ -25,6 +25,7 @@
           <div class="mt-10 success_box success success-text" v-if="processing">
             <div class="mb-2">Submission is successful.</div>
             <div class="font-normal relative"><b>Transaction hash: </b><a :href="explorerLink + transactionHash" target=_new class="hover:underline">{{ transactionHash.substr(0, 7) + '...' + transactionHash.substr(-7) }} <font-awesome-icon icon="external-link-alt" class="ml-1 w-3 h-3 self-center inline-block"></font-awesome-icon></a></div>
+            <div><button type="button" class="w-40 hover:shadow-sm bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-3 py-2 border border-blue-primary outline-none mt-2 mb-2" @click="saveCertificate">{{$t('general.certificate')}}</button></div>
           </div>
           <div class="flex justify-center mt-10 success_box success success-text" v-if="dispalyWaitForConfirmationMessage">
             <div style="border-top-color:transparent" class="inline-block mr-2 relative top-2 w-4 h-4 border-4 border-green-500 border-solid rounded-full animate-spin"></div> Please wait until transaction is confirmed
@@ -576,6 +577,7 @@ export default {
 
     checkWalletConnected();
 
+    const swapTimestamp = ref('');
     const buySiriusToken = async ()=>{
 
       customErrorMessage.value = "";
@@ -691,6 +693,7 @@ export default {
           const serverResponseData = await response.json();
 
           console.log(serverResponseData);
+          swapTimestamp.value = Helper.IsoTimeRemoveFormat(serverResponseData.timestamp);
 
           processing.value = true;
           searchAccountStableCoinsBalance();
@@ -899,6 +902,11 @@ export default {
 
     const isChecked = ref(false);
 
+    const saveCertificate = () => {
+      const swapQr = SwapUtils.generateQRCode(explorerLink.value + transactionHash.value);
+      SwapUtils.generateIncomingPdfCert(selectedChainId.value === bscChainId ? "BSC" : "ETH", swapTimestamp.value, siriusAddress.value, selectedFromToken.value, transactionHash.value, swapQr);
+    };
+
     return {
       stableCoins,
       siriusTokens,
@@ -943,6 +951,7 @@ export default {
       customErrorMessage,
       explorerLink,
       transactionHash,
+      saveCertificate,
     }
   }
 }
