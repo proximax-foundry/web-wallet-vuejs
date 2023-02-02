@@ -629,7 +629,6 @@ export default {
     else{
       selectedMosaic.value[e.index].namespace = mosaic.idHex
     }
-    console.log(selectedMosaic.value)
     selectedMosaic.value[e.index].amount = "0";
     mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
     emitter.emit("CLOSE_MOSAIC_INSUFFICIENT_ERR", false);
