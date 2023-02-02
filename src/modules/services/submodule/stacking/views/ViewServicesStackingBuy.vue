@@ -62,14 +62,14 @@
             </div>
           </div>
         </div>
-        <div class="flex justify-between mt-5">
-          <toggleSwitch v-model="isChecked" />
-          <div class="bg-blue-50 p-3 rounded-md inline-block text-xs text-right">
+        <div class="md:flex md:justify-between mt-5">
+          <div class="bg-blue-50 p-3 rounded-md inline-block text-xs text-right w-full">
             <div class="mb-1.5">Exchange Rate: 1 {{ selectedFromToken }} = {{ exchangeRate }} {{ selectedToToken }}</div>
             <div class="mb-1.5">Fee: {{ fee }} {{ selectedToToken }}</div>
             <div class="mb-1.5">{{ selectedFromToken }} Price: {{ selectedFromTokenPrice }} USD</div>
             <div>{{ selectedToToken }} Price: {{ selectedToTokenPrice }} USD</div>
           </div>
+          <toggleSwitch v-model="isChecked" class="w-full mt-3 order-last md:order-first" />
         </div>
         <div class="flex justify-center mt-10">
           <button class="blue-btn font-semibold py-2 cursor-pointer text-center w-32 disabled:opacity-50 disabled:cursor-auto" :disabled="disabledBuy" @click="buySiriusToken">Buy</button>
