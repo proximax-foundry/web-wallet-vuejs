@@ -3,8 +3,8 @@
   <AddContactModal :toggleModal="togglaAddContact" :saveAddress="recipientInput" />
   <ConfirmSendModal :toggleModal="toggleConfirm" />
   <div class='w-10/12 ml-auto mr-auto mt-5'>
-    <div class="border filter shadow-lg lg:grid lg:grid-cols-5" >
-      <div class="lg:col-span-3 py-6 px-6">
+    <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
+      <div class="xl:col-span-2 p-12">
         <div class="text-sm font-semibold ">{{$t('transfer.newTransfer')}}</div>
         <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <div v-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
@@ -66,97 +66,8 @@
           </label>
         </div>
       </div>
-      <div class='bg-navy-primary p-6 lg:col-span-2'>
-        <div v-if="!isMultiSig(selectedAccAdd)" class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
-        <div v-else class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.multisigAcc')}}</div>
-        <div class="lg:grid lg:grid-cols-5 grid grid-cols-7  my-1 text-white">
-          <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase lg:col-span-2 col-span-3'>{{$t('general.currentBalance')}}</div>
-          <div class="flex ml-auto lg:col-span-2 col-span-3">
-            <div class = 'ml-auto text-md font-bold '>{{splitBalance.left}} </div>
-            <div class = 'text-md font-bold ' v-if='splitBalance.right!=null'>.</div>
-            <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
-          </div>
-          <div class="flex">
-            <div class = 'ml-1 font-bold text-blue-400'>{{currentNativeTokenName}}</div>
-            <img src="@/modules/account/img/proximax-logo.svg" class='h-7 w-7'>
-          </div>
-        </div>
-        <div class='border-b-2 border-gray-600 my-2'/>
-         <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 mt-4 text-white">
-          <div class='text-xs lg:col-span-2 col-span-3'>{{$t('transfer.transferAmount')}}</div>
-          <div v-if="isNaN(parseFloat(sendXPX))" class="text-xs lg:col-span-2 col-span-3 ml-auto">0</div>
-          <div v-else class="text-xs lg:col-span-2 col-span-3 ml-auto">{{sendXPX}}</div>
-          <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
-        </div>
-        <div v-if="isMultiSig(selectedAccAdd)">
-          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
-            <div class="text-xs lg:col-span-4 col-span-6 ml-auto">{{selectedMosaic[index].amount}}</div>
-            <div class="ml-1 text-xs text-blue-400" :index="index " :options="mosaics" :disableOptions="selectedMosaic"> {{displayAssetId(selectedMosaic[index].id)}} </div>
-          </div>
-        </div>
-        <div v-if="isMultiSig(selectedAccAdd)">
-          <div v-if="getWalletCosigner.cosignerList.length > 0">
-            <div class="flex justify-between border-600 border-b items-center text-gray-200 text-xs my-5" />
-              <div class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
-              <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-gray-200 my-1">
-                <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase lg:col-span-2 col-span-3'>{{$t('general.currentBalance')}}</div>
-                <span class='ml-auto font-bold lg:col-span-2 col-span-3' v-if="getWalletCosigner.cosignerList.length == 1">{{  getWalletCosigner.cosignerList[0].balance }}</span>
-                <span class='ml-auto font-bold lg:col-span-2 col-span-3' v-else>{{ checkCosignBalance }}</span>
-                <div class="flex">
-                  <div class ='ml-1 font-bold text-blue-400'>{{currentNativeTokenName}}</div>
-                  <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
-                </div>
-              </div>
-            <div class='border-b-2 border-gray-600 my-2'/>
-          </div>
-        </div>
-        <div class="mt-0.5 text-white">
-          <div v-if="!isMultiSig(selectedAccAdd)" class='lg:grid lg:grid-cols-5 grid grid-cols-7 text-xs'>
-            <div class="text-xs lg:col-span-2 col-span-3">{{$t('general.transactionFee')}}</div>
-            <div class="text-xs lg:col-span-2 col-span-3 ml-auto">{{effectiveFee}}</div>
-            <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
-          </div>
-          <div v-else>
-            <div v-if="getWalletCosigner.cosignerList.length > 0" class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-xs">
-              <div class="lg:col-span-2 col-span-3">{{$t('general.aggregateFee')}}</div>
-              <div class="text-xs lg:col-span-2 col-span-3 ml-auto">{{effectiveFee}}</div>
-              <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
-            </div>
-          </div>
-        </div>
-        <div v-if="getWalletCosigner.cosignerList.length > 0">
-          <div v-if="isMultiSig(selectedAccAdd) " class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white">
-            <div class='text-xs lg:col-span-2 col-span-3'>{{$t('general.lockFund')}}</div>
-            <div class="text-xs lg:col-span-2 col-span-3 ml-auto">{{lockFundCurrency}}</div>
-            <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
-          </div>
-          <div v-if="isMultiSig(selectedAccAdd)" class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white">
-            <div class='text-xs lg:col-span-2 col-span-3'>{{$t('general.lockFundTxFee')}}</div>
-            <div class="text-xs lg:col-span-2 col-span-3 ml-auto">{{lockFundTxFee}}</div>
-            <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
-          </div>
-        </div>
-        <div class='border-b-2 border-gray-600 my-2'/>
-        <div class="text-white">
-          <div v-if="!isMultiSig(selectedAccAdd)" class='lg:grid lg:grid-cols-5 grid grid-cols-7 text-xs'>
-            <div class=' font-bold text-xs uppercase lg:col-span-2 col-span-3'>{{$t('general.total')}}</div>
-            <div  class="text-xs lg:col-span-2 col-span-3 ml-auto">{{totalFee}}</div>
-            <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
-          </div>
-          <div v-else>
-            <div v-if="getWalletCosigner.cosignerList.length > 0" class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-xs">
-              <div class=' font-bold text-xs uppercase lg:col-span-2 col-span-3'>{{$t('general.total')}}</div>
-              <div  class="text-xs lg:col-span-2 col-span-3 ml-auto">{{totalFee}}</div>
-              <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
-            </div>
-          </div>
-        </div>
-        <div v-if="!isMultiSig(selectedAccAdd)">
-          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
-            <div class="text-xs lg:col-span-4 col-span-6 ml-auto">{{selectedMosaic[index].amount}}</div>
-            <div class="ml-1 text-xs text-blue-400" :index="index " :options="mosaics" :disableOptions="selectedMosaic"> {{displayAssetId(selectedMosaic[index].id)}}</div>
-          </div>
-        </div>
+      <div class='bg-navy-primary py-6 px-6 xl:col-span-1'>
+        <TransactionFeeDisplay :send-x-p-x="sendXPX" :selected-mosaic="selectedMosaic" :mosaics-created="mosaicsCreated" :transaction-fee="effectiveFee" :total-fee-formatted="totalFee" :get-multi-sig-cosigner="getWalletCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="lockFundTxFee" :balance="balance" :selected-acc-add="selectedAccAdd"/>
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3" :disabled="disablePassword"/>
@@ -200,7 +111,7 @@ import SelectInputAccount from "@/components/SelectInputAccount.vue";
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
 import { AppState } from '@/state/appState';
-
+import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
 import { Address } from 'tsjs-xpx-chain-sdk';
 import { useRouter } from 'vue-router';
 export default { 
@@ -214,6 +125,7 @@ export default {
     AddContactModal,
     ConfirmSendModal,
     MosaicInput,
+    TransactionFeeDisplay,
   },
   setup() {
     const router = useRouter()
@@ -960,7 +872,7 @@ export default {
       let part2 = assetId.slice(-4)
       return part1 + "..." + part2
     }
-
+  console.log(typeof mosaics.value)
     return {
       showAssetBalanceErr,
       findAcc,

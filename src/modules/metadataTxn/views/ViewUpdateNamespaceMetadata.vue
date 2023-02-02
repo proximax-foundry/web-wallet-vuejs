@@ -92,37 +92,7 @@
                 <MetadataInput class="mt-2" v-model="newValue"  placeholder="New Value"/>
             </div>
             <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
-                <div v-if="!targetAccIsMultisig" class='font-semibold text-xxs text-blue-primary uppercase'>{{$t('general.accCurrentBalance')}}</div>
-                <div v-else class='font-semibold text-xxs text-blue-primary uppercase'>{{$t('general.initiatorCurrentBalance')}}</div>
-                <div class="flex my-1 text-white">
-                    <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
-                    <div class = 'text-md font-bold ' v-if='splitBalance.right!=null'>.</div>
-                    <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
-                    <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
-                    <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
-                </div>
-                <div v-if="targetAccIsMultisig" class="flex  text-white">
-                    <div class='text-xs '>{{$t('general.lockFund')}}</div>
-                    <div class="text-xs  ml-auto">{{lockFund}}</div>
-                    <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-                </div>
-                <div v-if="targetAccIsMultisig" class="flex  text-white">
-                    <div class='text-xs '>{{$t('general.lockFundTxFee')}}</div>
-                    <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
-                    <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-                </div>
-                <div v-if="targetAccIsMultisig" class='border-b-2 border-gray-600 my-2'/>
-                <div class="flex  text-white">
-                    <div class='text-xs '>{{$t('general.aggregateFee')}}</div>
-                    <div class="text-xs  ml-auto">{{aggregateFee}}</div>
-                    <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-                </div>
-                <div class='border-b-2 border-gray-600 my-2'/>
-                <div class="flex  text-white">
-                    <div class='text-xs '>{{$t('general.total')}}</div>
-                    <div class="text-xs  ml-auto">{{totalFee}}</div>
-                    <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-                </div>
+              <TransactionFeeDisplay :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="lockFundTxFee" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
                 <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
                 <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="walletPassword" icon="lock" class="mt-5 mb-3" />
                 <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="updateMetadata()" :disabled="disableAddBtn">
@@ -140,6 +110,7 @@
 import { Helper } from "@/util/typeHelper";
 import { computed, ref, watch} from "vue";
 import PasswordInput from "@/components/PasswordInput.vue";
+import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
 import {useI18n} from 'vue-i18n'
 import { multiSign } from "@/util/multiSignatory";
 import { walletState } from "@/state/walletState";
@@ -170,6 +141,7 @@ export default {
   components: {
     MetadataInput,
     PasswordInput,
+    TransactionFeeDisplay,
   },
   setup(props) {
     const router = useRouter() 
@@ -193,7 +165,9 @@ export default {
     const svgString = computed(()=>toSvg(selectedAcc.value?selectedAcc.value.address:'', 40, themeConfig.jdenticonConfig))
     const accountName = computed(()=>selectedAcc.value?walletState.currentLoggedInWallet.convertAddressToName(selectedAcc.value.address,true):'')
     const existingScopedMetadataKeys = ref([])
-
+    const defaultAcc = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount(): null
+    const selectedAccAdd = ref(defaultAcc?defaultAcc.address:'');
+    const accBalance = ref(Helper.toCurrencyFormat(defaultAcc?defaultAcc.balance:0, AppState.nativeToken.divisibility));
      const removeDoubleZero = (string :string) =>{
         let isZero = string.endsWith('00')
         if(isZero){
@@ -641,6 +615,44 @@ export default {
       }
     })
 
+    const transactionFee = computed(() => {
+      return aggregateFee.value.toString()
+    })
+
+    const totalFeeFormatted = computed(() => {
+      return Helper.amountFormatterSimple(totalFee.value, 0);
+    });
+
+    const fetchAccount = (publicKey) => {
+      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
+    };
+
+    const getMultiSigCosigner = computed(() => {
+      if(networkState.currentNetworkProfileConfig){
+        let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
+        let list = [];
+        cosigners.cosignerList.forEach( publicKey => {
+          list.push({
+            publicKey,
+            name: fetchAccount(publicKey).name,
+            balance: fetchAccount(publicKey).balance,
+            address: fetchAccount(publicKey).address
+          });
+        });
+
+        cosigners.cosignerList = list;
+        return cosigners;
+      }else{
+        return {hasCosigner:false,cosignerList:[]}
+      }
+      
+    });
+
+    const checkCosignBalance = computed(() => {
+      let cosignBalance = findAcc(selectedCosigner.value)?findAcc(selectedCosigner.value).balance:0;
+      return Helper.toCurrencyFormat(cosignBalance,3);
+    })
+
     watch(oldValue,n=>{
       txnBuilder.oldValue(n) 
       buildMetadataTxn()
@@ -692,7 +704,13 @@ export default {
       existingScopedMetadataKeys,
       showKeys,
       scopedMetadataKeySelectable,
-      scopedMetadataKeyHex
+      scopedMetadataKeyHex,
+      transactionFee,
+      totalFeeFormatted,
+      selectedAccAdd,
+      accBalance,
+      getMultiSigCosigner,
+      checkCosignBalance
     };
   },
 };
