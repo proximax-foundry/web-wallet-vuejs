@@ -834,44 +834,46 @@ export default {
     watch(showAddressError, (showAddressErrorStatus) =>{
       if(!showAddressErrorStatus){
         (async() => {
-          const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Helper.createAddress(siriusAddress.value));
-          let assetIdList = [];
-          let assetAmountList = [];
-          accountInfo.mosaics.map((mosaic) => {
-            assetIdList.push(mosaic.id)
-            assetAmountList.push(mosaic.amount)
-          });
-          const mosaicInfo = await AppState.chainAPI.assetAPI.getMosaicsNames(assetIdList);
-          const filteredMosaics = mosaicInfo.reduce((filtered, mosaic) => {
-            if(mosaic.names.length > 0){
-              let amount = assetAmountList[assetIdList.findIndex(asset => asset.toHex() == mosaic.mosaicId.toHex())];
-              let nsNames = [];
-              mosaic.names.forEach(name => {
-                nsNames.push(name.name)
-              });
-              let filterAsset = { names: nsNames, id: mosaic.mosaicId, amount: amount.compact() };
-              filtered.push(filterAsset);
-            }
-            return filtered;
-          }, []);
-
-          for(let i =0; i < siriusTokens.value.length ;++i){
-          const searchedAsset = filteredMosaics.find(asset => asset.names.includes(siriusTokens.value[i].namespaceName));
-          if(searchedAsset){
-            let formattedAmount = await AppState.chainAPI.assetAPI.getMosaic(searchedAsset.id);
-            siriusTokens.value[i].balance = Helper.convertToExact(searchedAsset.amount, formattedAmount.divisibility);
-          }else{
-            siriusTokens.value[i].balance = 0;
-          }
-        }
+          await getSiriusTokenBalance();
         })();
       }
     });
 
+    const getSiriusTokenBalance = async() => {
+      const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Helper.createAddress(siriusAddress.value));
+      let assetIdList = [];
+      let assetAmountList = [];
+      accountInfo.mosaics.map((mosaic) => {
+        assetIdList.push(mosaic.id)
+        assetAmountList.push(mosaic.amount)
+      });
+      const mosaicInfo = await AppState.chainAPI.assetAPI.getMosaicsNames(assetIdList);
+      const filteredMosaics = mosaicInfo.reduce((filtered, mosaic) => {
+        if(mosaic.names.length > 0){
+          let amount = assetAmountList[assetIdList.findIndex(asset => asset.toHex() == mosaic.mosaicId.toHex())];
+          let nsNames = [];
+          mosaic.names.forEach(name => {
+            nsNames.push(name.name)
+          });
+          let filterAsset = { names: nsNames, id: mosaic.mosaicId, amount: amount.compact() };
+          filtered.push(filterAsset);
+        }
+        return filtered;
+      }, []);
+
+      for(let i =0; i < siriusTokens.value.length ;++i){
+        const searchedAsset = filteredMosaics.find(asset => asset.names.includes(siriusTokens.value[i].namespaceName));
+        if(searchedAsset){
+          siriusTokens.value[i].balance = Helper.convertToExact(searchedAsset.amount, siriusTokens.value[i].divisibility);
+        }else{
+          siriusTokens.value[i].balance = 0;
+        }
+      }
+    }
+    getSiriusTokenBalance();
+
     // watcher section end
 
-
-    
     const contacts = computed(() => {
       if(!walletState.currentLoggedInWallet){
         return [];
