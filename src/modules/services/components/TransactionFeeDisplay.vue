@@ -76,7 +76,7 @@
             <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(transactionFee)"></div>
             <div class ='ml-1 text-blue-400'>{{currentNativeTokenName}}</div>
           </div>
-          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between border-gray-600 text-white text-xs py-5">
+          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between border-gray-600 text-white text-xs pt-5">
             <div class="font-bold uppercase lg:col-span-2 col-span-3">{{$t('general.total')}}</div>
             <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(totalFeeFormatted)"></div>
             <div class ='ml-1 mt-0.5 text-blue-400'>{{currentNativeTokenName}}</div>
