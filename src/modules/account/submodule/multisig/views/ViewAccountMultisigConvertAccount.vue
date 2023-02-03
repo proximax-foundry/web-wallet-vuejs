@@ -27,19 +27,6 @@
                 <SelectAccountAndContact v-bind="index" :contacts="contact" :index="index" :selectedNode="selectedNode[index]" @node-select="onNodeSelect($event,index)"/>
               </Sidebar>
             </div>
-            <!-- <div v-if="toggleContact[index]" class="pl-6 ">
-              <div class=" border">
-                <div class='text-xxs text-gray-300 font-semibold py-2 px-2 uppercase'>{{$t('general.importFromAB')}}</div>
-                <div v-for="(item, number) in contact" :key="number" class="cursor-pointer">
-                  <div @click="contactName[index]=item.label;coSign[index]=item.value;toggleContact[index]=false" class="flex justify-center">
-                    <div v-if="number%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full">{{item.label}}</div>
-                    <div v-if="number%2==1" class="text-xs py-2 pl-2 w-full">{{item.label}}</div>
-                    <div v-if="number%2==0" class="ml-auto pr-2 text-xxs py-2 font-semibold text-blue-primary bg-gray-100 uppercase">{{$t('general.select')}}</div>
-                    <div v-if="number%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold text-blue-primary uppercase">{{$t('general.select')}}</div>
-                  </div>
-                </div>
-              </div>
-            </div> -->
 
           </div>
        </div>
@@ -142,15 +129,17 @@ export default {
     const showAddressError = ref([]);
     const toggleContact = ref([])
     const onPartial = ref(false);
-    const space=ref(false);
-    const currentIndex = ref(0);
-
-     const lockFundCurrency = computed(() =>
+    const space=ref(false)
+    const defaultAcc = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount(): null
+    const selectedAccAdd = ref(defaultAcc?defaultAcc.address:'');
+    const accBalance = ref(Helper.toCurrencyFormat(defaultAcc?defaultAcc.balance:0, AppState.nativeToken.divisibility));
+    const lockFundCurrency = computed(() =>
       Helper.convertToCurrency(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
         AppState.nativeToken.divisibility
       )
     );
+    
     const lockFundTxFee = computed(()=>{ 
       if(networkState.currentNetworkProfile){ 
         return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
@@ -259,27 +248,24 @@ export default {
         });
       }
       return contacts
-      // return multiSign.generateContact(acc.value.address,acc.value.name)
     });
 
       function onNodeSelect(node, index){
+        makeNodeSelectable(index)
+        contactName.value[index]  = node.label
         coSign.value[index] = node.data
         toggleContact.value[index] = false
         // this is too make it turn blue
         selectedNode.value[index][node.key] = true
-        // recipientInput.value = node.data
-        // // this is too make it turn blue
-        // selectedNode.value[node.key] = true
-        // node.selectable = false
-      } 
+        node.selectable = false
+      }
 
-    
-      const makeNodeSelectable = () => {
+      const makeNodeSelectable = (index) => {
         // if there is previously unselectable value make it selectable
-        if (Object.keys(selectedNode.value).length !== 0){
-          selectedNodeIndex.value = Object.keys(selectedNode.value)[0].split('-')
-          contact.value[selectedNodeIndex.value[0]].children[selectedNodeIndex.value[1]].selectable = true
-          selectedNode.value = {}
+        if (Object.keys(selectedNode.value[index]).length !== 0){
+          let selectedNodeIndex = Object.keys(selectedNode.value[index])[0].split('-')
+          contact.value[selectedNodeIndex[0]].children[selectedNodeIndex[1]].selectable = true
+          selectedNode.value[index] = {}
         }
       }
 
@@ -340,10 +326,12 @@ export default {
       } 
     };
     watch(() => [...coSign.value], (n) => {
+      let duplicateOwner = false
       for(var i = 0; i < coSign.value.length; i++){
         if((coSign.value[i].length == 64) || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)){
           checkCosign(i)
-          if(coSign.value[i]==acc.value.address || coSign.value[i]==Helper.createAddress(acc.value.address).pretty() || coSign.value[i]==acc.value.publicKey ){
+          if((coSign.value[i]==acc.value.address || coSign.value[i]==Helper.createAddress(acc.value.address).pretty() || coSign.value[i]==acc.value.publicKey) && (duplicateOwner == false)){
+            duplicateOwner = true
             showAddressError.value[i] = true;
             err.value = t('multisig.selectedAccErr')
           }
@@ -359,7 +347,9 @@ export default {
             if(unique.length != n.length){
               err.value = t('multisig.duplicatedCosigner');
             }else{
-              err.value = '';
+              if (duplicateOwner == false){
+                err.value = '';
+              }
             }
           }
         }else{
@@ -399,9 +389,11 @@ export default {
       if(numApproveTransaction.value > maxNumApproveTransaction.value){
         numApproveTransaction.value = maxNumApproveTransaction.value;
       }
+      makeNodeSelectable(i)
       coSign.value.splice(i, 1);
-      contactName.value.splice(i, 1)
-     /*  console.log(coSign.value) */
+      selectedNode.value.splice(i, 1);
+      contactName.value.splice(i, 1);
+      toggleContact.value.splice(i,1);
       selectedAddresses.value.splice(i, 1);
       showAddressError.value.splice(i,1)
     }
