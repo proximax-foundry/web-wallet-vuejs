@@ -82,6 +82,7 @@ import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { setDefaultAccInStorage } from '@/models/account';
 export default {
   name:"ViewMultisigScheme",
   components:{
@@ -272,10 +273,11 @@ setup(p){
     let findAcc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address ==address) || walletState.currentLoggedInWallet.others.find(acc=>acc.address ==address)
     return findAcc.name
   }
-  const navigate = address =>{
 
+  const navigate = address =>{
     if(findAccountWithAddress(address,true) && !isHover.value ){
         setDefaultAcc(getAccountNameByAddress(Address.createFromRawAddress(address).plain()))
+        setDefaultAccInStorage(Address.createFromRawAddress(address).plain())
         router.push({ name: 'ViewAccountDetails', params: { address:Address.createFromRawAddress(address).plain() }})
       }
     if(!networkState.currentNetworkProfile){
