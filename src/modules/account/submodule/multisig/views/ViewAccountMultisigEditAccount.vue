@@ -290,7 +290,6 @@ export default {
           }
           return status;
         });
-
     
     const totalFee = computed(()=>{
        let tokenDivisibility = AppState.nativeToken.divisibility

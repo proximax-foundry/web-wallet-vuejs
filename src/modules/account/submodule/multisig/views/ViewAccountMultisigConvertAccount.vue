@@ -325,6 +325,7 @@ export default {
         router.push({ name: "ViewAccountPendingTransactions",params:{address:p.address} })
       } 
     };
+    
     watch(() => [...coSign.value], (n) => {
       let duplicateOwner = false
       for(var i = 0; i < coSign.value.length; i++){
@@ -365,18 +366,15 @@ export default {
       
     }, {deep:true});
     
-    
- 
     const addCoSig = () => {
       coSign.value.push('');
       selectedNode.value.push({})
-      // addresses.value.push('');
       showAddressError.value.push(false);
       maxNumApproveTransaction.value += 1;
       maxNumDeleteUser.value += 1;
     };
+
     const deleteCoSigAddressInput = (i) => {
-     /*  console.log('Delete index: ' + i); */
       if(maxNumApproveTransaction.value > 0){
         maxNumApproveTransaction.value -= 1;
       }
@@ -452,7 +450,6 @@ export default {
     )
     }
     
-    
     const checkCosign = (index) =>{
       if (coSign.value[index].length == 40 || coSign.value[index].length == 46) {
         try {
@@ -472,7 +469,6 @@ export default {
         fundStatus.value = true
       }
     }
-    
     
     watch(acc, (n) => {
       if(!n){
