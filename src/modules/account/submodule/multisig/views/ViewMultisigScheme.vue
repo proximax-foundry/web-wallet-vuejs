@@ -82,6 +82,7 @@ import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { setDefaultAccInStorage } from '@/models/account';
 export default {
   name:"ViewMultisigScheme",
   components:{
@@ -273,12 +274,6 @@ setup(p){
     return findAcc.name
   }
 
-  const setDefaultAccInStorage = (address) =>{
-     
-     sessionStorage.setItem('defaultAcc',address)
-     walletState.currentLoggedInWallet.setDefaultAccountByAddress(address)
-   }
-   
   const navigate = address =>{
     if(findAccountWithAddress(address,true) && !isHover.value ){
         setDefaultAcc(getAccountNameByAddress(Address.createFromRawAddress(address).plain()))

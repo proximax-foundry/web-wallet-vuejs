@@ -71,6 +71,7 @@ import { AppState} from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { Address } from 'tsjs-xpx-chain-sdk';
 import { useRouter } from 'vue-router';
+import { setDefaultAccInStorage } from '@/models/account';
 export default{
   name: 'AccountTile',
   props: ['account'],
@@ -194,12 +195,6 @@ export default{
       }else{
         return
       }
-    }
-
-    const setDefaultAccInStorage = (address) =>{
-     
-      sessionStorage.setItem('defaultAcc',address)
-      walletState.currentLoggedInWallet.setDefaultAccountByAddress(address)
     }
 
     const navigate = () =>{
