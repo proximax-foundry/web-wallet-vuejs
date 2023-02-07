@@ -10,6 +10,26 @@
           <div v-if="!isSupportedChainId && isWalletConnected" class="error_box error error-text">
             <div>Chain unsupported, please change to supported chain</div>
           </div>
+          <div class="flex justify-center mt-10 error_box error error-text" v-if="tokenInvalid">
+            Unsupported token
+          </div>
+          <div class="flex justify-center mt-10 error_box error error-text" v-if="!settingDone">
+            Configuration error
+          </div>
+          <div class="flex justify-center mt-10 error_box error error-text" v-if="submitFailed">
+            Submission failed
+          </div>
+          <div class="flex justify-center mt-10 error_box error error-text" v-if="customErrorMessage">
+            {{ customErrorMessage }}
+          </div>
+          <div class="mt-10 success_box success success-text" v-if="processing">
+            <div class="mb-2">Submission is successful.</div>
+            <div class="font-normal relative"><b>Transaction hash: </b><a :href="explorerLink + transactionHash" target=_new class="hover:underline">{{ transactionHash.substr(0, 7) + '...' + transactionHash.substr(-7) }} <font-awesome-icon icon="external-link-alt" class="ml-1 w-3 h-3 self-center inline-block"></font-awesome-icon></a></div>
+            <div><button type="button" class="w-40 hover:shadow-sm bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-3 py-2 border border-blue-primary outline-none mt-2 mb-2" @click="saveCertificate">{{$t('general.certificate')}}</button></div>
+          </div>
+          <div class="flex justify-center mt-10 success_box success success-text" v-if="dispalyWaitForConfirmationMessage">
+            <div style="border-top-color:transparent" class="inline-block mr-2 relative top-2 w-4 h-4 border-4 border-green-500 border-solid rounded-full animate-spin"></div> Please wait until transaction is confirmed
+          </div>
           <div v-if="isWalletConnected" class="text-xs flex items-center justify-end">
             <div v-if="connectedWalletName === 'WC'" class="flex items-center gray-text-300">
               <img src="@/modules/services/submodule/mainnetSwap/img/icon-walletconnect.svg" class="w-4 h-4 inline-block" />&nbsp;{{ tokenType(selectedChainId) }}&nbsp;{{ connectedAddress }}
@@ -43,32 +63,14 @@
             </div>
           </div>
         </div>
-        <div class="flex justify-between mt-5">
-          <toggleSwitch v-model="isChecked" />
-          <div class="bg-blue-50 p-3 rounded-md inline-block text-xs text-right">
+        <div class="md:flex md:justify-between mt-5">
+          <div class="bg-blue-50 p-3 rounded-md inline-block text-xs text-right w-full">
             <div class="mb-1.5">Exchange Rate: 1 {{ selectedFromToken }} = {{ exchangeRate }} {{ selectedToToken }}</div>
             <div class="mb-1.5">Fee: {{ fee }} {{ selectedToToken }}</div>
             <div class="mb-1.5">{{ selectedFromToken }} Price: {{ selectedFromTokenPrice }} USD</div>
             <div>{{ selectedToToken }} Price: {{ selectedToTokenPrice }} USD</div>
           </div>
-        </div>
-        <div class="flex justify-center mt-10 error_box error error-text" v-if="tokenInvalid">
-          Unsupported token
-        </div>
-        <div class="flex justify-center mt-10 error_box error error-text" v-if="!settingDone">
-          Configuration error
-        </div>
-        <div class="flex justify-center mt-10 error_box error error-text" v-if="submitFailed">
-          Submission failed
-        </div>
-        <div class="flex justify-center mt-10 error_box error error-text" v-if="customErrorMessage">
-          {{ customErrorMessage }}
-        </div>
-        <div class="flex justify-center mt-10 success_box success success-text" v-if="processing">
-          Submission success
-        </div>
-        <div class="flex justify-center mt-10 success_box success success-text" v-if="dispalyWaitForConfirmationMessage">
-          Please wait until transaction confirmed
+          <toggleSwitch v-model="isChecked" class="w-full mt-3 order-last md:order-first" />
         </div>
         <div class="flex justify-center mt-10">
           <button class="blue-btn font-semibold py-2 cursor-pointer text-center w-32 disabled:opacity-50 disabled:cursor-auto" :disabled="disabledBuy" @click="buySiriusToken">Buy</button>
@@ -100,6 +102,8 @@ import { Address, NetworkType } from 'tsjs-xpx-chain-sdk';
 import toggleSwitch from '@/modules/services/submodule/stacking/components/toggleSwitch.vue';
 import { getCurrentPriceUSD } from "@/util/functions";
 import { Utilities } from "@/util/utilities";
+import { Helper } from "@/util/typeHelper";
+
 
 export default {
   name: "ViewServicesStackingBuy",
@@ -119,7 +123,7 @@ export default {
     const submitFailed = ref(false);
     const buyFromComponent = ref(null);
     let stableCoins = availableTokens;
-    let siriusTokens = availableToTokens;
+    let siriusTokens = ref(availableToTokens);
     const selectedContractAddress = ref("");
     const selectedStableCoins = ref([]);
     const toAmount = ref(12345.54);
@@ -129,6 +133,9 @@ export default {
     const recipient = ref(walletState.currentLoggedInWallet.accounts.find(x => x.default).address);
     const isSubmit = shallowRef(false);
     const tokenInvalid = ref(false);
+
+    const transactionHash = ref('');
+    const explorerLink = ref('');
     
     const isChainIdValid = ref(false);
     let provider;
@@ -157,12 +164,12 @@ export default {
 
     const selectedToTokenPrice = computed(()=>{
       priceUpdated.value; // just to trigger auto recompute
-      return siriusTokens.find(x => x.name === selectedToToken.value).price;
+      return siriusTokens.value.find(x => x.name === selectedToToken.value).price;
     });
 
     const fee = computed(()=>{
       settingDone.value; // just to trigger auto recompute
-      return siriusTokens.find(x => x.name === selectedToToken.value).fee;
+      return siriusTokens.value.find(x => x.name === selectedToToken.value).fee;
     });
 
     let siriusTokenAtomicUnits = 1000000;
@@ -288,7 +295,7 @@ export default {
       const address = await signer.getAddress();
 
       for(let i=0; i < contracts.length; ++i){
-
+        // console.log(contracts[i].disabled);
         if(contracts[i].disabled){
           continue;
         }
@@ -355,7 +362,7 @@ export default {
 
         for(let siriusToken of siriusTokensInfo){
 
-          let currentSiriusToken = siriusTokens.find(x => x.name == siriusToken.name.toUpperCase()); 
+          let currentSiriusToken = siriusTokens.value.find(x => x.name == siriusToken.name.toUpperCase()); 
 
           if(currentSiriusToken){
             currentSiriusToken.fee = siriusToken.feeAmount;
@@ -407,7 +414,7 @@ export default {
 
       let prices = await getCurrentPriceUSD(SwapUtils.checkSwapPrice(swapData.priceConsultURL));
 
-      for(let siriusToken of siriusTokens){
+      for(let siriusToken of siriusTokens.value){
         if(prices[siriusToken.name.toLowerCase()]){
           siriusToken.price = prices[siriusToken.name.toLowerCase()];
         }
@@ -554,6 +561,8 @@ export default {
 
       isWalletConnected.value = false;
       connectedWalletName.value = "";
+      setDisconnected()
+      resetStableCoinsBalanceZero();
     }
 
     const checkWalletConnected = ()=>{
@@ -568,6 +577,7 @@ export default {
 
     checkWalletConnected();
 
+    const swapTimestamp = ref('');
     const buySiriusToken = async ()=>{
 
       customErrorMessage.value = "";
@@ -656,6 +666,8 @@ export default {
 
         let txnHash = receipt.hash;
         let nonce = receipt.nonce;
+        transactionHash.value = txnHash;
+        explorerLink.value = selectedChainId.value === bscChainId?swapData.BSCScanUrl:swapData.ETHScanUrl;
 
         const data = {
           fromToken: selectedFromToken.value,
@@ -681,6 +693,7 @@ export default {
           const serverResponseData = await response.json();
 
           console.log(serverResponseData);
+          swapTimestamp.value = Helper.IsoTimeRemoveFormat(serverResponseData.timestamp);
 
           processing.value = true;
           searchAccountStableCoinsBalance();
@@ -697,6 +710,105 @@ export default {
     }
 
     // section end
+
+    // address
+    const accounts = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
+      let accounts = walletState.currentLoggedInWallet.accounts.map((acc)=>{
+        return {
+          name: acc.name,
+          balance: acc.balance,
+          address: acc.address,
+          publicKey: acc.publicKey,
+          assets: acc.assets,
+          isMultisig: acc.getDirectParentMultisig().length ? true: false
+        };
+      });
+
+      let otherAccounts =walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map((acc)=>{
+        return {
+          name: acc.name,
+          balance: acc.balance,
+          address: acc.address,
+          publicKey: acc.publicKey,
+          assets: acc.assets,
+          isMultisig: true
+        };
+      });
+
+      return accounts.concat(otherAccounts);
+    });
+
+    const refreshSiriusTokenBalance = () => {
+      const addressRaw = Helper.createAddress(siriusAddress.value).plain();
+      const selectedAccount = accounts.value.find(account => account.address === addressRaw);
+      let assets = [];
+      if(selectedAccount){
+        assets = selectedAccount.assets;
+      }
+
+      for(let i =0; i < siriusTokens.value.length ;++i){
+        const searchedasset = assets.find(asset => asset.namespaceNames.includes(siriusTokens.value[i].namespaceName));
+        if(searchedasset){
+          siriusTokens.value[i].balance = searchedasset.amount;
+        }else{
+          siriusTokens.value[i].balance = 0;
+        }
+      }
+    }
+
+    const showAddressError = shallowRef(true);
+    const toggleContact = shallowRef(false);
+    const siriusAddress = ref('');
+
+    const checkNamespace = async (nsId)=>{
+      return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
+    }
+
+    const checkRecipient = () =>{
+      if(!walletState.currentLoggedInWallet){
+        return;
+      }
+      try {
+        let recipientAddress = Helper.createAddress(siriusAddress.value);
+        let networkOk = Helper.checkAddressNetwork(recipientAddress, AppState.networkType);
+        if(!networkOk){
+          showAddressError.value = true;
+        }
+        else{
+          showAddressError.value = false;
+          refreshSiriusTokenBalance();
+        }
+      } catch (error) {
+        // console.log(error)
+        try{
+          let namespaceId = Helper.createNamespaceId(Helper.createAddress(siriusAddress.value).plain().toLowerCase());
+          checkNamespace(namespaceId).then((address)=>{
+            siriusAddress.value = address.plain();
+            showAddressError.value = false;
+            refreshSiriusTokenBalance();
+          }).catch((error)=>{
+            showAddressError.value = true;
+          });
+        }
+        catch(error){
+          // console.log(error)
+          showAddressError.value = true;
+        }
+      }
+    };
+    siriusAddress.value = Helper.createAddress(walletState.currentLoggedInWallet.selectDefaultAccount().address).pretty();
+    checkRecipient();
+    watch(siriusAddress, n => {
+      if(n.length==40 || n.length==46){
+        checkRecipient();
+      }else{
+        showAddressError.value = true;
+      }
+    });
+
 
     // watcher section
     watch([fromInputAmount, exchangeRate], (newValue)=>{
@@ -719,46 +831,51 @@ export default {
         checkSelectedTokenSupported();
       }
     })
+
+    // get balance of xpx and metc for currect sirius wallet
+    // watch(walletState.currentLoggedInWallet.selectDefaultAccount().assets, () =>{
+    watch(showAddressError, (showAddressErrorStatus) =>{
+      if(!showAddressErrorStatus){
+        (async() => {
+          await getSiriusTokenBalance();
+        })();
+      }
+    });
+
+    const getSiriusTokenBalance = async() => {
+      const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Helper.createAddress(siriusAddress.value));
+      let assetIdList = [];
+      let assetAmountList = [];
+      accountInfo.mosaics.map((mosaic) => {
+        assetIdList.push(mosaic.id)
+        assetAmountList.push(mosaic.amount)
+      });
+      const mosaicInfo = await AppState.chainAPI.assetAPI.getMosaicsNames(assetIdList);
+      const filteredMosaics = mosaicInfo.reduce((filtered, mosaic) => {
+        if(mosaic.names.length > 0){
+          let amount = assetAmountList[assetIdList.findIndex(asset => asset.toHex() == mosaic.mosaicId.toHex())];
+          let nsNames = [];
+          mosaic.names.forEach(name => {
+            nsNames.push(name.name)
+          });
+          let filterAsset = { names: nsNames, id: mosaic.mosaicId, amount: amount.compact() };
+          filtered.push(filterAsset);
+        }
+        return filtered;
+      }, []);
+
+      for(let i =0; i < siriusTokens.value.length ;++i){
+        const searchedAsset = filteredMosaics.find(asset => asset.names.includes(siriusTokens.value[i].namespaceName));
+        if(searchedAsset){
+          siriusTokens.value[i].balance = Helper.convertToExact(searchedAsset.amount, siriusTokens.value[i].divisibility);
+        }else{
+          siriusTokens.value[i].balance = 0;
+        }
+      }
+    }
+    getSiriusTokenBalance();
+
     // watcher section end
-
-    // address
-    const showAddressError = shallowRef(true);
-    const toggleContact = shallowRef(false);
-    const siriusAddress = ref('');
-    watch(siriusAddress, n => {
-      if(n.length==40 || n.length==46){
-        checkRecipient();
-      }else{
-        showAddressError.value = true;
-      }
-    });
-
-    const accounts = computed(()=>{
-      if(!walletState.currentLoggedInWallet){
-        return [];
-      }
-      let accounts = walletState.currentLoggedInWallet.accounts.map((acc)=>{
-        return {
-          name: acc.name,
-          balance: acc.balance,
-          address: acc.address,
-          publicKey: acc.publicKey,
-          isMultisig: acc.getDirectParentMultisig().length ? true: false
-        };
-      });
-
-      let otherAccounts =walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map((acc)=>{
-        return {
-          name: acc.name,
-          balance: acc.balance,
-          address: acc.address,
-          publicKey: acc.publicKey,
-          isMultisig: true
-        };
-      });
-
-      return accounts.concat(otherAccounts);
-    });
 
     const contacts = computed(() => {
       if(!walletState.currentLoggedInWallet){
@@ -783,36 +900,12 @@ export default {
       return contact;
     });
 
-    const checkRecipient = () =>{
-      if(!walletState.currentLoggedInWallet){
-          return;
-      }
-      try {
-        let recipientAddress = Helper.createAddress(siriusAddress.value);
-        let networkOk = Helper.checkAddressNetwork(recipientAddress, AppState.networkType);
-        if(!networkOk){
-          showAddressError.value = true;
-        }
-        else{
-          showAddressError.value = false;
-        }
-      } catch (error) {
-        try{
-          let namespaceId = Helper.createNamespaceId(siriusAddress.value);
-          checkNamespace(namespaceId).then((address)=>{
-            siriusAddress.value = address.plain();
-            showAddressError.value = false;
-          }).catch((error)=>{
-            showAddressError.value = true;
-          });
-        }
-        catch(error){
-          showAddressError.value = true;
-        }
-      }
-    };
-
     const isChecked = ref(false);
+
+    const saveCertificate = () => {
+      const swapQr = SwapUtils.generateQRCode(explorerLink.value + transactionHash.value);
+      SwapUtils.generateIncomingPdfCert(selectedChainId.value === bscChainId ? "BSC" : "ETH", swapTimestamp.value, siriusAddress.value, selectedFromToken.value, transactionHash.value, swapQr);
+    };
 
     return {
       stableCoins,
@@ -855,7 +948,10 @@ export default {
       submitFailed,
       fee,
       dispalyWaitForConfirmationMessage,
-      customErrorMessage
+      customErrorMessage,
+      explorerLink,
+      transactionHash,
+      saveCertificate,
     }
   }
 }
