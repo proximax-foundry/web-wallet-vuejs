@@ -44,7 +44,7 @@
             <div class="flex">
               <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
               <TextInput class='w-5/12 mr-2 ' :placeholder="$t('multisig.cosignatory')+`${index+1}`"  v-model="contactName[index]" :disabled="true"  />
-              <TextInputClean class='w-7/12 mr-2 ' :placeholder="$t('multisig.addressOrPk')" :errorMessage="$t('general.invalidInput')" :showError="showAddressError[index]"  v-model="coSign[index]" />
+              <TextInputClean class='w-7/12 mr-2 ' :placeholder="$t('general.publicKey')" :errorMessage="$t('general.invalidInput')" :showError="showAddressError[index]"  v-model="coSign[index]" />
               <!-- <div v-if="showAddressError[index]==true " class=""/> -->
               <div @click="toggleContact[index]=!toggleContact[index]" class=' border  cursor-pointer flex flex-col justify-center  p-2' style="height:2.66rem">
                 <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
@@ -338,18 +338,13 @@ export default {
       let duplicateCosign = false
       let duplicateOwner = false
       for(var i = 0; i < coSign.value.length; i++){
-        if((coSign.value[i].length == 64) || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)){
-          checkCosign(i)
-          if((coSign.value[i]==acc.value.address || coSign.value[i]==Helper.createAddress(acc.value.address).pretty() || coSign.value[i]==acc.value.publicKey) && (duplicateOwner == false)){
+        if((coSign.value[i].length == 64)){
+          if((coSign.value[i]==acc.value.publicKey) && (duplicateOwner == false)){
             duplicateOwner = true
             showAddressError.value[i] = true;
             err.value = t('multisig.selectedAccErr')
           }
           else if(!coSign.value[i].match(publicKeyPattern) && (coSign.value[i].length == 64)){
-            showAddressError.value[i] = true;
-          }else if(!coSign.value[i].match(addressPatternLong) && (coSign.value[i].length == 46)){
-            showAddressError.value[i] = true;
-          }else if(!coSign.value[i].match(addressPatternShort) && (coSign.value[i].length == 40)){
             showAddressError.value[i] = true;
           }else{
             showAddressError.value[i] = false;
@@ -450,12 +445,33 @@ export default {
     function onNodeSelect(node, index){
         makeNodeSelectable(index)
         contactName.value[index]  = node.label
-        coSign.value[index] = node.data
+        // check if it is in the address book
+        if(node.key[0] == "1"){
+          changeToPublicKey(node.data, index)
+        }
+        else{
+          coSign.value[index] = node.data
+        }
         toggleContact.value[index] = false
         // this is too make it turn blue
         selectedNode.value[index][node.key] = true
         node.selectable = false
       } 
+    
+      function changeToPublicKey(address, index){
+        try {
+          multiSign.verifyContactPublicKey(address).then(result=>{
+            if(result.status==true){
+              coSign.value[index] = result.publicKey
+            }
+            else{
+              err.value = t('multisig.noPublicKey')
+            }
+          })
+        } catch (error) {
+          err.value = t('multisig.noPublicKey')
+        }
+      }
 
     const makeNodeSelectable = (index) => {
       // if there is previously unselectable value make it selectable
@@ -625,19 +641,7 @@ export default {
     } catch (error) {
       
     }
-    const checkCosign = (index) =>{
-      if (coSign.value[index].length == 40 || coSign.value[index].length == 46) {
-        try {
-          multiSign.verifyContactPublicKey(coSign.value[index]).then(result=>{
-            if(result.status==false){
-              showAddressError.value[index] = true
-            }
-          })
-        } catch (error) {
-          console.log(error)
-        }
-      }
-    }    
+   
     if(findAcc(selectedCosignPublicKey.value)){
       if(findAcc(selectedCosignPublicKey.value).balance<totalFee.value){
         fundStatus.value = true
