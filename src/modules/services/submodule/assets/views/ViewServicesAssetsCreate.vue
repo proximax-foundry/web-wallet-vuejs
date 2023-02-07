@@ -76,7 +76,7 @@ import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
-import { TransactionUtils } from '@/util/transactionUtils';
+import { TransactionUtils, isMultiSig, fetchAccount, findAccWithAddress } from '@/util/transactionUtils';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
 
@@ -181,15 +181,6 @@ export default {
       walletPassword.value.match(passwdPattern) && (divisibility.value != '') && (supply.value > 0) && (!showSupplyErr.value) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value)
     ));
 
-    const isMultiSig = (address) => {
-      if(walletState.currentLoggedInWallet){
-        const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address) || walletState.currentLoggedInWallet.others.find((account) => account.address == address);
-        const isMulti = account.getDirectParentMultisig().length>0?true:false
-        return isMulti
-      }else{
-        return false
-      }
-    };
     const defaultAcc = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount(): null
     const selectedAccName = ref(defaultAcc?defaultAcc.name:'');
     const selectedAccAdd = ref(defaultAcc?defaultAcc.address:'');
@@ -209,10 +200,6 @@ export default {
         return [];
       }
     });
-
-    const fetchAccount = (publicKey) => {
-      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
-    };
 
     const getMultiSigCosigner = computed(() => {
       if(networkState.currentNetworkProfileConfig){
@@ -381,26 +368,10 @@ export default {
       }
     })
 
-    const findAccWithAddress = address =>{
-      if(!walletState.currentLoggedInWallet){
-        return null
-      }
-      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)
-    }
-
     const checkCosignBalance = computed(() => {
       let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
       return Helper.toCurrencyFormat(cosignBalance);
     })
-
-    const splitCurrency = (amount) => {
-      let split = amount.toString().split(".")
-      if (split[1]!=undefined){
-        return '<span class="font-semibold text-sm">' + split[0] + '</span>.<span class="font-semibold text-xs">' + split[1] + '</span>';
-      }else{
-        return '<span class="font-semibold text-sm">' + split[0] + '</span>';
-      }
-    };
 
     if (isMultiSigBool.value) {
       let cosigner = getMultiSigCosigner.value.cosignerList
@@ -486,7 +457,6 @@ export default {
       duration,
       showDurationErr,
       durationCheckDisabled,
-      isMultiSig,
       isMultiSigBool,
       rentalFeeCurrency,
       lockFundCurrency,
@@ -503,7 +473,6 @@ export default {
       walletState,
       networkState,
       Helper,
-      splitCurrency,
       updateSupplyErr,
       defaultAcc,
       checkCosignBalance,

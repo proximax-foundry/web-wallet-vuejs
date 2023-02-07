@@ -114,7 +114,7 @@ import {useI18n} from 'vue-i18n'
 import { multiSign } from "@/util/multiSignatory";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
-import { TransactionUtils } from "@/util/transactionUtils";
+import { TransactionUtils, fetchAccount, findAcc } from "@/util/transactionUtils";
 import { WalletUtils } from "@/util/walletUtils";
 import { AppState } from '@/state/appState';
 import MetadataInput from '@/modules/metadataTxn/components/MetadataInput.vue'
@@ -399,12 +399,6 @@ export default {
     const disableAddBtn = computed(()=>{
         return (showScopedKeyErr.value==true ||inputScopedMetadataKey.value==''||newValue.value==''||!walletPassword.value.match(passwdPattern)||showBalanceErr.value==true)
     })
-    const findAcc = (publicKey)=>{
-      if(!walletState.currentLoggedInWallet){
-        return
-      }
-      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
-    }
     
     const accounts = computed(()=>{
       if(!walletState.currentLoggedInWallet){
@@ -579,16 +573,6 @@ export default {
       }
     });
 
-    const splitBalance = computed(()=>{
-      let accBalance = Helper.toCurrencyFormat(balance.value, AppState.nativeToken.divisibility)
-      let split = accBalance.split(".")
-      if (split[1]!=undefined){
-        return {left:split[0],right:split[1]}
-      }else{
-        return {left:split[0], right:null}
-      }
-    })
-
     const transactionFee = computed(() => {
       return aggregateFee.value.toString()
     })
@@ -596,10 +580,6 @@ export default {
     const totalFeeFormatted = computed(() => {
       return Helper.amountFormatterSimple(totalFee.value, 0);
     });
-
-    const fetchAccount = (publicKey) => {
-      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
-    };
 
     const getMultiSigCosigner = computed(() => {
       if(networkState.currentNetworkProfileConfig){
@@ -658,7 +638,6 @@ export default {
       lockFund,
       aggregateFee,
       lockFundTxFee,
-      splitBalance,
       walletName,
       currentNativeTokenName,
       oldValue,

@@ -204,14 +204,6 @@ export default {
       }
       return multiSign.generateContact(acc.value.address,acc.value.name)
     });
-     const splitBalance = computed(()=>{
-      let split = accountBalance.value.split(".")
-      if (split[1]!=undefined){
-        return {left:split[0],right:split[1]}
-      }else{
-        return {left:split[0], right:null}
-      }
-    })
     const disableSend = computed(() => !(
       !isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) && coSign.value.length > 0  &&  (err.value == '' || (err.value == t('general.walletpasswordInvalid',{name : walletState.currentLoggedInWallet.name}))) && (showAddressError.value.every(value => value == false)) == true && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
     ));
@@ -423,7 +415,6 @@ export default {
       contact,
       space,
       currentNativeTokenName,
-      splitBalance,
       contactName,
       err,
       disableSend,

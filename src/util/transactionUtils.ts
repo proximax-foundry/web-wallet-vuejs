@@ -33,6 +33,7 @@ import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { AnnounceType, AutoAnnounceSignedTransaction, HashAnnounceBlock } from "@/state/listenerState";
 import { networkState } from "@/state/networkState";
 import i18n from "@/i18n";
+import { walletState } from "@/state/walletState";
 
 
 const {t} = i18n.global
@@ -485,3 +486,34 @@ export class TransactionUtils {
   }
 }
 
+export const isMultiSig = (address) => {
+  if(walletState.currentLoggedInWallet){
+    const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address) || walletState.currentLoggedInWallet.others.find((account) => account.address == address);
+    if(account){
+      const isMulti = account.getDirectParentMultisig().length>0?true:false
+      return isMulti
+    }else{
+      return false
+    }
+  }else{
+    return false
+  }
+};
+
+export const fetchAccount = (publicKey) => {
+  return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
+};
+
+export const findAccWithAddress = address =>{
+  if(!walletState.currentLoggedInWallet){
+    return null
+  }
+  return walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)
+}
+
+export const findAcc = (publicKey)=>{
+  if(!walletState.currentLoggedInWallet){
+    return null
+  }
+  return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
+}
