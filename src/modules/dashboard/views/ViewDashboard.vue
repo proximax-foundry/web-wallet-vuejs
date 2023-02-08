@@ -32,7 +32,7 @@
                   </div><br>
                   <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.transfer')}}</div>
                 </router-link>
-                <router-link :to="{ name: 'ViewServicesStackingBuy'}" class="inline-block text-center mx-2.5">
+                <router-link :to="{ name: 'ViewServicesStackingBuy'}" class="inline-block text-center mx-2.5" v-if="isPublicNetwork">
                   <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
                     <div class="flex items-center justify-center h-full w-full">
                       <font-awesome-icon icon="shopping-bag" class="h-5 w-5 text-white" />
@@ -40,7 +40,7 @@
                   </div><br>
                   <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.buy')}}</div>
                 </router-link>
-                <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="inline-block text-center mx-3">
+                <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="inline-block text-center mx-3" v-if="isPublicNetwork">
                   <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
                     <div class="h-full w-full flex items-center justify-center">
                       <img src="@/modules/dashboard/img/icon-swap-white.svg" class="w-5 h-5">
@@ -66,7 +66,7 @@
               <div>
                 <router-link :to="{ name: 'ViewTransferCreate'}" class="flex items-center "><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">{{$t('general.transfer',{tokenName: currentNativeTokenName})}}</div></router-link>
               </div>
-              <div class="flex items-center">
+              <div class="flex items-center" v-if="isPublicNetwork">
                 <router-link :to="{ name: 'ViewServicesStackingBuy'}" class="mb-3 inline-block mr-2"><div class="flex items-center"><font-awesome-icon icon="shopping-bag" class="text-white w-4 h-3 cursor-pointer mr-1 relative -top-1" style="color: #007CFF" /><div class="text-xxs md:text-xs font-bold text-white" style="margin-top: 1px">{{$t('general.buy')}}</div></div></router-link>
                 <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="mb-3 inline-block"><div class="flex items-center"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-white" style="margin-top: 1px">{{$t('general.swap')}}</div></div></router-link>
               </div>
@@ -147,7 +147,8 @@ import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
 import {AppState} from '@/state/appState'
 import { useI18n } from 'vue-i18n';
-import { TransactionType } from 'tsjs-xpx-chain-sdk';
+import { TransactionType, NetworkType } from 'tsjs-xpx-chain-sdk';
+
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -184,6 +185,11 @@ export default defineComponent({
     const isInitialSender = ref(false);
     const cosignModalKey = ref(0);
     const decryptMessageKey = ref(0);
+
+    const isPublicNetwork = computed(()=>{
+      return AppState.networkType == NetworkType.TEST_NET || AppState.networkType == NetworkType.MAIN_NET;
+    });
+
     if(props.type == 'transaction'){
       displayBoard.value = 'transaction';
     }
@@ -280,7 +286,7 @@ export default defineComponent({
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const currentNativeTokenId = computed(()=> AppState.nativeToken.assetId);
     const displyFaucet = computed(() => {
-      return (AppState.networkType == 168)?true:false;
+      return (AppState.networkType == NetworkType.TEST_NET)?true:false;
     });
     const faucetLink = computed(() => {
       if(displyFaucet.value){
@@ -292,7 +298,7 @@ export default defineComponent({
           return false;
         }
       }else{
-        if(AppState.networkType == 184){
+        if(AppState.networkType == NetworkType.MAIN_NET){
           return 'https://www.proximax.io/en/xpx';
         }else{
           return false;
@@ -839,6 +845,7 @@ export default defineComponent({
       }
 
     return {
+      isPublicNetwork,
       pendingTransactions,
       toSvg,
       addressExplorerURL,
