@@ -13,7 +13,7 @@
           <div class="flex justify-center mt-10 error_box error error-text" v-if="tokenInvalid">
             Unsupported token
           </div>
-          <div class="flex justify-center mt-10 error_box error error-text" v-if="!settingDone">
+          <div class="flex justify-center mt-10 error_box error error-text" v-if="!settingDone && isLoaded">
             Configuration error
           </div>
           <div class="flex justify-center mt-10 error_box error error-text" v-if="submitFailed">
@@ -157,6 +157,7 @@ export default {
     const selectedToToken = ref('XPX');
     const priceUpdated = ref(false);
     const settingDone = ref(false);
+    const isLoaded = ref(false);
     const selectedFromTokenPrice = computed(()=>{
       priceUpdated.value; // just to trigger auto recompute
       return stableCoins.find(x => x.name === selectedFromToken.value).price;
@@ -402,10 +403,11 @@ export default {
             currentEthStableCoin.decimals = ethScAddress.decimals;
           }
         }
-
+        isLoaded.value = true;
         settingDone.value = true;
       }
       catch(error){
+        isLoaded.value = true;
         settingDone.value = false;
       }
     }
@@ -908,6 +910,7 @@ export default {
     };
 
     return {
+      isLoaded,
       stableCoins,
       siriusTokens,
       toAmount,
