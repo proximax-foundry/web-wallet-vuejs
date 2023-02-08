@@ -32,21 +32,21 @@
                   </div><br>
                   <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.transfer')}}</div>
                 </router-link>
-                <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="inline-block text-center mx-2">
-                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
-                    <div class="h-full w-full flex items-center justify-center">
-                      <img src="@/modules/dashboard/img/icon-swap-white.svg" class="w-5 h-5">
-                    </div>
-                  </div><br>
-                  <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.swap')}}</div>
-                </router-link>
-                <router-link :to="{ name: 'ViewServicesStackingBuy'}" class="inline-block text-center ml-2">
+                <router-link :to="{ name: 'ViewServicesStackingBuy'}" class="inline-block text-center mx-2.5">
                   <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
                     <div class="flex items-center justify-center h-full w-full">
                       <font-awesome-icon icon="shopping-bag" class="h-5 w-5 text-white" />
                     </div>
                   </div><br>
                   <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.buy')}}</div>
+                </router-link>
+                <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="inline-block text-center mx-3">
+                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                    <div class="h-full w-full flex items-center justify-center">
+                      <img src="@/modules/dashboard/img/icon-swap-white.svg" class="w-5 h-5">
+                    </div>
+                  </div><br>
+                  <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.swap')}}</div>
                 </router-link>
               </div>
             </div>
@@ -57,19 +57,19 @@
             <div class="mt-8">
               <div class="text-gray-300 text-txs uppercase">{{$t('general.currentBalance')}}</div>
               <div class="flex justify-between items-center">
-                 <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
-              <a :href="faucetLink" class="flex items-center" target=_new v-if="faucetLink"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">{{$t('general.topUp')}}</div></a>
+                <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
+                <a :href="faucetLink" class="flex items-center" target=_new v-if="faucetLink"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">{{$t('general.topUp')}}</div></a>
               </div>
-             
               <div class="text-gray-300 text-txs mt-1">{{$t('general.estimateUSD')}} {{ currencyConvert }}</div>
-
             </div>
             <div class="flex justify-between mt-2">
               <div>
                 <router-link :to="{ name: 'ViewTransferCreate'}" class="flex items-center "><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">{{$t('general.transfer',{tokenName: currentNativeTokenName})}}</div></router-link>
-                
               </div>
-              <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-white" style="margin-top: 1px">{{$t('general.swap')}}</div></router-link>
+              <div class="flex items-center">
+                <router-link :to="{ name: 'ViewServicesStackingBuy'}" class="mb-3 inline-block mr-2"><div class="flex items-center"><font-awesome-icon icon="shopping-bag" class="text-white w-4 h-3 cursor-pointer mr-1 relative -top-1" style="color: #007CFF" /><div class="text-xxs md:text-xs font-bold text-white" style="margin-top: 1px">{{$t('general.buy')}}</div></div></router-link>
+                <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="mb-3 inline-block"><div class="flex items-center"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-white" style="margin-top: 1px">{{$t('general.swap')}}</div></div></router-link>
+              </div>
             </div>
           </div>
         </div>
