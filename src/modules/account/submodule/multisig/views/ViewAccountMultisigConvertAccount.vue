@@ -314,7 +314,6 @@ export default {
             break;
           }
         }
-        
       }else{
         status = true;
       }
@@ -347,7 +346,9 @@ export default {
     
     watch(() => [...coSign.value], (n) => {
       let duplicateOwner = false
-      for(var i = 0; i < coSign.value.length; i++){
+      if (coSign.value.length > 0)
+      {
+        for(var i = 0; i < coSign.value.length; i++){
         if((coSign.value[i].length == 64)){
           if((coSign.value[i]==acc.value.publicKey) && (duplicateOwner == false)){
             duplicateOwner = true
@@ -362,7 +363,7 @@ export default {
             if(unique.length != n.length){
               err.value = t('multisig.duplicatedCosigner');
             }else{
-              if (duplicateOwner == false){
+              if(duplicateOwner == false){
                 err.value = '';
               }
             }
@@ -370,6 +371,10 @@ export default {
         }else{
           showAddressError.value[i] = true;
         }
+      }}
+      // there is no cosign left
+      else{
+        err.value = '';
       }
     }, {deep:true});
 
