@@ -147,7 +147,8 @@ import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
 import {AppState} from '@/state/appState'
 import { useI18n } from 'vue-i18n';
-import { TransactionType } from 'tsjs-xpx-chain-sdk';
+import { TransactionType, NetworkType } from 'tsjs-xpx-chain-sdk';
+
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -186,7 +187,7 @@ export default defineComponent({
     const decryptMessageKey = ref(0);
 
     const isPublicNetwork = computed(()=>{
-      return AppState.networkType == 168 || AppState.networkType == 184;
+      return AppState.networkType == NetworkType.TEST_NET || AppState.networkType == NetworkType.MAIN_NET;
     });
 
     if(props.type == 'transaction'){
@@ -285,7 +286,7 @@ export default defineComponent({
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const currentNativeTokenId = computed(()=> AppState.nativeToken.assetId);
     const displyFaucet = computed(() => {
-      return (AppState.networkType == 168)?true:false;
+      return (AppState.networkType == NetworkType.TEST_NET)?true:false;
     });
     const faucetLink = computed(() => {
       if(displyFaucet.value){
@@ -297,7 +298,7 @@ export default defineComponent({
           return false;
         }
       }else{
-        if(AppState.networkType == 184){
+        if(AppState.networkType == NetworkType.MAIN_NET){
           return 'https://www.proximax.io/en/xpx';
         }else{
           return false;
