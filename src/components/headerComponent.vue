@@ -133,6 +133,7 @@ import {useI18n} from 'vue-i18n'
 import { NotificationUtils } from '@/util/notificationUtils';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
+import { AppStateUtils } from "@/state/utils/appStateUtils";
 
 export default defineComponent({
   components: {
@@ -312,7 +313,7 @@ export default defineComponent({
     const logout = () => {
       doLogout();
       WalletStateUtils.doLogout();
-      AppState.doLogout();
+      AppStateUtils.doLogout();
       ListenerStateUtils.reset();
       router.push({ name: "Home"});
       console.log('logout');
@@ -588,6 +589,7 @@ export default defineComponent({
         emitter.emit('LOGIN');
       }
       else{
+        logout();
         // terminateListener();
         emitter.emit('LOGOUT');
       }

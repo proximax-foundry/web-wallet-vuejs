@@ -28,7 +28,8 @@ import {
     MosaicNames,
     Order_v2,
     TransactionSortingField,
-    MosaicSortingField
+    MosaicSortingField,
+    MosaicCreatorFilters
 } from "tsjs-xpx-chain-sdk";
 import { Helper, LooseObject } from "./typeHelper";
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
@@ -1324,12 +1325,14 @@ export class WalletUtils {
                 let foundIndex = oldAccAssets.indexOf(assetIdHex);
 
                 if(foundIndex > -1){
+                    // asset exist
                     let existingAsset = accs[i].assets[foundIndex];
 
                     existingAsset.rawAmount = asset.amount.compact();
                     existingAsset.updateExactAmount();
                 }
                 else{
+                    // not found
                     let newAsset = new Asset(assetIdHex);
                     newAsset.rawAmount = asset.amount.compact();
 
@@ -1540,7 +1543,7 @@ export class WalletUtils {
                 }
             }
 
-            // let assets: Asset[] = [];
+            let assets: Asset[] = [];
 
             for (let y = 0; y < accountInfo.mosaics.length; ++y) {
                 let asset = accountInfo.mosaics[y];
@@ -1549,7 +1552,7 @@ export class WalletUtils {
                 let newAsset = new Asset(assetIdHex);
                 newAsset.rawAmount = asset.amount.compact();
 
-                wallet.accounts[i].assets.push(newAsset);
+                // wallet.accounts[i].assets.push(newAsset);
 
                 if(assetIdHex === AppState.nativeToken.assetId){
                     let foundIndex = idsHex.indexOf(assetIdHex);
@@ -1564,9 +1567,10 @@ export class WalletUtils {
                     }
                 }
 
-                // assets.push(newAsset);
+                assets.push(newAsset);
             }
-            // wallet.accounts[i].assets = assets;
+            wallet.accounts[i].assets = assets;
+            wallet.accounts[i].assetsLastUpdate = Date.now();
             // wallet.accounts[i].updateBalance(AppState.nativeToken.assetId);
         }
 
@@ -1583,7 +1587,7 @@ export class WalletUtils {
                 wallet.others[i].linkedPublicKey = accountInfo.linkedAccountKey;
             }
 
-            // let assets: Asset[] = [];
+            let assets: Asset[] = [];
 
             for (let y = 0; y < accountInfo.mosaics.length; ++y) {
                 let asset = accountInfo.mosaics[y];
@@ -1591,7 +1595,7 @@ export class WalletUtils {
                 let newAsset = new Asset(assetIdHex);
                 newAsset.rawAmount = asset.amount.compact();
 
-                wallet.others[i].assets.push(newAsset);
+                // wallet.others[i].assets.push(newAsset);
 
                 if(assetIdHex === AppState.nativeToken.assetId){
                     let foundIndex = idsHex.indexOf(assetIdHex);
@@ -1605,9 +1609,10 @@ export class WalletUtils {
                         wallet.others[i].updateBalance(assetIdHex)
                     }
                 }
-                // assets.push(newAsset);
+                assets.push(newAsset);
             }
-            // wallet.others[i].assets = assets;
+            wallet.others[i].assets = assets;
+            wallet.others[i].assetsLastUpdate = Date.now();
             // wallet.others[i].updateBalance(AppState.nativeToken.assetId);
         }
 
@@ -2132,7 +2137,7 @@ export class WalletUtils {
             accCreatorCount[wallet.accounts[i].publicKey] = loadedCount;
             wallet.accounts[i].totalCreatedAsset = loadedCount;
             tempCreatorPubKey.push(wallet.accounts[i].publicKey);
-            queryParams.ownerPubKey = wallet.accounts[i].publicKey;
+            queryParams.ownerFilters = new MosaicCreatorFilters(wallet.accounts[i].publicKey);
 
             assetSearchList.push(AppState.chainAPI.assetAPI.searchMosaics(queryParams));
 
@@ -2160,7 +2165,7 @@ export class WalletUtils {
             accCreatorCount[wallet.others[i].publicKey] = loadedCount;
             wallet.others[i].totalCreatedAsset = loadedCount;
             tempCreatorPubKey.push(wallet.others[i].publicKey);
-            queryParams.ownerPubKey = wallet.others[i].publicKey;
+            queryParams.ownerFilters = new MosaicCreatorFilters(wallet.others[i].publicKey);
 
             assetSearchList.push(AppState.chainAPI.assetAPI.searchMosaics(queryParams));
 
@@ -2220,7 +2225,7 @@ export class WalletUtils {
 
             for(let y=2; y <= totalPages; ++y){
 
-                queryParams.ownerPubKey = queryingPublicKey;
+                queryParams.ownerFilters = new MosaicCreatorFilters(queryingPublicKey);
                 queryParams.pageNumber = y;
 
                 assetSearchList.push(AppState.chainAPI.assetAPI.searchMosaics(queryParams));
@@ -2262,7 +2267,7 @@ export class WalletUtils {
         let tempCreatorPubKey: string[] = [];
 
         for (let i = 0; i < accs.length; ++i) {
-            queryParams.ownerPubKey = accs[i].publicKey;
+            queryParams.ownerFilters = new MosaicCreatorFilters(accs[i].publicKey);
             tempCreatorPubKey.push(accs[i].publicKey);
             if(isRefresh){
                 if(!accs[i].totalCreatedAsset){
@@ -2313,7 +2318,7 @@ export class WalletUtils {
 
             for(let y = currentPage + 1; y <= totalPages; ++y){
 
-                queryParams.ownerPubKey = queryingPublicKey;
+                queryParams.ownerFilters = new MosaicCreatorFilters(queryingPublicKey);
                 queryParams.pageNumber = y;
 
                 assetSearchList.push(AppState.chainAPI.assetAPI.searchMosaics(queryParams));

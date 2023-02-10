@@ -309,9 +309,12 @@ export default defineComponent({
     currentAccount.default = true;
     const selectedAccount = ref(currentAccount);
     const accountAssets = computed(()=>{
-      let defaultAccAsset =walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount().assets : walletState.currentLoggedInWallet.accounts[0].assets
-      let filteredAsset = defaultAccAsset.filter(asset=>asset.amount!=0)
-      return filteredAsset 
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
+      let defaultAccAsset = selectedAccount.value.assets;
+      let filteredAsset = defaultAccAsset.filter(asset=>asset.rawAmount!=0);
+      return filteredAsset; 
     })
     const currentBlock = computed(() => AppState.readBlockHeight);
 
@@ -321,8 +324,8 @@ export default defineComponent({
     const selectedAccountAddressPlain = computed(()=> selectedAccount.value.address);
     const selectedAccountAddressShort = computed(() => {
       let prettyAddress = Helper.createAddress(selectedAccount.value.address).pretty();
-      let firstPartAddress = prettyAddress.substr(0, 11);
-      let secondPartAddress = prettyAddress.substr(-11);
+      let firstPartAddress = prettyAddress.substring(0, 11);
+      let secondPartAddress = prettyAddress.substring(prettyAddress.length - 11);
       return firstPartAddress + '...' + secondPartAddress;
     });
     const selectedAccountDirectChilds = computed(()=> {

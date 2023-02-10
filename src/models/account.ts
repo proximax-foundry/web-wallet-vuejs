@@ -11,10 +11,12 @@ export class Account{
     address: string;
     multisigInfo: MultisigInfo[] = [];
     assets: Asset[] = [];
+    nonHoldingAssets: Asset[] = [];
     namespaces: Namespace[] = [];
     linkedPublicKey: string = "";
     totalCreatedAsset: number | null = null;
     totalTxns: number = -1; // temp store total txns number, -1 to indicate not updated - include embedded, exclude cosigning
+    assetsLastUpdate: number = Date.now();
 
     constructor(name: string, publicKey: string, address: string){
         this.name = name;
