@@ -117,6 +117,7 @@ export default{
                 name: contact.name,
                 address: Helper.createAddress(contact.address).pretty(),
                 group: contact.group,
+                publicKey: contact.publicKey,
                 svgString: toSvg(contact.address, 45, themeConfig.jdenticonConfig),
               };
               contracts.push(data);
@@ -130,6 +131,7 @@ export default{
                 name: contact.name,
                 address: Helper.createAddress(contact.address).pretty(),
                 group: contact.group,
+                publicKey: contact.publicKey,
                 svgString: toSvg(contact.address, 45, themeConfig.jdenticonConfig),
               };
               contracts.push(data);
@@ -200,6 +202,8 @@ export default{
     const hoverOutMenu = () => {
       currentMenu.value = 'e';
     };
+
+    console.log(formattedContacts)
 
     return {
       formattedContacts,
