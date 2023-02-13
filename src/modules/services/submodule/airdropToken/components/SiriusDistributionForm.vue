@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, getCurrentInstance } from 'vue'
 import { 
   PublicAccount, NetworkType, MosaicId, Account,
   AccountHttp, MosaicHttp, Convert, Address
 } from 'tsjs-xpx-chain-sdk';
+
 import { SimpleSDA } from '@/models/sda'
 // import {parse} from 'csv-parse'
 import {sum} from 'mathjs'
@@ -19,6 +20,10 @@ import { TransactionUtils } from '@/util/transactionUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import {useI18n} from 'vue-i18n'
 import PasswordInput from '@/components/PasswordInput.vue';
+import SelectInputAccount from "@/components/SelectInputAccount.vue";
+
+const internalInstance = getCurrentInstance();
+const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
 const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 const cosignerBalanceInsufficient = ref(false);
@@ -72,6 +77,8 @@ let knownToken = [{
   }];
 
 let scanDistributorAsset = async() =>{
+  // console.log(selectedAccount.value.publicKey)
+  // console.log(selectedAccount.value)
   noAssetFound.value = false;
   assetSelected.value = "";
   let assets = await Sirius.scanAsset(selectedAccount.value.publicKey);
@@ -156,9 +163,7 @@ let distribute = async()=>{
   distributing.value = true;
   let allTxnsHash  = await Sirius.signAllAbtAndAnnounce(aggregateTxns, initiator);
   distributing.value = false;
-
   distributeDone.value = true;
-
   txnsHash.value = allTxnsHash;
 }
 
@@ -185,15 +190,6 @@ let loadCSV = (e: any)=>{
           amount: data[1]
         });
       }
-      // let distResultCsvData: any = await new Promise(function(resolve, reject) {
-      //   parse(fileData, {from_line: 2, columns: ["publicKey", "amount"]}, (err, rows)=>{
-      //       if(err){
-      //           reject(err);
-      //       }else{
-      //           resolve(rows);
-      //       }
-      //   });
-      // });
 
       let isInvalidData = false;
       distributionList.value = [];
@@ -209,7 +205,6 @@ let loadCSV = (e: any)=>{
           if(publicKeyOrAddress.length === 64){
             if(!Convert.isHexString(publicKeyOrAddress)){
               isInvalidData = true; 
-              console.log("Invalid recipient publicKey found");
               break;
             }
           }
@@ -217,13 +212,11 @@ let loadCSV = (e: any)=>{
             let tempAddress = Address.createFromRawAddress(publicKeyOrAddress);
             if(tempAddress.networkType !== AppState.networkType){
               isInvalidData = true;
-              console.log("Invalid recipient address found");
               break;
             }
           }
           else{
             isInvalidData = true;
-            console.log("Invalid recipient found");
             break;
           }
           
@@ -231,7 +224,6 @@ let loadCSV = (e: any)=>{
 
           if(isNaN(amount)){
             isInvalidData = true;
-            console.log("Invalid amount found");
             break;
           }
           else if(newAmountLength !== originAmount.length){
@@ -239,7 +231,7 @@ let loadCSV = (e: any)=>{
 
             if(amount.toString() + "0".repeat(strippedDecimal) !== originAmount){
               isInvalidData = true;
-              console.log("Invalid amount found");
+              // console.log("Invalid amount found");
               break;
             }
           }
@@ -337,6 +329,7 @@ interface Account{
   isMultisig: boolean
 }
 const selectedAccount = ref<Account[]>([])
+
 const accounts = computed(
       () => {
         if(walletState.currentLoggedInWallet){
@@ -386,7 +379,11 @@ const accounts = computed(
       }
     );
 
-const isMultiSig = (address) => {
+  selectedAccount.value = accounts.value[0]
+  scanDistributorAsset()
+  const currentAccount = ref(selectedAccount.value.address)
+
+  const isMultiSig = (address) => {
   const account = accounts.value.find(
     (account) => account.address === address
   );
@@ -471,29 +468,32 @@ const clearInput = () => {
       walletPassword.value = "";
     };
 
-watch(assetSelected, (value) => {
-  checkDistributorAssetAmount(value);
-  checkDistributorAssetAmountDecimal(value);
-});
+  watch(assetSelected, (value) => {
+    checkDistributorAssetAmount(value);
+    checkDistributorAssetAmountDecimal(value);
+  });
 
-watch(totalDistributeAmount, (value) => {
-  checkDistributorAssetAmount(assetSelected.value);
-  checkDistributorAssetAmountDecimal(assetSelected.value);
-});
+  watch(totalDistributeAmount, (value) => {
+    checkDistributorAssetAmount(assetSelected.value);
+    checkDistributorAssetAmountDecimal(assetSelected.value);
+  });
 
+  emitter.on("select-account", (address) => {
+    for (let i = 0; i < accounts.value.length; i++){
+      if (accounts.value[i].address == address){
+        selectedAccount.value = accounts.value[i]
+        scanDistributorAsset()
+        currentAccount.value = ref(selectedAccount.value.address)
+      }
+    }
+  })
 </script>
 
 <template>
   <div class="container">
     <div class="p-2">
       <div class="flex flex-col">
-        <label class="font-semibold">Distributor Account</label>
-        <Dropdown v-model="selectedAccount" :options="accounts" optionLabel="name" placeholder="Select an account" @change="scanDistributorAsset()"/>
-        <!-- <div class="mb-3 w-3/4 flex justify-between">
-          <input type="text" class="border border-gray-200 rounded-l-md w-3/4 px-2 py-1 font-sans" v-model="distributePublicKey" placeholder="Enter Distributor Account's Public Key" aria-label="Distributor Account's Public Key" 
-          aria-describedby="button-addon">
-          <button class="border rounded-r-md border-black w-1/4 px-2 py-1 hover:bg-gray-700 hover:text-white" @click="scanDistributorAsset()" type="button" id="button-addon">Scan SDAs</button>
-        </div> -->
+        <SelectInputAccount v-model="currentAccount" :selectDefault="currentAccount"/>
         <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4">
           <div v-if="getWalletCosigner.cosignerList.length > 0">
               <div class="text-tsm">
