@@ -769,9 +769,34 @@ export default defineComponent({
               group: 'br-custom', 
               life: 8000
           });
+          let verifySwitch = sessionStorage.getItem("soundSetting");
+          if(verifySwitch==="true"){
+            beep()
+          }
         }
       }
     }
+
+    function beep(){
+    return new Promise((resolve, reject) => {
+        /*volume = volume || 100;*/
+
+        try{
+            let sound = new Audio(require('@/assets/audio/ding.ogg'));
+
+            // Set volume
+            /*sound.volume = volume / 100;*/
+
+            sound.onended = () => {
+                resolve();
+            };
+
+            sound.play();
+        }catch(error){
+            reject(error);
+        }
+    });
+}
 
     let txnActivityLogLength = computed(()=> AppState.txnActivityLogNum);
     let txnCosignLogLength = computed(()=> AppState.txnCosignLogNum);

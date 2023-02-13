@@ -158,7 +158,7 @@ export default defineComponent({
         if(!networkConfigUpdated){
           await NetworkStateUtils.updateNetworkConfig();
         }
-
+        sessionStorage.setItem("soundSetting", "true");
         WalletUtils.checkLoadedDataUsable(networkState.chainNetworkName);
         let wallet = walletState.wallets.filterByNetworkNameAndName(networkState.chainNetworkName, selectedWallet.value);
         wallet.fixNonManagableAccounts();
