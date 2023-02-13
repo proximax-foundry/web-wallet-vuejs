@@ -34,7 +34,7 @@
   <script lang="ts">
   import { computed, ref, WritableComputedRef } from 'vue';
   export default{
-    name: 'adjustSoundSetting',
+    name: 'selectSoundSetting',
     setup(){
       const toggleModal = ref(false);
       const currentState = ref(JSON.parse(sessionStorage.getItem("soundSetting")));
