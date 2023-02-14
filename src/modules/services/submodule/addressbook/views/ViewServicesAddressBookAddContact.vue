@@ -148,13 +148,13 @@ export default {
     });
 
     const getPublicKey = async(address) =>{
-    let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
-    if (accInfo.publicKey == "0000000000000000000000000000000000000000000000000000000000000000"){
-      publicKey.value = null
-    }
-    else{
-      publicKey.value = accInfo.publicKey
-    }
+      try{
+        let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
+        publicKey.value = accInfo.publicKey
+      }
+      catch{
+        publicKey.value = null
+      }
     }
 
     const SaveContact = async() => {
