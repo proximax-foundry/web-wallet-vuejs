@@ -305,9 +305,15 @@ export default defineComponent({
         }
       }
     });
-    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
-    currentAccount.default = true;
-    const selectedAccount = ref(currentAccount);
+    // let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
+    // currentAccount.default = true;
+    // const selectedAccount = ref(currentAccount);
+    let selectedAccount = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
+      return walletState.currentLoggedInWallet.selectDefaultAccount()
+    })
     const accountAssets = computed(()=>{
       if(!walletState.currentLoggedInWallet){
         return [];
@@ -384,7 +390,7 @@ export default defineComponent({
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
     let accountConfirmedTxnsCount = ref(0);
     let updateAccountTransactionCount = async()=>{
-      let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
+      let transactionsCount = await dashboardService.getAccountTransactionsCount(selectedAccount.value);
       accountConfirmedTxnsCount.value = transactionsCount.confirmed;
     };
     const copy = (id) =>{
@@ -747,9 +753,9 @@ export default defineComponent({
     });
     
     emitter.on('DEFAULT_ACCOUNT_SWITCHED',async(payload) => {
-      currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
+      // currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
       // currentAccount.default = true;
-      selectedAccount.value = currentAccount;
+      // selectedAccount.value = currentAccount;
       // recentTransferTxn();
       updateAccountTransactionCount();
       loadRecentTransactions();
