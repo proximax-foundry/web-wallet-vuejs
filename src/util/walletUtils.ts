@@ -2130,26 +2130,9 @@ export class WalletUtils {
 
         let accsAssetHold: AccountAssetHold[] = [];
         let assetSearchList = [];
-        // let assetList: AssetInfo[] = [];
-
-        // let accAssetPage: AccountAssetPage[] = [];
-        // let allLoadedAssetInfoCreators = AppState.assetsInfo.map(x => x.creator);
-        // let tempCreatorPubKey: string[] = [];
-        // let cachedCount = [];
-        // let accCreatorCount: LooseObject = {};
 
         for (let i = 0; i < wallet.accounts.length; ++i) {
-            // let loadedCount = 0;
 
-            // for(let y=0; y < allLoadedAssetInfoCreators.length; ++y){
-            //     if(allLoadedAssetInfoCreators[y] ===  wallet.accounts[i].publicKey){
-            //         loadedCount++;
-            //     }
-            // }
-            // cachedCount.push(loadedCount);
-            // accCreatorCount[wallet.accounts[i].publicKey] = loadedCount;
-            // wallet.accounts[i].totalCreatedAsset = loadedCount;
-            // tempCreatorPubKey.push(wallet.accounts[i].publicKey);
             queryParams.ownerFilters = new MosaicCreatorFilters(wallet.accounts[i].publicKey);
             queryParams.ownerFilters.holding = false;
 
@@ -2161,25 +2144,13 @@ export class WalletUtils {
                 const tempAccsAssetHold = WalletUtils.extractAccsAssetSearch(assetSearches);
                 accsAssetHold = accsAssetHold.concat(tempAccsAssetHold);
                 assetSearchList = [];
-                // tempCreatorPubKey = [];
-                // cachedCount = [];
 
                 await delay(250);
             }
         }
 
         for (let i = 0; i < wallet.others.length; ++i) {
-            // let loadedCount = 0;
 
-            // for(let y=0; y < allLoadedAssetInfoCreators.length; ++y){
-            //     if(allLoadedAssetInfoCreators[y] ===  wallet.others[i].publicKey){
-            //         loadedCount++;
-            //     }
-            // }
-            // cachedCount.push(loadedCount);
-            // accCreatorCount[wallet.others[i].publicKey] = loadedCount;
-            // wallet.others[i].totalCreatedAsset = loadedCount;
-            // tempCreatorPubKey.push(wallet.others[i].publicKey);
             queryParams.ownerFilters = new MosaicCreatorFilters(wallet.others[i].publicKey);
             queryParams.ownerFilters.holding = false;
 
@@ -2191,8 +2162,6 @@ export class WalletUtils {
                 const tempAccsAssetHold = WalletUtils.extractAccsAssetSearch(assetSearches);
                 accsAssetHold = accsAssetHold.concat(tempAccsAssetHold);
                 assetSearchList = [];
-                // tempCreatorPubKey = [];
-                // cachedCount = [];
 
                 await delay(250);
             }
@@ -2204,43 +2173,16 @@ export class WalletUtils {
             const tempAccsAssetHold = WalletUtils.extractAccsAssetSearch(assetSearches);
             accsAssetHold = accsAssetHold.concat(tempAccsAssetHold);
             assetSearchList = [];
-            // tempCreatorPubKey = [];
-            // cachedCount = [];
 
             await delay(250);
         }
 
         let allAccs: MyAccount[] = wallet.accounts.map(x => x as MyAccount).concat(wallet.others.map(x => x as MyAccount));
-        // let publicKeyWithNewData = accsAssetHold.map(x => x.publicKey);
-        // let accsWithCachedData = allAccs.filter(x => !publicKeyWithNewData.includes(x.publicKey) && accCreatorCount[x.publicKey]);
-
-        // if(accsAssetHold.length){
-            // let tempAssetInfo: AssetInfo[] = [];
-            // for(let i = 0; i < accsAssetHold.length; ++i){
-                // let accPublicKey = accsAssetHold[i].publicKey;
-    
-                // let indexes = [], newI = -1;
-                // while ((newI = allLoadedAssetInfoCreators.indexOf(accPublicKey, newI+1)) != -1){
-                //     indexes.push(newI);
-                // }
-
-                // for(let y=0; y < indexes.length; ++y){
-                //     tempAssetInfo.push(AppState.assetsInfo[indexes[y]]);
-                // }
-            // }
-            // WalletUtils.updatePendingAssetInfo(tempAssetInfo);
-            // WalletUtils.updateWalletNonHoldingAsset(wallet, tempAssetInfo);
-        // }
         let subsequenceQueryData: CreatorAssets[] = [];
 
         for(let i = 0; i < accsAssetHold.length; ++i){
             let totalPages = accsAssetHold[i].totalPages;
             let queryingPublicKey = accsAssetHold[i].publicKey;
-            // let totalCreatedAsset = accsAssetHold[i].totalEntries;
-
-            // let currentAcc = allAccs.find(x => x.publicKey === accsAssetHold[i].publicKey);
-
-            // currentAcc.totalCreatedAsset = totalCreatedAsset;
 
             for(let y=2; y <= totalPages; ++y){
 
