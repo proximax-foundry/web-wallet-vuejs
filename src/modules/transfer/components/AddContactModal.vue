@@ -59,6 +59,8 @@ import TextInput from "@/components/TextInput.vue";
 import { walletState } from "@/state/walletState";
 import { AddressBook } from "@/models/addressBook";
 import { useI18n } from 'vue-i18n';
+import { AppState } from "@/state/appState";
+import { Address } from "tsjs-xpx-chain-sdk";
 
 export default {
   name: "SignInModal",
@@ -73,6 +75,7 @@ export default {
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const contactName = ref("");
     const address = ref(p.saveAddress);
+    const publicKey = ref("");
     const err = ref("");
     const verifyAdd = ref(true);
     // const addMsg = ref('');
@@ -86,21 +89,30 @@ export default {
 
     const showNameErr = ref(false);
 
-    
+    const getPublicKey = async(address) =>{
+      try{
+        let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
+        publicKey.value = accInfo.publicKey
+      }
+      catch{
+        publicKey.value = null
+      }
+    }
     // watch(address, ()=>{
     //   const verifyAdd = verifyAddress(appStore.getCurrentAdd(appStore.state.currentLoggedInWallet.name), address.value);
     //   verifyAdd.value = verifyAdd.verify.value;
     //   addMsg.value = verifyAdd.msg.value;
     // });
 
-    const SaveContact = () => {
+    const SaveContact = async() => {
       if (contactName.value !== ''&& address.value !== ''){
         let contact = walletState.currentLoggedInWallet.contacts
         if(contact.find(item=>item.name==contactName.value)){
           err.value = t('addressBook.nameExist')
         }else{
+          await getPublicKey(address.value)
           walletState.currentLoggedInWallet.addAddressBook(
-            new AddressBook(contactName.value, address.value,'-none-')
+            new AddressBook(contactName.value, address.value,'-none-', publicKey.value)
           );
           walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
           err.value = "";

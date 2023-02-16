@@ -117,7 +117,7 @@ export default{
                 name: contact.name,
                 address: Helper.createAddress(contact.address).pretty(),
                 group: contact.group,
-                publicKey: contact.publicKey?contact.publicKey:"",
+                publicKey: contact.publicKey?contact.publicKey:null,
                 svgString: toSvg(contact.address, 45, themeConfig.jdenticonConfig),
               };
               contracts.push(data);
@@ -131,7 +131,7 @@ export default{
                 name: contact.name,
                 address: Helper.createAddress(contact.address).pretty(),
                 group: contact.group,
-                publicKey: contact.publicKey?contact.publicKey:"",
+                publicKey: contact.publicKey?contact.publicKey:null,
                 svgString: toSvg(contact.address, 45, themeConfig.jdenticonConfig),
               };
               contracts.push(data);
