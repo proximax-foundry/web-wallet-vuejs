@@ -2234,9 +2234,6 @@ export class WalletUtils {
                 allAccs[i].nonHoldingAssets = assetList.map(x => WalletUtils.assetInfoToAsset(x));
             }
         }
-
-        console.log(allAccs);
-        console.log(wallet);
         
         WalletUtils.addAppStateAssetInfo(assetList);
         WalletUtils.updatePendingAssetInfo(assetList);
