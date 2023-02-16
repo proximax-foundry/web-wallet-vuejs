@@ -392,6 +392,7 @@ multisig:
     时，您的账户将自动转换为一个多重认证的
     帐户。
   noMultisig: '{name}不是任何账户的签署人。'
+  noPublicKey: 'Public Key is not found in explorer'
   ofCosignatories: '/{value} 签署人'
   rightToLeft: 从右到左
   selectedAccErr: 签署人不能是这个账户本身

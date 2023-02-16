@@ -15,7 +15,7 @@
             <div class="flex">
               <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
               <TextInput class='w-5/12 mr-2 ' :placeholder="$t('multisig.cosignatory') + `${index+1}`"  v-model="contactName[index]" :disabled="true"  />
-              <TextInputClean class='w-7/12 mr-2 ' :placeholder="$t('multisig.addressOrPk')" :errorMessage="$t('general.invalidInput')" :showError="showAddressError[index]" v-model="coSign[index]" />
+              <TextInputClean class='w-7/12 mr-2 ' :placeholder="$t('general.publicKey')" :errorMessage="$t('general.invalidInput')" :showError="showAddressError[index]" v-model="coSign[index]" />
               <div v-if="showAddressError[index]==true " class="mt-16"/>
               <div @click="toggleContact[index]=!toggleContact[index]" class=' border  cursor-pointer flex flex-col justify-center  p-2' style="height:2.66rem">
                 <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
@@ -27,7 +27,6 @@
                 <SelectAccountAndContact v-bind="index" :contacts="contact" :index="index" :selectedNode="selectedNode[index]" @node-select="onNodeSelect($event,index)"/>
               </Sidebar>
             </div>
-
           </div>
        </div>
         <button class="pl-6 font-semibold text-xs mt-1 text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">+{{$t('multisig.addNewCosignatory')}}</button>
@@ -120,8 +119,6 @@ export default {
     const maxNumApproveTransaction = ref(0);
     const maxNumDeleteUser = ref(0);
     const publicKeyPattern = "^[0-9A-Fa-f]{64}$";
-    const addressPatternShort = "^[0-9A-Za-z]{40}$";
-    const addressPatternLong = "^[0-9A-Za-z-]{46}$";
     const coSign = ref([]);
     const selectedNode = ref([])
     const contactName = ref([])
@@ -253,11 +250,33 @@ export default {
       function onNodeSelect(node, index){
         makeNodeSelectable(index)
         contactName.value[index]  = node.label
+        // check if it is in the address book
+        if(node.key[0] == "1"){
+          changeToPublicKey(node.data, index)
+        }
+        else{
+          coSign.value[index] = node.data
+        }
         coSign.value[index] = node.data
         toggleContact.value[index] = false
         // this is too make it turn blue
         selectedNode.value[index][node.key] = true
         node.selectable = false
+      }
+
+      function changeToPublicKey(address, index){
+        try {
+          multiSign.verifyContactPublicKey(address).then(result=>{
+            if(result.status==true){
+              coSign.value[index] = result.publicKey
+            }
+            else{
+              err.value = t('multisig.noPublicKey')
+            }
+          })
+        } catch (error) {
+          err.value = t('multisig.noPublicKey')
+        }
       }
 
       const makeNodeSelectable = (index) => {
@@ -295,7 +314,6 @@ export default {
             break;
           }
         }
-        
       }else{
         status = true;
       }
@@ -328,19 +346,16 @@ export default {
     
     watch(() => [...coSign.value], (n) => {
       let duplicateOwner = false
-      for(var i = 0; i < coSign.value.length; i++){
-        if((coSign.value[i].length == 64) || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)){
-          checkCosign(i)
-          if((coSign.value[i]==acc.value.address || coSign.value[i]==Helper.createAddress(acc.value.address).pretty() || coSign.value[i]==acc.value.publicKey) && (duplicateOwner == false)){
+      if (coSign.value.length > 0)
+      {
+        for(var i = 0; i < coSign.value.length; i++){
+        if((coSign.value[i].length == 64)){
+          if((coSign.value[i]==acc.value.publicKey) && (duplicateOwner == false)){
             duplicateOwner = true
             showAddressError.value[i] = true;
             err.value = t('multisig.selectedAccErr')
           }
           else if(!coSign.value[i].match(publicKeyPattern) && (coSign.value[i].length == 64)){
-            showAddressError.value[i] = true;
-          }else if(!coSign.value[i].match(addressPatternLong) && (coSign.value[i].length == 46)){
-            showAddressError.value[i] = true;
-          }else if(!coSign.value[i].match(addressPatternShort) && (coSign.value[i].length == 40)){
             showAddressError.value[i] = true;
           }else{
             showAddressError.value[i] = false;
@@ -348,7 +363,7 @@ export default {
             if(unique.length != n.length){
               err.value = t('multisig.duplicatedCosigner');
             }else{
-              if (duplicateOwner == false){
+              if(duplicateOwner == false){
                 err.value = '';
               }
             }
@@ -356,6 +371,10 @@ export default {
         }else{
           showAddressError.value[i] = true;
         }
+      }}
+      // there is no cosign left
+      else{
+        err.value = '';
       }
     }, {deep:true});
 
@@ -448,20 +467,6 @@ export default {
       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(verify=>
       onPartial.value = verify
     )
-    }
-    
-    const checkCosign = (index) =>{
-      if (coSign.value[index].length == 40 || coSign.value[index].length == 46) {
-        try {
-          multiSign.verifyContactPublicKey(coSign.value[index]).then(result=>{
-            if(result.status==false){
-              showAddressError.value[index] = true
-            }
-          })
-        } catch (error) {
-          console.log(error)
-        }
-      }
     }
    
     if(acc.value){
