@@ -95,7 +95,7 @@ class Reconstruct{
         }else{
             group = addressBook.group;
         }
-        let newAddressBook = new AddressBook(addressBook.name, addressBook.address, group);
+        let newAddressBook = new AddressBook(addressBook.name, addressBook.address, group, addressBook.publicKey);
         return newAddressBook;
     }
 
