@@ -32,6 +32,11 @@
               <div class="inline-block">
                 <div class="text-blue-primary text-tsm">{{data.name}} <span class="inline-block ml-5 rounded-md text-blue-primary bg-blue-200 px-2 py-1 text-xxs font-bold" v-if="data.group!='-none-'">{{ data.group }}</span></div>
                 <div class="mt-1 text-xs md:text-tsm">{{data.address}}</div>
+                <div  class="mt-1 text-xs md:text-tsm flex items-center">
+                  <div>{{ $t('general.publicKey') }}</div>
+                  <font-awesome-icon icon="check" class="w-3 h-3 ml-1 inline-block text-blue-primary" v-if="data.publicKey"></font-awesome-icon>
+                  <font-awesome-icon icon="times" class="w-3 h-3 ml-1 inline-block text-blue-primary" v-else></font-awesome-icon>
+                </div>
               </div>
             </div>
           </template>

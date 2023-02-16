@@ -41,6 +41,11 @@
             {{data.group}}
           </template>
         </Column>
+        <Column field="publicKey" :header="$t('general.publicKey')" headerStyle="width:55%">
+          <template #body="{data}">
+            {{data.publicKey}}
+          </template>
+        </Column>
       </DataTable>
     </div>
   </div>

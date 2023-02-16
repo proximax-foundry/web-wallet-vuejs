@@ -99,9 +99,9 @@ export default{
           let errContact = [];
           array.shift();
           array.forEach(element => {
-            var label, address, group;
+            var label, address, group, publicKey;
             var arr = element.split(',');
-            if(arr.length > 3){
+            if(arr.length > 4){
               // merge all array as label except the last
               let str = '';
               for(var a = 0; a < arr.length -1 ; ++a){
@@ -117,6 +117,11 @@ export default{
             }else{
               group = '-none-';
             }
+            if(arr[3]){
+              publicKey = arr[3].replace(/['"]+/g, '');
+            }else{
+              publicKey = null;
+            }
             
 
             // check if address or name is already in the contact book
@@ -130,20 +135,20 @@ export default{
             const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
 
             if(contactAddIndex >= 0){
-              exist.push({label, address, group });
+              exist.push({label, address, group, publicKey });
             }else if( contactNameIndex >= 0 || accountNameIndex >= 0 ){
               const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address);
               if(verifyContactAddress.isPassed){
-                addContact.push({label: label + ' - 2', address, group });
+                addContact.push({label: label + ' - 2', address, group, publicKey });
               }else{
-                errContact.push({label, address, group });
+                errContact.push({label, address, group, publicKey });
               }
             }else{
               const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address);
               if(verifyContactAddress.isPassed){
-                addContact.push({label, address, group });
+                addContact.push({label, address, group, publicKey });
               }else{
-                errContact.push({label, address, group });
+                errContact.push({label, address, group, publicKey });
               }
             }
           });
@@ -153,7 +158,7 @@ export default{
           }
           if(addContact.length > 0){
             addContact.forEach((element) => {
-              let addressBook = new AddressBook(element.label, element.address, element.group);
+              let addressBook = new AddressBook(element.label, element.address, element.group, element.publicKey);
               walletState.currentLoggedInWallet.addAddressBook(addressBook);
             });
             walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
