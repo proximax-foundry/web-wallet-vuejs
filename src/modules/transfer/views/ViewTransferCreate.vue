@@ -66,7 +66,7 @@
         </div>
       </div>
       <div class='bg-navy-primary py-6 px-6 xl:col-span-1'>
-        <TransactionFeeDisplay :send-x-p-x="sendXPX" :selected-mosaic="selectedMosaic" :mosaics-created="mosaicsCreated" :transaction-fee="effectiveFee" :total-fee-formatted="totalFee" :get-multi-sig-cosigner="getWalletCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="lockFundTxFee" :balance="balance" :selected-acc-add="selectedAccAdd"/>
+        <TransactionFeeDisplay :send-x-p-x="sendXPX" :selected-mosaic="selectedMosaic" :mosaics-created="mosaicsCreated" :transaction-fee="effectiveFee" :total-fee-formatted="String(totalFee)" :get-multi-sig-cosigner="getWalletCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="String(balance)" :selected-acc-add="selectedAccAdd"/>
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3" :disabled="disablePassword"/>
@@ -850,8 +850,6 @@ export default {
     mosaicSupplyDivisibility.value = [];
   });
   
-    
-  
   // confirm modal
   emitter.on("CLOSE_CONFIRM_SEND_MODAL", (payload) => {
     toggleConfirm.value = payload;
@@ -870,7 +868,7 @@ export default {
       let part2 = assetId.slice(-4)
       return part1 + "..." + part2
     }
-  console.log(typeof mosaics.value)
+
     return {
       showAssetBalanceErr,
       findAcc,
@@ -888,7 +886,6 @@ export default {
       balance,
       showBalanceErr,
       err,
-      /* contact, */
       recipientInput,
       namespace,
       sendXPX,
