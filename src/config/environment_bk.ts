@@ -1,6 +1,4 @@
 import { NetworkType } from 'tsjs-xpx-chain-sdk';
-import { ChronoUnit } from 'js-joda';
-
 
 export const environment = {
   production: false,
@@ -52,7 +50,7 @@ export const environment = {
   },
   deadlineTransfer: {
     deadline: 1439,
-    chronoUnit: ChronoUnit.MINUTES
+    chronoUnit: "MINUTE"
   },
   timeOutTransactionNis1: 20000,
   blockchainConnection: {
