@@ -1,8 +1,29 @@
 <template>
-  <div class='mt-2 py-3'>
-    <div class="grid xs-grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
-      <ServiceTile :key="index" :service="item" :showMenuCall="showMenu[index]" :i="index" v-for="(item, index) in services" />
+  <div class="lg:ml-60 mt-10 lg:mt-16 flex-grow px-5 pt-5">
+    <div class="w-11/12 ml-auto mr-auto mt-3 py-3">
+      <div>Services</div>
+      <div class='border ml-auto mr-auto mt-6 filter shadow-lg'>
+        <div class='flex gap-2 flex-col md:flex-row items-center p-3'>
+          <router-link :to="{ name : 'ViewServicesPortfolio'}" class='p-6 w-8/12 md:w-4/12'>
+            <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg" class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
+            <div class='text-center text-xs font-semibold'>Portfolio</div>
+          </router-link>
+          <router-link :to="{ name : 'ViewServicesNFT'}" class='p-6 w-8/12 md:w-4/12'>
+            <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg" class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
+            <div class='text-center text-xs font-semibold'>NFT</div>
+          </router-link>
+          <router-link :to="{ name : 'ViewServicesAirdropToken'}" class='p-6 w-8/12 md:w-4/12'>
+            <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg" class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
+            <div class='text-center text-xs font-semibold'>Airdrop Token Utility</div>
+          </router-link>
+        </div>
+      </div>
     </div>
+    <!-- <div class='mt-2 py-3'>
+      <div class="grid xs-grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+        <ServiceTile :key="index" :service="item" :showMenuCall="showMenu[index]" :i="index" v-for="(item, index) in services" />
+      </div>
+    </div> -->
   </div>
 </template>
 <script>
@@ -12,9 +33,9 @@ import {useI18n} from 'vue-i18n'
 
 export default {
   name: 'ViewServices',
-  components: {
-    ServiceTile,
-  },
+  // components: {
+  //   ServiceTile,
+  // },
 
   setup() {
     const {t} = useI18n();

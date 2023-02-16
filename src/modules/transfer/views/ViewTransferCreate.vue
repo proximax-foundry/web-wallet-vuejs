@@ -3,10 +3,16 @@
   <AddContactModal :toggleModal="togglaAddContact" :saveAddress="recipientInput" />
   <ConfirmSendModal :toggleModal="toggleConfirm" />
   <div class='w-10/12 ml-auto mr-auto mt-5'>
-    <div class="border filter shadow-lg lg:grid lg:grid-cols-5" >
-      <div class="lg:col-span-3 py-6 px-6">
+    <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
+      <div class="xl:col-span-2 p-12">
         <div class="text-sm font-semibold ">{{$t('transfer.newTransfer')}}</div>
         <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
+        <div v-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
+          <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.noCosigner')}}</div>
+        </div>
+        <div v-else-if="showBalanceErr" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
+        </div>
         <div class="mt-4"/>
         <SelectInputAccount v-model="selectedAccAdd" :selectDefault="selectedAccAdd"/>
         <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
@@ -28,9 +34,6 @@
                 </div>
               </div>
             </div>
-            <div class="error" v-else>
-             {{$t('general.noCosigner')}} 
-            </div>
           </div>
         <div class="flex mt-3 gap-1">
           <AddressInputClean :placeholder="$t('transfer.transferPlaceholder')" v-model="recipientInput" v-debounce:1000="checkRecipient" :showError="showAddressError" :disabled="disableRecipient"/>
@@ -41,21 +44,20 @@
         </div>
         <!-- Pop Up when select icon is clicked -->
         <Sidebar v-model:visible="toggleContact" :baseZIndex="10000" position="full">
-          <Tree :value="contacts" selectionMode="single" v-model:selectionKeys="selectedNode" :expandedKeys="expandedKeys" :filter="true" filterMode="strict" @node-select="onNodeSelect" @node-expand="expandTree" @node-collapse="collapseTree" >
-        </Tree>
+          <SelectAccountAndContact :contacts="contacts" :selectedNode="selectedNode" @node-select="onNodeSelect"/>
         </Sidebar>
         
         <div v-for="(mosaic, index) in mosaicsCreated" :key="index">
           <MosaicInput :placeholder="$t('transfer.selectAsset')" errorMessage="" v-model="selectedMosaic[index].id" :index="index" :options="mosaics" :disableOptions="selectedMosaic" @show-mosaic-selection="updateMosaic" @remove-mosaic-selected="removeMosaic"/>
-          <TransferInputClean v-if="selectedMosaic[index].id != 0" v-model="selectedMosaic[index].amount" :placeholder="$t('transfer.assetAmount')" type="text" :showError="showAssetBalanceErr[index]" :errorMessage="$t('general.insufficientBalance')" :decimal="mosaicSupplyDivisibility[index]"  />
+          <TransferInputClean v-if="selectedMosaic[index].id != 0" v-model="selectedMosaic[index].amount" :placeholder="$t('transfer.assetAmount')" type="text" :showError="showAssetBalanceErr[index]" :decimal="mosaicSupplyDivisibility[index]"  />
         </div>
         <div>
           <button class="my-2 font-semibold text-xs text-blue-primary outline-none focus:outline-none disabled:opacity-50" :disabled="addMosaicsButton || mosaics.length==0" @click="displayMosaicsOption">
            + {{$t('transfer.addAssets')}}
           </button>
         </div>
-        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" :errorMessage="$t('general.insufficientBalance')" :decimal="6"  :disabled="disableSupply"/>
-        <TransferTextareaInput :placeholder="$t('general.message')" :errorMessage="$t('general.limitExceed')" v-model="messageText" :remainingChar="remainingChar" :showError="showLimitErr"   :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
+        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" :decimal="6"  :disabled="disableSupply"/>
+        <TransferTextareaInput class="pt-4" :placeholder="$t('general.message')" :errorMessage="$t('general.limitExceed')" v-model="messageText" :remainingChar="remainingChar" :showError="showLimitErr"   :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
           <label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">
@@ -63,97 +65,8 @@
           </label>
         </div>
       </div>
-      <div class='bg-navy-primary p-6 lg:col-span-2'>
-        <div v-if="!isMultiSig(selectedAccAdd)" class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
-        <div v-else class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.multisigAcc')}}</div>
-        <div class="lg:grid lg:grid-cols-5 grid grid-cols-7  my-1 text-white">
-          <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase lg:col-span-2 col-span-3'>{{$t('general.currentBalance')}}</div>
-          <div class="flex ml-auto lg:col-span-2 col-span-3">
-            <div class = 'ml-auto text-md font-bold '>{{splitBalance.left}} </div>
-            <div class = 'text-md font-bold ' v-if='splitBalance.right!=null'>.</div>
-            <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
-          </div>
-          <div class="flex">
-            <div class = 'ml-1 font-bold text-blue-400'>{{currentNativeTokenName}}</div>
-            <img src="@/modules/account/img/proximax-logo.svg" class='h-7 w-7'>
-          </div>
-        </div>
-        <div class='border-b-2 border-gray-600 my-2'/>
-         <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 mt-4 text-white">
-          <div class='text-xs lg:col-span-2 col-span-3'>{{$t('transfer.transferAmount')}}</div>
-          <div v-if="isNaN(parseFloat(sendXPX))" class="text-xs lg:col-span-2 col-span-3 ml-auto">0</div>
-          <div v-else class="text-xs lg:col-span-2 col-span-3 ml-auto">{{sendXPX}}</div>
-          <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
-        </div>
-        <div v-if="isMultiSig(selectedAccAdd)">
-          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
-            <div class="text-xs lg:col-span-4 col-span-6 ml-auto">{{selectedMosaic[index].amount}}</div>
-            <div class="ml-1 text-xs text-blue-400" :index="index " :options="mosaics" :disableOptions="selectedMosaic"> {{displayAssetId(selectedMosaic[index].id)}} </div>
-          </div>
-        </div>
-        <div v-if="isMultiSig(selectedAccAdd)">
-          <div v-if="getWalletCosigner.cosignerList.length > 0">
-            <div class="flex justify-between border-600 border-b items-center text-gray-200 text-xs my-5" />
-              <div class='font-bold text-xs text-blue-primary uppercase'>{{$t('general.signerAcc')}}</div>
-              <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-gray-200 my-1">
-                <div class='font-semibold text-xxs mt-2  text-blue-primary uppercase lg:col-span-2 col-span-3'>{{$t('general.currentBalance')}}</div>
-                <span class='ml-auto font-bold lg:col-span-2 col-span-3' v-if="getWalletCosigner.cosignerList.length == 1">{{  getWalletCosigner.cosignerList[0].balance }}</span>
-                <span class='ml-auto font-bold lg:col-span-2 col-span-3' v-else>{{ checkCosignBalance }}</span>
-                <div class="flex">
-                  <div class ='ml-1 font-bold text-blue-400'>{{currentNativeTokenName}}</div>
-                  <img src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
-                </div>
-              </div>
-            <div class='border-b-2 border-gray-600 my-2'/>
-          </div>
-        </div>
-        <div class="mt-0.5 text-white">
-          <div v-if="!isMultiSig(selectedAccAdd)" class='lg:grid lg:grid-cols-5 grid grid-cols-7 text-xs'>
-            <div class="text-xs lg:col-span-2 col-span-3">{{$t('general.transactionFee')}}</div>
-            <div class="text-xs lg:col-span-2 col-span-3 ml-auto">{{effectiveFee}}</div>
-            <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
-          </div>
-          <div v-else>
-            <div v-if="getWalletCosigner.cosignerList.length > 0" class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-xs">
-              <div class="lg:col-span-2 col-span-3">{{$t('general.aggregateFee')}}</div>
-              <div class="text-xs lg:col-span-2 col-span-3 ml-auto">{{effectiveFee}}</div>
-              <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
-            </div>
-          </div>
-        </div>
-        <div v-if="getWalletCosigner.cosignerList.length > 0">
-          <div v-if="isMultiSig(selectedAccAdd) " class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white">
-            <div class='text-xs lg:col-span-2 col-span-3'>{{$t('general.lockFund')}}</div>
-            <div class="text-xs lg:col-span-2 col-span-3 ml-auto">{{lockFundCurrency}}</div>
-            <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
-          </div>
-          <div v-if="isMultiSig(selectedAccAdd)" class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white">
-            <div class='text-xs lg:col-span-2 col-span-3'>{{$t('general.lockFundTxFee')}}</div>
-            <div class="text-xs lg:col-span-2 col-span-3 ml-auto">{{lockFundTxFee}}</div>
-            <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
-          </div>
-        </div>
-        <div class='border-b-2 border-gray-600 my-2'/>
-        <div class="text-white">
-          <div v-if="!isMultiSig(selectedAccAdd)" class='lg:grid lg:grid-cols-5 grid grid-cols-7 text-xs'>
-            <div class=' font-bold text-xs uppercase lg:col-span-2 col-span-3'>{{$t('general.total')}}</div>
-            <div  class="text-xs lg:col-span-2 col-span-3 ml-auto">{{totalFee}}</div>
-            <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
-          </div>
-          <div v-else>
-            <div v-if="getWalletCosigner.cosignerList.length > 0" class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-xs">
-              <div class=' font-bold text-xs uppercase lg:col-span-2 col-span-3'>{{$t('general.total')}}</div>
-              <div  class="text-xs lg:col-span-2 col-span-3 ml-auto">{{totalFee}}</div>
-              <div class ='ml-1 text-xs text-blue-400'>{{currentNativeTokenName}}</div>
-            </div>
-          </div>
-        </div>
-        <div v-if="!isMultiSig(selectedAccAdd)">
-          <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white"  v-for="(mosaic, index) in mosaicsCreated" :key="index">
-            <div class="text-xs lg:col-span-4 col-span-6 ml-auto">{{selectedMosaic[index].amount}}</div>
-            <div class="ml-1 text-xs text-blue-400" :index="index " :options="mosaics" :disableOptions="selectedMosaic"> {{displayAssetId(selectedMosaic[index].id)}}</div>
-          </div>
-        </div>
+      <div class='bg-navy-primary py-6 px-6 xl:col-span-1'>
+        <TransactionFeeDisplay :send-x-p-x="sendXPX" :selected-mosaic="selectedMosaic" :mosaics-created="mosaicsCreated" :transaction-fee="effectiveFee" :total-fee-formatted="totalFee" :get-multi-sig-cosigner="getWalletCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="lockFundTxFee" :balance="balance" :selected-acc-add="selectedAccAdd"/>
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3" :disabled="disablePassword"/>
@@ -194,10 +107,11 @@ import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from '@/util/chainUtils';
 import { NamespaceUtils } from '@/util/namespaceUtils';
 import SelectInputAccount from "@/components/SelectInputAccount.vue";
+import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
 import { AppState } from '@/state/appState';
-
+import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
 import { Address } from 'tsjs-xpx-chain-sdk';
 import { useRouter } from 'vue-router';
 export default { 
@@ -205,12 +119,14 @@ export default {
   components: {
     AddressInputClean,
     SelectInputAccount,
+    SelectAccountAndContact,
     TransferInputClean,
     TransferTextareaInput,
     PasswordInput,
     AddContactModal,
     ConfirmSendModal,
     MosaicInput,
+    TransactionFeeDisplay,
   },
   setup() {
     const router = useRouter()
@@ -223,7 +139,6 @@ export default {
     const showAssetBalanceErr = ref([])
     const selectContact = ref("0");
     const recipientInput = ref("");
-    const expandedKeys = ref({})
     const selectedNode = ref({})
     const selectedNodeIndex = ref()
     const msgOption = ref("regular");
@@ -243,8 +158,9 @@ export default {
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
-    
+    const isNotCosigner = ref(false);
     const cosignAddress = ref("");
+    
     const disableAllInput = ref(false);
     const disableRecipient = computed(() => disableAllInput.value);
     const disableSupply = computed(() => disableAllInput.value);
@@ -273,7 +189,7 @@ export default {
         AppState.nativeToken.divisibility
       )
     );
-    
+
     const lockFundTxFee = computed(()=>{
       if(networkState.currentNetworkProfile){
         return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
@@ -482,7 +398,8 @@ export default {
       makeNodeSelectable()
       toggleContact.value = false
       recipientInput.value = node.data
-      selectedNode.value = node.key
+      // this is too make it turn blue
+      selectedNode.value[node.key] = true
       node.selectable = false
     }
 
@@ -491,16 +408,8 @@ export default {
       if (Object.keys(selectedNode.value).length !== 0){
         selectedNodeIndex.value = Object.keys(selectedNode.value)[0].split('-')
         contacts.value[selectedNodeIndex.value[0]].children[selectedNodeIndex.value[1]].selectable = true
+        selectedNode.value = {}
       }
-    }
-
-    const expandTree = (expanded) => {
-      expandedKeys.value = {}
-      expandedKeys.value[expanded.key] = true
-    }
-
-    const collapseTree = () =>{
-      expandedKeys.value = {}
     }
 
     const clearInput = () => {
@@ -624,13 +533,13 @@ export default {
 
   const showBalanceErr = computed(()=>{
     if(isMultiSigBool.value){
-      if (sendXPX.value>balance.value){
+      if (sendXPX.value>balance.value || !(showAssetBalanceErr.value.every(value => value == false))){
         return true
       }else{
         return false
       }
     }else{
-      if(totalFee.value > balance.value){
+      if(totalFee.value > balance.value || !(showAssetBalanceErr.value.every(value => value == false))){
         return true
       }else{
         return false
@@ -686,7 +595,7 @@ export default {
 
   const displayMosaicsOption = () => {
     mosaicsCreated.value.push(0);
-    selectedMosaic.value.push({ id: 0, amount: "0" });
+    selectedMosaic.value.push({ id: 0, amount: "0" , namespace: ""});
   };
   // update mosaic
   const updateMosaic = (e) => {
@@ -706,6 +615,13 @@ export default {
       }
     }));
 
+    // check is namespace is link to asset
+    if (mosaic.namespaceNames.length >= 1){
+      selectedMosaic.value[e.index].namespace = mosaic.namespaceNames[0]
+    }
+    else{
+      selectedMosaic.value[e.index].namespace = mosaic.idHex
+    }
     selectedMosaic.value[e.index].amount = "0";
     mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
     emitter.emit("CLOSE_MOSAIC_INSUFFICIENT_ERR", false);
@@ -739,6 +655,7 @@ export default {
   };
   
   watch(selectedAccAdd, (n, o) => {
+    isNotCosigner.value = false
     showAssetBalanceErr.value = []
     for(let i=0;i<mosaics.value.length;i++){
       showAssetBalanceErr.value.push(false)
@@ -755,6 +672,7 @@ export default {
             disableAllInput.value = false;
           }
         } else {
+          isNotCosigner.value = true
           disableAllInput.value = true;
         }
     }
@@ -848,8 +766,6 @@ export default {
     if (n != o) {
       makeNodeSelectable()
       recipientInput.value = "";
-      selectedNode.value = {};
-      expandedKeys.value = {};
       updateFee()
     }
   });
@@ -911,15 +827,15 @@ export default {
    watch(() => [...selectedMosaic.value], (n) => {
      updateFee()
       for(let i = 0; i < n.length; i++){
-           if(n[i].amount> getMosaicBalanceById(n[i].id)){
+          if(n[i].amount> getMosaicBalanceById(n[i].id)){
           showAssetBalanceErr.value[i]= true
           }else{
             showAssetBalanceErr.value[i]= false
           }
-         
-        
       }
     }, {deep:true});
+    
+
   emitter.on("CLOSE_CONTACT_MODAL", (payload) => {
     togglaAddContact.value = payload;
     router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
@@ -954,16 +870,13 @@ export default {
       let part2 = assetId.slice(-4)
       return part1 + "..." + part2
     }
-
+  console.log(typeof mosaics.value)
     return {
       showAssetBalanceErr,
       findAcc,
       totalFee,
       contacts,
       onNodeSelect,
-      expandedKeys,
-      collapseTree,
-      expandTree,
       selectedNode,
       toggleContact,
       splitBalance,
@@ -1010,6 +923,7 @@ export default {
       isMultiSig,
       isMultiSigBool,
       effectiveFee,
+      isNotCosigner,
       cosignAddress,
       getWalletCosigner,
       disableRecipient,
@@ -1077,6 +991,22 @@ export default {
     padding-left:2px;
     padding-top:2px
   }
+  .p-link{
+  padding: 0;
+  margin: 0;
+  }
+  .p-inputtext{
+      font-size: 1rem;
+      text-align: left;
+      padding: 0.5rem;
+      border: 1px solid #ced4da;
+    }
 }
+  ::v-deep(.p-inputtext) {
+      font-size: 1rem;
+      text-align: left;
+      padding: 0.5rem;
+    }
+  
 
 </style>

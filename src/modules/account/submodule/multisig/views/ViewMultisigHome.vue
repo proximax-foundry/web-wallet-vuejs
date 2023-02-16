@@ -67,6 +67,7 @@ import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { setDefaultAccInStorage } from '@/models/account';
 export default {
     name: "ViewMultisigHome",
     props: {
@@ -161,9 +162,11 @@ export default {
       let findAcc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address ==address) || walletState.currentLoggedInWallet.others.find(acc=>acc.address ==address)
       return findAcc.name
     }
+
     const navigate = (address) =>{
       if(findAccountWithAddress(address) && !isHover.value){
         setDefaultAcc(getAccountNameByAddress(Address.createFromRawAddress(address).plain()))
+        setDefaultAccInStorage(Address.createFromRawAddress(address).plain())
         router.push({ name: 'ViewAccountDetails', params: { address:getPlainAddress(address) }})
       }
       if(!networkState.currentNetworkProfile){

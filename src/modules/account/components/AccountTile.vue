@@ -71,6 +71,7 @@ import { AppState} from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { Address } from 'tsjs-xpx-chain-sdk';
 import { useRouter } from 'vue-router';
+import { setDefaultAccInStorage } from '@/models/account';
 export default{
   name: 'AccountTile',
   props: ['account'],
@@ -195,11 +196,13 @@ export default{
         return
       }
     }
+
     const navigate = () =>{
       if(isHover.value || isHoverCopy.value){
         return
       }
       setDefaultAcc()
+      setDefaultAccInStorage(p.account.address)
       router.push({ name: 'ViewAccountDetails', params: { address: p.account.address }})     
       
     }

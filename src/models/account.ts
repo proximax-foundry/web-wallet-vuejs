@@ -2,6 +2,7 @@ import { NetworkType, PublicAccount } from 'tsjs-xpx-chain-sdk';
 import { MultisigInfo } from './multisigInfo';
 import { Asset } from './asset';
 import { Namespace } from './namespace';
+import { walletState } from '@/state/walletState';
 
 export class Account{
     name: string;
@@ -10,10 +11,12 @@ export class Account{
     address: string;
     multisigInfo: MultisigInfo[] = [];
     assets: Asset[] = [];
+    nonHoldingAssets: Asset[] = [];
     namespaces: Namespace[] = [];
     linkedPublicKey: string = "";
     totalCreatedAsset: number | null = null;
     totalTxns: number = -1; // temp store total txns number, -1 to indicate not updated - include embedded, exclude cosigning
+    assetsLastUpdate: number = Date.now();
 
     constructor(name: string, publicKey: string, address: string){
         this.name = name;
@@ -39,6 +42,11 @@ export class Account{
         if(index > -1){
             this.assets.splice(index, 1);
         }
+    }
+
+    removeAssetByIndex(index: number): void{
+
+        this.assets.splice(index, 1);
     }
 
     addNamespace(namespace: Namespace): void{
@@ -87,6 +95,14 @@ export class Account{
         return Account.getMultisigInfoPublicKey(temp);
     }
 
+    addNonHoldingAsset(asset: Asset){
+        let nonHoldingAssetsId = this.nonHoldingAssets.map((asset)=> asset.idHex);
+        
+        if(!nonHoldingAssetsId.includes(asset.idHex)){
+            this.nonHoldingAssets.push(asset);
+        }
+    }
+
     static getMultisigInfoPublicKey(multisigInfo: MultisigInfo[]): string[]{
         let publicKeyArray: string[] = [];
 
@@ -95,3 +111,9 @@ export class Account{
         return publicKeyArray;
     }
 }
+
+export const setDefaultAccInStorage = (address) =>{
+     
+    sessionStorage.setItem('defaultAcc',address)
+    walletState.currentLoggedInWallet.setDefaultAccountByAddress(address)
+  }

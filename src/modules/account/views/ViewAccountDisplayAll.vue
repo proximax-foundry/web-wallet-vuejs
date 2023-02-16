@@ -225,13 +225,18 @@ export default {
   });
 
   function filterDuplicate(data){
-        var result = data.reduce((unique, o) => {
-        if(!unique.some(obj => obj.address === o.address && obj.name === o.name)){
-          unique.push(o);
+        if(data===null){
+          return
         }
-        return unique;
-        },[]);
-        return result 
+        else{
+          var result = data.reduce((unique, o) => {
+          if(!unique.some(obj => obj.address === o.address && obj.name === o.name)){
+          unique.push(o);
+          }
+          return unique;
+          },[]);
+          return result 
+        }
         }
 
     return {

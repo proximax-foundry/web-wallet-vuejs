@@ -136,6 +136,20 @@ export default defineComponent({
   setup() {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance!.appContext.config.globalProperties.emitter;
+    watch(AppState ,n=>{
+      if(n.isReady && walletState.currentLoggedInWallet){
+        let address  = sessionStorage.getItem('defaultAcc')
+        let findAcc = walletState.currentLoggedInWallet.accounts.find(account=>account.address == address)
+        //validations
+        if(!address || !findAcc){
+          let address = walletState.currentLoggedInWallet.accounts[0].address
+          sessionStorage.setItem('defaultAcc',address)
+          return
+        }
+        walletState.currentLoggedInWallet.setDefaultAccountByAddress(address)
+      }
+    })
+    
 
     const overflowScreen = ref(false);
     const mainFrame = ref(null);

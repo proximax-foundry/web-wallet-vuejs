@@ -15,28 +15,18 @@
             <div class="flex">
               <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
               <TextInput class='w-5/12 mr-2 ' :placeholder="$t('multisig.cosignatory') + `${index+1}`"  v-model="contactName[index]" :disabled="true"  />
-              <TextInput class='w-7/12 mr-2 ' :placeholder="$t('multisig.addressOrPk')" :errorMessage="$t('general.invalidInput')" :showError="showAddressError[index]" v-model="coSign[index]" />
+              <TextInputClean class='w-7/12 mr-2 ' :placeholder="$t('general.publicKey')" :errorMessage="$t('general.invalidInput')" :showError="showAddressError[index]" v-model="coSign[index]" />
               <div v-if="showAddressError[index]==true " class="mt-16"/>
               <div @click="toggleContact[index]=!toggleContact[index]" class=' border  cursor-pointer flex flex-col justify-center  p-2' style="height:2.66rem">
                 <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
                 <div class='text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.select')}}</div>
               </div>
             </div>
-            
-            <div v-if="toggleContact[index]" class="pl-6 ">
-              <div class=" border">
-                <div class='text-xxs text-gray-300 font-semibold py-2 px-2 uppercase'>{{$t('general.importFromAB')}}</div>
-                <div v-for="(item, number) in contact" :key="number" class="cursor-pointer">
-                  <div @click="contactName[index]=item.label;coSign[index]=item.value;toggleContact[index]=false" class="flex justify-center">
-                    <div v-if="number%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full">{{item.label}}</div>
-                    <div v-if="number%2==1" class="text-xs py-2 pl-2 w-full">{{item.label}}</div>
-                    <div v-if="number%2==0" class="ml-auto pr-2 text-xxs py-2 font-semibold text-blue-primary bg-gray-100 uppercase">{{$t('general.select')}}</div>
-                    <div v-if="number%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold text-blue-primary uppercase">{{$t('general.select')}}</div>
-                  </div>
-                </div>
-              </div>
+            <div v-if="toggleContact[index]">
+              <Sidebar v-model:visible="toggleContact[index]" :baseZIndex="10000" position="full">
+                <SelectAccountAndContact v-bind="index" :contacts="contact" :index="index" :selectedNode="selectedNode[index]" @node-select="onNodeSelect($event,index)"/>
+              </Sidebar>
             </div>
-
           </div>
        </div>
         <button class="pl-6 font-semibold text-xs mt-1 text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">+{{$t('multisig.addNewCosignatory')}}</button>
@@ -64,57 +54,7 @@
         </div>
       </div>
       <div class='bg-navy-primary p-6 lg:col-span-1'>
-        <div class='font-semibold text-xxs text-blue-primary uppercase'>{{$t('general.accCurrentBalance')}}</div>
-        <div class='flex text-white'>
-          <div class = 'text-md font-bold '>{{splitBalance.left}} </div>
-          <div class = 'text-md font-bold' v-if='splitBalance.right!=null'>.</div>
-          <div class='text-xs mt-1.5 font-bold'>{{splitBalance.right}}</div>
-          <div class = 'ml-1 font-bold'>{{currentNativeTokenName}}</div>
-          <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
-        </div>
-        <div v-if="fundStatus" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
-          <div class="flex gap-2">
-            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-            <div class="flex-cols">
-               <div class="text-txs">{{$t('general.insufficientBalanceWarning',{tokenName:currentNativeTokenName})}}</div>
-               <a v-if="networkType ==168" class="text-xs text-blue-primary font-semibold underline " :href="topUpUrl" target="_blank">{{$t('general.topUp',{tokenName: currentNativeTokenName})}}<img src="@/modules/dashboard/img/icon-new-page-link.svg" class="w-3 h-3 ml-2 inline-block"></a>
-            </div>
-          </div>
-        </div>
-        <div v-if="onPartial" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
-          <div class="flex gap-2">
-            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-            <div class="text-txs">{{$t('general.hasPartial')}}</div>
-          </div>
-        </div>
-        <div v-if="isMultisig" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
-          <div class="flex gap-2">
-            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-            <div class="text-txs">{{$t('multisig.alreadyMultisig')}}</div>
-          </div>
-        </div>
-        <div class="flex mt-4 text-white">
-          <div class='text-xs '>{{$t('general.lockFund')}}</div>
-          <div class="text-xs  ml-auto">{{lockFundCurrency}}</div>
-          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-        </div>
-        <div class="flex mt-0.5 text-white">
-          <div class='text-xs '>{{$t('general.lockFundTxFee')}}</div>
-          <div class="text-xs  ml-auto">{{lockFundTxFee}}</div>
-          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-        </div>
-        <div class='border-b-2 border-gray-600 my-2'/>
-        <div class="flex  text-white">
-          <div class='text-xs '>{{$t('general.aggregateFee')}}</div>
-          <div class="text-xs  ml-auto">{{aggregateFee}}</div>
-          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-        </div>
-        <div class='border-b-2 border-gray-600 my-2'/>
-        <div class="flex text-white">
-          <div class=' font-bold text-xs uppercase'>{{$t('general.total')}}</div>
-          <div class="text-xs  ml-auto">{{totalFee}}</div>
-          <div class ='ml-1 text-xs'>{{currentNativeTokenName}}</div>
-        </div>
+        <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig-already="isMultisig" :on-partial="onPartial" :transaction-fee="aggregateFee" :total-fee-formatted="totalFeeFormatted" :lock-fund-currency-convert="lockFundCurrency" :lock-fund-tx-fee-convert="lockFundTxFee" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
@@ -133,8 +73,11 @@ import { computed, ref, inject, watch, getCurrentInstance } from 'vue';
 import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
+import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
+import TextInputClean from '@/components/TextInputClean.vue'
 import { multiSign } from '@/util/multiSignatory';
 import { walletState } from '@/state/walletState';
+import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import {
@@ -151,8 +94,11 @@ export default {
   components: {
     PasswordInput,
     TextInput,
+    TextInputClean,
+    SelectAccountAndContact,
     AccountComponent,
-    AccountTabs
+    AccountTabs,
+    TransactionFeeDisplay
   },
   props: {
     address: String,
@@ -173,22 +119,24 @@ export default {
     const maxNumApproveTransaction = ref(0);
     const maxNumDeleteUser = ref(0);
     const publicKeyPattern = "^[0-9A-Fa-f]{64}$";
-    const addressPatternShort = "^[0-9A-Za-z]{40}$";
-    const addressPatternLong = "^[0-9A-Za-z-]{46}$";
     const coSign = ref([]);
+    const selectedNode = ref([])
     const contactName = ref([])
     const selectedAddresses = ref([]);
     const showAddressError = ref([]);
     const toggleContact = ref([])
     const onPartial = ref(false);
     const space=ref(false)
-   
-     const lockFundCurrency = computed(() =>
+    const defaultAcc = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount(): null
+    const selectedAccAdd = ref(defaultAcc?defaultAcc.address:'');
+    const accBalance = ref(Helper.toCurrencyFormat(defaultAcc?defaultAcc.balance:0, AppState.nativeToken.divisibility));
+    const lockFundCurrency = computed(() =>
       Helper.convertToCurrency(
         networkState.currentNetworkProfileConfig.lockedFundsPerAggregate,
         AppState.nativeToken.divisibility
       )
     );
+    
     const lockFundTxFee = computed(()=>{ 
       if(networkState.currentNetworkProfile){ 
         return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
@@ -204,9 +152,6 @@ export default {
       }
       return walletState.currentLoggedInWallet.accounts.find(acc =>acc.address ===p.address)
     }) 
-    const accountName = ref(acc.value?acc.value.name:'');
-    const accountNameDisplay = ref(acc.value?acc.value.name:'');
-    
 
     let isMultisig = computed(()=>{
       if(!acc.value){
@@ -245,8 +190,104 @@ export default {
       if(!acc.value){
         return false
       }
-      return multiSign.generateContact(acc.value.address,acc.value.name)
+      const wallet = walletState.currentLoggedInWallet;
+
+      let accounts = wallet.accounts.map(
+        (account)=>{
+          return { 
+            name: account.name,
+            publicKey: account.publicKey,
+          }
+        });
+      
+      let addressBook = wallet.contacts
+      var contacts = [];
+      var indexNo = 0
+      
+      contacts.push({
+        "key" : "0",
+        "label" : t('general.ownerAcc'),
+        "selectable" : false,
+        "children" : []
+        }
+      )
+      accounts.forEach((element) => {
+        contacts[0].children.push(
+          {
+            "key" : "0-" + indexNo.toString(),
+            "label" : element.name,
+            "data" : element.publicKey
+          }
+        )
+        indexNo++
+      })
+
+      indexNo = 0
+      // getting address book contacts
+      contacts.push({
+        "key" : "1",
+        "label" : t('general.contact'),
+        "selectable" : false,
+        "children" : []
+        }
+      )
+      
+      if (addressBook != undefined) {
+        addressBook.forEach((element) => {
+          contacts[1].children.push(
+          {
+            "key" : "1-" + indexNo.toString(),
+            "label" : element.name,
+            "data" : element.address
+          }
+        )
+        indexNo++
+        });
+      }
+      return contacts
     });
+
+      function onNodeSelect(node, index){
+        makeNodeSelectable(index)
+        contactName.value[index]  = node.label
+        // check if it is in the address book
+        if(node.key[0] == "1"){
+          changeToPublicKey(node.data, index)
+        }
+        else{
+          coSign.value[index] = node.data
+        }
+        coSign.value[index] = node.data
+        toggleContact.value[index] = false
+        // this is too make it turn blue
+        selectedNode.value[index][node.key] = true
+        node.selectable = false
+      }
+
+      function changeToPublicKey(address, index){
+        try {
+          multiSign.verifyContactPublicKey(address).then(result=>{
+            if(result.status==true){
+              coSign.value[index] = result.publicKey
+            }
+            else{
+              err.value = t('multisig.noPublicKey')
+            }
+          })
+        } catch (error) {
+          err.value = t('multisig.noPublicKey')
+        }
+      }
+
+      const makeNodeSelectable = (index) => {
+        // if there is previously unselectable value make it selectable
+        if (Object.keys(selectedNode.value[index]).length !== 0){
+          let selectedNodeIndex = Object.keys(selectedNode.value[index])[0].split('-')
+          contact.value[selectedNodeIndex[0]].children[selectedNodeIndex[1]].selectable = true
+          selectedNode.value[index] = {}
+        }
+      }
+
      const splitBalance = computed(()=>{
       let split = accountBalance.value.split(".")
       if (split[1]!=undefined){
@@ -273,7 +314,6 @@ export default {
             break;
           }
         }
-        
       }else{
         status = true;
       }
@@ -303,19 +343,19 @@ export default {
         router.push({ name: "ViewAccountPendingTransactions",params:{address:p.address} })
       } 
     };
+    
     watch(() => [...coSign.value], (n) => {
-      for(var i = 0; i < coSign.value.length; i++){
-        if((coSign.value[i].length == 64) || (coSign.value[i].length == 46) || (coSign.value[i].length == 40)){
-          checkCosign(i)
-          if(coSign.value[i]==acc.value.address || coSign.value[i]==Helper.createAddress(acc.value.address).pretty() || coSign.value[i]==acc.value.publicKey ){
+      let duplicateOwner = false
+      if (coSign.value.length > 0)
+      {
+        for(var i = 0; i < coSign.value.length; i++){
+        if((coSign.value[i].length == 64)){
+          if((coSign.value[i]==acc.value.publicKey) && (duplicateOwner == false)){
+            duplicateOwner = true
             showAddressError.value[i] = true;
             err.value = t('multisig.selectedAccErr')
           }
           else if(!coSign.value[i].match(publicKeyPattern) && (coSign.value[i].length == 64)){
-            showAddressError.value[i] = true;
-          }else if(!coSign.value[i].match(addressPatternLong) && (coSign.value[i].length == 46)){
-            showAddressError.value[i] = true;
-          }else if(!coSign.value[i].match(addressPatternShort) && (coSign.value[i].length == 40)){
             showAddressError.value[i] = true;
           }else{
             showAddressError.value[i] = false;
@@ -323,12 +363,18 @@ export default {
             if(unique.length != n.length){
               err.value = t('multisig.duplicatedCosigner');
             }else{
-              err.value = '';
+              if(duplicateOwner == false){
+                err.value = '';
+              }
             }
           }
         }else{
           showAddressError.value[i] = true;
         }
+      }}
+      // there is no cosign left
+      else{
+        err.value = '';
       }
     }, {deep:true});
 
@@ -339,17 +385,15 @@ export default {
       
     }, {deep:true});
     
-    
- 
     const addCoSig = () => {
       coSign.value.push('');
-      // addresses.value.push('');
+      selectedNode.value.push({})
       showAddressError.value.push(false);
       maxNumApproveTransaction.value += 1;
       maxNumDeleteUser.value += 1;
     };
+
     const deleteCoSigAddressInput = (i) => {
-     /*  console.log('Delete index: ' + i); */
       if(maxNumApproveTransaction.value > 0){
         maxNumApproveTransaction.value -= 1;
       }
@@ -362,9 +406,11 @@ export default {
       if(numApproveTransaction.value > maxNumApproveTransaction.value){
         numApproveTransaction.value = maxNumApproveTransaction.value;
       }
+      makeNodeSelectable(i)
       coSign.value.splice(i, 1);
-      contactName.value.splice(i, 1)
-     /*  console.log(coSign.value) */
+      selectedNode.value.splice(i, 1);
+      contactName.value.splice(i, 1);
+      toggleContact.value.splice(i,1);
       selectedAddresses.value.splice(i, 1);
       showAddressError.value.splice(i,1)
     }
@@ -422,28 +468,12 @@ export default {
       onPartial.value = verify
     )
     }
-    
-    
-    const checkCosign = (index) =>{
-      if (coSign.value[index].length == 40 || coSign.value[index].length == 46) {
-        try {
-          multiSign.verifyContactPublicKey(coSign.value[index]).then(result=>{
-            if(result.status==false){
-              showAddressError.value[index] = true
-            }
-          })
-        } catch (error) {
-          console.log(error)
-        }
-      }
-    }
    
     if(acc.value){
       if(acc.value.balance<totalFee.value){
         fundStatus.value = true
       }
     }
-    
     
     watch(acc, (n) => {
       if(!n){
@@ -456,17 +486,10 @@ export default {
       }
     });
 
-    const topUpUrl = computed(()=>{
-      if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 1'){
-        return 'https://bctestnetfaucet.xpxsirius.io/#/'
-      }else if (networkType.value == 168 && networkState.chainNetworkName=='Sirius Testnet 2'){
-        return 'https://bctestnet2faucet.xpxsirius.io/#/'
-      }else{
-        return ''
-      }
-    }) 
+    const totalFeeFormatted = computed(() => {
+      return Helper.amountFormatterSimple(totalFee.value, 0);
+    });
 
-    const networkType = computed(()=>AppState.networkType)
     return {
       networkState,
       toggleContact,
@@ -482,8 +505,6 @@ export default {
       maxNumApproveTransaction,
       maxNumDeleteUser,
       fundStatus,
-      accountNameDisplay,
-      accountName,
       acc,
       passwd,
       showPasswdError,
@@ -491,7 +512,9 @@ export default {
       addCoSig,
       coSign,
       addCoSigButton,
+      selectedNode,
       deleteCoSigAddressInput,
+      onNodeSelect,
       selectedAddresses,
       clear,
       convertAccount,
@@ -505,8 +528,9 @@ export default {
       lockFundTxFee,
       aggregateFee,
       totalFee,
-      topUpUrl,
-      networkType
+      totalFeeFormatted,
+      selectedAccAdd,
+      accBalance
     };
   },
 }

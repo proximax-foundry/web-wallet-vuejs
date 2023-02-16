@@ -216,7 +216,7 @@ export default{
     });
 
     const logout = () => {
-      WalletStateUtils.doLogout();
+      walletState.isLogin = false;
       router.push({ name: "Home"});
       closeNavi();
     };

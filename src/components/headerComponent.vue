@@ -133,6 +133,7 @@ import {useI18n} from 'vue-i18n'
 import { NotificationUtils } from '@/util/notificationUtils';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
+import { AppStateUtils } from "@/state/utils/appStateUtils";
 
 export default defineComponent({
   components: {
@@ -312,7 +313,7 @@ export default defineComponent({
     const logout = () => {
       doLogout();
       WalletStateUtils.doLogout();
-      AppState.doLogout();
+      AppStateUtils.doLogout();
       ListenerStateUtils.reset();
       router.push({ name: "Home"});
       console.log('logout');
@@ -588,6 +589,7 @@ export default defineComponent({
         emitter.emit('LOGIN');
       }
       else{
+        logout();
         // terminateListener();
         emitter.emit('LOGOUT');
       }
@@ -769,9 +771,34 @@ export default defineComponent({
               group: 'br-custom', 
               life: 8000
           });
+          let verifySwitch = sessionStorage.getItem("soundSetting");
+          if(verifySwitch==="true"){
+            beep()
+          }
         }
       }
     }
+
+    function beep(){
+    return new Promise((resolve, reject) => {
+        /*volume = volume || 100;*/
+
+        try{
+            let sound = new Audio(require('@/assets/audio/ding.ogg'));
+
+            // Set volume
+            /*sound.volume = volume / 100;*/
+
+            sound.onended = () => {
+                resolve();
+            };
+
+            sound.play();
+        }catch(error){
+            reject(error);
+        }
+    });
+}
 
     let txnActivityLogLength = computed(()=> AppState.txnActivityLogNum);
     let txnCosignLogLength = computed(()=> AppState.txnCosignLogNum);

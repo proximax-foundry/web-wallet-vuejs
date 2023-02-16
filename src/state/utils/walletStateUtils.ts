@@ -30,6 +30,7 @@ export class WalletStateUtils{
     walletState.isLogin = false;
     sessionStorage.removeItem(sessionWalletKey);
     sessionStorage.removeItem('notification');
+    sessionStorage.removeItem("defaultAcc");
   }
 
   static checkFromSession(): boolean{
