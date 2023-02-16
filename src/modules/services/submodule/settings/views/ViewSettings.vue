@@ -12,7 +12,7 @@
             </div>
             <div class="flex">
               <div class="text-left mb-3 text-gray-700">Sound Volume:</div>
-              <selectSoundSetting class="text-xs mt-1.5" />
+              <selectSoundSetting />
             </div>
             <div class="text-left mb-3 text-gray-700">Nodes</div>
             <NodeComponent />
