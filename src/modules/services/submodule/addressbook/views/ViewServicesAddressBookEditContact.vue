@@ -157,7 +157,12 @@ export default {
     const getPublicKey = async(address) =>{
       try{
         let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
-        publicKey.value = accInfo.publicKey
+        if(accInfo.publicKey == "0000000000000000000000000000000000000000000000000000000000000000"){
+          publicKey.value = null
+        }
+        else{
+          publicKey.value = accInfo.publicKey
+        }
       }
       catch{
         publicKey.value = null
