@@ -41,12 +41,9 @@ let api = "https://api-2.testnet2.xpxsirius.io";
 let explorerURL = "https://bctestnetexplorer.xpxsirius.io";
 let accountHttp = new AccountHttp(api);
 let mosaicHttp = new MosaicHttp(api);
-// let data = reactive<DataInterface>({
-//   assetList: []
-// });
 
 let assetList = ref<SimpleSDA[]>([]);
-let assetSelected = ref("");
+let assetSelected = ref(null);
 let aggregateNum = ref(10);
 let distributionList = ref<DistributeListInterface[]>([]);
 let totalRecipients = ref(0);
@@ -63,7 +60,6 @@ let sdaError = ref("");
 let recipientError = ref("");
 let distributionError = ref("");
 let distributing = ref(false);
-
 let knownToken = [{
     namespace: "prx.xpx",
     name: "XPX"
@@ -77,10 +73,8 @@ let knownToken = [{
   }];
 
 let scanDistributorAsset = async() =>{
-  // console.log(selectedAccount.value.publicKey)
-  // console.log(selectedAccount.value)
   noAssetFound.value = false;
-  assetSelected.value = "";
+  assetSelected.value = null;
   let assets = await Sirius.scanAsset(selectedAccount.value.publicKey);
 
   assetList.value = assets;
@@ -89,6 +83,13 @@ let scanDistributorAsset = async() =>{
     noAssetFound.value = true;
   }
 }
+
+let aggregateOption = [
+  {label: "5", value: 5},
+  {label: "10", value: 10},
+  {label: "15", value: 15},
+  {label: "20", value: 20}
+]
 
 let distribute = async()=>{
   distributionError.value = "";
@@ -100,7 +101,7 @@ let distribute = async()=>{
   if(assetNotEnough.value || assetWrongDivisibility.value){
     return;
   }
-  else if(assetSelected.value === ""){
+  else if(assetSelected.value === null){
     sdaError.value = "Please select SDA";
     return;
   }
@@ -282,7 +283,7 @@ let setActive = () =>{
 
 let checkDistributorAssetAmount = (selectedAssetId: string)=>{
   if(selectedAssetId){
-    let data = assetList.value.find(x => x.id === selectedAssetId);
+    let data = assetList.value.find(x => x.id === selectedAssetId.id);
 
     if(totalDistributeAmount.value > data!.amount){
       assetNotEnough.value = true;
@@ -298,7 +299,7 @@ let checkDistributorAssetAmount = (selectedAssetId: string)=>{
 
 let checkDistributorAssetAmountDecimal = (selectedAssetId: string)=>{
   if(selectedAssetId){
-    let data = assetList.value.find(x => x.id === selectedAssetId );
+    let data = assetList.value.find(x => x.id === selectedAssetId.id );
 
     let invalidDivisibility = distributionList.value.find(x =>{
       let bigNumberAmount = mathjs.bignumber(x.amount);
@@ -452,13 +453,8 @@ if (isMultiSigBool.value) {
   let cosigner = getWalletCosigner.value.cosignerList
   if (cosigner.length > 0) {
     cosignAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
-    // if (findAccWithAddress(cosignAddress.value).balance < lockFundTotalFee.value + Number(effectiveFee.value) ) {
-    //   disableAllInput.value = true;
-    //   cosignerBalanceInsufficient.value = true;
-    // } else {
       disableAllInput.value = false;
       cosignerBalanceInsufficient.value = false;
-    // }
   } else {
     disableAllInput.value = true;
   }
@@ -478,6 +474,7 @@ const clearInput = () => {
     checkDistributorAssetAmountDecimal(assetSelected.value);
   });
 
+  // account is selected
   emitter.on("select-account", (address) => {
     for (let i = 0; i < accounts.value.length; i++){
       if (accounts.value[i].address == address){
@@ -526,12 +523,32 @@ const clearInput = () => {
       <div>
         <div class="flex flex-col-reverse">
           <div class="error error_box" v-if="sdaError!=''">{{ sdaError }}</div>
-          <select class="w-3/4" v-model="assetSelected" aria-label="Floating label select example">
-            <option value="" selected>Select SDA to distribute</option>
-                      <option v-for='asset, index in assetList' :key='index' :value="asset.id">
-                        {{ asset.amount }} - {{ asset.label }}
-                      </option>
-          </select>
+            <Dropdown
+              v-model="assetSelected"
+              :options="assetList"
+              placeholder="Select SDA to distribute"
+              :style="{'width':'100%'}"
+              :filter="true"
+              :filterFields="['label']"
+              optionLabel="text"
+              option-disabled="disabled"
+              :showClear="true"
+            >
+              <template  #value="slotProps">
+                <div v-if="slotProps.value">
+                  <div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">{{slotProps.value.label}} <span class="text-tsm text-gray-400"> ({{Helper.toCurrencyFormat(slotProps.value.amount,slotProps.value.divisibility)}})</span></div>
+                </div>
+                <span v-else>
+                  {{slotProps.placeholder}}
+                </span>
+              </template>
+              <template #option="slotProps">
+                <div style="display: flex;justify-content: space-between;">
+                  <span class="text-sm">{{slotProps.option.label}}</span>
+                  <span class="text-tsm text-gray-500">Balance:{{Helper.toCurrencyFormat(slotProps.option.amount,slotProps.option.divisibility)}}</span>
+                </div>
+              </template>
+            </Dropdown>
           <label class="font-medium text-gray-400" for="floatingSelect">Sirius Digital Asset</label>
         </div>
       </div>
@@ -539,12 +556,8 @@ const clearInput = () => {
     <div class="p-2">
       <div>
         <div class="flex flex-col-reverse">
-          <select class="w-3/4" v-model="aggregateNum" aria-label="Floating label select example">
-            <option value="5" >5</option>
-            <option value="10" >10</option>
-            <option value="15" >15</option>
-            <option value="20" >20</option>
-          </select>
+          <Dropdown v-model="aggregateNum" :options="aggregateOption" :style="{'width':'100%'}" optionLabel="label" optionValue="value" />
+
           <label class="font-medium text-gray-400" for="floatingSelect">Transactions per aggregate</label>
         </div>
       </div>
