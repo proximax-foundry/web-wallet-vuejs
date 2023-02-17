@@ -44,8 +44,7 @@
         </div>
         <!-- Pop Up when select icon is clicked -->
         <Sidebar v-model:visible="toggleContact" :baseZIndex="10000" position="full">
-          <Tree :value="contacts" selectionMode="single" v-model:selectionKeys="selectedNode" :expandedKeys="expandedKeys" :filter="true" filterMode="strict" @node-select="onNodeSelect" @node-expand="expandTree" @node-collapse="collapseTree" >
-        </Tree>
+          <SelectAccountAndContact :contacts="contacts" :selectedNode="selectedNode" @node-select="onNodeSelect"/>
         </Sidebar>
         
         <div v-for="(mosaic, index) in mosaicsCreated" :key="index">
@@ -108,6 +107,7 @@ import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from '@/util/chainUtils';
 import { NamespaceUtils } from '@/util/namespaceUtils';
 import SelectInputAccount from "@/components/SelectInputAccount.vue";
+import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
 import { AppState } from '@/state/appState';
@@ -119,6 +119,7 @@ export default {
   components: {
     AddressInputClean,
     SelectInputAccount,
+    SelectAccountAndContact,
     TransferInputClean,
     TransferTextareaInput,
     PasswordInput,
@@ -138,7 +139,6 @@ export default {
     const showAssetBalanceErr = ref([])
     const selectContact = ref("0");
     const recipientInput = ref("");
-    const expandedKeys = ref({})
     const selectedNode = ref({})
     const selectedNodeIndex = ref()
     const msgOption = ref("regular");
@@ -377,7 +377,8 @@ export default {
       makeNodeSelectable()
       toggleContact.value = false
       recipientInput.value = node.data
-      selectedNode.value = node.key
+      // this is too make it turn blue
+      selectedNode.value[node.key] = true
       node.selectable = false
     }
 
@@ -386,16 +387,8 @@ export default {
       if (Object.keys(selectedNode.value).length !== 0){
         selectedNodeIndex.value = Object.keys(selectedNode.value)[0].split('-')
         contacts.value[selectedNodeIndex.value[0]].children[selectedNodeIndex.value[1]].selectable = true
+        selectedNode.value = {}
       }
-    }
-
-    const expandTree = (expanded) => {
-      expandedKeys.value = {}
-      expandedKeys.value[expanded.key] = true
-    }
-
-    const collapseTree = () =>{
-      expandedKeys.value = {}
     }
 
     const clearInput = () => {
@@ -752,8 +745,6 @@ export default {
     if (n != o) {
       makeNodeSelectable()
       recipientInput.value = "";
-      selectedNode.value = {};
-      expandedKeys.value = {};
       updateFee()
     }
   });
@@ -864,9 +855,6 @@ export default {
       totalFee,
       contacts,
       onNodeSelect,
-      expandedKeys,
-      collapseTree,
-      expandTree,
       selectedNode,
       toggleContact,
       splitBalance,

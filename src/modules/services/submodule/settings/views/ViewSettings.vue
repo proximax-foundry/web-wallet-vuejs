@@ -10,6 +10,10 @@
               <div class="text-left mb-3 text-gray-700">Select Language:</div>
               <selectLanguageModal class="text-xs mt-1.5" />
             </div>
+            <div class="flex">
+              <div class="text-left mb-3 text-gray-700">Sound Volume:</div>
+              <selectSoundSetting />
+            </div>
             <div class="text-left mb-3 text-gray-700">Nodes</div>
             <NodeComponent />
         </div>
@@ -21,7 +25,8 @@
 
 <script lang="ts" setup>
 import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue';
-import NodeComponent from "@/modules/services/submodule/settings/components/NodeComponent.vue" 
+import NodeComponent from "@/modules/services/submodule/settings/components/NodeComponent.vue"
+import selectSoundSetting from '@/modules/services/submodule/settings/components/selectSoundSetting.vue'; 
 
 </script>
 
