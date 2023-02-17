@@ -34,8 +34,8 @@
                 <div class="mt-1 text-xs md:text-tsm">{{data.address}}</div>
                 <div  class="mt-1 text-xs md:text-tsm flex items-center">
                   <div>{{ $t('general.publicKey') }}</div>
-                  <font-awesome-icon icon="check" class="w-3 h-3 ml-1 inline-block text-blue-primary" v-if="data.publicKey"></font-awesome-icon>
-                  <font-awesome-icon icon="times" class="w-3 h-3 ml-1 inline-block text-blue-primary" v-else></font-awesome-icon>
+                  <font-awesome-icon icon="check" class="w-3 h-3 ml-1 mt-1 inline-block text-blue-primary" v-if="data.publicKey"></font-awesome-icon>
+                  <font-awesome-icon icon="times" class="w-3 h-3 ml-1 mt-1 inline-block text-blue-primary" v-else></font-awesome-icon>
                 </div>
               </div>
             </div>
@@ -47,7 +47,7 @@
               <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
               <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 <div role="none" class="my-2">
-                  <router-link :to="{ name: 'ViewServicesAddressBookEditContact' , params: { contactAddress: data.address }}" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.edit')}}</router-link>
+                  <router-link :to="{ name: 'ViewServicesAddressBookEditContact' , params: { contactAddress: data.address, contactPublicKey: data.publicKey?true:false }}" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.edit')}}</router-link>
                   <ConfirmDeleteContactModal :data="data" class="block" />
                 </div>
               </div>
