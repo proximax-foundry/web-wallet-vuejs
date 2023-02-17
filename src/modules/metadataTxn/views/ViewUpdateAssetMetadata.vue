@@ -114,7 +114,7 @@ import {useI18n} from 'vue-i18n'
 import { multiSign } from "@/util/multiSignatory";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
-import { TransactionUtils, fetchAccount, findAcc } from "@/util/transactionUtils";
+import { TransactionUtils, findAcc } from "@/util/transactionUtils";
 import { WalletUtils } from "@/util/walletUtils";
 import { AppState } from '@/state/appState';
 import MetadataInput from '@/modules/metadataTxn/components/MetadataInput.vue'
@@ -588,9 +588,9 @@ export default {
         cosigners.cosignerList.forEach( publicKey => {
           list.push({
             publicKey,
-            name: fetchAccount(publicKey).name,
-            balance: fetchAccount(publicKey).balance,
-            address: fetchAccount(publicKey).address
+            name: findAcc(publicKey).name,
+            balance: findAcc(publicKey).balance,
+            address: findAcc(publicKey).address
           });
         });
 

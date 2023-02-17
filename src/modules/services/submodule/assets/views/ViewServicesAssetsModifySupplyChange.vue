@@ -97,7 +97,7 @@ import Tooltip from 'primevue/tooltip';
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
-import { isMultiSig, TransactionUtils, fetchAccount, findAccWithAddress } from '@/util/transactionUtils';
+import { isMultiSig, TransactionUtils, findAcc, findAccWithAddress } from '@/util/transactionUtils';
 
 export default {
   name: 'ViewServicesAssetsModifySupplyChange',
@@ -261,9 +261,9 @@ export default {
         cosigners.cosignerList.forEach( publicKey => {
           list.push({
             publicKey,
-            name: fetchAccount(publicKey).name,
-            balance: fetchAccount(publicKey).balance,
-            address: fetchAccount(publicKey).address
+            name: findAcc(publicKey).name,
+            balance: findAcc(publicKey).balance,
+            address: findAcc(publicKey).address
           });
         });
         cosigners.cosignerList = list;
@@ -298,7 +298,7 @@ export default {
         if(getMultiSigCosigner.value.cosignerList.length > 1){
           return cosignerAddress.value;
         }else{
-          return fetchAccount(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
+          return findAcc(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
         }
       }else{
         return '';

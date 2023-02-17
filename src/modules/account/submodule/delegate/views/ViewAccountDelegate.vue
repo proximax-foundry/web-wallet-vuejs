@@ -93,7 +93,7 @@ import { Account } from "tsjs-xpx-chain-sdk";
 import { listenerState } from '@/state/listenerState';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
-import { TransactionUtils, fetchAccount, findAcc } from '@/util/transactionUtils';
+import { TransactionUtils, findAcc } from '@/util/transactionUtils';
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 export default {
   name: 'ViewAccountDelegate',
@@ -399,9 +399,9 @@ export default {
         cosigners.cosignerList.forEach( publicKey => {
           list.push({
             publicKey,
-            name: fetchAccount(publicKey).name,
-            balance: fetchAccount(publicKey).balance,
-            address: fetchAccount(publicKey).address
+            name: findAcc(publicKey).name,
+            balance: findAcc(publicKey).balance,
+            address: findAcc(publicKey).address
           });
         });
 

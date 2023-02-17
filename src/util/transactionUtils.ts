@@ -500,10 +500,6 @@ export const isMultiSig = (address) => {
   }
 };
 
-export const fetchAccount = (publicKey) => {
-  return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
-};
-
 export const findAccWithAddress = address =>{
   if(!walletState.currentLoggedInWallet){
     return null

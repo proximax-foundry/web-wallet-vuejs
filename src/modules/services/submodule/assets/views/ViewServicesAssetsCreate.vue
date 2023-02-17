@@ -76,7 +76,7 @@ import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
-import { TransactionUtils, isMultiSig, fetchAccount, findAccWithAddress } from '@/util/transactionUtils';
+import { TransactionUtils, isMultiSig, findAcc, findAccWithAddress } from '@/util/transactionUtils';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
 
@@ -208,9 +208,9 @@ export default {
         cosigners.cosignerList.forEach( publicKey => {
           list.push({
             publicKey,
-            name: fetchAccount(publicKey).name,
-            balance: fetchAccount(publicKey).balance,
-            address: fetchAccount(publicKey).address
+            name: findAcc(publicKey).name,
+            balance: findAcc(publicKey).balance,
+            address: findAcc(publicKey).address
           });
         });
 
@@ -353,7 +353,7 @@ export default {
         if(getMultiSigCosigner.value.cosignerList.length > 1){
           return cosignerAddress.value;
         }else{
-          return fetchAccount(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
+          return findAcc(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
         }
       }else{
         return '';
@@ -427,7 +427,7 @@ export default {
   });
 
     return {
-      fetchAccount,
+      findAcc,
       accounts,
       moreThanOneAccount,
       currentSelectedName,

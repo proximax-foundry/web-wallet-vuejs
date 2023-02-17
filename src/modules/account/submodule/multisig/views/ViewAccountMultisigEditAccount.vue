@@ -125,7 +125,7 @@ import { networkState } from '@/state/networkState';
 import {useI18n} from 'vue-i18n'
 import { Helper } from '@/util/typeHelper';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-import { TransactionUtils, fetchAccount, findAcc } from '@/util/transactionUtils';
+import { TransactionUtils, findAcc } from '@/util/transactionUtils';
 import { AppState } from '@/state/appState';
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 export default {
@@ -596,9 +596,9 @@ export default {
         cosigners.cosignerList.forEach( publicKey => {
           list.push({
             publicKey,
-            name: fetchAccount(publicKey).name,
-            balance: fetchAccount(publicKey).balance,
-            address: fetchAccount(publicKey).address
+            name: findAcc(publicKey).name,
+            balance: findAcc(publicKey).balance,
+            address: findAcc(publicKey).address
           });
         });
 
