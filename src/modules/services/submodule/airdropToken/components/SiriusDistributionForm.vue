@@ -6,7 +6,6 @@ import {
 } from 'tsjs-xpx-chain-sdk';
 
 import { SimpleSDA } from '@/models/sda'
-// import {parse} from 'csv-parse'
 import {sum} from 'mathjs'
 import {DistributeListInterface, Sirius} from "@/models/sirius"
 import { AppState } from '@/state/appState';
@@ -474,7 +473,7 @@ const clearInput = () => {
     checkDistributorAssetAmountDecimal(assetSelected.value);
   });
 
-  // account is selected
+  // account is clicked
   emitter.on("select-account", (address) => {
     for (let i = 0; i < accounts.value.length; i++){
       if (accounts.value[i].address == address){
@@ -522,6 +521,7 @@ const clearInput = () => {
     <div class="p-2">
       <div>
         <div class="flex flex-col-reverse">
+          <!-- Dropdown for select SDA -->
           <div class="error error_box" v-if="sdaError!=''">{{ sdaError }}</div>
             <Dropdown
               v-model="assetSelected"
@@ -555,9 +555,9 @@ const clearInput = () => {
     </div>
     <div class="p-2">
       <div>
+        <!-- Dropdown for aggregate number -->
         <div class="flex flex-col-reverse">
           <Dropdown v-model="aggregateNum" :options="aggregateOption" :style="{'width':'100%'}" optionLabel="label" optionValue="value" />
-
           <label class="font-medium text-gray-400" for="floatingSelect">Transactions per aggregate</label>
         </div>
       </div>
