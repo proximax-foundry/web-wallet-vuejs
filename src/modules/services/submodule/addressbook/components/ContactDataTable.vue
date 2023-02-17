@@ -208,8 +208,6 @@ export default{
       currentMenu.value = 'e';
     };
 
-    console.log(formattedContacts)
-    console.log(walletState.currentLoggedInWallet)
     return {
       formattedContacts,
       selectContactGroups,
