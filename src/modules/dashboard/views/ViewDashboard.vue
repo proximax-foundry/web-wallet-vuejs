@@ -119,7 +119,6 @@ export default defineComponent({
     const showAddressQRModal = ref(false);
     const showMessageModal = ref(false);
     const showDecryptMessageModal  = ref(false)
-    const displayConvertion = ref(false);
     const showCosignModal = ref(false);
     const txMessage = ref("");
     const messagePayload = ref("");
@@ -358,14 +357,6 @@ export default defineComponent({
         }
       }
     )
-    const isDefault = computed(()=> selectedAccount.value.default ? true : false );
-    let isMultisig = computed(()=> selectedAccount.value.multisigInfo.find((multisigInfo)=> multisigInfo.level == 1) ? true : false);
-    const getCurrencyPrice = () => {
-      let balance = selectedAccount.value?selectedAccount.value.balance:0;
-      getXPXcurrencyPrice(balance).then((total) => {
-        currencyConvert.value = Helper.toCurrencyFormat(total, 6);
-      });
-    };
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
     let accountConfirmedTxnsCount = ref(0);
     let updateAccountTransactionCount = async()=>{
@@ -379,17 +370,6 @@ export default defineComponent({
 
       toast.add({severity:'info', detail: copySubject + ' ' +t('general.copied'), group: 'br-custom', life: 3000});
     };
-    // get USD conversion
-    const currencyConvert = ref('');
-    const updatePricing = () =>{
-      if(AppState.nativeToken.label=== "XPX"){
-        displayConvertion.value = true;
-        getCurrencyPrice();
-        watch(selectedAccountBalance, () => {
-          getCurrencyPrice();
-        });
-      }
-    }
     // setup transaction loading
     const recentTransactions = ref([]);
     const searchedTransactions = ref([]);
@@ -808,7 +788,6 @@ export default defineComponent({
       updateAccountTransactionCount();
       loadRecentTransactions();
       loadRecentTransferTransactions();
-      updatePricing();
       await loadUnconfirmedTransactions();
       await loadPartialTransactions();
       loadInQueueTransactions();
@@ -846,14 +825,10 @@ export default defineComponent({
       selectedAccountBalanceBack,
       selectedAccountName,
       selectedAccountPublicKey,
-      currencyConvert,
-      displayConvertion,
       currentNativeTokenName,
       selectedAccountAddress,
       selectedAccountAddressPlain,
       selectedAccountAddressShort,
-      isDefault,
-      isMultisig,
       recentTransactions,
       searchedTransactions, 
       addressQR,
