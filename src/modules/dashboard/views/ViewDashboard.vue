@@ -275,13 +275,23 @@ export default defineComponent({
 
     const selectedAccountPublicKey = computed(()=> selectedAccount.value.publicKey);
     // const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty().substring(0, 13) + '....' + Helper.createAddress(selectedAccount.value.address).pretty().substring(Helper.createAddress(selectedAccount.value.address).pretty().length - 11));
-    const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty());
-    const selectedAccountAddressPlain = computed(()=> selectedAccount.value.address);
+    const selectedAccountAddress = computed(()=> {
+      if(selectedAccount.value){
+        return Helper.createAddress(selectedAccount.value.address).pretty()
+      }else{
+        return null
+      }
+    });
+    const selectedAccountAddressPlain = computed(()=> selectedAccount.value?selectedAccount.value.address:null);
     const selectedAccountAddressShort = computed(() => {
-      let prettyAddress = Helper.createAddress(selectedAccount.value.address).pretty();
-      let firstPartAddress = prettyAddress.substring(0, 11);
-      let secondPartAddress = prettyAddress.substring(prettyAddress.length - 11);
-      return firstPartAddress + '...' + secondPartAddress;
+      if(selectedAccount.value){
+        let prettyAddress = Helper.createAddress(selectedAccount.value.address).pretty();
+        let firstPartAddress = prettyAddress.substring(0, 11);
+        let secondPartAddress = prettyAddress.substring(prettyAddress.length - 11);
+        return firstPartAddress + '...' + secondPartAddress;
+      }else{
+        return null
+      }
     });
     const selectedAccountDirectChilds = computed(()=> {
       let multisigInfo = selectedAccount.value.multisigInfo.find((x)=> x.level === 0);
@@ -300,38 +310,58 @@ export default defineComponent({
     });
     const selectedAccountBalance = computed(
       () => {
-        return Helper.toCurrencyFormat(selectedAccount.value.balance, currentNativeTokenDivisibility.value);
+        if(!selectedAccount.value){
+          return null
+        }else{
+            return Helper.toCurrencyFormat(selectedAccount.value?selectedAccount.value.balance:0, currentNativeTokenDivisibility.value);
+        }
       }
     );
     const selectedAccountBalanceFront = computed(
       () => {
-        let balance = selectedAccountBalance.value.split('.');
-        return balance[0];
+        if(selectedAccountBalance.value){
+          let balance = selectedAccountBalance.value.split('.');
+          return balance[0];
+        }else{
+          return null
+        }
       }
     );
     const selectedAccountBalanceBack = computed(
       () => {
-        let balance = selectedAccountBalance.value.split('.');
-        return balance[1];
+        if(selectedAccountBalance.value){
+          let balance = selectedAccountBalance.value.split('.');
+          return balance[1];
+        }else{
+          return null
+        }
       }
     );
     const selectedAccountName = computed(
       () => {
-        return selectedAccount.value.name;
+        if(selectedAccount.value){
+          return selectedAccount.value.name;
+        }else{
+          return null
+        }
       }
     );
     const addressQR = computed(
       () => {
-        let qr = qrcode(15, 'H');
-        qr.addData(selectedAccountAddress.value);
-        qr.make();
-        return qr.createDataURL();
+        if(selectedAccountAddress.value){
+          let qr = qrcode(15, 'H');
+          qr.addData(selectedAccountAddress.value);
+          qr.make();
+          return qr.createDataURL();
+        }else{
+          return null
+        }
       }
     )
     const isDefault = computed(()=> selectedAccount.value.default ? true : false );
     let isMultisig = computed(()=> selectedAccount.value.multisigInfo.find((multisigInfo)=> multisigInfo.level == 1) ? true : false);
     const getCurrencyPrice = () => {
-      let balance = selectedAccount.value.balance;
+      let balance = selectedAccount.value?selectedAccount.value.balance:0;
       getXPXcurrencyPrice(balance).then((total) => {
         currencyConvert.value = Helper.toCurrencyFormat(total, 6);
       });
