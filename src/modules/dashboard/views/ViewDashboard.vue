@@ -11,7 +11,7 @@
                 <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" :copySubject="$t('general.address')">{{ selectedAccountAddressShort }}</div>
 
                 <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
-                <AddressQRModal :accourentAddssQR="addressQR" :notIncludeWord="true" />      
+                <AddressQRModal :accountAddressQR="addressQR" :notIncludeWord="true" />      
               </div>
             </div>
             <div>
