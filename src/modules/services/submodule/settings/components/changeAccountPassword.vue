@@ -54,6 +54,7 @@
   import { AppState } from '@/state/appState';
   import { WalletAccount } from "@/models/walletAccount"
   import { useRouter } from "vue-router";
+  import { useToast } from "primevue/usetoast";
   export default{
     name: 'changeAccountPassword',
     components:{
@@ -66,6 +67,7 @@
       const showPasswdError = ref(false);
       const passwdPattern = "^[^ ]{8,}$";
       const router = useRouter();
+      const toast = useToast();
       let err = ref('');
       let walletPasswd = ref('');
       let passwd = ref('');
@@ -99,21 +101,25 @@
           err.value = t('general.walletPasswordInvalid',{name: walletName});
         } 
      }
+     const showSuccess = () => {
+            toast.add({severity:'success', summary: 'Success Message', detail:'Your Password has changed successfully', group:"tl" , life: 3000});
+    }
 
      const changeWalletPasswd = ()=> {
-    for(let i = 0; i<walletState.currentLoggedInWallet.accounts.length;i++){
-      let currentAccount=walletState.currentLoggedInWallet.accounts[i]
-      const passwordInstance = WalletUtils.createPassword(passwd.value);
-      const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance,currentAccount.encrypted,currentAccount.iv);
-      let password = WalletUtils.createPassword(walletPasswd.value);
-      const wallet = WalletUtils.createAccountSimpleFromPrivateKey(currentAccount.name, password, walletPrivateKey, AppState.networkType);
-      let walletAccount = new WalletAccount(currentAccount.name, currentAccount.publicKey, wallet.publicAccount.address.plain() , "pass:bip32",  wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
-      walletState.currentLoggedInWallet.accounts[i].encrypted= walletAccount.encrypted
-      walletState.currentLoggedInWallet.accounts[i].iv= walletAccount.iv
+      for(let i = 0; i<walletState.currentLoggedInWallet.accounts.length;i++){
+        let currentAccount=walletState.currentLoggedInWallet.accounts[i]
+        const passwordInstance = WalletUtils.createPassword(passwd.value);
+        const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance,currentAccount.encrypted,currentAccount.iv);
+        let password = WalletUtils.createPassword(walletPasswd.value);
+        const wallet = WalletUtils.createAccountSimpleFromPrivateKey(currentAccount.name, password, walletPrivateKey, AppState.networkType);
+        let walletAccount = new WalletAccount(currentAccount.name, currentAccount.publicKey, wallet.publicAccount.address.plain() , "pass:bip32",  wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
+        walletState.currentLoggedInWallet.accounts[i].encrypted= walletAccount.encrypted
+        walletState.currentLoggedInWallet.accounts[i].iv= walletAccount.iv
+      }
+      walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
+      showSuccess()
+      logout()
     }
-    walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
-    logout()
-     }
 
       return{
         verifyWalletPwPk,
