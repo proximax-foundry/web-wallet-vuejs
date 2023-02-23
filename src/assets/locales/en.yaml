@@ -397,6 +397,7 @@ multisig:
     cosignatory, your account will automatically be converted into a multisig
     account.
   noMultisig: '{name} is not a cosignatory of any accounts.'
+  noPublicKey: 'Public Key is not found in explorer'
   ofCosignatories: 'of {value} cosignatories'
   rightToLeft: Right to Left
   selectedAccErr: Cosigner cannot be this account itself

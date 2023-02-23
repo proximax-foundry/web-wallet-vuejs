@@ -1,103 +1,52 @@
 <template>
   <div>
     <div class="px-2 sm:px-10 bg-gray-200 pb-4 pt-5">
-      <div class="md:grid md:grid-cols-2 xl:grid-cols-3">
-        <div class="block md:hidden">
-          <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded flex flex-col bg-white text-black">
-            <div class="text-center py-3">
-              <div class="text-center my-2"><div class="inline-block"><span class="font-bold text-xl">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-md">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-xl">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-6 h-6 ml-3 relative" style="top: -6px;"></div>
-              <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddressPlain }}" class="inline-block text-xs font-bold text-blue-primary cursor-pointer">{{ selectedAccountName }}<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></router-link>
-              <div class="mb-8">
-                <div class="flex items-center justify-center">
-                  <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" :copySubject="$t('general.address')">{{ selectedAccountAddressShort }}</div>
+      <div class="max-w-screen-sm m-auto">
+        <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded flex flex-col bg-white text-black">
+          <div class="text-center py-3">
+            <div class="text-center my-2"><div class="inline-block"><span class="font-bold text-xl">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-md">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-xl">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-6 h-6 ml-3 relative" style="top: -6px;"></div>
+            <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddressPlain }}" class="inline-block text-xs font-bold text-blue-primary cursor-pointer">{{ selectedAccountName }}<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></router-link>
+            <div class="mb-8">
+              <div class="flex items-center justify-center">
+                <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" :copySubject="$t('general.address')">{{ selectedAccountAddressShort }}</div>
 
-                  <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
-                  <AddressQRModal :accountAddressQR="addressQR" :notIncludeWord="true" />      
-                </div>
-              </div>
-              <div>
-                <a :href="faucetLink" target=_new class="inline-block text-center mr-2" v-if="faucetLink">
-                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
-                    <div class="h-full w-full flex items-center justify-center">
-                      <img src="@/modules/dashboard/img/icon-balance-white.svg" class="w-5 h-5">
-                    </div>
-                  </div><br>
-                  <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.topUp')}}</div>
-                </a>
-                <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center mx-2">
-                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
-                    <div class="h-full w-full flex items-center justify-center">
-                      <img src="@/modules/dashboard/img/icon-transfer-white.svg" class="w-5 h-5">
-                    </div>
-                  </div><br>
-                  <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.transfer')}}</div>
-                </router-link>
-                <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="inline-block text-center mx-2">
-                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
-                    <div class="h-full w-full flex items-center justify-center">
-                      <img src="@/modules/dashboard/img/icon-swap-white.svg" class="w-5 h-5">
-                    </div>
-                  </div><br>
-                  <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.swap')}}</div>
-                </router-link>
-                <router-link :to="{ name: 'ViewServicesStackingBuy'}" class="inline-block text-center ml-2">
-                  <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
-                    <div class="flex items-center justify-center h-full w-full">
-                      <font-awesome-icon icon="shopping-bag" class="h-5 w-5 text-white" />
-                    </div>
-                  </div><br>
-                  <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.buy')}}</div>
-                </router-link>
+                <img src="@/modules/dashboard/img/icon-copy.svg" class="w-4 cursor-pointer ml-4 inline-block" @click="copy('address')">
+                <AddressQRModal :accourentAddssQR="addressQR" :notIncludeWord="true" />      
               </div>
             </div>
-          </div>
-        </div>
-        <div class="pr-2 hidden md:inline-block">
-          <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded-lg balance-div flex flex-col justify-between bg-navy-primary text-white">
-            <div class="mt-8">
-              <div class="text-gray-300 text-txs uppercase">{{$t('general.currentBalance')}}</div>
-              <div class="flex justify-between items-center">
-                 <div class="flex items-center"><div class="inline-block"><span class="font-bold text-lg">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-xs">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-lg">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-4 h-4 ml-4"></div>
-              <a :href="faucetLink" class="flex items-center" target=_new v-if="faucetLink"><img src="@/assets/img/icon-header-account.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold inline-block" style="margin-top: 1px">{{$t('general.topUp')}}</div></a>
-              </div>
-             
-              <div class="text-gray-300 text-txs mt-1">{{$t('general.estimateUSD')}} {{ currencyConvert }}</div>
-
-            </div>
-            <div class="flex justify-between mt-2">
-              <div>
-                <router-link :to="{ name: 'ViewTransferCreate'}" class="flex items-center "><img src="@/assets/img/icon-transfer.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold" style="margin-top: 1px">{{$t('general.transfer',{tokenName: currentNativeTokenName})}}</div></router-link>
-                
-              </div>
-              <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="flex items-center mb-3"><img src="@/modules/dashboard/img/icon-swap.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xxs md:text-xs font-bold text-white" style="margin-top: 1px">{{$t('general.swap')}}</div></router-link>
-            </div>
-          </div>
-        </div>
-        <div class="sm:pl-2 xl:px-2 hidden md:inline-block">
-          <div class="shadow-md w-full relative inline-block overflow-x-hidden address_div bg-gray-50 px-5 py-4 rounded-lg default-div">
-            <div class="text-gray-400 text-txs mt-7 mb-2 uppercase">{{$t('general.walletAddress')}}</div>
-            <div class="flex items-center justify-between mb-10">
-              <div id="address" class="font-bold outline-none break-all text-xs lg:text-tsm h-8" :copyValue="selectedAccountAddressPlain" :copySubject="$t('general.address')">{{ selectedAccountAddress }}</div>
-              <img src="@/modules/dashboard/img/icon-copy.svg" :title="$t('general.copy')" class="w-4 cursor-pointer ml-4" @click="copy('address')">
-            </div>
-            <div class="flex justify-between w-full">
-              <AddressQRModal :accountAddressQR="addressQR" />
-              <router-link :to="{ name: 'ViewMultisigHome', params: { address: selectedAccountAddressPlain }}" class="my-2 flex items-center" v-if="!isMultisig"><img src="@/modules/dashboard/img/icon-multisig-blue.svg" class="w-4 h-4 cursor-pointer mr-1"><div class="text-xs font-bold" style="margin-top: 1px">{{$t('general.convertMultisig')}}</div></router-link>
-            </div>
-          </div>
-        </div>
-        <div class="pl-2 hidden xl:inline-block">
-          <div class="shadow-md w-full relative overflow-x-hidden address_div bg-navy-primary px-7 py-3 rounded-lg transaction-div text-white">
-            <div class="text-txs mt-6 text-gray-400 uppercase">{{$t('dashboard.recentTransfers')}}</div>
-            <div class="text-gray-400 text-tsm mt-8 mb-3 h-12" v-if="recentTransferTxnRow.length==0">{{$t('dashboard.noTransactions',{acc:selectedAccountName})}} </div>
-            <div v-else class="mt-3 h-16">
-              <div v-for="txn in recentTransferTxnRow" :key="txn.hash" class="flex items-center justify-between mb-1">
-                <a class="flex items-center max-w-xs " :href="addressExplorerURL + '/' + txn.transferContactAddress" target=_new>
-                  <div v-html="toSvg(txn.transferContactAddress, 20, jdenticonConfig)" class="mr-3 inline-block"></div>
-                  <div class="text-xs inline-block w-40 truncate">{{ txn.transferContact }}</div>
-                </a>
-                <a class="text-tsm font-bold" :href="hashExplorerURL + '/' + txn.hash" target=_new><span :class="`${ (txn.amount[0] ==='-')?'text-red-500':'text-green-500' }`">{{ txn.amount }}</span> <span class="text-xxs font-normal">{{ currentNativeTokenName }}</span></a>
-              </div>
+            <div>
+              <a :href="faucetLink" target=_new class="inline-block text-center mr-2" v-if="faucetLink">
+                <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                  <div class="h-full w-full flex items-center justify-center">
+                    <img src="@/modules/dashboard/img/icon-balance-white.svg" class="w-5 h-5">
+                  </div>
+                </div><br>
+                <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.topUp')}}</div>
+              </a>
+              <router-link :to="{ name: 'ViewTransferCreate'}" class="inline-block text-center mx-2">
+                <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                  <div class="h-full w-full flex items-center justify-center">
+                    <img src="@/modules/dashboard/img/icon-transfer-white.svg" class="w-5 h-5">
+                  </div>
+                </div><br>
+                <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.transfer')}}</div>
+              </router-link>
+              <router-link :to="{ name: 'ViewServicesStackingBuy'}" class="inline-block text-center mx-2.5" v-if="isPublicNetwork">
+                <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                  <div class="flex items-center justify-center h-full w-full">
+                    <font-awesome-icon icon="shopping-bag" class="h-5 w-5 text-white" />
+                  </div>
+                </div><br>
+                <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.buy')}}</div>
+              </router-link>
+              <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="inline-block text-center mx-3" v-if="isPublicNetwork">
+                <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
+                  <div class="h-full w-full flex items-center justify-center">
+                    <img src="@/modules/dashboard/img/icon-swap-white.svg" class="w-5 h-5">
+                  </div>
+                </div><br>
+                <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.swap')}}</div>
+              </router-link>
             </div>
           </div>
         </div>
@@ -147,7 +96,8 @@ import { listenerState } from '@/state/listenerState';
 import { WalletUtils } from '@/util/walletUtils';
 import {AppState} from '@/state/appState'
 import { useI18n } from 'vue-i18n';
-import { TransactionType } from 'tsjs-xpx-chain-sdk';
+import { TransactionType, NetworkType } from 'tsjs-xpx-chain-sdk';
+
 
 export default defineComponent({
   name: 'ViewDashboard',
@@ -184,6 +134,11 @@ export default defineComponent({
     const isInitialSender = ref(false);
     const cosignModalKey = ref(0);
     const decryptMessageKey = ref(0);
+
+    const isPublicNetwork = computed(()=>{
+      return AppState.networkType == NetworkType.TEST_NET || AppState.networkType == NetworkType.MAIN_NET;
+    });
+
     if(props.type == 'transaction'){
       displayBoard.value = 'transaction';
     }
@@ -280,7 +235,7 @@ export default defineComponent({
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
     const currentNativeTokenId = computed(()=> AppState.nativeToken.assetId);
     const displyFaucet = computed(() => {
-      return (AppState.networkType == 168)?true:false;
+      return (AppState.networkType == NetworkType.TEST_NET)?true:false;
     });
     const faucetLink = computed(() => {
       if(displyFaucet.value){
@@ -292,20 +247,29 @@ export default defineComponent({
           return false;
         }
       }else{
-        if(AppState.networkType == 184){
+        if(AppState.networkType == NetworkType.MAIN_NET){
           return 'https://www.proximax.io/en/xpx';
         }else{
           return false;
         }
       }
     });
-    let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
-    currentAccount.default = true;
-    const selectedAccount = ref(currentAccount);
+    // let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
+    // currentAccount.default = true;
+    // const selectedAccount = ref(currentAccount);
+    let selectedAccount = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return null
+      }
+      return walletState.currentLoggedInWallet.selectDefaultAccount()
+    })
     const accountAssets = computed(()=>{
-      let defaultAccAsset =walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount().assets : walletState.currentLoggedInWallet.accounts[0].assets
-      let filteredAsset = defaultAccAsset.filter(asset=>asset.amount!=0)
-      return filteredAsset 
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
+      let defaultAccAsset = selectedAccount.value.assets;
+      let filteredAsset = defaultAccAsset.filter(asset=>asset.rawAmount!=0);
+      return filteredAsset; 
     })
     const currentBlock = computed(() => AppState.readBlockHeight);
 
@@ -315,8 +279,8 @@ export default defineComponent({
     const selectedAccountAddressPlain = computed(()=> selectedAccount.value.address);
     const selectedAccountAddressShort = computed(() => {
       let prettyAddress = Helper.createAddress(selectedAccount.value.address).pretty();
-      let firstPartAddress = prettyAddress.substr(0, 11);
-      let secondPartAddress = prettyAddress.substr(-11);
+      let firstPartAddress = prettyAddress.substring(0, 11);
+      let secondPartAddress = prettyAddress.substring(prettyAddress.length - 11);
       return firstPartAddress + '...' + secondPartAddress;
     });
     const selectedAccountDirectChilds = computed(()=> {
@@ -375,7 +339,7 @@ export default defineComponent({
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
     let accountConfirmedTxnsCount = ref(0);
     let updateAccountTransactionCount = async()=>{
-      let transactionsCount = await dashboardService.getAccountTransactionsCount(currentAccount);
+      let transactionsCount = await dashboardService.getAccountTransactionsCount(selectedAccount.value);
       accountConfirmedTxnsCount.value = transactionsCount.confirmed;
     };
     const copy = (id) =>{
@@ -738,9 +702,9 @@ export default defineComponent({
     });
     
     emitter.on('DEFAULT_ACCOUNT_SWITCHED',async(payload) => {
-      currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
+      // currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount();
       // currentAccount.default = true;
-      selectedAccount.value = currentAccount;
+      // selectedAccount.value = currentAccount;
       // recentTransferTxn();
       updateAccountTransactionCount();
       loadRecentTransactions();
@@ -839,6 +803,7 @@ export default defineComponent({
       }
 
     return {
+      isPublicNetwork,
       pendingTransactions,
       toSvg,
       addressExplorerURL,

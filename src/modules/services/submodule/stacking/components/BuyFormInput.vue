@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { networkState } from "@/state/networkState";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
@@ -66,6 +66,8 @@ export default {
   ],
   setup(props, { emit, expose }){
 
+    const balance = ref(props.tokens.find(token => token.name === props.selectedToken).balance);
+
     const tokenName = computed(() => {
       return props.tokens.find(token => token.name === props.selectedToken).name;
     });
@@ -81,9 +83,10 @@ export default {
     }
 
     const isDisplayBuyTokenModal = ref(false);
-    const setToken = (token) => {
+    const setToken = (tokenName) => {
       isDisplayBuyTokenModal.value = false;
-      emit('confirmedSelectToken', token);
+      tokenBalance.value = props.tokens.find(token => token.name === tokenName).balance;
+      emit('confirmedSelectToken', tokenName);
     }
 
     const updateSeletectedTokenBalance = (tokenName)=>{
@@ -93,6 +96,10 @@ export default {
     expose({ updateSeletectedTokenBalance });
 
     updateSeletectedTokenBalance(props.selectedToken);
+
+    watch(props, (newProps) => {
+      tokenBalance.value = newProps.tokens.find(token => token.name === newProps.selectedToken).balance;
+    }, {deep: true})
 
     return {
       isDisplayBuyTokenModal,

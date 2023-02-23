@@ -11,10 +11,12 @@ export class Account{
     address: string;
     multisigInfo: MultisigInfo[] = [];
     assets: Asset[] = [];
+    nonHoldingAssets: Asset[] = [];
     namespaces: Namespace[] = [];
     linkedPublicKey: string = "";
     totalCreatedAsset: number | null = null;
     totalTxns: number = -1; // temp store total txns number, -1 to indicate not updated - include embedded, exclude cosigning
+    assetsLastUpdate: number = Date.now();
 
     constructor(name: string, publicKey: string, address: string){
         this.name = name;
@@ -40,6 +42,11 @@ export class Account{
         if(index > -1){
             this.assets.splice(index, 1);
         }
+    }
+
+    removeAssetByIndex(index: number): void{
+
+        this.assets.splice(index, 1);
     }
 
     addNamespace(namespace: Namespace): void{
@@ -86,6 +93,14 @@ export class Account{
         let temp: MultisigInfo[] = this.multisigInfo.filter(( multiInfo)=> multiInfo.level === 1);
 
         return Account.getMultisigInfoPublicKey(temp);
+    }
+
+    addNonHoldingAsset(asset: Asset){
+        let nonHoldingAssetsId = this.nonHoldingAssets.map((asset)=> asset.idHex);
+        
+        if(!nonHoldingAssetsId.includes(asset.idHex)){
+            this.nonHoldingAssets.push(asset);
+        }
     }
 
     static getMultisigInfoPublicKey(multisigInfo: MultisigInfo[]): string[]{
