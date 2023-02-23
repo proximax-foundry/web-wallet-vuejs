@@ -421,6 +421,7 @@ export default {
 
     return {
       showPrivateKeyError,
+      findAcc,
       privateKey,
       currentNativeTokenName,
       splitBalance,
