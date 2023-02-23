@@ -201,10 +201,13 @@ export default{
       if(isHover.value || isHoverCopy.value){
         return
       }
-      setDefaultAcc()
-      setDefaultAccInStorage(p.account.address)
-      router.push({ name: 'ViewAccountDetails', params: { address: p.account.address }})     
-      
+      if(!p.account.type){
+        setDefaultAcc()
+        setDefaultAccInStorage(p.account.address)
+        router.push({ name: 'ViewAccountDetails', params: { address: p.account.address }})
+      }else{
+        router.push({ name: 'ViewAccountDetails', params: { address: p.account.address }})
+      }   
     }
     
     return {
