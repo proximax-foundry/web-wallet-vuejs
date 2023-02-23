@@ -53,7 +53,7 @@
   </div>
 </template>
 
-<script >
+<script>
 import { computed, ref, watch, getCurrentInstance, inject } from "vue";
 import TextInput from "@/components/TextInput.vue";
 import { walletState } from "@/state/walletState";

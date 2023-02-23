@@ -32,10 +32,10 @@
               <div class="inline-block">
                 <div class="text-blue-primary text-tsm">{{data.name}} <span class="inline-block ml-5 rounded-md text-blue-primary bg-blue-200 px-2 py-1 text-xxs font-bold" v-if="data.group!='-none-'">{{ data.group }}</span></div>
                 <div class="mt-1 text-xs md:text-tsm">{{data.address}}</div>
-                <div  class="mt-1 text-xs md:text-tsm flex items-center">
+                <div  class="mt-1 text-xs md:text-tsm flex items-center bg-green-100 w-24">
                   <div>{{ $t('general.publicKey') }}</div>
-                  <font-awesome-icon icon="check" class="w-3 h-3 ml-1 mt-1 inline-block text-blue-primary" v-if="data.publicKey"></font-awesome-icon>
-                  <font-awesome-icon icon="times" class="w-3 h-3 ml-1 mt-1 inline-block text-blue-primary" v-else></font-awesome-icon>
+                  <font-awesome-icon icon="check" class="w-3 h-3 ml-3 inline-block text-blue-primary" v-if="data.publicKey"></font-awesome-icon>
+                  <font-awesome-icon icon="times" class="w-3 h-3 ml-3 inline-block text-blue-primary" v-else></font-awesome-icon>
                 </div>
               </div>
             </div>
@@ -64,7 +64,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { computed, ref, getCurrentInstance } from "vue";
 import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import DataTable from 'primevue/datatable';
@@ -179,7 +179,7 @@ export default{
       isMenuShow.value[i] = !isMenuShow.value[i];
     }
 
-    const currentMenu = ref('');
+    const currentMenu = ref<string | number>('');
 
     // emitted from App.vue when click on any part of the page
     emitter.on('PAGE_CLICK', () => {

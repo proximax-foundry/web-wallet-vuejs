@@ -20,7 +20,7 @@
     <AddCustomGroupModal :toggleModal="isDisplayAddCustomPanel" :groups="contactGroups" />
   </div>
 </template>
-<script>
+<script lang="ts">
 import { Address } from "tsjs-xpx-chain-sdk";
 import { computed, ref, watch, getCurrentInstance } from 'vue';
 import TextInputClean from '@/components/TextInputClean.vue';
@@ -136,7 +136,7 @@ export default {
       }
       else if(addressOrPk.value.length == 64){
         verifyAdd.value = true
-        address.value = WalletUtils.createAddressFromPublicKey(addressOrPk.value, AppState.networkType).address
+        address.value = WalletUtils.createAddressFromPublicKey(addressOrPk.value, AppState.networkType).plain()
       }
     });
 
