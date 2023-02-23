@@ -101,6 +101,13 @@ export default {
           }
           return true
       }
+      const checkOtherAcc = address =>{
+        let plainAddress = Address.createFromRawAddress(address).plain()
+        if(walletState.currentLoggedInWallet.others.find(acc=>acc.address==plainAddress)){
+          return true
+        }
+        return false
+      }
       const isMultisig = ref(false) 
       const isCosigner = ref(false)
       const networkType = AppState.networkType
@@ -164,9 +171,11 @@ export default {
     }
 
     const navigate = (address) =>{
-      if(findAccountWithAddress(address) && !isHover.value){
+      if(findAccountWithAddress(address) && !isHover.value && !checkOtherAcc(address)){
         setDefaultAcc(getAccountNameByAddress(Address.createFromRawAddress(address).plain()))
         setDefaultAccInStorage(Address.createFromRawAddress(address).plain())
+        router.push({ name: 'ViewAccountDetails', params: { address:getPlainAddress(address) }})
+      }else if(findAccountWithAddress(address)){
         router.push({ name: 'ViewAccountDetails', params: { address:getPlainAddress(address) }})
       }
       if(!networkState.currentNetworkProfile){
