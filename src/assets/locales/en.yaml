@@ -292,6 +292,8 @@ general:
     assets cannot be recovered without it!
   privateKey: Private Key
   publicKey: Public Key
+  publicKeyAvailable: Public key is available on the blockchain!
+  publicKeyNotAvailable: Public key is not available on the blockchain!
   recipient: Recipient
   remove: Remove
   rentalFee: Rental Fee

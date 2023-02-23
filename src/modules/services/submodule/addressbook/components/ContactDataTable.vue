@@ -32,6 +32,11 @@
               <div class="inline-block">
                 <div class="text-blue-primary text-tsm">{{data.name}} <span class="inline-block ml-5 rounded-md text-blue-primary bg-blue-200 px-2 py-1 text-xxs font-bold" v-if="data.group!='-none-'">{{ data.group }}</span></div>
                 <div class="mt-1 text-xs md:text-tsm">{{data.address}}</div>
+                <div  class="mt-1 text-xs md:text-tsm flex items-center bg-green-100 w-24">
+                  <div>{{ $t('general.publicKey') }}</div>
+                  <font-awesome-icon icon="check" class="w-3 h-3 ml-3 inline-block text-blue-primary" v-if="data.publicKey"></font-awesome-icon>
+                  <font-awesome-icon icon="times" class="w-3 h-3 ml-3 inline-block text-blue-primary" v-else></font-awesome-icon>
+                </div>
               </div>
             </div>
           </template>
@@ -42,7 +47,7 @@
               <img src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer inline-block" @click="showMenu(data.i)">
               <div v-if="isMenuShow[data.i]" class="mt-1 pop-option absolute right-0 w-32 rounded-sm shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 text-left lg:mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 <div role="none" class="my-2">
-                  <router-link :to="{ name: 'ViewServicesAddressBookEditContact' , params: { contactAddress: data.address }}" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.edit')}}</router-link>
+                  <router-link :to="{ name: 'ViewServicesAddressBookEditContact' , params: { contactAddress: data.address, contactPublicKey: data.publicKey?true:false }}" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.edit')}}</router-link>
                   <ConfirmDeleteContactModal :data="data" class="block" />
                 </div>
               </div>
@@ -59,7 +64,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { computed, ref, getCurrentInstance } from "vue";
 import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import DataTable from 'primevue/datatable';
@@ -117,6 +122,7 @@ export default{
                 name: contact.name,
                 address: Helper.createAddress(contact.address).pretty(),
                 group: contact.group,
+                publicKey: contact.publicKey?contact.publicKey:null,
                 svgString: toSvg(contact.address, 45, themeConfig.jdenticonConfig),
               };
               contracts.push(data);
@@ -130,6 +136,7 @@ export default{
                 name: contact.name,
                 address: Helper.createAddress(contact.address).pretty(),
                 group: contact.group,
+                publicKey: contact.publicKey?contact.publicKey:null,
                 svgString: toSvg(contact.address, 45, themeConfig.jdenticonConfig),
               };
               contracts.push(data);
@@ -172,7 +179,7 @@ export default{
       isMenuShow.value[i] = !isMenuShow.value[i];
     }
 
-    const currentMenu = ref('');
+    const currentMenu = ref<string | number>('');
 
     // emitted from App.vue when click on any part of the page
     emitter.on('PAGE_CLICK', () => {

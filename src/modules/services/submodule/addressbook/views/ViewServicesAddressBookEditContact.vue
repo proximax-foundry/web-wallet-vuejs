@@ -13,16 +13,20 @@
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <div class='mt-2 py-3 text-center px-0 flex'>
           <TextInputClean :placeholder="$t('general.name')" :errorMessage="$t('general.nameRequired')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" class="w-52 inline-block mr-2" />
-          <TextInputClean :placeholder="$t('general.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" class="w-96 inline-block mr-2" />
+          <TextInputClean :placeholder="$t('general.address')" :errorMessage="addErr" v-model="addressOrPk" icon="wallet" :showError="showAddErr" class="w-96 inline-block mr-2" />
           <SelectInputPluginClean v-model="selectContactGroups" placeholder="Group" :options="contactGroups" selectDefault="-none-" ref="selectGroupDropdown" class="w-60 inline-block mr-2" />
           <button type="submit" class="default-btn py-1 disabled:opacity-50 h-12 flex items-center" :disabled="disableSave" @click="SaveContact()"><img src="@/modules/services/submodule/addressbook/img/icon-save.svg" class="inline-block mr-2">{{$t('addressBook.saveAddress')}}</button>
+        </div>
+        <div v-if="!existingPublicKey && !showAddErr && !newPublicKey">
+          <div v-if="!publicKey && isLoaded" class="px-3 py-2 mt-1 bg-red-300">{{$t('general.publicKeyNotAvailable')}}</div>
+          <div v-else class="px-3 py-2 mt-1 bg-green-100">{{$t('general.publicKeyAvailable')}}</div>
         </div>
       </div>
     </div>
     <AddCustomGroupModal :toggleModal="isDisplayAddCustomPanel" :groups="contactGroups" />
   </div>
 </template>
-<script>
+<script lang="ts">
 import { Address } from "tsjs-xpx-chain-sdk";
 import { computed, ref, watch, getCurrentInstance, onMounted } from 'vue';
 import TextInputClean from '@/components/TextInputClean.vue';
@@ -38,6 +42,8 @@ import {useI18n} from 'vue-i18n';
 import { Helper } from "@/util/typeHelper";
 import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import AddCustomGroupModal from "@/modules/services/submodule/addressbook/components/AddCustomGroupModal.vue";
+import { AppState } from "@/state/appState";
+import { WalletUtils } from "@/util/walletUtils";
 export default {
   name: 'ViewServicesAddressBookEditContact',
   components: {
@@ -46,7 +52,8 @@ export default {
     AddCustomGroupModal,
   },
   props: {
-    contactAddress: String
+    contactAddress: String,
+    contactPublicKey: String
   },
 
   setup(props){
@@ -70,7 +77,24 @@ export default {
     }
     
     const contactName = ref(contact?contact.name:'');
-    const address = ref(props.contactAddress)
+    const addressOrPk = ref(props.contactAddress)
+    const address = ref('');
+    const publicKey = ref('');
+    address.value = addressOrPk.value
+    
+    const existingPublicKey = ref(false)
+    const isLoaded = ref(false)
+    if(props.contactPublicKey == "true"){
+      existingPublicKey.value = true
+    }
+
+    const newPublicKey = computed(() => {
+      if(addressOrPk.value.length == 64){
+        return true
+      }else{
+        return false
+      }
+    })
 
     const contactGroupsList = ref([]);
     if(walletState.currentLoggedInWallet){
@@ -116,24 +140,32 @@ export default {
     );
 
     const showNameErr = computed(
-      () => address.value != '' && contactName.value == ''
+      () => (address.value != '' && contactName.value == '') || (addressOrPk.value != '' && contactName.value == '')
     );
 
     const addErr = computed(
       () => {
-        let addErrDefault = t('addressBook.addressRequired');
+        let addErrDefault = t('general.invalidInput');
         return addMsg.value?addMsg.value:addErrDefault;
       }
     );
 
-    watch(address, ()=>{
+    watch(addressOrPk, ()=>{
       if(!walletState.currentLoggedInWallet){
         return;
       }
-      const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
-      const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address.value);
-      verifyAdd.value = verifyContactAddress.isPassed;
-      addMsg.value = verifyContactAddress.errMessage;
+      if(addressOrPk.value.length <= 63 || addressOrPk.value.length >=65){
+        address.value = addressOrPk.value
+        const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
+        const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address.value);
+        verifyAdd.value = verifyContactAddress.isPassed;
+        addMsg.value = verifyContactAddress.errMessage;
+        init()
+      }
+      else if(addressOrPk.value.length == 64){
+        verifyAdd.value = true
+        address.value = WalletUtils.createAddressFromPublicKey(addressOrPk.value, AppState.networkType).plain()
+      }
     });
 
     const isDisplayAddCustomPanel = ref(false);
@@ -143,10 +175,34 @@ export default {
       }
     });
 
-    const SaveContact = () => {
+    const getPublicKey = async(address) =>{
+      try{
+        let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
+        if(accInfo.publicKey == "0000000000000000000000000000000000000000000000000000000000000000"){
+          publicKey.value = null
+          isLoaded.value = true
+        }
+        else{
+          publicKey.value = accInfo.publicKey
+          isLoaded.value = true
+        }
+      }
+      catch{
+        publicKey.value = null
+        isLoaded.value = true
+      }
+    }
+
+    const SaveContact = async() => {
       const wallet = walletState.currentLoggedInWallet
       if(!wallet){
         return;
+      }
+      if (addressOrPk.value.length == 64){
+        publicKey.value = addressOrPk.value
+      }
+      else{
+        await getPublicKey(address.value)
       }
       //get index of editing contact
       const contactIndex = walletState.currentLoggedInWallet.contacts.findIndex((contact) => Helper.createAddress(contact.address).pretty() == props.contactAddress);
@@ -160,7 +216,7 @@ export default {
       }else if(findAddressInTempContact!=undefined){
         err.value = t('addressBook.addressExist');
       }else{
-        walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value.trim(), address: Address.createFromRawAddress(address.value).plain(), group: selectContactGroups.value });
+        walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value.trim(), address: Address.createFromRawAddress(address.value).plain(), group: selectContactGroups.value, publicKey: publicKey.value });
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         toast.add({severity:'info', summary: t('general.addressBook'), detail: t('addressBook.contactUpdated'), group: 'br-custom', life: 5000});
         router.push({name: "ViewServicesAddressBook"});
@@ -182,11 +238,26 @@ export default {
       isDisplayAddCustomPanel.value = false;
     });
 
+    const init = ()=>{
+      if (AppState.isReady) {
+        getPublicKey(address.value)
+      }else {
+        let readyWatcher = watch(AppState, (value) => {
+          if (value.isReady) {
+            getPublicKey(address.value)
+            readyWatcher();
+          }
+        });
+      }
+    }
+    init()
+
     return {
       err,
       addErr,
       contactName,
       address,
+      addressOrPk,
       disableSave,
       showAddErr,
       showNameErr,
@@ -195,6 +266,10 @@ export default {
       contactGroups,
       isDisplayAddCustomPanel,
       selectGroupDropdown,
+      existingPublicKey,
+      publicKey,
+      isLoaded,
+      newPublicKey
     }
   },
 
