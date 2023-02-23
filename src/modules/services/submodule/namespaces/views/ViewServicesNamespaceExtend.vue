@@ -74,7 +74,7 @@ import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
-import { TransactionUtils } from '@/util/transactionUtils';
+import { isMultiSig, TransactionUtils, findAcc, findAccWithAddress } from '@/util/transactionUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { useI18n } from 'vue-i18n';
 
@@ -179,20 +179,6 @@ export default {
     const disableCreate = computed(() => !(
       walletPassword.value.match(passwdPattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value)
     ));
-
-    const isMultiSig = (address) => {
-      if(walletState.currentLoggedInWallet){
-        const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address) || walletState.currentLoggedInWallet.others.find((account) => account.address == address);
-        if(account){
-          const isMulti = account.getDirectParentMultisig().length>0?true:false
-          return isMulti
-        }else{
-          return false
-        }
-      }else{
-        return false
-      }
-    };
 
     const selectedAccName = ref('');
     const selectedAccAdd = ref('');
@@ -317,10 +303,6 @@ export default {
       router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
     };
 
-    const fetchAccount = (publicKey) => {
-      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
-    };
-
     const getMultiSigCosigner = computed(()=>{
       if(!account.value){
         return
@@ -331,9 +313,9 @@ export default {
         cosigners.cosignerList.forEach( publicKey => {
           list.push({
             publicKey,
-            name: fetchAccount(publicKey).name,
-            balance: fetchAccount(publicKey).balance,
-            address: fetchAccount(publicKey).address
+            name: findAcc(publicKey).name,
+            balance: findAcc(publicKey).balance,
+            address: findAcc(publicKey).address
           });
         });
         cosigners.cosignerList = list;
@@ -382,28 +364,13 @@ export default {
         if(getMultiSigCosigner.value.cosignerList.length > 1){
           return cosignerAddress.value;
         }else{
-          return fetchAccount(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
+          return findAcc(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
         }
       }else{
         return '';
       }
     });
 
-    const splitCurrency = (amount) => {
-      let split = amount.toString().split(".")
-      if (split[1]!=undefined){
-        return '<span class="font-semibold text-sm">' + split[0] + '</span>.<span class="font-semibold text-xs">' + split[1] + ' ' + currentNativeTokenName.value + '</span>';
-      }else{
-        return '<span class="font-semibold text-sm">' + split[0] + '</span> <span class="font-semibold text-xs">' + currentNativeTokenName.value + '</span>';
-      }
-    };
-
-    const findAccWithAddress = address =>{
-      if(!walletState.currentLoggedInWallet){
-        return null
-      }
-      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)
-    }
 
     const checkCosignBalance = computed(() => {
       let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
@@ -425,7 +392,6 @@ export default {
       disabledDuration,
       duration,
       showDurationErr,
-      isMultiSig,
       isMultiSigBool,
       rentalFee,
       rentalFeeCurrency,
@@ -448,7 +414,6 @@ export default {
       endBlock,
       numDaysleft,
       showMaxDaysLabel,
-      splitCurrency,
       svgString,
       Helper,
       currentNativeTokenName,

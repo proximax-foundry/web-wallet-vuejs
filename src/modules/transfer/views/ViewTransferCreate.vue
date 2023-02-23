@@ -102,7 +102,7 @@ import { multiSign } from "@/util/multiSignatory";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { accountUtils } from "@/util/accountUtils";
-import { TransactionUtils } from "@/util/transactionUtils";
+import { isMultiSig, TransactionUtils, findAccWithAddress, findAcc } from '@/util/transactionUtils';
 import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from '@/util/chainUtils';
 import { NamespaceUtils } from '@/util/namespaceUtils';
@@ -218,16 +218,6 @@ export default {
     const selectedAccAdd = ref(
       walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount().address : ''
     );
-    const findAcc = (publicKey)=>{
-      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
-    }
-
-    const findAccWithAddress = address =>{
-      if(!walletState.currentLoggedInWallet){
-        return null
-      }
-      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)
-    }
     
     const accounts = computed(()=>{
       if(!walletState.currentLoggedInWallet){
@@ -273,17 +263,6 @@ export default {
       }
     })
     
-    const isMultiSig = (address) => {
-      const account = accounts.value.find(
-        (account) => account.address === address
-      );
-      let isMulti = false;
-     
-      if (account != undefined) {
-        isMulti = account.isMultisig;
-      }
-      return isMulti;
-    };
     const isMultiSigBool = computed(() => {
           return isMultiSig(selectedAccAdd.value)
       }
@@ -871,7 +850,6 @@ export default {
 
     return {
       showAssetBalanceErr,
-      findAcc,
       totalFee,
       contacts,
       onNodeSelect,
@@ -917,7 +895,6 @@ export default {
       currentlySelectedMosaic,
       removeMosaic,
       toggleConfirm,
-      isMultiSig,
       isMultiSigBool,
       effectiveFee,
       isNotCosigner,

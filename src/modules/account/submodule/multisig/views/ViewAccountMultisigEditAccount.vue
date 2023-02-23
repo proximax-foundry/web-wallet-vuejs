@@ -114,7 +114,7 @@ import {useI18n} from 'vue-i18n'
 import { Helper } from '@/util/typeHelper';
 import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-import { TransactionUtils } from '@/util/transactionUtils';
+import { TransactionUtils, findAcc } from '@/util/transactionUtils';
 import { AppState } from '@/state/appState';
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 export default {
@@ -158,12 +158,6 @@ export default {
     const defaultAcc = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount(): null
     const selectedAccAdd = ref(defaultAcc?defaultAcc.address:'');
     const accBalance = ref(Helper.toCurrencyFormat(defaultAcc?defaultAcc.balance:0, AppState.nativeToken.divisibility));
-     const findAcc = (publicKey)=>{
-      if(!walletState.currentLoggedInWallet){
-        return null
-      }
-      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
-    }
     // current wallet
     const wallet = walletState.currentLoggedInWallet;
     // get account details initialization
@@ -507,14 +501,6 @@ export default {
         return '0' 
       }
     });
-    const splitBalance = computed(()=>{
-      let split = initiatorDisplayBalance.value.split(".")
-      if (split[1]!=undefined){
-        return {left:split[0],right:split[1]}
-      }else{
-        return {left:split[0], right:null}
-      }
-    })
     const addCoSig = () => {
       coSign.value.push('');
       selectedNode.value.push({})
@@ -700,10 +686,6 @@ export default {
       
     });
 
-    const fetchAccount = (publicKey) => {
-      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
-    };
-
     const getMultiSigCosigner = computed(() => {
       if(networkState.currentNetworkProfileConfig){
         let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
@@ -711,9 +693,9 @@ export default {
         cosigners.cosignerList.forEach( publicKey => {
           list.push({
             publicKey,
-            name: fetchAccount(publicKey).name,
-            balance: fetchAccount(publicKey).balance,
-            address: fetchAccount(publicKey).address
+            name: findAcc(publicKey).name,
+            balance: findAcc(publicKey).balance,
+            address: findAcc(publicKey).address
           });
         });
 
@@ -735,7 +717,6 @@ export default {
       contact,
       toggleContact,
       contactName,
-      splitBalance,
       currentNativeTokenName,
       err,
       disableSend,
