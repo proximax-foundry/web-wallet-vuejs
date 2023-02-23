@@ -33,7 +33,7 @@
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
-        <TransactionFeeDisplay :namespace-rental-fee-currency="rentalFeeCurrency" :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="lockFundTxFee" :balance="balance" :selected-acc-add="selectedAccAdd"/>
+        <TransactionFeeDisplay :namespace-rental-fee-currency="rentalFeeCurrency" :transaction-fee="String(transactionFee)" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="balance" :selected-acc-add="selectedAccAdd"/>
         <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="createNamespace">{{$t('namespace.registerNamespace')}}</button>

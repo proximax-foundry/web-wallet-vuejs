@@ -54,7 +54,7 @@
         </div>
       </div>
       <div class='bg-navy-primary p-6 lg:col-span-1'>
-        <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig-already="isMultisig" :on-partial="onPartial" :transaction-fee="aggregateFee" :total-fee-formatted="totalFeeFormatted" :lock-fund-currency-convert="lockFundCurrency" :lock-fund-tx-fee-convert="lockFundTxFee" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
+        <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig-already="isMultisig" :on-partial="onPartial" :transaction-fee="String(aggregateFee)" :total-fee-formatted="totalFeeFormatted" :lock-fund-currency-convert="lockFundCurrency" :lock-fund-tx-fee-convert="String(lockFundTxFee)" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
