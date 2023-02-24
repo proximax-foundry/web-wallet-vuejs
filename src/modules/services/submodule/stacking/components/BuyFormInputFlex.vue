@@ -26,7 +26,7 @@
             :disabled="disabled?disabled:false"
           />
         </div>
-        <!-- <div class="text-xs text-gray-400 text-right">Balance: {{ Helper.toCurrencyFormat(tokenBalance, 3) }}</div> -->
+        <div class="text-xs text-gray-400 text-right">Balance: {{ Helper.toCurrencyFormat(tokenBalance, 3) }}</div>
       </div>
     </div>
     <SelectTokenModalNoBalance @closeModal="isDisplayBuyTokenModal = false" @selectToken="setToken" :tokens="tokens" :toggleModal="isDisplayBuyTokenModal" />

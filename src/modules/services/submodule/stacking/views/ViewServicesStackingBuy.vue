@@ -24,7 +24,7 @@
           </div>
           <div class="mt-10 success_box success success-text" v-if="processing">
             <div class="mb-2">Submission is successful.</div>
-            <div class="font-normal relative"><b>Transaction hash: </b><a :href="explorerLink + transactionHash" target=_new class="hover:underline">{{ transactionHash.substr(0, 7) + '...' + transactionHash.substr(-7) }} <font-awesome-icon icon="external-link-alt" class="ml-1 w-3 h-3 self-center inline-block"></font-awesome-icon></a></div>
+            <div class="font-normal relative"><b>Transaction hash: </b><a :href="explorerLink + transactionHash" target=_new class="hover:underline">{{ transactionHash.substring(0, 7) + '...' + transactionHash.slice(-7) }} <font-awesome-icon icon="external-link-alt" class="ml-1 w-3 h-3 self-center inline-block"></font-awesome-icon></a></div>
             <div><button type="button" class="w-40 hover:shadow-sm bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-3 py-2 border border-blue-primary outline-none mt-2 mb-2" @click="saveCertificate">{{$t('general.certificate')}}</button></div>
           </div>
           <div class="flex justify-center mt-10 success_box success success-text" v-if="dispalyWaitForConfirmationMessage">
@@ -42,7 +42,7 @@
           <div v-else class="text-xs flex items-center justify-end text-gray-500 hover:text-gray-900 group duration-200 transition-all"><button @click="connectWallet" class="border border-gray-500 p-1 rounded-md bg-gray-50 hover:bg-gray-200 transition-all duration-200">Connect Wallet <font-awesome-icon icon="wallet" class="text-gray-500 ml-2 group-hover:text-gray-900" /></button></div>
           <div>
             <BuyFormInput ref="buyFromComponent" formLabel="From" :tokens="stableCoins" v-model="fromInputAmount" :selectedToken="selectedFromToken" :amount="fromAmount" :tokenType="tokenType(selectedChainId)" @confirmedSelectToken="selectFromToken" />
-            <BuyFormInput ref="buyToComponent" formLabel="To" :tokens="siriusTokens" v-model="toInputAmount" :selectedToken="selectedToToken" :amount="toAmount" @confirmedSelectToken="selectToToken" :disabled="true" class="mt-5" />
+            <BuyFormInputFlex ref="buyToComponent" formLabel="To" :tokens="siriusTokens" v-model="toInputAmount" :selectedToken="selectedToToken" :amount="toAmount" @confirmedSelectToken="selectToToken" :disabled="true" class="mt-5" />
           </div>
           <div class="flex mt-4">
             <AddressInputClean :placeholder="$t('transfer.transferPlaceholder')" v-model="siriusAddress" v-debounce:1000="checkRecipient" :showError="showAddressError" />
@@ -91,6 +91,7 @@ import { availableToTokens } from '@/modules/services/submodule/stacking/siriusT
 import { bscStableCoins } from '@/modules/services/submodule/stacking/bscStableCoins';
 import { ethStableCoins } from '@/modules/services/submodule/stacking/ethStableCoins';
 import BuyFormInput from '@/modules/services/submodule/stacking/components/BuyFormInput.vue';
+import BuyFormInputFlex from '@/modules/services/submodule/stacking/components/BuyFormInputFlex.vue';
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import Web3Modal from 'web3modal';
@@ -109,6 +110,7 @@ export default {
   name: "ViewServicesStackingBuy",
   components: {
     BuyFormInput,
+    BuyFormInputFlex,
     AddressInputClean,
     toggleSwitch,
   },
