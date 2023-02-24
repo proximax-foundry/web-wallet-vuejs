@@ -4,7 +4,7 @@
     <div class="flex justify-between">
       <div class="flex items-center cursor-pointer" @click="isDisplayBuyTokenModal = true">
         <font-awesome-icon icon="caret-down" class="mr-1 text-gray-700" />
-        <img :src="require('@/modules/services/submodule/buySiriusCoins/img/tokens/' + tokenImage)" class="w-9 h-9 inline-block" />
+        <img :src="require('@/modules/services/submodule/stacking/img/tokens/' + tokenImage)" class="w-9 h-9 inline-block" />
         <div class="ml-1 text-tsm">{{ tokenName }} {{tokenType}}</div>
       </div>
       <div>
@@ -41,8 +41,7 @@ import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { useI18n } from 'vue-i18n';
 import { Helper } from '@/util/typeHelper';
 import AutoNumericVue from 'autonumeric-vue/src/components/AutoNumericVue';
-// import SelectTokenModal from '@/modules/services/submodule/buySiriusCoins/components/SelectTokenModal.vue';
-import SelectTokenModalNoBalance from '@/modules/services/submodule/buySiriusCoins/components/SelectTokenModalNoBalance.vue';
+import SelectTokenModalNoBalance from '@/modules/services/submodule/stacking/components/SelectTokenModalNoBalance.vue';
 import { boolean } from 'mathjs';
 // import { availableTokens } from '@/modules/services/submodule/buySiriusCoins/tokens';
 
