@@ -322,7 +322,7 @@ export default {
     const err = ref('');
     const bscAddress = ref('');
     const isDisabledSwap = computed(() => 
-      !(amount.value > 0 && walletPasswd.value.match(passwdPattern) && bscAddress.value != '' && !swapInProgress.value )
+      !(amount.value > 0 && walletPasswd.value.match(passwdPattern) && bscAddress.value != '' && !swapInProgress.value && showAmountErr.value==false)
     );
     const amount = ref(0);
 
@@ -662,6 +662,14 @@ export default {
         }
       }
     });
+
+    watch(amount, () => {
+      if(selectedAccount.value.balance < (amount.value + minBalanceAmount.value)){
+        showAmountErr.value = true;
+      }else{
+        showAmountErr.value = false;
+      }
+    })
 
     const siriusTransactionHash = ref('');
 
