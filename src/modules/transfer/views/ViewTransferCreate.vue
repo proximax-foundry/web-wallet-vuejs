@@ -158,7 +158,7 @@ export default {
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
-    const isNotCosigner = ref(false);
+    const isNotCosigner = computed(() => getWalletCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
     const cosignAddress = ref("");
     
     const disableAllInput = ref(false);
