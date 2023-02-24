@@ -15,8 +15,8 @@
               <selectSoundSetting />
             </div>
             <div class="flex">
-              <div class="text-left mb-3 text-gray-700">Change Password:</div>
-              <changeAccountPassword class="text-xs mt-1.5" />
+              <div class="text-left mt-1 mb-3 text-gray-700">Change Password:</div>
+              <changeAccountPassword />
             </div>
             <div class="text-left mb-3 text-gray-700">Nodes</div>
             <NodeComponent />

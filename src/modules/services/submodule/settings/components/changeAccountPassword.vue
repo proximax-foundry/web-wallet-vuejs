@@ -1,7 +1,7 @@
 <template>
     <div>
       <a @click="toggleModal = !toggleModal" ><img src="@/assets/img/globe-white.svg" class="h-4 w-4 inline-block relative mr-2 " style="top: -1px">
-        <button>Change Password</button>
+        <Button label="Change Password" class="p-button-sm p-button-outlined p-button-secondary" />
       </a>
       <TransitionGroup
         enter-active-class="animate__animated animate__fadeInDown"
@@ -16,7 +16,7 @@
               <h1 class="default-title my-3 sm:my-5">Change Password</h1>
             </div>
             <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
-            <div class= 'text-center mt-2 text-xs font-semibold'>{{$t('general.enterPassword')}}</div>
+            <div class= 'text-center mt-2 text-xs font-semibold'>Enter Current Password</div>
             <PasswordInput class = 'my-3' v-model= 'walletPasswd' :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')"/>
             <div @click="verifyWalletPwPk()"  class = 'blue-btn font-semibold py-2 cursor-pointer text-center ml-auto mr-auto w-7/12 disabled:opacity-50 disabled:cursor-auto' :disabled="disableShow">{{$t('general.confirm')}}</div>
             <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-2' @click="toggleModal = !toggleModal;walletPasswd=''">{{$t('general.cancel')}}</div>
@@ -55,10 +55,12 @@
   import { WalletAccount } from "@/models/walletAccount"
   import { useRouter } from "vue-router";
   import { useToast } from "primevue/usetoast";
+  import Button from 'primevue/button';
   export default{
     name: 'changeAccountPassword',
     components:{
-      PasswordInput
+      PasswordInput,
+      Button,
     },
     setup(){
       const {t} = useI18n();
@@ -102,7 +104,7 @@
         } 
      }
      const showSuccess = () => {
-            toast.add({severity:'success', summary: 'Success Message', detail:'Your Password has changed successfully', group:"tl" , life: 3000});
+            toast.add({severity:'success', summary: 'Success', detail:'Your Password has changed', group:"br", life: 3000});
     }
 
      const changeWalletPasswd = ()=> {
