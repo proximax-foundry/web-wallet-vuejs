@@ -34,6 +34,7 @@ import { walletState } from '@/state/walletState';
 import { computed, ref, getCurrentInstance } from 'vue';
 import { toSvg, type JdenticonConfig } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+
 const p = defineProps({
   selectDefault: {
     type: String,
@@ -44,6 +45,7 @@ const p = defineProps({
 defineEmits([
   'select-account', 'update:modelValue',
 ])
+
 const toggleSelection = ref(false);
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance?.appContext.config.globalProperties.emitter;
@@ -76,13 +78,16 @@ const accounts = computed(() => {
   return accountList;
 
 });
+
 const selectedAccount = computed(() => {
   const findAcc = accounts.value.find(acc => acc.value == p.selectDefault)
   return findAcc ? findAcc.label : ""
 })
+
 const selectedAddress = ref(p.selectDefault);
 const selectedAccountInfo = { label: selectedAccount.value, value: selectedAddress.value }
 const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig.value));
+
 const selectAccount = (accountName: string, accountAddress: string) => {
   emitter.emit("select-account", accountAddress)
   selectedAccount.value, selectedAccountInfo.label = accountName;
@@ -90,6 +95,7 @@ const selectAccount = (accountName: string, accountAddress: string) => {
   selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig.value);
   toggleSelection.value = !toggleSelection.value;
 };
+
 const filterQuery = ref("");
 
 const filteredAccounts = computed(() => {

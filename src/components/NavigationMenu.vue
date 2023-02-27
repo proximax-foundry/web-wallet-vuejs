@@ -116,7 +116,6 @@ const selectedAccountAddress = computed(() => {
   return selectedAccount.value.address;
 })
 
-// default account menu
 const displayDefaultAccountMenu = ref(false);
 const booleanOverDefaultAccount = ref(false);
 
@@ -180,7 +179,6 @@ const logout = () => {
   closeNavi();
 };
 
-// const isShowNavi = ref(false);
 const hoverOverNavigation = () => {
   if (navigationSideBar) {
     navigationSideBar.inNavi = true;
@@ -199,16 +197,6 @@ const closeNavi = () => {
     navigationSideBar.isOpen = false;
   }
 }
-
-// const updateDefaultAccount = (accountName) => {
-//   currentAccount = walletState.currentLoggedInWallet.accounts.find((account)=> account.name === accountName);
-//   walletState.currentLoggedInWallet.setDefaultAccountByName(accountName);
-//   walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
-//   toast.add({severity:'success', summary: 'Default account has switched to' , detail: accountName, group: 'br-custom', life: 3000});
-//   emitter.emit('DEFAULT_ACCOUNT_SWITCHED', accountName);
-//   updateAccountTransactionCount();
-//   closeNavi();
-// }
 
 const init = () => {
   updateAccountTransactionCount();
