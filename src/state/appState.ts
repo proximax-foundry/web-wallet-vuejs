@@ -1,9 +1,9 @@
 import { reactive } from "vue";
-import { BuildTransactions } from "../util/buildTransactions"
-import { ChainAPICall } from "../models/REST/chainAPICall"
-import { NetworkType, MosaicId, NamespaceId, NamespaceInfo } from "tsjs-xpx-chain-sdk";
-import { AssetInfo } from "../models/assetInfo";
-import { Namespace } from "../models/namespace";
+import type { BuildTransactions } from "../util/buildTransactions"
+import type { ChainAPICall } from "../models/REST/chainAPICall"
+import { NetworkType, NamespaceInfo } from "tsjs-xpx-chain-sdk";
+import type { AssetInfo } from "../models/assetInfo";
+import type { Namespace } from "../models/namespace";
 
 interface NativeToken{
     label: string,

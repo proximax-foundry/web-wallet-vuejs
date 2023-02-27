@@ -1,6 +1,4 @@
 import { useToast } from "primevue/usetoast";
-import { ref } from 'vue';
-import { Address } from "tsjs-xpx-chain-sdk";
 
 // copy address keys
 export const copyKeyFunc = (id:string, ):void => {
@@ -53,9 +51,11 @@ export const copyToClipboard = (data: string): boolean => {
     range.selectNodeContents(textInput);
 
     const textSelection = window.getSelection();
-    textSelection.removeAllRanges();
-    textSelection.addRange(range);
-
+    if(textSelection){
+      textSelection.removeAllRanges();
+      textSelection.addRange(range);
+    }
+   
     textInput.setSelectionRange(0, textInput.value.length);
     document.execCommand('copy');
   } catch (err) {

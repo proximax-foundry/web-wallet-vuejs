@@ -1,5 +1,5 @@
 import { PartialTransaction } from "./partialTransaction";
-import { TxnExchangeOffer } from "../exchangeOffer";
+import type { TxnExchangeOffer } from "../exchangeOffer";
 
 export class PartialExchangeTransaction extends PartialTransaction{
 

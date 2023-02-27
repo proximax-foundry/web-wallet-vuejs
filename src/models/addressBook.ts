@@ -6,7 +6,7 @@ export class AddressBook{
     group: string;
     publicKey: string | null;
 
-    constructor(name: string, address: string, group: string, publicKey=null){
+    constructor(name: string, address: string, group: string, publicKey :string | null=null){
         this.name = name;
         this.address = address;
         this.group = group;

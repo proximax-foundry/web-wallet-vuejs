@@ -12,7 +12,7 @@ import {
   AggregateTransaction,
   CosignatureTransaction,
   TransactionQueryParams,
-  InnerTransaction,
+  type InnerTransaction,
   SignedTransaction,
   CosignatureSignedTransaction,
   TransactionGroupType,
@@ -20,7 +20,6 @@ import {
   TransactionHash,
   HashLockTransaction,
   TransactionAnnounceResponse,
-  AddExchangeOfferTransaction,
   ExchangeOfferTransaction,
   AccountLinkTransaction,
   ModifyMultisigAccountTransaction,
@@ -32,11 +31,12 @@ import { ChainConfigUtils } from "./chainConfigUtils";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { AnnounceType, AutoAnnounceSignedTransaction, HashAnnounceBlock } from "@/state/listenerState";
 import { networkState } from "@/state/networkState";
-import i18n from "@/i18n";
 import { walletState } from "@/state/walletState";
+import { useI18n } from "vue-i18n";
+import type { WalletAccount } from "@/models/walletAccount";
 
 
-const {t} = i18n.global
+const { t } = useI18n({ useScope: 'global' })
 export const transactionTypeName = {
   transfer: {
     id: TransactionType.TRANSFER,
@@ -136,7 +136,7 @@ export const transactionTypeName = {
   },
   modifyAccountMetadata_v2: {
     id: TransactionType.ACCOUNT_METADATA_V2,
-    name:t('transaction.accountMetadata')
+    name: t('transaction.accountMetadata')
   },
   modifyMosaicMetadata_v2: {
     id: TransactionType.MOSAIC_METADATA_V2,
@@ -159,30 +159,27 @@ export const transactionTypeName = {
 export class TransactionUtils {
 
 
-  static getTransactionTypeNameByEnum(transactionType: TransactionType): string{
+  static getTransactionTypeNameByEnum(
+    transactionType: TransactionType
+  ): string {
+    const transactionTypes = Object.values(transactionTypeName);
+    const foundType = transactionTypes.find(
+      (txnType) => txnType.id == transactionType
+    );
 
-    let name = "";
-
-    for(let key in transactionTypeName){
-      if(transactionType === transactionTypeName[key].id){
-        name = transactionTypeName[key].name;
-        break;
-      }
-    }
-
-    return name;
+    return foundType ? foundType.name : "UNKNOWN";
   }
 
-  static getFee(transaction: Transaction): number{
+  static getFee(transaction: Transaction): number {
 
     return transaction.maxFee.compact();
   }
 
-  static getFakeEncryptedMessageSize(message: string): number{
+  static getFakeEncryptedMessageSize(message: string): number {
     return EncryptedMessage.create(message, PublicAccount.createFromPublicKey("0".repeat(64), AppState.networkType), "0".repeat(64)).size();
   }
 
-  static getPlainMessageSize(message: string): number{
+  static getPlainMessageSize(message: string): number {
     return PlainMessage.create(message).size();
   }
 
@@ -201,51 +198,65 @@ export class TransactionUtils {
   }
 
   static async getTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]> {
-
+    if (!AppState.chainAPI) {
+      throw new Error("Service unavailable")
+    }
     let transactions = await AppState.chainAPI.accountAPI.transactions(publicAccount, queryParams);
 
     return transactions;
   }
 
   static async searchTransactions(txnGroupType: TransactionGroupType, queryParams?: TransactionQueryParams): Promise<TransactionSearch> {
-
+    if (!AppState.chainAPI) {
+      throw new Error("Service unavailable")
+    }
     let transactionsResult = await AppState.chainAPI.transactionAPI.searchTransactions(txnGroupType, queryParams);
 
     return transactionsResult;
   }
 
   static async getUnconfirmedTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]> {
-
-    let transactions = await  AppState.chainAPI.accountAPI.unconfirmedTransactions(publicAccount, queryParams);
+    if (!AppState.chainAPI) {
+      throw new Error("Service unavailable")
+    }
+    let transactions = await AppState.chainAPI.accountAPI.unconfirmedTransactions(publicAccount, queryParams);
 
     return transactions;
   }
 
   static async getPartialTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]> {
-
+    if (!AppState.chainAPI) {
+      throw new Error("Service unavailable")
+    }
     let transactions = await AppState.chainAPI.accountAPI.aggregateBondedTransactions(publicAccount, queryParams);
 
     return transactions;
   }
 
-  static announceTransaction(signedTx: SignedTransaction): Promise<TransactionAnnounceResponse>{
-
+  static announceTransaction(signedTx: SignedTransaction): Promise<TransactionAnnounceResponse> {
+    if (!AppState.chainAPI) {
+      throw new Error("Service unavailable")
+    }
     return AppState.chainAPI.transactionAPI.announce(signedTx);
   }
 
   static announceBondedTransaction(signedTx: SignedTransaction): Promise<TransactionAnnounceResponse> {
-
+    if (!AppState.chainAPI) {
+      throw new Error("Service unavailable")
+    }
     return AppState.chainAPI.transactionAPI.announceAggregateBonded(signedTx);
   }
 
-  static announceCosignatureSignedTransaction(signedTx: CosignatureSignedTransaction): Promise<TransactionAnnounceResponse>{
-
+  static announceCosignatureSignedTransaction(signedTx: CosignatureSignedTransaction): Promise<TransactionAnnounceResponse> {
+    if (!AppState.chainAPI) {
+      throw new Error("Service unavailable")
+    }
     return AppState.chainAPI.transactionAPI.announceAggregateBondedCosignature(signedTx);
   }
 
-  static getTransactionTypeName(type: number): string | null {
+  static getTransactionTypeName(type: number): string  {
 
-    let typeName = "";
+    let typeName: string | null = "";
 
     switch (type) {
       case TransactionType.ADDRESS_ALIAS:
@@ -334,93 +345,104 @@ export class TransactionUtils {
         break;
       case TransactionType.REMOVE_MOSAIC_LEVY:
         typeName = transactionTypeName.removeRemoveLevy.name
-        break;  
+        break;
 
       default:
-        typeName = null;
+        typeName = "UNKNOWN";
         break;
     }
 
     return typeName;
   }
 
-  static aggregateBondedTx(innerTX :InnerTransaction[]) :AggregateTransaction{
+  static aggregateBondedTx(innerTX: InnerTransaction[]): AggregateTransaction {
     let txBuilder = AppState.buildTxn;
+    if (!txBuilder) {
+      throw new Error("Service unavailable")
+    }
     return txBuilder.aggregateBonded(innerTX)
   }
 
-  static lockFundTx(signedABT :SignedTransaction | TransactionHash) :HashLockTransaction{
+  static lockFundTx(signedABT: SignedTransaction | TransactionHash): HashLockTransaction {
+    let txBuilder = AppState.buildTxn
+    if (!networkState.currentNetworkProfileConfig || !txBuilder) {
+      throw new Error("Service unavailable")
+    }
     const nativeTokenNamespace = AppState.nativeToken.fullNamespace
     const lockingAtomicFee = networkState.currentNetworkProfileConfig.lockedFundsPerAggregate ?? 0;
-    let txBuilder = AppState.buildTxn 
     return txBuilder.hashLockBuilder()
-    .transactionHash(signedABT)
-    .duration(UInt64.fromUint(ChainConfigUtils.getABTMaxSafeDuration()))
-    .mosaic(new Mosaic(new NamespaceId(nativeTokenNamespace), UInt64.fromUint(lockingAtomicFee)))
-    .build()
+      .transactionHash(signedABT)
+      .duration(UInt64.fromUint(ChainConfigUtils.getABTMaxSafeDuration()))
+      .mosaic(new Mosaic(new NamespaceId(nativeTokenNamespace), UInt64.fromUint(lockingAtomicFee)))
+      .build()
   }
 
-  static announceLF_AND_addAutoAnnounceABT ( lockFundTxSigned :SignedTransaction, signedAggregateBondedTx :SignedTransaction ) :void {
+  static announceLF_AND_addAutoAnnounceABT(lockFundTxSigned: SignedTransaction, signedAggregateBondedTx: SignedTransaction): void {
+    if (!AppState.chainAPI) {
+      throw new Error("Service unavailable")
+    }
     let autoAnnounceSignedTx = new AutoAnnounceSignedTransaction(signedAggregateBondedTx);
     autoAnnounceSignedTx.hashAnnounceBlock = new HashAnnounceBlock(lockFundTxSigned.hash);
     autoAnnounceSignedTx.hashAnnounceBlock.annouceAfterBlockNum = 1;
-    autoAnnounceSignedTx.type = AnnounceType.BONDED; 
+    autoAnnounceSignedTx.type = AnnounceType.BONDED;
     AppState.chainAPI.transactionAPI.announce(lockFundTxSigned);
     ListenerStateUtils.addAutoAnnounceSignedTransaction(autoAnnounceSignedTx);
     AppState.isPendingTxnAnnounce = true;
   }
 
-  static getLockFundFee() :number {
+  static getLockFundFee(): number {
     let abtType = TransactionType.AGGREGATE_BONDED
-    let txHash = new TransactionHash("0".repeat(64),abtType)
+    let txHash = new TransactionHash("0".repeat(64), abtType)
     const lockFundTx = TransactionUtils.lockFundTx(txHash)
     return lockFundTx.maxFee.compact();
-  }  
+  }
 
-  static castToAggregate(tx :Transaction){
+  static castToAggregate(tx: Transaction) {
     return tx as AggregateTransaction;
   }
-  
-  static extractConfirmedRelatedAddressByTransactionType(txn: Transaction): Address[]{
-    let addresses: Address[] = [];
 
+  static extractConfirmedRelatedAddressByTransactionType(txn: Transaction): Address[] {
+    let addresses: Address[] = [];
+    if (!txn.signer) {
+      throw new Error("Service unavailable")
+    }
     addresses.push(txn.signer.address);
 
-    switch(txn.type){
-      case TransactionType.AGGREGATE_BONDED:{
-        let aggregateBondedTxn = txn as AggregateTransaction; 
-        let addressInDeep = aggregateBondedTxn.innerTransactions.map(x =>{
+    switch (txn.type) {
+      case TransactionType.AGGREGATE_BONDED: {
+        let aggregateBondedTxn = txn as AggregateTransaction;
+        let addressInDeep = aggregateBondedTxn.innerTransactions.map(x => {
           return TransactionUtils.extractConfirmedRelatedAddressByTransactionType(x);
         });
         let allNewAddress = addressInDeep.flat();
         addresses = addresses.concat(allNewAddress);
-      }  break;
-      case TransactionType.AGGREGATE_COMPLETE:{
-        let aggregateCompleteTxn = txn as AggregateTransaction; 
-        let addressInDeep = aggregateCompleteTxn.innerTransactions.map(x =>{
+      } break;
+      case TransactionType.AGGREGATE_COMPLETE: {
+        let aggregateCompleteTxn = txn as AggregateTransaction;
+        let addressInDeep = aggregateCompleteTxn.innerTransactions.map(x => {
           return TransactionUtils.extractConfirmedRelatedAddressByTransactionType(x);
         });
         let allNewAddress = addressInDeep.flat();
         addresses = addresses.concat(allNewAddress);
-      }  break;
+      } break;
       case TransactionType.ACCOUNT_METADATA_V2:
         break;
       case TransactionType.ADDRESS_ALIAS:
         break;
-      case TransactionType.ADD_EXCHANGE_OFFER:{
+      case TransactionType.ADD_EXCHANGE_OFFER: {
       }
         break;
       case TransactionType.CHAIN_CONFIGURE:
         break;
       case TransactionType.CHAIN_UPGRADE:
         break;
-      case TransactionType.EXCHANGE_OFFER:{
+      case TransactionType.EXCHANGE_OFFER: {
         let exchangeOffer = txn as ExchangeOfferTransaction;
         let allNewAddress = exchangeOffer.offers.map(x => x.owner.address);
         addresses = addresses.concat(allNewAddress);
       }
         break;
-      case TransactionType.LINK_ACCOUNT:{
+      case TransactionType.LINK_ACCOUNT: {
         let tempTxn = txn as AccountLinkTransaction;
         let linkAccountAddress = PublicAccount.createFromPublicKey(tempTxn.remoteAccountKey, AppState.networkType).address;
         addresses.push(linkAccountAddress);
@@ -438,7 +460,7 @@ export class TransactionUtils {
         break;
       case TransactionType.MODIFY_MULTISIG_ACCOUNT:
         let tempTxn = txn as ModifyMultisigAccountTransaction;
-        let affectedAddress = tempTxn.modifications.map(x=>{
+        let affectedAddress = tempTxn.modifications.map(x => {
           return x.cosignatoryPublicAccount.address
         });
         addresses = addresses.concat(affectedAddress);
@@ -467,49 +489,48 @@ export class TransactionUtils {
         break;
       case TransactionType.SECRET_LOCK:
         break;
-      case TransactionType.SECRET_PROOF:{
+      case TransactionType.SECRET_PROOF: {
         let tempTxn = txn as SecretProofTransaction;
         let recipientAddress = tempTxn.recipient;
         addresses.push(recipientAddress);
       }
         break;
-      case TransactionType.TRANSFER:{
+      case TransactionType.TRANSFER: {
         let tempTxn = txn as TransferTransaction;
-        if(tempTxn.recipient instanceof Address){
+        if (tempTxn.recipient instanceof Address) {
           let recipientAddress = tempTxn.recipient as Address;
           addresses.push(recipientAddress);
         }
-      }  break;
+      } break;
     }
 
     return addresses;
   }
 }
 
-export const isMultiSig = (address) => {
-  if(walletState.currentLoggedInWallet){
-    const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address) || walletState.currentLoggedInWallet.others.find((account) => account.address == address);
-    if(account){
-      const isMulti = account.getDirectParentMultisig().length>0?true:false
-      return isMulti
-    }else{
-      return false
-    }
-  }else{
-    return false
+export const isMultiSig = (address: string) :boolean => {
+  const wallet = walletState.currentLoggedInWallet
+  if (!wallet) {
+    throw new Error("Service unavailable")
   }
+  const account = wallet.accounts.find((account) => account.address == address) || wallet.others.find((account) => account.address == address);
+  if (account) {
+    return account.getDirectParentMultisig().length > 0 
+  }
+  return false
+
 };
 
-export const findAccWithAddress = address =>{
-  if(!walletState.currentLoggedInWallet){
-    return null
+export const findAccWithAddress = (address: string): WalletAccount | undefined => {
+  if (!walletState.currentLoggedInWallet) {
+    throw new Error("Service unavailable")
   }
-  return walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)
+  return walletState.currentLoggedInWallet.accounts.find(acc => acc.address == address)
 }
 
-export const findAcc = (publicKey)=>{
-  if(!walletState.currentLoggedInWallet){
-    return null
+export const findAcc = (publicKey: string): WalletAccount | undefined => {
+  if (!walletState.currentLoggedInWallet) {
+    throw new Error("Service unavailable")
   }
-  return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
+  return walletState.currentLoggedInWallet.accounts.find(acc => acc.publicKey == publicKey)
 }

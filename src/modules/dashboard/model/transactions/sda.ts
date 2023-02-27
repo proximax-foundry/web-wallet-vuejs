@@ -1,4 +1,4 @@
-import {AliasNamespace} from "./aliasNamespace";
+import type {AliasNamespace} from "./aliasNamespace";
 
 export interface SDA{
     id: string;

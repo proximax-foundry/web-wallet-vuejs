@@ -1,5 +1,5 @@
 import { PartialTransaction } from "./partialTransaction";
-import { RestrictionModification } from "../restrictionModification";
+import type { RestrictionModification } from "../restrictionModification";
 
 export class PartialRestrictionTransaction extends PartialTransaction{
 

@@ -1,5 +1,4 @@
 import { Address } from 'tsjs-xpx-chain-sdk';
-import { Account } from './account';
 
 export class MultisigInfo{ 
 

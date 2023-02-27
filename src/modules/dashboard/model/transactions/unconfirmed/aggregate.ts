@@ -1,5 +1,5 @@
 import { UnconfirmedTransaction } from "./unconfirmedTransaction";
-import { TxnList } from "../txnList";
+import type { TxnList } from "../txnList";
 
 export class UnconfirmedAggregateTransaction extends UnconfirmedTransaction{
 

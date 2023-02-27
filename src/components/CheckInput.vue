@@ -11,61 +11,13 @@
   </div>
 </template>
 
-<script>
-import Tooltip from 'primevue/tooltip';
-export default{
-  directives: { 'tooltip': Tooltip },
-  props: {
-    title: String,
-    disabled: Boolean,
-    modelValue: Boolean,
-    toolTip: String,
-  },
-  emits:[
-    'update:modelValue'
-  ],
-  name: 'CheckInput',
-  data() {
-    return {
-      inputText: "",
-      borderColor: 'border border-gray-300',
-      textErr: false,
-    };
-  },
-  methods: {
-    clickInputText: function() {
-      if(!this.showError && !this.disabled){
-        this.borderColor = 'border-2 border-blue-primary';
-      }
-    },
+<script setup lang="ts">
 
-    getIcon() {
-      return require(`@/${this.icon}`);
-    },
+defineProps({
+  title: String,
+  disabled: Boolean,
+  modelValue: Boolean,
+  toolTip: String,
+})
 
-    blurInputText: function() {
-      if(!this.disabled){
-        if(this.modelValue == ''){
-          this.borderColor = 'border-2 border-red-primary';
-          this.textErr = true;
-        }else{
-          this.borderColor = 'border-2 border-gray-300';
-          this.textErr = false;
-        }
-      }
-    },
-
-    focusInputText: function() {
-      this.borderColor = 'border-2 border-blue-primary';
-      this.textErr = false;
-    }
-  },
-  mounted() {
-    this.emitter.on("CLEAR_TEXT", payload => {
-      this.inputText = payload;
-      this.textErr = false;
-      this.borderColor = 'border border-gray-300';
-    });
-  }
-}
 </script>

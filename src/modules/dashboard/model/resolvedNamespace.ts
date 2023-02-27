@@ -12,7 +12,7 @@ export class NamespaceCommon{
     assetIdHex: string = "";
     endBlock?: number;
 
-    constructor(namespaceIdHex){
+    constructor(namespaceIdHex :string){
         this.namespaceIdHex = namespaceIdHex;
     }
 }

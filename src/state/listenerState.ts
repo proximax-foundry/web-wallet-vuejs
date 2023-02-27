@@ -1,4 +1,4 @@
-import { BlockInfo, Transaction, TransactionStatusError, 
+import type { BlockInfo, Transaction, TransactionStatusError, 
     AggregateTransaction, CosignatureSignedTransaction, Address, SignedTransaction  
 } from "tsjs-xpx-chain-sdk";
 import { reactive } from "vue";

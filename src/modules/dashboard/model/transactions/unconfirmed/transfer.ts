@@ -1,4 +1,4 @@
-import {SDA} from "../sda";
+import type {SDA} from "../sda";
 import { UnconfirmedTransaction } from "./unconfirmedTransaction";
 
 export class UnconfirmedTransferTransaction extends UnconfirmedTransaction{

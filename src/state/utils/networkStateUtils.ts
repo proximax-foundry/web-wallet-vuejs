@@ -116,7 +116,7 @@ export class NetworkStateUtils{
     }
     let portNumber = networkState.currentNetworkProfile?.httpPort;
 
-    SessionService.setNumber('nodePort', portNumber !== null ? portNumber : 3000);
+    SessionService.setNumber('nodePort', portNumber ? portNumber : 3000);
     SessionService.setRaw('selectedChainNode', networkState.selectedAPIEndpoint);
 
     AppState.nodeFullURL = NetworkStateUtils.buildAPIEndpointURL(networkState.selectedAPIEndpoint);
@@ -213,7 +213,7 @@ export class NetworkStateUtils{
   static checkSession(){
     const sessionNetworkAuth = SessionService.getRaw("secured_auth");
 
-    if(sessionNetworkAuth){
+    if(sessionNetworkAuth && networkState.currentNetworkProfile){
       networkState.currentNetworkProfile.apikey = sessionNetworkAuth;
     }
   }

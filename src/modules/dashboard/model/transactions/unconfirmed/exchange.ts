@@ -1,5 +1,5 @@
 import { UnconfirmedTransaction } from "./unconfirmedTransaction";
-import { TxnExchangeOffer } from "../exchangeOffer";
+import type { TxnExchangeOffer } from "../exchangeOffer";
 
 export class UnconfirmedExchangeTransaction extends UnconfirmedTransaction{
 

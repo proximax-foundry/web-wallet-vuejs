@@ -1,5 +1,4 @@
 // import { Helper } from "./typeHelper";
-import { ref } from "vue";
 
 interface NetworkAddress{
   isPassed: boolean,
@@ -33,6 +32,7 @@ export class AddressBookUtils {
         return false;
       }
     }
+    return false
   }
 
   static verifyNetworkAddress(currentAdd:string, add:string): NetworkAddress {

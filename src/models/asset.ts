@@ -9,7 +9,7 @@ export class Asset{
     expirationBlock: number | null = null;
     supplyMutable: boolean | null = null;
     transferable: boolean | null = null;
-    creator: string | null; 
+    creator: string | null = null; 
     namespaceNames: string[] = []; 
     height: number = 0;
 

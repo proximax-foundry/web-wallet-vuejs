@@ -9,6 +9,9 @@ import { TimeUnit } from '@/models/const/timeUnit';
 export class ChainConfigUtils{
 
     static getABTMaxSafeDuration(): number{
+      if(!networkState.currentNetworkProfileConfig){
+        throw new Error("Service unavailable")
+      }
       let targetTime = networkState.currentNetworkProfileConfig.blockGenerationTargetTime; 
       const targetTimeInSeconds = UnitConverter.configReturn(targetTime, TimeUnit.SECOND);
 
@@ -28,6 +31,9 @@ export class ChainConfigUtils{
     }
 
     static getABTMinConfigSeconds(): number{
+      if(!networkState.currentNetworkProfileConfig){
+        throw new Error("Service unavailable")
+      }
       let abtMaxLifeTime = networkState.currentNetworkProfileConfig.maxBondedTransactionLifetime;
       let lockFundsMaxDuration = networkState.currentNetworkProfileConfig.maxHashLockDuration;
 

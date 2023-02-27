@@ -5,8 +5,4 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'IntroTextComponent',
-}
-</script>
+

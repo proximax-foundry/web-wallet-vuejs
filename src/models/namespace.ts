@@ -7,8 +7,8 @@ export class Namespace{
     linkType: AliasType = AliasType.None;
     linkedId: string = "";
     parentId: string = "";
-    startHeight: number | null; 
-    endHeight: number | string | null;
+    startHeight: number | null = null; 
+    endHeight: number | string | null = null;
     active: boolean = true;
     owner: string = "";
 

@@ -1,5 +1,5 @@
 import { Account } from './account';
-import { OtherAcountType } from "./const/otherAccountType"
+import type { OtherAcountType } from "./const/otherAccountType"
 
 export class OtherAccount extends Account{
 

@@ -1,4 +1,4 @@
-import { ChainProfile, ChainSwapConfig } from "./stores";
+import type { ChainProfile, ChainSwapConfig } from "./stores";
 
 export class AppSetting{
 

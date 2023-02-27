@@ -1,8 +1,7 @@
 import { walletState } from "../walletState";
 import { AppState } from "../appState";
-import { AppStateUtils } from "../utils/appStateUtils";
 import { Wallets } from "../../models/wallets"
-import { Wallet } from "../../models/wallet";
+import type { Wallet } from "../../models/wallet";
 import { SessionService } from "../../models/stores/sessionService"
 
 const sessionWalletKey = "loggedInWallet";
@@ -39,12 +38,14 @@ export class WalletStateUtils{
 
     if(sessionWalletToken && sessionNetworkName){
 
-      let verifiableToken: VerifiableToken = WalletSessionToken.decode(sessionWalletToken);
-
+      let verifiableToken: jwt.JwtPayload | null | string = WalletSessionToken.decode(sessionWalletToken);
+      if(!verifiableToken || typeof verifiableToken== "string"){
+        throw new Error("Service unavailable")
+      }
       let isValid = WalletSessionToken.verify(sessionWalletToken, verifiableToken.name, sessionNetworkName, verifiableToken.salt);
-
-      if(isValid){
-        let wallet = walletState.wallets.wallets.find((wallet)=>wallet.name === verifiableToken.name && wallet.networkName === sessionNetworkName);
+      let passToken = verifiableToken
+      if(isValid && passToken){
+        let wallet = walletState.wallets.wallets.find((wallet)=>wallet.name === passToken.name && wallet.networkName === sessionNetworkName);
         if(wallet){
           walletState.currentLoggedInWallet = wallet;
           walletState.isLogin = true;
@@ -90,7 +91,7 @@ export class WalletStateUtils{
 
 class WalletSessionToken{
 
-  static decode(token: string): VerifiableToken{
+  static decode(token: string): jwt.JwtPayload |string | null{
     let decoded = jwt.decode(token);
 
     return decoded;
@@ -102,7 +103,7 @@ class WalletSessionToken{
     let secret = WalletSessionToken.generateWalletSessionToken(walletName, salt, networkName);
 
     try {
-      jwt.verify(token, secret, { algorithms : "HS512"});
+      jwt.verify(token, secret, { algorithms : ["HS512"]});
     } catch (error: unknown) {
       if (error instanceof Error) {
         if(error.name === "TokenExpiredError"){

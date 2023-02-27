@@ -1,11 +1,11 @@
 import {
     Deadline,
-    Message, NetworkType,
+    AggregateTransaction, NetworkType,
     PublicAccount, Account,
     UInt64,
     PlainMessage, EncryptedMessage,
     MosaicId, Mosaic, NamespaceId,
-    Transaction, InnerTransaction,
+    Transaction, type InnerTransaction,
     Address,
     MosaicSupplyType,
     MosaicNonce,
@@ -14,13 +14,10 @@ import {
     QueryParams,
     CosignatureTransaction,
     Password,
-    TransactionType,
     TransactionHash,
     TransactionQueryParams,
     MetadataQueryParams,
     TransactionGroupType,
-    MosaicQueryParams,
-    MetadataType,
     Order,
     TransactionSortingField,
     TransactionFieldOrder,
@@ -170,8 +167,8 @@ export class Helper {
         return Base64.parse(toDecode);
     }
 
-    static base64encode(toEncode: string): string {
-        return Base64.stringify(toEncode);
+    static base64encode(toEncode: CryptoJS.lib.WordArray): string {
+        return Base64.stringify( toEncode);
     }
 
     static amountFormatterSimple(amount: number, d: number = 6): string {
@@ -265,7 +262,7 @@ export class Helper {
         }
     }
 
-    static createCosignatureTransaction(signedABT) {
+    static createCosignatureTransaction(signedABT :AggregateTransaction) {
         return CosignatureTransaction.create(signedABT);
     }
 

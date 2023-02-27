@@ -1,7 +1,7 @@
 import { NetworkType, PublicAccount } from 'tsjs-xpx-chain-sdk';
-import { MultisigInfo } from './multisigInfo';
-import { Asset } from './asset';
-import { Namespace } from './namespace';
+import type { MultisigInfo } from './multisigInfo';
+import type { Asset } from './asset';
+import type { Namespace } from './namespace';
 import { walletState } from '@/state/walletState';
 
 export class Account{
@@ -112,8 +112,10 @@ export class Account{
     }
 }
 
-export const setDefaultAccInStorage = (address) =>{
-     
+export const setDefaultAccInStorage = (address :string) =>{
+    if(!walletState.currentLoggedInWallet){
+        return
+    }
     sessionStorage.setItem('defaultAcc',address)
     walletState.currentLoggedInWallet.setDefaultAccountByAddress(address)
   }

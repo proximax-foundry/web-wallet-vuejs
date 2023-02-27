@@ -1,12 +1,10 @@
 import jsPDF from 'jspdf';
-import qrcode from 'qrcode-generator';
+import QRCode from 'qrcode';
 import { Account, Address, AggregateTransaction, SignedTransaction } from "tsjs-xpx-chain-sdk";
 import { pdfImg } from '@/modules/services/submodule/mainnetSwap/pdfBackground';
 import { walletState } from '@/state/walletState';
 import { networkState } from '@/state/networkState';
 import { WalletUtils } from "@/util/walletUtils";
-import { ChainUtils } from "@/util/chainUtils";
-import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { AppState } from '@/state/appState';
 
 export const abi = [
@@ -648,11 +646,8 @@ export const abi = [
 
 
 export class SwapUtils {
-  static generateQRCode = (url: string) :string => {
-    const qr = qrcode(0, 'H');
-    qr.addData(url);
-    qr.make();
-    return qr.createDataURL();
+  static  generateQRCode = async(url: string) :Promise<string> => {
+    return await QRCode.toString(url)
   }
 
   static generateIncomingPdfCert = (networkName: string, swapTimestamp: string, siriusAddress: string, swapToken: string, transactionHash: string, qrImage: string) => {
@@ -727,8 +722,17 @@ export class SwapUtils {
   }
 
   static signTransaction(selectedAddress: string, walletPassword: string, aggreateCompleteTransaction: AggregateTransaction) :SignedTransaction {
+    if(!walletState.currentLoggedInWallet){
+      throw new Error("Service unavailable")
+    }
+    if(!networkState.currentNetworkProfile){
+      throw new Error("Service unavailable")
+    }
     const accAddress = Address.createFromRawAddress(selectedAddress);
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
+    if(!accountDetails){
+      throw new Error("Account not found")
+    }
     const encryptedPassword = WalletUtils.createPassword(walletPassword);
     let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
     const account = Account.createFromPrivateKey(privateKey, AppState.networkType);

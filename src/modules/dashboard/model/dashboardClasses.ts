@@ -1,4 +1,4 @@
-import { Mosaic, MosaicId } from "tsjs-xpx-chain-sdk";
+import type{  MosaicId } from "tsjs-xpx-chain-sdk";
 
 export class DashboardTip{
     
@@ -71,6 +71,6 @@ export enum AmountType{
 export class OtherAsset{
   asset: string = '';
   amount: number = 0;
-  assetId: MosaicId;
+  assetId: MosaicId | null = null;
   isLinked: boolean = false;
 }

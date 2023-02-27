@@ -5,37 +5,33 @@ import { Wallet } from "../models/wallet"
 import { Wallets } from "../models/wallets"
 import { WalletAccount } from "../models/walletAccount"
 import { nis1Account } from "../models/nis1Account"
-import { ChainProfile } from "../models/stores/chainProfile"
+import type { ChainProfile } from "../models/stores/chainProfile"
 import { Asset } from "../models/asset";
 import { ChainAPICall } from "../models/REST/chainAPICall"
-import { SecretKeyPair } from "../models/interface/secretKeyPair"
+import type { SecretKeyPair } from "../models/interface/secretKeyPair"
 import { MultisigInfo } from "../models/multisigInfo"
 import {
     SimpleWallet, Password, RawAddress, Convert, Crypto,
     WalletAlgorithm, PublicAccount, Account, NetworkType,
-    AggregateTransaction, CosignatureTransaction, MosaicNonce, NamespaceInfo,
-    NamespaceId, Address, AccountInfo, MosaicId, AliasType, Transaction,
-    MultisigAccountGraphInfo, MultisigAccountInfo, QueryParams,
+    AggregateTransaction, CosignatureTransaction,  NamespaceInfo,
+    NamespaceId, Address, AccountInfo, MosaicId, AliasType, 
+    MultisigAccountGraphInfo, 
     MosaicInfo,
-    UInt64,
     TransactionQueryParams,
-    TransactionType,
     TransactionGroupType,
     TransactionSearch,
-    MosaicDefinitionTransaction,
     MosaicSearch,
     MosaicQueryParams,
     MosaicNames,
     Order_v2,
     TransactionSortingField,
-    MosaicSortingField,
     MosaicCreatorFilters
 } from "tsjs-xpx-chain-sdk";
-import { Helper, LooseObject } from "./typeHelper";
+import { Helper, type LooseObject } from "./typeHelper";
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { OtherAccount } from "@/models/otherAccount";
 import { Namespace } from "@/models/namespace";
-import { Account as MyAccount } from "@/models/account";
+import type { Account as MyAccount } from "@/models/account";
 import { TransactionUtils } from "./transactionUtils"
 import { AddressBook } from "@/models/addressBook"
 import { AppState } from "@/state/appState";
@@ -48,7 +44,7 @@ const dataPerRequest = 50;
 const assetInfoSessionKey = "assetsInfo";
 const namespaceInfoSessionKey = "namespacesInfo";
 
-const delay = ms => new Promise(res => setTimeout(res, ms));
+const delay = (ms :number) => new Promise(res => setTimeout(res, ms));
 
 interface AccountAssetHold{
     publicKey: string;
@@ -173,7 +169,7 @@ export class WalletUtils {
     static syncAccNamespaceName(){
 
         if(walletState.currentLoggedInWallet === null){
-            return;
+            throw new Error("Service unavailable")
         }
 
         let wallet = walletState.currentLoggedInWallet;
@@ -218,7 +214,9 @@ export class WalletUtils {
     }
 
     static async updateAccTxnEntries(accs: MyAccount[]){
-
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         let txnQP = new TransactionQueryParams();
 
         txnQP.pageSize = 10;
@@ -264,19 +262,23 @@ export class WalletUtils {
             let totalEntries = txnSearchResults[i].pagination.totalEntries;
 
             let acc = accs.find(x => x.publicKey === queryingPublicKey);
-            acc.totalTxns = totalEntries;
+            if(acc){
+                acc.totalTxns = totalEntries;
+            }
         }
     }
 
     static async transactionConfirmed(txnHashes: string[]){
-
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         if(txnHashes.length === 0){
             return;
         }
 
         let confirmedTransactions = await AppState.chainAPI.transactionAPI.getTransactions(txnHashes);
 
-        let relatedAddress = [];
+        let relatedAddress :string[] = [];
 
         for(let i =0; i < confirmedTransactions.length; ++i){
             let txn = confirmedTransactions[i];
@@ -287,7 +289,7 @@ export class WalletUtils {
         }
 
         if(walletState.currentLoggedInWallet === null){
-            return;
+            throw new Error("Service unavailable")
         }
 
         let wallet = walletState.currentLoggedInWallet;
@@ -304,7 +306,7 @@ export class WalletUtils {
     static updateAllAccountsAssetNamespace(changedAssetId: string[]){
 
         if(walletState.currentLoggedInWallet === null){
-            return;
+            throw new Error("Service unavailable")
         }
 
         let assetsInfo = AppState.assetsInfo.filter(x => changedAssetId.includes(x.idHex));
@@ -356,14 +358,22 @@ export class WalletUtils {
     static async recheckAssetsNames(){
 
         if(walletState.currentLoggedInWallet === null){
-            return;
+            throw new Error("Service unavailable")
+        }
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
         }
 
         let wallet = walletState.currentLoggedInWallet;
 
         let accs = WalletUtils.getAllAccs(wallet);
         let accsPubKey = accs.map(x => x.publicKey);
-        let nonCreatorAssetsInfo = AppState.assetsInfo.filter(x => !accsPubKey.includes(x.creator));
+        let nonCreatorAssetsInfo = AppState.assetsInfo.filter(x => {
+            if(!x.creator){
+                throw new Error("Service unavailable")
+            }
+            return !accsPubKey.includes(x.creator)
+        });
         let data = nonCreatorAssetsInfo.map(x => new MosaicId(x.idHex));
         let dataPlain = nonCreatorAssetsInfo.map(x => x.idHex);
 
@@ -437,7 +447,7 @@ export class WalletUtils {
     static checkRemovedMultisig(otherAccounts: OtherAccount[]): string[]{
 
         if (walletState.currentLoggedInWallet === null) {
-            return [];
+            throw new Error("Service unavailable")
         }
 
         let pubKeyNeedToRemove: string[] = [];
@@ -459,7 +469,10 @@ export class WalletUtils {
     static async checkConfirmedTxnChecking(){
 
         if(walletState.currentLoggedInWallet === null){
-            return;
+            throw new Error("Service unavailable")
+        }
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
         }
 
         let txnQP = new TransactionQueryParams();
@@ -512,7 +525,9 @@ export class WalletUtils {
             let totalEntries = txnSearchResults[i].pagination.totalEntries;
 
             let acc = allAccounts.find(x => x.publicKey === queryingPublicKey);
-
+            if(!acc){
+                throw new Error("Account not found")
+            }
             if(acc.totalTxns !== -1 && acc.totalTxns !== totalEntries){
                 accsNeedUpdate.push(acc);
             }
@@ -596,44 +611,11 @@ export class WalletUtils {
 
     }
 
-    static fetchAccountInfoCurrentWalletAccounts(): false | Promise<AccountInfo[]> {
 
-        const wallet = walletState.currentLoggedInWallet;
-        const networkType = AppState.networkType;
-
-        if (!wallet || !networkType) {
-            return false;
-        }
-
-        const addresses: Address[] = [];
-        wallet.accounts.forEach((element: WalletAccount) => {
-            addresses.push(Address.createFromPublicKey(element.publicKey, networkType));
-        });
-
-        let currentNetworkProfile: ChainProfile;
-
-        if (networkState.currentNetworkProfile) {
-            currentNetworkProfile = networkState.currentNetworkProfile as ChainProfile;
-        }
-        else {
-            return false;
-        }
-
-        return new Promise((resolve, reject) => {
-            try {
-                AppState.chainAPI.accountAPI.getAccountsInfo(addresses).then(accountInfo => {
-                    resolve(accountInfo);
-                }).catch((error) => {
-                    console.warn(error);
-                    reject(false);
-                });
-            } catch (err) {
-                console.warn(err);
-                reject(false);
-            }
-        });
-    }
     static getAggregateBondedTransactions = (publicAccount: PublicAccount): Promise<AggregateTransaction[]> => {
+        if(!networkState.currentNetworkProfile){
+            throw new Error("Service unavailable")
+        }
         const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
         return new Promise((resolve, reject) => {
             try {
@@ -654,6 +636,9 @@ export class WalletUtils {
 
 
     static getMultisigAccGraphInfo(address: Address): Promise<MultisigAccountGraphInfo> {
+        if(!networkState.currentNetworkProfile){
+            throw new Error("Service unavailable")
+        }
         const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
         return new Promise((resolve, reject) => {
             try {
@@ -671,6 +656,9 @@ export class WalletUtils {
     }
 
     static getAccInfo(add: string): Promise<AccountInfo> {
+        if(!networkState.currentNetworkProfile){
+            throw new Error("Service unavailable")
+        }
         const chainAPICall = new ChainAPICall(ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
         let address = Address.createFromRawAddress(add);
         return new Promise((resolve, reject) => {
@@ -782,17 +770,10 @@ export class WalletUtils {
     }
 
     static cosignAggregateBondedTransaction(transaction: AggregateTransaction, account: Account) {
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         const cosignatureTransaction = CosignatureTransaction.create(transaction);
-
-        let chainProfile;
-        if (networkState.currentNetworkProfile) {
-            chainProfile = networkState.currentNetworkProfile as ChainProfile;
-        }
-        else {
-            return Promise.reject(new Error('chainProfile is null'));
-        }
-
-        const endpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, chainProfile.httpPort);
 
         return AppState.chainAPI.transactionAPI.announceAggregateBondedCosignature(
             account.signCosignatureTransaction(cosignatureTransaction)
@@ -910,6 +891,7 @@ export class WalletUtils {
                 return false;
             }
         }
+        return false
     }
 
     /**
@@ -1060,8 +1042,8 @@ export class WalletUtils {
         const exportingData = wallet.convertToSimpleWallet();
 
         const walletJSON = JSON.stringify(exportingData);
-
-        return Helper.base64encode(walletJSON);
+        const wordArray = Helper.base64decode(walletJSON)
+        return Helper.base64encode(wordArray);
     }
 
     static exportAccount(wallet: Wallet, exportingPublicKey: string): string {
@@ -1071,8 +1053,8 @@ export class WalletUtils {
         dataToExport.accounts = dataToExport.accounts.filter(acc => acc.publicKey === exportingPublicKey);
 
         const walletJSON = JSON.stringify(dataToExport);
-
-        return Helper.base64encode(walletJSON);
+        const wordArray = Helper.base64decode(walletJSON)
+        return Helper.base64encode(wordArray);
     }
 
     static async updateWalletMultisigInfo(wallet: Wallet): Promise<void> {
@@ -1122,7 +1104,9 @@ export class WalletUtils {
     }
 
     static async updateMultisigDetails(walletAccount: MyAccount): Promise<void> {
-
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         const address = Helper.createAddress(walletAccount.address);
 
         try {
@@ -1157,7 +1141,9 @@ export class WalletUtils {
     }
 
     static async getMultisigDetails(addressInString: string): Promise<MultisigInfo[]> {
-
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         const address = Helper.createAddress(addressInString);
         let multisigInfos: MultisigInfo[] = [];
 
@@ -1187,7 +1173,9 @@ export class WalletUtils {
     }
 
     static populateOtherSingleAccountTypeMultisig(acc: WalletAccount): string[] {
-
+        if(!walletState.currentLoggedInWallet){
+            throw new Error("Service unavailable")
+        }
         let othersList: string[] = [];
 
         let publicKeys = acc.getDirectChildMultisig();
@@ -1252,7 +1240,9 @@ export class WalletUtils {
     }
 
     static async refreshAccountsInfo(accs: MyAccount[], addInLinkedAccount: boolean = false): Promise<string[]> {
-
+        if(!walletState.currentLoggedInWallet || !AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         let tempLinkedList: string[] = [];
         const list1: Address[] = accs.map((acc) => PublicAccount.createFromPublicKey(acc.publicKey, AppState.networkType).address)
         let accountsInfo: AccountInfo[] = [];
@@ -1394,7 +1384,9 @@ export class WalletUtils {
     }
 
     static async updateAccountsInfo(accs: MyAccount[], addInLinkedAccount: boolean = false): Promise<string[]> {
-
+        if(!walletState.currentLoggedInWallet || !AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         let tempLinkedList: string[] = [];
         const list1: Address[] = accs.map((acc) => PublicAccount.createFromPublicKey(acc.publicKey, AppState.networkType).address)
         let accountsInfo: AccountInfo[] = [];
@@ -1490,7 +1482,9 @@ export class WalletUtils {
     }
 
     static async updateWalletAccountsInfo(wallet: Wallet, addInLinkedAccount: boolean = false): Promise<void> {
-
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         let tempLinkedList: string[] = [];
         const list1: Address[] = wallet.accounts.map((acc) => PublicAccount.createFromPublicKey(acc.publicKey, AppState.networkType).address)
         const list2: Address[] = wallet.others.map((acc) => PublicAccount.createFromPublicKey(acc.publicKey, AppState.networkType).address);
@@ -1525,7 +1519,7 @@ export class WalletUtils {
             let accountInfo = accountsInfo.find(x => x.address.plain() === wallet.accounts[i].address);
 
             if (!accountInfo) {
-                continue;
+                throw new Error("Account not found")
             }
 
             if (addInLinkedAccount && accountInfo.linkedAccountKey !== "0".repeat(64)) {
@@ -1538,8 +1532,8 @@ export class WalletUtils {
                 let stripedAddress = newAddress.substring(newAddress.length - 4);
 
                 let newOtherAccount = new OtherAccount("ACCOUNT-LINK-" + stripedAddress, accountInfo.linkedAccountKey, newAddress, Helper.getOtherWalletAccountType().DELEGATE_VALIDATE);
-
-                if (!wallet.others.find((other) => other.publicKey === accountInfo.linkedAccountKey)) {
+                let accInfo = accountInfo
+                if (!wallet.others.find((other) => other.publicKey === accInfo.linkedAccountKey)) {
                     wallet.others.push(newOtherAccount);
                 }
 
@@ -1629,7 +1623,9 @@ export class WalletUtils {
     }
 
     static async refreshAccountsNamespaceInfo(accs: MyAccount[]): Promise<void> {
-
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         const list1: Address[] = accs.map((acc) => PublicAccount.createFromPublicKey(acc.publicKey, AppState.networkType).address)
         let namespacesInfo: NamespaceInfo[] = [];
 
@@ -1698,7 +1694,9 @@ export class WalletUtils {
     }
 
     static async updateAccountsNamespaceInfo(accs: MyAccount[]): Promise<void> {
-
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         const list1: Address[] = accs.map((acc) => PublicAccount.createFromPublicKey(acc.publicKey, AppState.networkType).address)
         let namespacesInfo: NamespaceInfo[] = [];
 
@@ -1744,7 +1742,9 @@ export class WalletUtils {
     }
 
     static async updateWalletAccountsNamespaceInfo(wallet: Wallet): Promise<void> {
-
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         const list1: Address[] = wallet.accounts.map((acc) => PublicAccount.createFromPublicKey(acc.publicKey, AppState.networkType).address)
         const list2: Address[] = wallet.others.map((acc) => PublicAccount.createFromPublicKey(acc.publicKey, AppState.networkType).address);
         let accountAddressList = list1.concat(list2);
@@ -1837,7 +1837,7 @@ export class WalletUtils {
             assetInfo.owner.publicKey
         );
         asset.supply = assetInfo.supply.compact();
-        asset.duration = assetInfo.duration.compact();
+        asset.duration = assetInfo.duration ? assetInfo.duration.compact(): null
         asset.height = assetInfo.height.compact();
 
         return asset;
@@ -1879,9 +1879,13 @@ export class WalletUtils {
         namespace.owner = nsInfo.owner.publicKey;
         namespace.parentId = nsInfo.isSubnamespace() ? nsInfo.parentNamespaceId().toHex() : "";
         namespace.linkType = nsInfo.alias.type;
+        
         if (nsInfo.alias.type !== AliasType.None) {
-            namespace.linkedId = nsInfo.alias.type === AliasType.Address ?
-                nsInfo.alias.address.plain() : nsInfo.alias.mosaicId.toHex()
+            if(nsInfo.alias.type == AliasType.Address){
+                namespace.linkedId = nsInfo.alias.address?nsInfo.alias.address.plain(): ""
+            }else{
+                namespace.linkedId = nsInfo.alias.mosaicId?nsInfo.alias.mosaicId.toHex(): ""
+            }
         }
 
         return namespace;
@@ -1900,8 +1904,11 @@ export class WalletUtils {
         // cachedData.parentId = nsInfo.isSubnamespace() ? nsInfo.parentNamespaceId().toHex() : "";
         cachedData.linkType = nsInfo.alias.type;
         if (nsInfo.alias.type !== AliasType.None) {
-            cachedData.linkedId = nsInfo.alias.type === AliasType.Address ?
-                nsInfo.alias.address.plain() : nsInfo.alias.mosaicId.toHex()
+            if(nsInfo.alias.type == AliasType.Address){
+                cachedData.linkedId = nsInfo.alias.address?nsInfo.alias.address.plain(): ""
+            }else{
+                cachedData.linkedId = nsInfo.alias.mosaicId?nsInfo.alias.mosaicId.toHex(): ""
+            }
         }
     }
 
@@ -1917,15 +1924,15 @@ export class WalletUtils {
     
     static async reloadAddedAccount(accountName: string) {
         if (walletState.currentLoggedInWallet === null) {
-            return;
+            throw new Error("Service unavailable")
         }
         let acc = walletState.currentLoggedInWallet.accounts.find(x => x.name === accountName);
 
-        if (!acc) {
-            return;
+       if(!acc){
+            throw new Error("Account not found")
         }
 
-        let otherAcc = walletState.currentLoggedInWallet.others.find(x => x.publicKey === acc.publicKey);
+        let otherAcc = walletState.currentLoggedInWallet.others.find(x => x.publicKey === acc?.publicKey);
 
         if(otherAcc){
             walletState.currentLoggedInWallet.removeOtherAccount(otherAcc.publicKey);
@@ -1951,7 +1958,7 @@ export class WalletUtils {
 
     static async refreshOtherAccounts(otherAccounts: OtherAccount[]) {
         if (walletState.currentLoggedInWallet === null) {
-            return;
+            throw new Error("Service unavailable")
         }
 
         for (let i = 0; i < otherAccounts.length; ++i) {
@@ -1967,7 +1974,7 @@ export class WalletUtils {
 
     static async loadOtherAccounts(allAddedAccPubKey: string[]) {
         if (walletState.currentLoggedInWallet === null) {
-            return;
+            throw new Error("Service unavailable")
         }
 
         let accs: MyAccount[] = walletState.currentLoggedInWallet.others.filter(x => allAddedAccPubKey.includes(x.publicKey));
@@ -1984,8 +1991,8 @@ export class WalletUtils {
     }
 
     static async confirmedTransactionRefresh(accs: MyAccount[]): Promise<void> {
-        if (walletState.currentLoggedInWallet === null) {
-            return;
+        if (walletState.currentLoggedInWallet === null || !AppState.chainAPI) {
+            throw new Error("Service unavailable")
         }
 
         let chainHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
@@ -2041,7 +2048,9 @@ export class WalletUtils {
     }
 
     static async refreshAllAccountDetails(wallet: Wallet, networkProfile: ChainProfile): Promise<void> {
-
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         if (wallet === null) {
             return;
         }
@@ -2123,7 +2132,9 @@ export class WalletUtils {
      * @param wallet 
      */
     static async getWalletCreatorExraAssets(wallet: Wallet): Promise<void> {
-
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         let queryParams: MosaicQueryParams = new MosaicQueryParams();
         queryParams.pageSize = 100;
         queryParams.pageNumber = 1;
@@ -2229,7 +2240,11 @@ export class WalletUtils {
             let currentPublicKey = allAccs[i].publicKey;
 
             if(accPublicKeyWithAsset.includes(currentPublicKey)){
-                let currentAssetsInfo = accsAssetHold.find(x=> x.publicKey === currentPublicKey).assetsInfo;
+                let acc = accsAssetHold.find(x=> x.publicKey === currentPublicKey)
+                if(!acc){
+                    throw new Error("Account not found")
+                }
+                let currentAssetsInfo = acc.assetsInfo;
                 assetList = assetList.concat(currentAssetsInfo);
                 allAccs[i].nonHoldingAssets = assetList.map(x => WalletUtils.assetInfoToAsset(x));
             }
@@ -2240,7 +2255,9 @@ export class WalletUtils {
     }
 
     static async getAccsCreatorExtraAssets(accs: MyAccount[]): Promise<void> {
-
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         let queryParams: MosaicQueryParams = new MosaicQueryParams();
         queryParams.pageSize = 100;
         queryParams.pageNumber = 1;
@@ -2326,7 +2343,11 @@ export class WalletUtils {
             let currentPublicKey = accs[i].publicKey;
 
             if(accPublicKeyWithAsset.includes(currentPublicKey)){
-                let currentAssetsInfo = accsAssetHold.find(x=> x.publicKey === currentPublicKey).assetsInfo;
+                let acc = accsAssetHold.find(x=> x.publicKey === currentPublicKey)
+                if(!acc){
+                    throw new Error("Account not found")
+                }
+                let currentAssetsInfo = acc.assetsInfo;
                 assetList = assetList.concat(currentAssetsInfo);
                 accs[i].nonHoldingAssets = assetList.map(x => WalletUtils.assetInfoToAsset(x));
             }
@@ -2426,6 +2447,9 @@ export class WalletUtils {
     }
 
     static async getPendingNamespaceName() {
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         let numOfRequest = Math.ceil(AppState.pendingNamespacesName.length / dataPerRequest);
 
         let data: NamespaceInfo[] = AppState.pendingNamespacesName as NamespaceInfo[];
@@ -2445,6 +2469,9 @@ export class WalletUtils {
                 for (let y = 0; y < tempNamespaceInfo.length; ++y) {
 
                     let nsInfo = data.find(x => x.id.toHex() === tempNamespaceInfo[y].namespaceId.toHex());
+                    if(!nsInfo){
+                        throw new Error("Namespace not found")
+                    }
                     let namespace = WalletUtils.namespaceInfoToNamespace(nsInfo);
                     namespace.name = tempNamespaceInfo[y].name;
 
@@ -2461,7 +2488,9 @@ export class WalletUtils {
     }
 
     static async getPendingAssetsInfo() {
-
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         let numOfRequest = Math.ceil(AppState.pendingAssetsInfo.length / dataPerRequest);
         let newAssetsInfo: AssetInfo[] = [];
 
@@ -2570,6 +2599,9 @@ export class WalletUtils {
 
             for(let y=0; y < namespaces.length; ++y){
                 let namespaceInfo = AppState.namespacesInfo.find(x => x.idHex === namespaces[y].idHex);
+                if(!namespaceInfo){
+                    throw new Error("Namespace not found")
+                }
                 namespaces[y].name = namespaceInfo.name;
             }
         }
@@ -2579,6 +2611,9 @@ export class WalletUtils {
 
             for(let y=0; y < namespaces.length; ++y){
                 let namespaceInfo = AppState.namespacesInfo.find(x => x.idHex === namespaces[y].idHex);
+                if(!namespaceInfo){
+                    throw new Error("Namespace not found")
+                }
                 namespaces[y].name = namespaceInfo.name;
             }
         }  
@@ -2586,14 +2621,19 @@ export class WalletUtils {
 
     static async updateAssetInfoNamespaces(){
 
-        if(walletState.currentLoggedInWallet === null){
-            return;
+        if(walletState.currentLoggedInWallet === null || !AppState.chainAPI){
+            throw new Error("Service unavailable")
         }
 
         let wallet = walletState.currentLoggedInWallet;
         let allPubKeys = wallet.accounts.map(x => x.publicKey).concat(wallet.others.map(x => x.publicKey));
 
-        let assetIds: MosaicId[] = AppState.assetsInfo.filter(x => x.doneChecking === false || !allPubKeys.includes(x.creator)).map(x => new MosaicId(x.idHex));
+        let assetIds: MosaicId[] = AppState.assetsInfo.filter(x =>{
+            if(!x.creator){
+                throw new Error("Service unavailable")
+            }
+            return  x.doneChecking === false || !allPubKeys.includes(x.creator)
+        }).map(x => new MosaicId(x.idHex));
 
         for(let i=0; i < AppState.assetsInfo.length; ++i){
             AppState.assetsInfo[i].doneChecking = true;
@@ -2680,9 +2720,10 @@ export class WalletUtils {
 
     static oldFormatCollectAddressBook(walletName: string, prefix: string): AddressBook[] {
         let allWalletContacts: AddressBook[] = [];
-
-        if (localStorage.getItem(prefix + walletName)) {
-            let accountAddressBooks: any[] = JSON.parse(localStorage.getItem(prefix + walletName));
+        const addressBook = localStorage.getItem(prefix + walletName)
+        if (addressBook) {
+            
+            let accountAddressBooks: any[] = JSON.parse(addressBook);
 
             for (let i = 0; i < accountAddressBooks.length; ++i) {
                 // if(accountAddressBooks[i].walletContact){
@@ -2764,13 +2805,13 @@ export class WalletUtils {
 
     static getAllMultisigInfoByPublicKey(wallet: Wallet, publicKey: string): MultisigInfo[] {
 
-        let account: WalletAccount = wallet.accounts.find((acc) => acc.publicKey === publicKey);
+        let account= wallet.accounts.find((acc) => acc.publicKey === publicKey);
 
         if (account) {
             return account.multisigInfo;
         }
 
-        let otherAccount: OtherAccount = wallet.others.find((acc) => acc.publicKey === publicKey);
+        let otherAccount= wallet.others.find((acc) => acc.publicKey === publicKey);
 
         if (otherAccount) {
             return otherAccount.multisigInfo;
@@ -2796,7 +2837,7 @@ export class WalletUtils {
     }
 
     static findWalletAccountByPublicKey(wallet: Wallet, publicKey: string): WalletAccount | null {
-        let account: WalletAccount = wallet.accounts.find((acc) => acc.publicKey === publicKey);
+        let account = wallet.accounts.find((acc) => acc.publicKey === publicKey);
 
         if (account) {
             return account;
@@ -2806,13 +2847,13 @@ export class WalletUtils {
     }
 
     static findAccountByPublicKey(wallet: Wallet, publicKey: string): MyAccount | null {
-        let account: WalletAccount = wallet.accounts.find((acc) => acc.publicKey === publicKey);
+        let account = wallet.accounts.find((acc) => acc.publicKey === publicKey);
 
         if (account) {
             return account;
         }
 
-        let otherAccount: OtherAccount = wallet.others.find((acc) => acc.publicKey === publicKey);
+        let otherAccount = wallet.others.find((acc) => acc.publicKey === publicKey);
 
         if (otherAccount) {
             return otherAccount;
@@ -2822,13 +2863,13 @@ export class WalletUtils {
     }
 
     static findAccountPublicKeyByAddress(wallet: Wallet, address: string): string | null {
-        let account: WalletAccount = wallet.accounts.find((acc) => acc.address === address);
+        let account = wallet.accounts.find((acc) => acc.address === address);
 
         if (account) {
             return account.publicKey;
         }
 
-        let otherAccount: OtherAccount = wallet.others.find((acc) => acc.address === address);
+        let otherAccount = wallet.others.find((acc) => acc.address === address);
 
         if (otherAccount) {
             return otherAccount.publicKey;

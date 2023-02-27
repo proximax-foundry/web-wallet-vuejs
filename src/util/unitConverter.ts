@@ -23,7 +23,6 @@ export class UnitConverter{
         
             default:
                 return days;
-                break;
         }
 
         return unit.toNumber(finalUnit);
@@ -47,7 +46,6 @@ export class UnitConverter{
                 break;
             default:
                 return hours;
-                break;
         }
 
         return unit.toNumber(finalUnit);
@@ -71,7 +69,6 @@ export class UnitConverter{
                 break;
             default:
                 return minutes;
-                break;
         }
 
         return unit.toNumber(finalUnit);

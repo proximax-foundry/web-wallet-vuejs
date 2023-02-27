@@ -1,5 +1,5 @@
 import { InnerTransaction } from "./innerTxn";
-import { TxnExchangeOffer } from "../exchangeOffer";
+import type { TxnExchangeOffer } from "../exchangeOffer";
 
 export class InnerExchangeTransaction extends InnerTransaction{
 

@@ -1,4 +1,4 @@
-import {SDA} from "../sda";
+import type {SDA} from "../sda";
 import { PartialTransaction } from "./partialTransaction";
 
 export class PartialTransferTransaction extends PartialTransaction{

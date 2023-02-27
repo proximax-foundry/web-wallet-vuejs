@@ -3,20 +3,20 @@ import { ConfirmedTransaction } from "./confirmedTransaction";
 export class ConfirmedAssetTransaction extends ConfirmedTransaction{
 
     assetId: string = "";
-    nonce?: number = null;
-    namespaceName? : string = null;
-    levyAssetId?: string = null;
-    levyAssetAmount?: number = null;
-    levyAssetAmountIsRaw?: boolean = null;
-    levyType?: number = null;
-    levyRecipient?: string = null;
-    levyAssetName?: string = null;
-    supplyDelta?: number = null;
-    supplyDeltaIsRaw?: boolean = null;
-    divisibility?: number = null;
-    transferable?: boolean = null;
-    supplyMutable?: boolean = null;
-    duration?: number = null;
+    nonce?: number| null  = null;
+    namespaceName? : string| null  = null;
+    levyAssetId?: string | null  = null;
+    levyAssetAmount?: number| null  = null;
+    levyAssetAmountIsRaw?: boolean| null  = null;
+    levyType?: number| null  = null;
+    levyRecipient?: string| null  = null;
+    levyAssetName?: string| null  = null;
+    supplyDelta?: number| null  = null;
+    supplyDeltaIsRaw?: boolean| null  = null;
+    divisibility?: number| null  = null;
+    transferable?: boolean| null  = null;
+    supplyMutable?: boolean| null  = null;
+    duration?: number| null  = null;
 
     constructor(txnHash: string){
       super(txnHash);

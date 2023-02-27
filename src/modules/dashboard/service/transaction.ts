@@ -1,5 +1,5 @@
-import { AggregateTransaction } from "tsjs-xpx-chain-sdk";
-import { DashboardTipList, RowDashboardTip, OtherAsset } from "../model/dashboardClasses";
+import type { AggregateTransaction } from "tsjs-xpx-chain-sdk";
+import type { RowDashboardTip, OtherAsset } from "../model/dashboardClasses";
 
 export interface DashboardTransaction{
   id?: string,

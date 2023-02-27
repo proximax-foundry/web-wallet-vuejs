@@ -1,5 +1,5 @@
 import { ConfirmedTransaction } from "./confirmedTransaction";
-import { TxnExchangeOffer } from "../exchangeOffer";
+import type { TxnExchangeOffer } from "../exchangeOffer";
 
 export class ConfirmedExchangeTransaction extends ConfirmedTransaction{
 

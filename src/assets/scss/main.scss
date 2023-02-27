@@ -212,7 +212,7 @@ body{
 }
 
 .text-outline{
-  @apply transition-all duration-200 group rounded-3xl border-solid w-full py-2 mb-1 flex;
+  @apply transition-all duration-200 rounded-3xl border-solid w-full py-2 mb-1 flex;
 }
 
 .text-placeholder{
@@ -243,7 +243,7 @@ body{
 .navbar{
   a.router-link-active, a:hover{
     background:var(--white);
-    color: var(--black) #{!important};
+    color: var(--black) !important;
   }
 }
 
@@ -252,12 +252,12 @@ body{
     a.router-link-active, a:hover{
       background: linear-gradient(180deg, #2C71BF 0%, #215590 80%) !important;
       border-bottom: 3px solid var(--white);
-      color: var(--white) #{!important};
+      color: var(--white) !important;
     }
 
     a{
       display: inline-block;
-      color: var(--white) #{!important};
+      color: var(--white) !important;
       font-size: 16px;
     }
   }

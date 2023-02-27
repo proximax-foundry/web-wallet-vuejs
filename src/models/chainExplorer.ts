@@ -8,7 +8,7 @@ export class ChainExplorer{
     namespaceInfoRoute: string = "";
     assetInfoRoute: string = "";
 
-    constructor(url){
+    constructor(url :string){
         this.url = url;
     }
 

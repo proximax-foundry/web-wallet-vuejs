@@ -25,7 +25,7 @@ import {
     MosaicDefinitionTransactionBuilder,
     TransactionBuilderFactory,
     FeeCalculationStrategy,
-    InnerTransaction,
+    type InnerTransaction,
     HashLockTransaction,
     HashLockTransactionBuilder,
     ModifyMultisigAccountTransaction,
@@ -48,7 +48,6 @@ import {
     EmptyMessage,
     TransactionHash
 } from 'tsjs-xpx-chain-sdk';
-import { WalletUtils } from "./walletUtils";
 import { Helper } from "./typeHelper";
 import { ChainConfigUtils } from "./chainConfigUtils";
 

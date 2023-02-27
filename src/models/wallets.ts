@@ -3,14 +3,14 @@ import { Namespace } from './namespace';
 import { Wallet } from './wallet';
 import { WalletAccount } from './walletAccount';
 import { OtherAccount } from './otherAccount';
-import { Address, AliasType } from "tsjs-xpx-chain-sdk";
+import {  AliasType } from "tsjs-xpx-chain-sdk";
 import { MultisigInfo } from './multisigInfo';
 import { nis1Account } from './nis1Account';
 import { AddressBook } from './addressBook';
 import { OtherAcountType } from './const/otherAccountType';
 import { Label } from './label';
-import { SimpleWallet } from './simpleWallet';
-import { SimpleAccount } from './simpleAccount';
+import type { SimpleWallet } from './simpleWallet';
+import type { SimpleAccount } from './simpleAccount';
 import { SimpleWallets } from './simpleWallets';
 
 const walletKey = "sw";
@@ -86,7 +86,7 @@ export class Wallets {
         return this.wallets.filter((wallet)=> wallet.networkName == networkName)
     }
 
-    filterByNetworkNameAndName (networkName: string, name: string): Wallet{
+    filterByNetworkNameAndName (networkName: string, name: string): Wallet | undefined{
         return this.wallets.find((wallet)=> wallet.networkName == networkName && wallet.name == name)
     }
 

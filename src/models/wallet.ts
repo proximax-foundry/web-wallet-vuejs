@@ -1,11 +1,10 @@
-import { WalletAccount } from './walletAccount';
-import { AddressBook } from './addressBook';
-import { OtherAccount } from './otherAccount';
+import type { WalletAccount } from './walletAccount';
+import type { AddressBook } from './addressBook';
+import type { OtherAccount } from './otherAccount';
 import { Address } from 'tsjs-xpx-chain-sdk';
-import { Helper } from '@/util/typeHelper';
-import {Label} from './label'
+import type {Label} from './label'
 import { SimpleWallet } from './simpleWallet';
-import { SimpleAccount } from './simpleAccount';
+import type { SimpleAccount } from './simpleAccount';
 
 export class Wallet{
 
@@ -116,8 +115,12 @@ export class Wallet{
         this.contacts[index] = addressBook;
     }
 
-    selectDefaultAccount(): WalletAccount{
-        return this.accounts.find((walletAccount)=> walletAccount.default === true);
+    selectDefaultAccount(): WalletAccount | null{
+        const defaultAcc = this.accounts.find((walletAccount)=> walletAccount.default === true)
+        if(!defaultAcc){
+            return null
+        }
+        return defaultAcc
     }
 
     setDefaultAccountByAddress(address: string): void{
@@ -127,9 +130,11 @@ export class Wallet{
             accounts[i].default = false;
         }
 
-        let account: WalletAccount = this.accounts.find((account)=> account.address === address);
+        let account= this.accounts.find((account)=> account.address === address);
+        if(account){
+            account.default = true;
+        }
 
-        account.default = true;
     }
 
     setDefaultAccountByName(name: string): void{
@@ -139,9 +144,11 @@ export class Wallet{
             accounts[i].default = false;
         }
 
-        let account: WalletAccount = this.accounts.find((account)=> account.name === name);
+        let account = this.accounts.find((account)=> account.name === name);
 
-        account.default = true;
+        if(account){
+            account.default = true;
+        }
     }
 
     fixNonManagableAccounts(){

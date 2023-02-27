@@ -16,8 +16,8 @@ import { walletState } from "@/state/walletState";
 import { WalletUtils } from '@/util/walletUtils'
 import { Helper } from "@/util/typeHelper";
 import { AppState } from "@/state/appState";
-import { WalletAccount } from "@/models/walletAccount";
-import { OtherAccount } from "@/models/otherAccount";
+import type { WalletAccount } from "@/models/walletAccount";
+import type { OtherAccount } from "@/models/otherAccount";
 import { TransactionUtils } from "./transactionUtils";
 
 async function getAccInfo(address :string) :Promise<PublicAccount> {
@@ -28,9 +28,13 @@ async function getAccInfo(address :string) :Promise<PublicAccount> {
 
 export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[], walletPassword :string, senderAccAddress :string, selectedCosigner :string, encryptedMsg :string) : Promise<boolean>  => {
   // verify password
-  let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword)
-  
-  if (!verify) {
+  let transactionBuilder = AppState.buildTxn
+
+  const wallet = walletState.currentLoggedInWallet
+  if(!wallet || !networkState.currentNetworkProfile || !transactionBuilder){
+    throw new Error("Service unavailable")
+  }
+  if(!WalletUtils.verifyWalletPassword(wallet.name, networkState.chainNetworkName, walletPassword)){
     return false
   }
 
@@ -57,22 +61,26 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
       }
     });
   }
-  let transactionBuilder = AppState.buildTxn
 
-  let initiatorAcc :WalletAccount
-  let senderAcc :WalletAccount | OtherAccount
-  let senderPublicAccount :PublicAccount;
+  let initiatorAcc :WalletAccount | undefined
+  let senderAcc :WalletAccount | OtherAccount | undefined
+  let senderPublicAccount :PublicAccount | null = null;
   if (!selectedCosigner) { 
-    initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === senderAccAddress);
+    initiatorAcc = wallet.accounts.find((element) => element.address === senderAccAddress);
   } else {
     // initiator acc details
-    initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedCosigner);
+    initiatorAcc = wallet.accounts.find((element) => element.address === selectedCosigner);
     //sender acc details
-    senderAcc =  walletState.currentLoggedInWallet.others.find((element) => element.address=== senderAccAddress) || walletState.currentLoggedInWallet.accounts.find((element) => element.address=== senderAccAddress) 
+    senderAcc =  wallet.others.find((element) => element.address=== senderAccAddress) || wallet.accounts.find((element) => element.address=== senderAccAddress) 
+    if(!senderAcc){
+      throw new Error("Account not found")
+    }
     let publicKey =senderAcc.publicKey
     senderPublicAccount = PublicAccount.createFromPublicKey(publicKey, networkType);
   }
-
+  if(!initiatorAcc){
+    throw new Error("Account not found")
+  }
   
   let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), initiatorAcc.encrypted, initiatorAcc.iv)
 
@@ -99,9 +107,15 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
     const signedTransaction = account.sign(transferTransaction, hash);
     TransactionUtils.announceTransaction(signedTransaction)
   } else { // there is a cosigner, aggregate  bonded transaction
-    let selectedWalletSigner = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==selectedCosigner) 
+    let selectedWalletSigner = wallet.accounts.find(acc=>acc.address==selectedCosigner) 
+    if(!selectedWalletSigner){
+      throw new Error("Account not found")
+    }
     let selectedSignerPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), selectedWalletSigner.encrypted, selectedWalletSigner.iv);
     let selectedSignerAccount = Account.createFromPrivateKey(selectedSignerPrivateKey,networkType)
+    if(!senderPublicAccount){
+      throw new Error("Account not found")
+    }
     const innerTxn = [transferTransaction.toAggregate(senderPublicAccount)];
     const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)
     const aggregateBondedTransactionSigned = selectedSignerAccount.sign(aggregateBondedTransaction, hash);
@@ -150,6 +164,9 @@ const getMosaic =(amount :string, mosaic :{id :string ,amount :string}[]) :Mosai
 const calculate_aggregate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]):string=> {
   
   let transactionBuilder = AppState.buildTxn
+  if(!transactionBuilder){
+    throw new Error("Service unavailable")
+  }
   let mosaics = getMosaic(amount,mosaic)
   let transferTransaction = transactionBuilder.transferBuilder()
   .recipient(Address.createFromRawAddress(test_address))
@@ -166,6 +183,9 @@ const calculate_aggregate_fee = (message :string , amount :string, mosaic :{id :
 const calculate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]) :string=> {
  
   let transactionBuilder = AppState.buildTxn
+  if(!transactionBuilder){
+    throw new Error("Service unavailable")
+  }
   let mosaics = getMosaic(amount,mosaic)
   let transferTransaction = transactionBuilder.transferBuilder()
   .recipient(Address.createFromRawAddress(test_address))

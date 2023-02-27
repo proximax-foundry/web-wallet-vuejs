@@ -1,5 +1,5 @@
 import { InnerTransaction } from "./innerTxn";
-import { RestrictionModification } from "../restrictionModification";
+import type { RestrictionModification } from "../restrictionModification";
 
 export class InnerRestrictionTransaction extends InnerTransaction{
 

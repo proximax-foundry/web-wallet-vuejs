@@ -13,12 +13,18 @@ export class BlockExtendedInfo{
     searchNamespaceResolution(namespaceIdHex: string): ResolutionSearch | null{
 
         let foundAddress = this.addressResolutions.find((resolution)=> resolution.unresolved.toUpperCase() === namespaceIdHex.toUpperCase());
-        let type: ResolutionType;
+        let type: ResolutionType ;
         let resolved: string = "";
 
         if(foundAddress){
             type = ResolutionType.ADDRESS;
             resolved = foundAddress.resolved
+            if(resolved){
+                return <ResolutionSearch>{
+                    type: type,
+                    value: resolved
+                }
+            }
         }
         else{
             let foundAsset = this.assetResolutions.find((resolution)=> resolution.unresolved.toUpperCase() === namespaceIdHex.toUpperCase());
@@ -26,16 +32,16 @@ export class BlockExtendedInfo{
             if(foundAsset){
                 type = ResolutionType.ASSET;
                 resolved = foundAsset.resolved
+                if(resolved){
+                    return <ResolutionSearch>{
+                        type: type,
+                        value: resolved
+                    }
+                }
             }
+           
         }
-
-        if(resolved){
-            return <ResolutionSearch>{
-                type: type,
-                value: resolved
-            }
-        }
-
+        
         return null;
     }
 

@@ -1,5 +1,5 @@
 import { PartialTransaction } from "./partialTransaction";
-import { TxnList } from "../txnList";
+import type { TxnList } from "../txnList";
 
 export class PartialAggregateTransaction extends PartialTransaction{
 

@@ -1,19 +1,20 @@
-import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Convert,
+import { Convert,
   NetworkType, 
   NamespaceId,
   MosaicId, Address, PublicAccount, CosignatureSignedTransaction, Statement,
-  AccountInfo, Transaction, TransactionQueryParams, SignedTransaction, TransactionType, NamespaceName, Mosaic, MosaicInfo,
+  AccountInfo, Transaction, TransactionQueryParams, SignedTransaction, TransactionType, NamespaceName, MosaicInfo,
   NamespaceInfo, TransactionGroupType, TransactionSearch
 } from "tsjs-xpx-chain-sdk";
-import { NetworkConfig } from "../models/stores/chainProfileConfig";
+import type { NetworkConfig } from "../models/stores/chainProfileConfig";
 import { ChainAPICall } from "../models/REST/chainAPICall";
-import { ChainConfigAPI } from "../models/REST/chainConfig";
+import type { ChainConfigAPI } from "../models/REST/chainConfig";
 import { networkState } from "../state/networkState";
 import { computed } from "vue";
 import { AppState } from "@/state/appState";
+import type { LooseObject } from "./typeHelper";
 
 const currentEndPoint = computed(() => networkState.selectedAPIEndpoint);
-const connectionPort = computed(() => networkState.currentNetworkProfile.httpPort);
+const connectionPort = computed(() => networkState.currentNetworkProfile?.httpPort);
 const currentNetworkType = computed(() => AppState.networkType);
 
 export class ChainUtils{
@@ -58,12 +59,12 @@ export class ChainUtils{
       const regex = /[^=\n{1}]+=\s*(.*)/g;
       const configs = configString.networkConfig.match(regex);
 
-      if(configs){
-        const networkConfig = configs.reduce((result, data)=>{
-          const [config, value] = data.split("=");
-          result[config.trim()] = value.trim();
-          return result;
-        }, {});
+      if(configs?.length){
+        const networkConfig: LooseObject = {};
+            configs.forEach((data) => {
+              const [config, value] = data.split("=");
+              networkConfig[config.trim()] = value.trim();
+            });
         const chainConfig = <NetworkConfig>
         {
           chainHeight: chainHeight,
@@ -139,7 +140,7 @@ export class ChainUtils{
       }
     }
 
-    static convertConfigNumberToInteger(amount){
+    static convertConfigNumberToInteger(amount :string){
         if(!amount){
             return 0;
         }
@@ -168,7 +169,7 @@ export class ChainUtils{
       }
     }
 
-    static isPrivateKeyValid(privateKey) {
+    static isPrivateKeyValid(privateKey :string) {
       if (privateKey.length !== 64 && privateKey.length !== 66) {
         return false;
       } else if (!Convert.isHexString(privateKey)) {

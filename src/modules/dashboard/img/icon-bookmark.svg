@@ -1,9 +1,0 @@
-<svg id="push_pin_black_24dp" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10">
-  <g id="Group_97" data-name="Group 97">
-    <rect id="Rectangle_323" data-name="Rectangle 323" width="10" height="10" fill="none"/>
-    <rect id="Rectangle_324" data-name="Rectangle 324" width="10" height="10" fill="none"/>
-  </g>
-  <g id="Group_98" data-name="Group 98" transform="translate(2.083 0.833)">
-    <path id="Path_3663" data-name="Path 3663" d="M10.833,6.529a.434.434,0,0,0-.333-.408,1.249,1.249,0,0,1-.917-1.2V2.833H10A.417.417,0,0,0,10,2H5.833a.417.417,0,0,0,0,.833H6.25V4.917a1.249,1.249,0,0,1-.917,1.2A.434.434,0,0,0,5,6.529v.054A.418.418,0,0,0,5.417,7H7.492L7.5,9.917a.417.417,0,0,0,.833,0L8.325,7h2.092a.418.418,0,0,0,.417-.417Z" transform="translate(-5 -2)" fill="#007cff" fill-rule="evenodd"/>
-  </g>
-</svg>

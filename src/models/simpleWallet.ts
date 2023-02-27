@@ -1,6 +1,6 @@
-import { SimpleAccount } from './simpleAccount';
-import { AddressBook } from './addressBook';
-import {Label} from './label';
+import type { SimpleAccount } from './simpleAccount';
+import type { AddressBook } from './addressBook';
+import type {Label} from './label';
 
 export class SimpleWallet{
 

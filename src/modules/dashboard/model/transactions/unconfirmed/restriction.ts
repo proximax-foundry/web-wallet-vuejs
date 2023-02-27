@@ -1,5 +1,5 @@
 import { UnconfirmedTransaction } from "./unconfirmedTransaction";
-import { RestrictionModification } from "../restrictionModification";
+import type { RestrictionModification } from "../restrictionModification";
 
 export class UnconfirmedRestrictionTransaction extends UnconfirmedTransaction{
 

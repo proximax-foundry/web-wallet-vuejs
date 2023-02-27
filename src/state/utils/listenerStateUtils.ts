@@ -2,11 +2,11 @@ import {
     listenerState, AddressAggregateTransactions, AddressConfirmedTransactions,
     AddressCosignatureSignedTransactions, AddressTransactionStatuses, AddressUnconfirmedTransactions
 } from "../listenerState";
-import {
+import type{
     BlockInfo, Transaction, TransactionStatusError,
-    AggregateTransaction, CosignatureSignedTransaction, Address, Listener
+    AggregateTransaction, CosignatureSignedTransaction, Address
 } from "tsjs-xpx-chain-sdk";
-import { AutoAnnounceSignedTransaction, AnnounceType, HashAnnounceBlock } from "../listenerState";
+import { AutoAnnounceSignedTransaction, AnnounceType } from "../listenerState";
 import { networkState } from "../networkState"
 import { computed } from "vue";
 import { ChainUtils } from "../../util/chainUtils"
@@ -24,7 +24,7 @@ let aggregateBondedToRemoveSet: boolean = false;
 let isCheckingAutoAnnounce: boolean = false;
 
 const currentEndPoint = computed(() => networkState.selectedAPIEndpoint);
-const connectionPort = computed(() => networkState.currentNetworkProfile.httpPort);
+const connectionPort = computed(() => networkState.currentNetworkProfile?.httpPort);
 const apiURL = computed(() => ChainUtils.buildAPIEndpoint(currentEndPoint.value, connectionPort.value));
 const chainAPICall = computed(() => new ChainAPICall(apiURL.value));
 
@@ -81,7 +81,9 @@ export class ListenerStateUtils {
         // console.log("Confirm Added");
         // console.log("Hash: "+ transaction.transactionInfo.hash);
         // console.log("Address: "+ address.plain());
-        listenerState.allConfirmedTransactionsHash.push(transaction.transactionInfo.hash);
+        if(transaction.transactionInfo && transaction.transactionInfo.hash){
+            listenerState.allConfirmedTransactionsHash.push(transaction.transactionInfo.hash);
+        }
 
         ListenerStateUtils.fireRecountConfirmed();
     }
@@ -109,7 +111,9 @@ export class ListenerStateUtils {
         // console.log("Unconfirm Added");
         // console.log("Hash: "+ transaction.transactionInfo.hash);
         // console.log("Address: "+ address.plain());
-        listenerState.allUnconfirmedTransactionsHash.push(transaction.transactionInfo.hash);
+        if(transaction.transactionInfo && transaction.transactionInfo.hash){
+            listenerState.allUnconfirmedTransactionsHash.push(transaction.transactionInfo.hash);
+        }
 
         //ListenerStateUtils.updateAutoAnnounceByConfirmedHash(transaction.transactionInfo.hash);
 
@@ -182,8 +186,9 @@ export class ListenerStateUtils {
         }
 
         //ListenerStateUtils.updateAutoAnnounceByConfirmedHash(transaction.transactionInfo.hash);
-
-        listenerState.allAggregateBondedTransactionHash.push(transaction.transactionInfo.hash);
+        if(transaction.transactionInfo && transaction.transactionInfo.hash){
+            listenerState.allAggregateBondedTransactionHash.push(transaction.transactionInfo.hash);
+        }
 
         ListenerStateUtils.fireRecountAggregateAdded();
     }
@@ -462,7 +467,7 @@ export class ListenerStateUtils {
             if(currentAutoAnnounceTx.announceAtBlock && currentBlockHeight >= currentAutoAnnounceTx.announceAtBlock){
                 letAnnouce = true;
             }
-            else if(currentAutoAnnounceTx.hashAnnounceBlock && currentAutoAnnounceTx.hashAnnounceBlock.hashFound){
+            else if(currentAutoAnnounceTx.hashAnnounceBlock && currentAutoAnnounceTx.hashAnnounceBlock.hashFound && currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock ){
                 if(currentBlockHeight > currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock + currentAutoAnnounceTx.hashAnnounceBlock.annouceAfterBlockNum){
                     letAnnouce = true;
                 }

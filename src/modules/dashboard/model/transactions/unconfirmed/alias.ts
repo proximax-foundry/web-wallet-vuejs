@@ -1,5 +1,4 @@
 import { UnconfirmedTransaction } from "./unconfirmedTransaction";
-import { TransactionType, SecretProofTransaction } from "tsjs-xpx-chain-sdk";
 
 export class UnconfirmedAliasTransaction extends UnconfirmedTransaction{
 

@@ -1,35 +1,50 @@
 <template>
-    <Tree :value="contacts" selectionMode="single" v-model:selectionKeys="selectedNode" :expandedKeys="expandedKeys" :filter="true" filterMode="strict" @node-select="onNodeSelect" @node-expand="expandTree" @node-collapse="collapseTree" >
+    <Tree :value="contacts" selectionMode="single" v-model:selectionKeys="selectedNode" :expandedKeys="expandedKeys"
+        :filter="true" filterMode="strict" @node-select="onNodeSelect(selectedNode)" @node-expand="expandTree(selectedNode)"
+        @node-collapse="collapseTree">
     </Tree>
 </template>
 
 <script setup lang="ts">
-    import {defineComponent, ref} from 'vue';
+import { defineComponent, ref, type PropType } from 'vue';
 
-    defineComponent({
-        name: 'SelectAccountAndContact'
-    })
-    const emits = defineEmits([
-        'node-select'
-    ])
-    const props = defineProps({
-        contacts : {},
-        selectedNode : {}
-    })
+defineComponent({
+    name: 'SelectAccountAndContact'
+})
+const emits = defineEmits([
+    'node-select'
+])
+interface contact {
+    key: string,
+    label: string,
+    selectable: boolean,
+    children: []
+}
 
-    const expandedKeys = ref({})
-
-    function onNodeSelect(node){
-        emits("node-select", node)
+defineProps({
+    contacts: {
+        type: Array<contact>,
+        required: true
+    },
+    selectedNode: {
+        type: Object as PropType<contact>,
+        required: true
     }
+})
 
-    function expandTree(expanded){
-        expandedKeys.value = {}
-        expandedKeys.value[expanded.key] = true
-    }
+const expandedKeys = ref<Record<string, boolean>>({})
 
-    function collapseTree(){
-        expandedKeys.value = {}
-    }
-    
+function onNodeSelect(node: contact) {
+    emits("node-select", node)
+}
+
+function expandTree(expanded: contact) {
+    expandedKeys.value = {}
+    expandedKeys.value[expanded.key] = true
+}
+
+function collapseTree() {
+    expandedKeys.value = {}
+}
+
 </script>

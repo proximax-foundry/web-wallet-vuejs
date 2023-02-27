@@ -1,6 +1,6 @@
 import { reactive } from "vue";
 import { Wallets } from "../models/wallets"
-import { Wallet } from "../models/wallet"
+import type { Wallet } from "../models/wallet"
 
 interface walletStateInterface {
     wallets: Wallets

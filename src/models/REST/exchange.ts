@@ -13,7 +13,7 @@ export class ExchangeAPI {
         this.exchangeHttp = new ExchangeHttp(endpoint, networkHttp);
     }
 
-    getAccountExchanges(accountId: Address | PublicAccount): Promise<AccountExchanges>{
+    getAccountExchanges(accountId: Address | PublicAccount): Promise<AccountExchanges | undefined>{
         let authHeader = RequestAuth.getAuthHeader();
         return this.exchangeHttp.getAccountExchanges(accountId, authHeader).toPromise();
     }

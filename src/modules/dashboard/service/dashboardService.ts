@@ -1,32 +1,15 @@
 import {
-    Account,
     Address,
     Deadline,
-    EncryptedMessage,
-    // NetworkCurrencyMosaic,
-    // FeeCalculationStrategy,
-    Mosaic,
     MosaicId,
     UInt64,
-    MosaicProperties,
     MosaicSupplyType,
-    // MosaicService,
-    MosaicNonce,
-    PlainMessage,
     TransferTransaction,
-    TransactionHttp,
-    TransactionBuilderFactory,
     PublicAccount,
-    AccountHttp,
-    AccountInfo,
-    FeeCalculationStrategy,
-    NetworkType,
     NamespaceId,
     Transaction,
     TransactionType,
     AggregateTransaction,
-    CosignatureTransaction,
-    QueryParams,
     AddressAliasTransaction,
     AddExchangeOfferTransaction,
     ChainConfigTransaction,
@@ -48,13 +31,9 @@ import {
     RegisterNamespaceTransaction,
     SecretLockTransaction,
     SecretProofTransaction,
-    InnerTransaction,
+    type InnerTransaction,
     ExchangeOfferType,
-    HashType,
     RestrictionType,
-    AccountRestrictionModification,
-    SignedTransaction,
-    CosignatureSignedTransaction,
     TransactionQueryParams,
     TransactionGroupType,
     TransactionSearch,
@@ -68,7 +47,6 @@ import {
     NamespaceType,
     LinkAction,
     MosaicInfo,
-    AccountRestrictionTransaction,
     RestrictionModificationType,
     MosaicRemoveLevyTransaction,
     MosaicModifyLevyTransaction,
@@ -82,16 +60,11 @@ import {
 import { HashType as myHashType } from "./../../../models/const/hashType"
 import { TransactionUtils } from "../../../util/transactionUtils";
 import { Helper } from "../../../util/typeHelper";
-import { DashboardTransaction, Tip,
-    TransferList, DashboardInnerTransaction, TransactionCosigner
-  } from "./transaction";
-import { Wallet } from "@/models/wallet"
-import { Account as myAccount } from "@/models/account";
-import { networkState } from "@/state/networkState";
+import type { Wallet } from "@/models/wallet"
+import type { Account as myAccount } from "@/models/account";
 import { computed } from "vue";
-import { ChainUtils } from "@/util/chainUtils";
-import { DashboardTip, DashboardTipList, RowDashboardTip, TipType, AmountType, OtherAsset } from "../model/dashboardClasses";
-import { ConfirmedTransferTransaction, UnconfirmedTransferTransaction, PartialTransferTransaction,
+import {
+    ConfirmedTransferTransaction, UnconfirmedTransferTransaction, PartialTransferTransaction,
     ConfirmedAggregateTransaction, UnconfirmedAggregateTransaction, PartialAggregateTransaction,
     ConfirmedAliasTransaction, UnconfirmedAliasTransaction, PartialAliasTransaction,
     ConfirmedAssetTransaction, UnconfirmedAssetTransaction, PartialAssetTransaction,
@@ -103,28 +76,28 @@ import { ConfirmedTransferTransaction, UnconfirmedTransferTransaction, PartialTr
     ConfirmedAccountTransaction, UnconfirmedAccountTransaction, PartialAccountTransaction,
     ConfirmedNamespaceTransaction, UnconfirmedNamespaceTransaction, PartialNamespaceTransaction,
     ConfirmedRestrictionTransaction, UnconfirmedRestrictionTransaction, PartialRestrictionTransaction,
-    ConfirmedSecretTransaction, UnconfirmedSecretTransaction, PartialSecretTransaction, 
-    ConfirmedTransaction, UnconfirmedTransaction, PartialTransaction, 
-    SDA, AliasNamespace, TxnExchangeOffer, RestrictionModification, TxnList,
-    InnerAccountTransaction, InnerAliasTransaction, InnerAssetTransaction, InnerChainTransaction, 
+    ConfirmedSecretTransaction, UnconfirmedSecretTransaction, PartialSecretTransaction,
+    ConfirmedTransaction, UnconfirmedTransaction, PartialTransaction,
+    type SDA, type TxnExchangeOffer, type RestrictionModification, type TxnList,
+    InnerAccountTransaction, InnerAliasTransaction, InnerAssetTransaction, InnerChainTransaction,
     InnerExchangeTransaction, InnerLinkTransaction, InnerLockTransaction, InnerMetadataTransaction, InnerNamespaceTransaction,
     InnerRestrictionTransaction, InnerSecretTransaction, InnerTransaction as MyInnerTxn, InnerTransferTransaction
 } from "../model/transactions/transaction";
-import { Account as MyAccount } from "../../../models/account";
+import type { Account as MyAccount } from "../../../models/account";
 import { AppState } from "@/state/appState";
-import i18n from "@/i18n";
+import { useI18n } from "vue-i18n";
 
 const namespaceIdFirstCharacterString = "89ABCDEF";
-const nativeTokenNamespaceId = computed(()=> new NamespaceId(AppState.nativeToken.fullNamespace).toHex());
+const nativeTokenNamespaceId = computed(() => new NamespaceId(AppState.nativeToken.fullNamespace).toHex());
 
-export enum MsgType{
+export enum MsgType {
     NONE = 0,
     GREEN = 1,
     RED = 2,
     INFO = 3,
 }
 
-export interface TxnDetails{
+export interface TxnDetails {
     type: MsgType,
     value: string | number;
     label?: string;
@@ -132,7 +105,7 @@ export interface TxnDetails{
     hover?: string;
 }
 
-export enum InnerTxnLegendType{
+export enum InnerTxnLegendType {
     NONE = 0,
     ADD_REMOVE = 1,
     TRUE_FALSE = 2,
@@ -140,7 +113,7 @@ export enum InnerTxnLegendType{
     ALLOW_BLOCK = 4
 }
 
-export interface InnerTxnDetails{
+export interface InnerTxnDetails {
 
     typeName: string;
     signer: string;
@@ -151,7 +124,7 @@ export interface InnerTxnDetails{
     sdas: string[];
 }
 
-const {t} = i18n.global 
+const { t } = useI18n({ useScope: 'global' })
 
 export class DashboardService {
 
@@ -159,43 +132,47 @@ export class DashboardService {
     selectedAccount: MyAccount;
     savedAggregateTxn: AggregateTransaction[] = [];
 
-    constructor(wallet: Wallet, selectedAccount: MyAccount){
+    constructor(wallet: Wallet, selectedAccount: MyAccount) {
         this.wallet = wallet;
         this.selectedAccount = selectedAccount;
     }
 
-    async searchTxns(transactionGroupType: TransactionGroupType, transactionQueryParams: TransactionQueryParams): Promise<TransactionSearch>{
-
+    async searchTxns(transactionGroupType: TransactionGroupType, transactionQueryParams: TransactionQueryParams): Promise<TransactionSearch> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
         let transactionSearchResult: TransactionSearch = await AppState.chainAPI.transactionAPI.searchTransactions(transactionGroupType, transactionQueryParams);
 
         return transactionSearchResult;
     }
 
     // ---------------------------TransferTransaction / Mixed Transaction---------------------------------------------------
-    async formatPartialMixedTxns(txns: Transaction[]): Promise<PartialTransferTransaction[]>{
+    async formatPartialMixedTxns(txns: Transaction[]): Promise<PartialTransferTransaction[]> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
+        let formatedTxns: PartialTransferTransaction[] = [];
 
-        let formatedTxns : PartialTransferTransaction[] = [];
-
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialTransferTransaction, formattedTxn) as PartialTransferTransaction;
-            
+
             let sdas: SDA[] = [];
 
-            if(txns[i].type === TransactionType.TRANSFER){
+            if (txns[i].type === TransactionType.TRANSFER) {
                 let transferTxn = txns[i] as TransferTransaction;
                 txn.message = transferTxn.message.payload;
                 txn.messageType = transferTxn.message.type;
 
                 // if(txn.messageType === MessageType.PlainMessage){
                 //     let newType = this.convertToSwapType(txn.message);
-                
+
                 //     if(newType){
                 //         txn.type = newType;
                 //     }
                 // }
 
-                switch(txn.messageType){
+                switch (txn.messageType) {
                     case MessageType.PlainMessage:
                         txn.messageTypeTitle = "Plain Message";
                         break;
@@ -210,21 +187,24 @@ export class DashboardService {
 
                 let recipient;
 
-                if(transferTxn.recipient instanceof NamespaceId){
+                if (transferTxn.recipient instanceof NamespaceId) {
                     txn.recipientNamespaceId = transferTxn.recipient.toHex();
                     recipient = await DashboardService.getAddressAlias(transferTxn.recipient);
                     let namespacesName = await DashboardService.getNamespacesName([transferTxn.recipient]);
                     txn.recipientNamespaceName = namespacesName[0].name;
                 }
-                else{
+                else {
                     recipient = transferTxn.recipient;
                 }
 
                 txn.recipient = recipient.plain();
+                if (!transferTxn.signer) {
+                    throw new Error("Service unavailable")
+                }
                 txn.sender = transferTxn.signer.address.plain();
-                txn.in_out = this.selectedAccount.address === txn.sender ? false: true;
+                txn.in_out = this.selectedAccount.address === txn.sender ? false : true;
 
-                for(let y = 0; y < transferTxn.mosaics.length; ++y){
+                for (let y = 0; y < transferTxn.mosaics.length; ++y) {
 
                     let rawAmount = transferTxn.mosaics[y].amount.compact();
                     let actualAmount = rawAmount;
@@ -232,17 +212,17 @@ export class DashboardService {
                     let assetId;
                     let isSendWithNamespace = DashboardService.isNamespace(transferTxn.mosaics[y].id);
 
-                    if(isSendWithNamespace){
+                    if (isSendWithNamespace) {
                         let namespaceId = new NamespaceId(transferTxn.mosaics[y].id.toDTO().id);
                         assetId = await DashboardService.getAssetAlias(namespaceId);
                     }
-                    else{
+                    else {
                         assetId = transferTxn.mosaics[y].id;
                     }
 
                     let assetIdHex = assetId.toHex();
 
-                    if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
+                    if ([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)) {
                         txn.amountTransfer += DashboardService.convertToExactNativeAmount(actualAmount);
                         continue;
                     }
@@ -255,7 +235,7 @@ export class DashboardService {
                         sendWithNamespace: isSendWithNamespace
                     };
 
-                    if(isSendWithNamespace){
+                    if (isSendWithNamespace) {
                         let namespaceId = transferTxn.mosaics[y].id;
 
                         newSDA.sendWithAlias = {
@@ -267,21 +247,26 @@ export class DashboardService {
                     sdas.push(newSDA);
                 }
 
-                let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => Helper.createNamespaceId(sda.sendWithAlias.id));
+                let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => {
+                    if (!sda.sendWithAlias) {
+                        throw new Error("Service unavailable")
+                    }
+                    return Helper.createNamespaceId(sda.sendWithAlias.id)
+                });
 
-                let allAssetId = sdas.filter(sda =>{ 
+                let allAssetId = sdas.filter(sda => {
                     return sda.amountIsRaw
                 }).map(sda => Helper.createAssetId(sda.id));
 
-                if(namespaceIds.length || allAssetId.length){
+                if (namespaceIds.length || allAssetId.length) {
                     let namespacesNames: NamespaceName[] = [];
                     namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
                     let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
                     let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
 
-                    for(let x= 0; x < sdas.length; ++x){
+                    for (let x = 0; x < sdas.length; ++x) {
 
-                        let assetProperties = assetsProperties.filter(aliasName=> aliasName.mosaicId.toHex() === sdas[x].id)[0];
+                        let assetProperties = assetsProperties.filter(aliasName => aliasName.mosaicId.toHex() === sdas[x].id)[0];
 
                         sdas[x].divisibility = assetProperties.divisibility;
                         sdas[x].amount = DashboardService.convertToExactAmount(sdas[x].amount, assetProperties.divisibility);
@@ -289,13 +274,13 @@ export class DashboardService {
 
                         let mosaicNames: MosaicNames = aliasNames.filter(aliaName => aliaName.mosaicId.toHex() === sdas[x].id)[0];
                         let currentAliasNames: NamespaceName[] = mosaicNames.names;
-                        sdas[x].currentAlias = currentAliasNames.map(currentAlias =>{ 
+                        sdas[x].currentAlias = currentAliasNames.map(currentAlias => {
                             return { name: currentAlias.name, id: currentAlias.namespaceId.toDTO().id, idHex: currentAlias.namespaceId.toHex() }
                         });
-
-                        if(sdas[x].sendWithAlias){
-                            sdas[x].sendWithAlias.name = namespacesNames
-                                .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
+                        const { sendWithAlias } = sdas[x]
+                        if (sendWithAlias) {
+                            sendWithAlias.name = namespacesNames
+                                .filter(nsName => nsName.namespaceId.toHex() === sendWithAlias.idHex)
                                 .map(nsName => nsName.name)[0]
                         }
                     }
@@ -308,30 +293,32 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatUnconfirmedMixedTxns(txns: Transaction[]): Promise<UnconfirmedTransferTransaction[]>{
+    async formatUnconfirmedMixedTxns(txns: Transaction[]): Promise<UnconfirmedTransferTransaction[]> {
 
-        let formatedTxns : UnconfirmedTransferTransaction[] = [];
-
-        for(let i=0; i < txns.length; ++i){
+        let formatedTxns: UnconfirmedTransferTransaction[] = [];
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedTransferTransaction, formattedTxn) as UnconfirmedTransferTransaction;
-            
+
             let sdas: SDA[] = [];
 
-            if(txns[i].type === TransactionType.TRANSFER){
+            if (txns[i].type === TransactionType.TRANSFER) {
                 let transferTxn = txns[i] as TransferTransaction;
                 txn.message = transferTxn.message.payload;
                 txn.messageType = transferTxn.message.type;
 
-                if(txn.messageType === MessageType.PlainMessage){
+                if (txn.messageType === MessageType.PlainMessage) {
                     let newType = this.convertToSwapType(txn.message);
-                
-                    if(newType){
+
+                    if (newType) {
                         txn.type = newType;
                     }
                 }
 
-                switch(txn.messageType){
+                switch (txn.messageType) {
                     case MessageType.PlainMessage:
                         txn.messageTypeTitle = "Plain Message";
                         break;
@@ -342,25 +329,27 @@ export class DashboardService {
                         txn.messageTypeTitle = "Hexadecimal Message";
                         break;
                 }
-                let recipientIsNamespace = transferTxn.recipient instanceof NamespaceId ? true : false;
 
                 let recipient;
 
-                if(transferTxn.recipient instanceof NamespaceId){
+                if (transferTxn.recipient instanceof NamespaceId) {
                     txn.recipientNamespaceId = transferTxn.recipient.toHex();
                     recipient = await DashboardService.getAddressAlias(transferTxn.recipient);
                     let namespacesName = await DashboardService.getNamespacesName([transferTxn.recipient]);
                     txn.recipientNamespaceName = namespacesName[0].name;
                 }
-                else{
+                else {
                     recipient = transferTxn.recipient;
                 }
 
                 txn.recipient = recipient.plain();
+                if (!transferTxn.signer) {
+                    throw new Error("Service unavailable")
+                }
                 txn.sender = transferTxn.signer.address.plain();
-                txn.in_out = this.selectedAccount.address === txn.sender ? false: true;
+                txn.in_out = this.selectedAccount.address === txn.sender ? false : true;
 
-                for(let y = 0; y < transferTxn.mosaics.length; ++y){
+                for (let y = 0; y < transferTxn.mosaics.length; ++y) {
 
                     let rawAmount = transferTxn.mosaics[y].amount.compact();
                     let actualAmount = rawAmount;
@@ -368,17 +357,17 @@ export class DashboardService {
                     let assetId;
                     let isSendWithNamespace = DashboardService.isNamespace(transferTxn.mosaics[y].id);
 
-                    if(isSendWithNamespace){
+                    if (isSendWithNamespace) {
                         let namespaceId = new NamespaceId(transferTxn.mosaics[y].id.toDTO().id);
                         assetId = await DashboardService.getAssetAlias(namespaceId);
                     }
-                    else{
+                    else {
                         assetId = transferTxn.mosaics[y].id;
                     }
 
                     let assetIdHex = assetId.toHex();
 
-                    if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
+                    if ([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)) {
                         txn.amountTransfer += DashboardService.convertToExactNativeAmount(actualAmount);
                         continue;
                     }
@@ -391,7 +380,7 @@ export class DashboardService {
                         sendWithNamespace: isSendWithNamespace
                     };
 
-                    if(isSendWithNamespace){
+                    if (isSendWithNamespace) {
                         let namespaceId = transferTxn.mosaics[y].id;
 
                         newSDA.sendWithAlias = {
@@ -403,21 +392,26 @@ export class DashboardService {
                     sdas.push(newSDA);
                 }
 
-                let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => Helper.createNamespaceId(sda.sendWithAlias.id));
+                let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => {
+                    if (!sda.sendWithAlias) {
+                        throw new Error('Service unavailable')
+                    }
+                    return Helper.createNamespaceId(sda.sendWithAlias.id)
+                })
 
-                let allAssetId = sdas.filter(sda =>{ 
+                let allAssetId = sdas.filter(sda => {
                     return sda.amountIsRaw
                 }).map(sda => Helper.createAssetId(sda.id));
 
-                if(namespaceIds.length || allAssetId.length){
+                if (namespaceIds.length || allAssetId.length) {
                     let namespacesNames: NamespaceName[] = [];
                     namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
                     let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
                     let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
 
-                    for(let x= 0; x < sdas.length; ++x){
+                    for (let x = 0; x < sdas.length; ++x) {
 
-                        let assetProperties = assetsProperties.filter(aliasName=> aliasName.mosaicId.toHex() === sdas[x].id)[0];
+                        let assetProperties = assetsProperties.filter(aliasName => aliasName.mosaicId.toHex() === sdas[x].id)[0];
 
                         sdas[x].divisibility = assetProperties.divisibility;
                         sdas[x].amount = DashboardService.convertToExactAmount(sdas[x].amount, assetProperties.divisibility);
@@ -425,13 +419,13 @@ export class DashboardService {
 
                         let mosaicNames: MosaicNames = aliasNames.filter(aliaName => aliaName.mosaicId.toHex() === sdas[x].id)[0];
                         let currentAliasNames: NamespaceName[] = mosaicNames.names;
-                        sdas[x].currentAlias = currentAliasNames.map(currentAlias =>{ 
+                        sdas[x].currentAlias = currentAliasNames.map(currentAlias => {
                             return { name: currentAlias.name, id: currentAlias.namespaceId.toDTO().id, idHex: currentAlias.namespaceId.toHex() }
                         });
-
-                        if(sdas[x].sendWithAlias){
-                            sdas[x].sendWithAlias.name = namespacesNames
-                                .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
+                        const { sendWithAlias } = sdas[x]
+                        if (sendWithAlias) {
+                            sendWithAlias.name = namespacesNames
+                                .filter(nsName => nsName.namespaceId.toHex() === sendWithAlias.idHex)
                                 .map(nsName => nsName.name)[0]
                         }
                     }
@@ -444,29 +438,31 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatConfirmedMixedTxns(txns: Transaction[]): Promise<ConfirmedTransferTransaction[]>{
+    async formatConfirmedMixedTxns(txns: Transaction[]): Promise<ConfirmedTransferTransaction[]> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
+        let formatedTxns: ConfirmedTransferTransaction[] = [];
 
-        let formatedTxns : ConfirmedTransferTransaction[] = [];
-
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedTransferTransaction, formattedTxn) as ConfirmedTransferTransaction;
 
             let sdas: SDA[] = [];
 
-            if(txns[i].type === TransactionType.TRANSFER){
+            if (txns[i].type === TransactionType.TRANSFER) {
                 let transferTxn = txns[i] as TransferTransaction;
                 txn.message = transferTxn.message.payload;
                 txn.messageType = transferTxn.message.type;
 
-                if(txn.messageType === MessageType.PlainMessage){
+                if (txn.messageType === MessageType.PlainMessage) {
                     let newType = this.convertToSwapType(txn.message);
-                
-                    if(newType){
+
+                    if (newType) {
                         txn.type = newType;
                     }
                 }
-                switch(txn.messageType){
+                switch (txn.messageType) {
                     case MessageType.PlainMessage:
                         txn.messageTypeTitle = "Plain Message";
                         break;
@@ -477,29 +473,36 @@ export class DashboardService {
                         txn.messageTypeTitle = "Hexadecimal Message";
                         break;
                 }
-                let recipientIsNamespace = transferTxn.recipient instanceof NamespaceId ? true : false;
 
-                if(transferTxn.recipient instanceof NamespaceId){
+                if (transferTxn.recipient instanceof NamespaceId) {
                     txn.recipientNamespaceId = transferTxn.recipient.toHex();
                     let namespacesName = await DashboardService.getNamespacesName([transferTxn.recipient]);
                     txn.recipientNamespaceName = namespacesName[0].name;
                 }
 
                 let recipient = await DashboardService.getRecipient(transferTxn, txn.block);
-
+                if(!recipient){
+                    throw new Error("Service unavailable")
+                }
                 txn.recipient = recipient.plain();
+                if (!transferTxn.signer) {
+                    throw new Error("Service unavailable")
+                }
                 txn.sender = transferTxn.signer.address.plain();
-                txn.in_out = this.selectedAccount.address === txn.sender ? false: true;
+                txn.in_out = this.selectedAccount.address === txn.sender ? false : true;
 
-                for(let y = 0; y < transferTxn.mosaics.length; ++y){
+                for (let y = 0; y < transferTxn.mosaics.length; ++y) {
 
                     let rawAmount = transferTxn.mosaics[y].amount.compact();
                     let actualAmount = rawAmount;
                     let isSendWithNamespace = DashboardService.isNamespace(transferTxn.mosaics[y].id);
                     let assetId = await DashboardService.getResolvedAsset(transferTxn.mosaics[y].id, txn.block);
+                    if(!assetId){
+                        throw new Error("Service unavailable")
+                    }
                     let assetIdHex = assetId.toHex();
 
-                    if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
+                    if ([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)) {
                         txn.amountTransfer += DashboardService.convertToExactNativeAmount(actualAmount);
                         continue;
                     }
@@ -512,7 +515,7 @@ export class DashboardService {
                         sendWithNamespace: isSendWithNamespace
                     };
 
-                    if(isSendWithNamespace){
+                    if (isSendWithNamespace) {
                         let namespaceId = transferTxn.mosaics[y].id;
 
                         newSDA.sendWithAlias = {
@@ -524,21 +527,26 @@ export class DashboardService {
                     sdas.push(newSDA);
                 }
 
-                let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => Helper.createNamespaceId(sda.sendWithAlias.id));
+                let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => {
+                    if (!sda.sendWithAlias) {
+                        throw new Error('Service unavailable')
+                    }
+                    return Helper.createNamespaceId(sda.sendWithAlias.id)
+                })
 
-                let allAssetId = sdas.filter(sda =>{ 
+                let allAssetId = sdas.filter(sda => {
                     return sda.amountIsRaw
                 }).map(sda => Helper.createAssetId(sda.id));
 
-                if(namespaceIds.length || allAssetId.length){
+                if (namespaceIds.length || allAssetId.length) {
                     let namespacesNames: NamespaceName[] = [];
                     namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
                     let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
                     let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
 
-                    for(let x= 0; x < sdas.length; ++x){
+                    for (let x = 0; x < sdas.length; ++x) {
 
-                        let assetProperties = assetsProperties.filter(aliasName=> aliasName.mosaicId.toHex() === sdas[x].id)[0];
+                        let assetProperties = assetsProperties.filter(aliasName => aliasName.mosaicId.toHex() === sdas[x].id)[0];
 
                         sdas[x].divisibility = assetProperties.divisibility;
                         sdas[x].amount = DashboardService.convertToExactAmount(sdas[x].amount, assetProperties.divisibility);
@@ -546,13 +554,13 @@ export class DashboardService {
 
                         let mosaicNames: MosaicNames = aliasNames.filter(aliaName => aliaName.mosaicId.toHex() === sdas[x].id)[0];
                         let currentAliasNames: NamespaceName[] = mosaicNames.names;
-                        sdas[x].currentAlias = currentAliasNames.map(currentAlias =>{ 
+                        sdas[x].currentAlias = currentAliasNames.map(currentAlias => {
                             return { name: currentAlias.name, id: currentAlias.namespaceId.toDTO().id, idHex: currentAlias.namespaceId.toHex() }
                         });
-
-                        if(sdas[x].sendWithAlias){
-                            sdas[x].sendWithAlias.name = namespacesNames
-                                .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
+                        const { sendWithAlias } = sdas[x]
+                        if (sendWithAlias) {
+                            sendWithAlias.name = namespacesNames
+                                .filter(nsName => nsName.namespaceId.toHex() === sendWithAlias.idHex)
                                 .map(nsName => nsName.name)[0]
                         }
                     }
@@ -566,15 +574,17 @@ export class DashboardService {
     }
 
     //----------Account Transaction----------------------------------------------------------
-    async formatUnconfirmedAccountTransaction(txns: Transaction[]): Promise<UnconfirmedAccountTransaction[]>{
+    async formatUnconfirmedAccountTransaction(txns: Transaction[]): Promise<UnconfirmedAccountTransaction[]> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
+        let formatedTxns: UnconfirmedAccountTransaction[] = [];
 
-        let formatedTxns : UnconfirmedAccountTransaction[] = [];
-
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAccountTransaction, formattedTxn) as UnconfirmedAccountTransaction;
 
-            if(txns[i].type === TransactionType.MODIFY_MULTISIG_ACCOUNT){
+            if (txns[i].type === TransactionType.MODIFY_MULTISIG_ACCOUNT) {
                 let modifyMultisigTxn = txns[i] as ModifyMultisigAccountTransaction;
 
                 txn.approvalDelta = modifyMultisigTxn.minApprovalDelta;
@@ -585,9 +595,12 @@ export class DashboardService {
                     .map(x => x.cosignatoryPublicAccount.publicKey);
 
                 try {
+                    if (!modifyMultisigTxn.signer) {
+                        throw new Error("Service unavailable")
+                    }
                     let multisigInfo = await AppState.chainAPI.accountAPI.getMultisigAccountInfo(modifyMultisigTxn.signer.address);
 
-                    if(multisigInfo){
+                    if (multisigInfo) {
                         txn.oldApprovalNumber = multisigInfo.minApproval;
                         txn.oldRemovalNumber = multisigInfo.minRemoval;
                     }
@@ -597,22 +610,22 @@ export class DashboardService {
                     txn.oldRemovalNumber = 0;
                 }
             }
-            
+
             formatedTxns.push(txn);
         }
 
         return formatedTxns;
     }
 
-    async formatConfirmedAccountTransaction(txns: Transaction[]): Promise<ConfirmedAccountTransaction[]>{
+    async formatConfirmedAccountTransaction(txns: Transaction[]): Promise<ConfirmedAccountTransaction[]> {
 
-        let formatedTxns : ConfirmedAccountTransaction[] = [];
+        let formatedTxns: ConfirmedAccountTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedAccountTransaction, formattedTxn) as ConfirmedAccountTransaction;
-            
-            if(txns[i].type === TransactionType.MODIFY_MULTISIG_ACCOUNT){
+
+            if (txns[i].type === TransactionType.MODIFY_MULTISIG_ACCOUNT) {
                 let modifyMultisigTxn = txns[i] as ModifyMultisigAccountTransaction;
 
                 txn.approvalDelta = modifyMultisigTxn.minApprovalDelta;
@@ -629,15 +642,17 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatPartialAccountTransaction(txns: Transaction[]): Promise<PartialAccountTransaction[]>{
+    async formatPartialAccountTransaction(txns: Transaction[]): Promise<PartialAccountTransaction[]> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
+        let formatedTxns: PartialAccountTransaction[] = [];
 
-        let formatedTxns : PartialAccountTransaction[] = [];
-
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialAccountTransaction, formattedTxn) as PartialAccountTransaction;
-            
-            if(txns[i].type === TransactionType.MODIFY_MULTISIG_ACCOUNT){
+
+            if (txns[i].type === TransactionType.MODIFY_MULTISIG_ACCOUNT) {
                 let modifyMultisigTxn = txns[i] as ModifyMultisigAccountTransaction;
 
                 txn.approvalDelta = modifyMultisigTxn.minApprovalDelta;
@@ -648,9 +663,12 @@ export class DashboardService {
                     .map(x => x.cosignatoryPublicAccount.publicKey);
 
                 try {
+                    if (!modifyMultisigTxn.signer) {
+                        throw new Error("Service unavailable")
+                    }
                     let multisigInfo = await AppState.chainAPI.accountAPI.getMultisigAccountInfo(modifyMultisigTxn.signer.address);
 
-                    if(multisigInfo){
+                    if (multisigInfo) {
                         txn.oldApprovalNumber = multisigInfo.minApproval;
                         txn.oldRemovalNumber = multisigInfo.minRemoval;
                     }
@@ -668,21 +686,21 @@ export class DashboardService {
     }
 
     //------------------Alias Transaction--------------------------------------------------------------------
-    async formatUnconfirmedAliasTransaction(txns: Transaction[]): Promise<UnconfirmedAliasTransaction[]>{
+    async formatUnconfirmedAliasTransaction(txns: Transaction[]): Promise<UnconfirmedAliasTransaction[]> {
 
-        let formatedTxns : UnconfirmedAliasTransaction[] = [];
+        let formatedTxns: UnconfirmedAliasTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAliasTransaction, formattedTxn) as UnconfirmedAliasTransaction;
 
-            if(txns[i].type === TransactionType.ADDRESS_ALIAS){
+            if (txns[i].type === TransactionType.ADDRESS_ALIAS) {
                 let addressAliasTxn = txns[i] as AddressAliasTransaction;
 
                 txn.address = addressAliasTxn.address.plain();
                 txn.aliasType = addressAliasTxn.actionType;
                 txn.aliasTypeName = addressAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
-        
+
                 let nsId = addressAliasTxn.namespaceId;
 
                 try {
@@ -690,16 +708,16 @@ export class DashboardService {
 
                     txn.aliasName = nsName[0].name;
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.MOSAIC_ALIAS){
+            else if (txns[i].type === TransactionType.MOSAIC_ALIAS) {
                 let assetAliasTxn = txns[i] as MosaicAliasTransaction;
 
                 txn.assetId = assetAliasTxn.mosaicId.toHex();
                 txn.aliasType = assetAliasTxn.actionType;
                 txn.aliasTypeName = assetAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
-        
+
                 let nsId = assetAliasTxn.namespaceId;
 
                 try {
@@ -707,7 +725,7 @@ export class DashboardService {
 
                     txn.aliasName = nsName[0].name;
                 } catch (error) {
-                    
+
                 }
             }
 
@@ -717,21 +735,21 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatConfirmedAliasTransaction(txns: Transaction[]): Promise<ConfirmedAliasTransaction[]>{
+    async formatConfirmedAliasTransaction(txns: Transaction[]): Promise<ConfirmedAliasTransaction[]> {
 
-        let formatedTxns : ConfirmedAliasTransaction[] = [];
+        let formatedTxns: ConfirmedAliasTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedAliasTransaction, formattedTxn) as ConfirmedAliasTransaction;
-            
-            if(txns[i].type === TransactionType.ADDRESS_ALIAS){
+
+            if (txns[i].type === TransactionType.ADDRESS_ALIAS) {
                 let addressAliasTxn = txns[i] as AddressAliasTransaction;
 
                 txn.address = addressAliasTxn.address.plain();
                 txn.aliasType = addressAliasTxn.actionType;
                 txn.aliasTypeName = addressAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
-        
+
                 let nsId = addressAliasTxn.namespaceId;
 
                 try {
@@ -739,16 +757,16 @@ export class DashboardService {
 
                     txn.aliasName = nsName[0].name;
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.MOSAIC_ALIAS){
+            else if (txns[i].type === TransactionType.MOSAIC_ALIAS) {
                 let assetAliasTxn = txns[i] as MosaicAliasTransaction;
 
                 txn.assetId = assetAliasTxn.mosaicId.toHex();
                 txn.aliasType = assetAliasTxn.actionType;
                 txn.aliasTypeName = assetAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
-        
+
                 let nsId = assetAliasTxn.namespaceId;
 
                 try {
@@ -756,7 +774,7 @@ export class DashboardService {
 
                     txn.aliasName = nsName[0].name;
                 } catch (error) {
-                    
+
                 }
             }
 
@@ -766,21 +784,21 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatPartialAliasTransaction(txns: Transaction[]): Promise<PartialAliasTransaction[]>{
+    async formatPartialAliasTransaction(txns: Transaction[]): Promise<PartialAliasTransaction[]> {
 
-        let formatedTxns : PartialAliasTransaction[] = [];
+        let formatedTxns: PartialAliasTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialAliasTransaction, formattedTxn) as PartialAliasTransaction;
-            
-            if(txns[i].type === TransactionType.ADDRESS_ALIAS){
+
+            if (txns[i].type === TransactionType.ADDRESS_ALIAS) {
                 let addressAliasTxn = txns[i] as AddressAliasTransaction;
 
                 txn.address = addressAliasTxn.address.plain();
                 txn.aliasType = addressAliasTxn.actionType;
                 txn.aliasTypeName = addressAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
-        
+
                 let nsId = addressAliasTxn.namespaceId;
 
                 try {
@@ -788,16 +806,16 @@ export class DashboardService {
 
                     txn.aliasName = nsName[0].name;
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.MOSAIC_ALIAS){
+            else if (txns[i].type === TransactionType.MOSAIC_ALIAS) {
                 let assetAliasTxn = txns[i] as MosaicAliasTransaction;
 
                 txn.assetId = assetAliasTxn.mosaicId.toHex();
                 txn.aliasType = assetAliasTxn.actionType;
                 txn.aliasTypeName = assetAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
-        
+
                 let nsId = assetAliasTxn.namespaceId;
 
                 try {
@@ -805,7 +823,7 @@ export class DashboardService {
 
                     txn.aliasName = nsName[0].name;
                 } catch (error) {
-                    
+
                 }
             }
 
@@ -816,15 +834,15 @@ export class DashboardService {
     }
 
     //-------------Metadata Txn-----------------------------------------------------------
-    async formatUnconfirmedMetadataTransaction(txns: Transaction[]): Promise<UnconfirmedMetadataTransaction[]>{
+    async formatUnconfirmedMetadataTransaction(txns: Transaction[]): Promise<UnconfirmedMetadataTransaction[]> {
 
-        let formatedTxns : UnconfirmedMetadataTransaction[] = [];
+        let formatedTxns: UnconfirmedMetadataTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedMetadataTransaction, formattedTxn) as UnconfirmedMetadataTransaction;
 
-            if(txns[i].type === TransactionType.MOSAIC_METADATA_V2){
+            if (txns[i].type === TransactionType.MOSAIC_METADATA_V2) {
                 let assetMetadataTxn = txns[i] as MosaicMetadataTransaction;
 
                 let assetId = assetMetadataTxn.targetMosaicId.toHex();
@@ -840,25 +858,25 @@ export class DashboardService {
                 try {
                     let assetName = await DashboardService.getAssetName(assetId);
 
-                    if(assetName.names.length){
+                    if (assetName.names.length) {
                         txn.targetIdName = assetName.names[0].name;
                     }
 
                     let assetMetadataEntry = await DashboardService.getAssetMetadata(assetMetadataTxn.targetMosaicId, assetMetadataTxn.scopedMetadataKey);
-                    
-                    if(assetMetadataEntry){
+
+                    if (assetMetadataEntry) {
                         txn.oldValue = assetMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
                     }
-                    else{
+                    else {
                         txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
                     }
 
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.NAMESPACE_METADATA_V2){
+            else if (txns[i].type === TransactionType.NAMESPACE_METADATA_V2) {
                 let namespaceMetadataTxn = txns[i] as NamespaceMetadataTransaction;
 
                 let nsId = namespaceMetadataTxn.targetNamespaceId.toHex();
@@ -874,25 +892,25 @@ export class DashboardService {
                 try {
                     let nsName = await DashboardService.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
 
-                    if(nsName.length){
+                    if (nsName.length) {
                         txn.targetIdName = nsName[0].name;
                     }
 
                     let nsMetadataEntry = await DashboardService.getNamespaceMetadata(namespaceMetadataTxn.targetNamespaceId, namespaceMetadataTxn.scopedMetadataKey);
-                    
-                    if(nsMetadataEntry){
+
+                    if (nsMetadataEntry) {
                         txn.oldValue = nsMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
                     }
-                    else{
+                    else {
                         txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
                     }
-                    
+
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.ACCOUNT_METADATA_V2){
+            else if (txns[i].type === TransactionType.ACCOUNT_METADATA_V2) {
                 let accountMetadataTxn = txns[i] as AccountMetadataTransaction;
 
                 txn.metadataType = MetadataType.ACCOUNT;
@@ -905,16 +923,16 @@ export class DashboardService {
 
                 try {
                     let nsMetadataEntry = await DashboardService.getAccountMetadata(accountMetadataTxn.targetPublicKey, accountMetadataTxn.scopedMetadataKey);
-                    
-                    if(nsMetadataEntry){
+
+                    if (nsMetadataEntry) {
                         txn.oldValue = nsMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
                     }
-                    else{
+                    else {
                         txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
                     }
                 } catch (error) {
-                    
+
                 }
             }
 
@@ -924,15 +942,15 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatConfirmedMetadataTransaction(txns: Transaction[]): Promise<ConfirmedMetadataTransaction[]>{
+    async formatConfirmedMetadataTransaction(txns: Transaction[]): Promise<ConfirmedMetadataTransaction[]> {
 
-        let formatedTxns : ConfirmedMetadataTransaction[] = [];
+        let formatedTxns: ConfirmedMetadataTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedMetadataTransaction, formattedTxn) as ConfirmedMetadataTransaction;
-            
-            if(txns[i].type === TransactionType.MOSAIC_METADATA_V2){
+
+            if (txns[i].type === TransactionType.MOSAIC_METADATA_V2) {
                 let assetMetadataTxn = txns[i] as MosaicMetadataTransaction;
 
                 let assetId = assetMetadataTxn.targetMosaicId.toHex();
@@ -947,15 +965,15 @@ export class DashboardService {
                 try {
                     let assetName = await DashboardService.getAssetName(assetId);
 
-                    if(assetName.names.length){
+                    if (assetName.names.length) {
                         txn.targetIdName = assetName.names[0].name;
                     }
-                    
+
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.NAMESPACE_METADATA_V2){
+            else if (txns[i].type === TransactionType.NAMESPACE_METADATA_V2) {
                 let namespaceMetadataTxn = txns[i] as NamespaceMetadataTransaction;
 
                 let nsId = namespaceMetadataTxn.targetNamespaceId.toHex();
@@ -970,15 +988,15 @@ export class DashboardService {
                 try {
                     let nsName = await DashboardService.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
 
-                    if(nsName.length){
+                    if (nsName.length) {
                         txn.targetIdName = nsName[0].name;
                     }
-                    
+
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.ACCOUNT_METADATA_V2){
+            else if (txns[i].type === TransactionType.ACCOUNT_METADATA_V2) {
                 let accountMetadataTxn = txns[i] as AccountMetadataTransaction;
 
                 txn.metadataType = MetadataType.ACCOUNT;
@@ -995,15 +1013,15 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatPartialMetadataTransaction(txns: Transaction[]): Promise<PartialMetadataTransaction[]>{
+    async formatPartialMetadataTransaction(txns: Transaction[]): Promise<PartialMetadataTransaction[]> {
 
-        let formatedTxns : PartialMetadataTransaction[] = [];
+        let formatedTxns: PartialMetadataTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialMetadataTransaction, formattedTxn) as PartialMetadataTransaction;
-            
-            if(txns[i].type === TransactionType.MOSAIC_METADATA_V2){
+
+            if (txns[i].type === TransactionType.MOSAIC_METADATA_V2) {
                 let assetMetadataTxn = txns[i] as MosaicMetadataTransaction;
 
                 let assetId = assetMetadataTxn.targetMosaicId.toHex();
@@ -1019,25 +1037,25 @@ export class DashboardService {
                 try {
                     let assetName = await DashboardService.getAssetName(assetId);
 
-                    if(assetName.names.length){
+                    if (assetName.names.length) {
                         txn.targetIdName = assetName.names[0].name;
                     }
 
                     let assetMetadataEntry = await DashboardService.getAssetMetadata(assetMetadataTxn.targetMosaicId, assetMetadataTxn.scopedMetadataKey);
-                    
-                    if(assetMetadataEntry){
+
+                    if (assetMetadataEntry) {
                         txn.oldValue = assetMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
                     }
-                    else{
+                    else {
                         txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
                     }
-                    
+
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.NAMESPACE_METADATA_V2){
+            else if (txns[i].type === TransactionType.NAMESPACE_METADATA_V2) {
                 let namespaceMetadataTxn = txns[i] as NamespaceMetadataTransaction;
 
                 let nsId = namespaceMetadataTxn.targetNamespaceId.toHex();
@@ -1053,25 +1071,25 @@ export class DashboardService {
                 try {
                     let nsName = await DashboardService.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
 
-                    if(nsName.length){
+                    if (nsName.length) {
                         txn.targetIdName = nsName[0].name;
                     }
 
                     let nsMetadataEntry = await DashboardService.getNamespaceMetadata(namespaceMetadataTxn.targetNamespaceId, namespaceMetadataTxn.scopedMetadataKey);
-                    
-                    if(nsMetadataEntry){
+
+                    if (nsMetadataEntry) {
                         txn.oldValue = nsMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
                     }
-                    else{
+                    else {
                         txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
                     }
-                    
+
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.ACCOUNT_METADATA_V2){
+            else if (txns[i].type === TransactionType.ACCOUNT_METADATA_V2) {
                 let accountMetadataTxn = txns[i] as AccountMetadataTransaction;
 
                 txn.metadataType = MetadataType.ACCOUNT;
@@ -1084,16 +1102,16 @@ export class DashboardService {
 
                 try {
                     let nsMetadataEntry = await DashboardService.getAccountMetadata(accountMetadataTxn.targetPublicKey, accountMetadataTxn.scopedMetadataKey);
-                    
-                    if(nsMetadataEntry){
+
+                    if (nsMetadataEntry) {
                         txn.oldValue = nsMetadataEntry.value;
                         txn.newValue = DashboardService.applyValueChange(txn.oldValue, txn.valueChange, txn.sizeChanged);
                     }
-                    else{
+                    else {
                         txn.newValue = DashboardService.applyValueChange("", txn.valueChange, txn.sizeChanged);
                     }
                 } catch (error) {
-                    
+
                 }
             }
 
@@ -1104,36 +1122,39 @@ export class DashboardService {
     }
 
     //-------------Aggregate Txn-----------------------------------------------------------
-    async formatUnconfirmedAggregateTransaction(txns: Transaction[]): Promise<UnconfirmedAggregateTransaction[]>{
+    async formatUnconfirmedAggregateTransaction(txns: Transaction[]): Promise<UnconfirmedAggregateTransaction[]> {
 
-        let formatedTxns : UnconfirmedAggregateTransaction[] = [];
+        let formatedTxns: UnconfirmedAggregateTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAggregateTransaction, formattedTxn) as UnconfirmedAggregateTransaction;
 
-            if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
-                let aggregateTxn = txns[i] as AggregateTransaction;
+            if (txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE) {
+                let aggregateTxn: AggregateTransaction | null = txns[i] as AggregateTransaction;
 
-                if(aggregateTxn.innerTransactions.length === 0){
+                if (aggregateTxn.innerTransactions.length === 0) {
                     aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
+                }
+                if (!aggregateTxn) {
+                    throw new Error("Service unavailable")
                 }
                 txn.aggregateLength = aggregateTxn.innerTransactions.length;
                 txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
-                
-                for(let x=0; x < aggregateTxn.innerTransactions.length; ++x){
+
+                for (let x = 0; x < aggregateTxn.innerTransactions.length; ++x) {
                     let txnType = aggregateTxn.innerTransactions[x].type;
                     let listFound = txn.txnList.find(txn => txn.type === txnType);
-                    
-                    if(listFound){
+
+                    if (listFound) {
                         listFound.total += 1;
                     }
-                    else{
+                    else {
                         let txnList: TxnList = {
                             type: txnType,
                             name: TransactionUtils.getTransactionTypeName(txnType),
                             total: 1
-                        }; 
+                        };
                         txn.txnList.push(txnList);
                     }
                 }
@@ -1145,36 +1166,39 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatConfirmedAggregateTransaction(txns: Transaction[]): Promise<ConfirmedAggregateTransaction[]>{
+    async formatConfirmedAggregateTransaction(txns: Transaction[]): Promise<ConfirmedAggregateTransaction[]> {
 
-        let formatedTxns : ConfirmedAggregateTransaction[] = [];
+        let formatedTxns: ConfirmedAggregateTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedAggregateTransaction, formattedTxn) as ConfirmedAggregateTransaction;
-            
-            if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
-                let aggregateTxn = txns[i] as AggregateTransaction;
 
-                if(aggregateTxn.innerTransactions.length === 0){
+            if (txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE) {
+                let aggregateTxn: AggregateTransaction | null = txns[i] as AggregateTransaction;
+
+                if (aggregateTxn.innerTransactions.length === 0) {
                     aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
+                }
+                if (!aggregateTxn) {
+                    throw new Error("Service unavailable")
                 }
                 txn.aggregateLength = aggregateTxn.innerTransactions.length;
                 txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
-                
-                for(let x=0; x < aggregateTxn.innerTransactions.length; ++x){
+
+                for (let x = 0; x < aggregateTxn.innerTransactions.length; ++x) {
                     let txnType = aggregateTxn.innerTransactions[x].type;
                     let listFound = txn.txnList.find(txn => txn.type === txnType);
-                    
-                    if(listFound){
+
+                    if (listFound) {
                         listFound.total += 1;
                     }
-                    else{
+                    else {
                         let txnList: TxnList = {
                             type: txnType,
                             name: TransactionUtils.getTransactionTypeName(txnType),
                             total: 1
-                        }; 
+                        };
                         txn.txnList.push(txnList);
                     }
                 }
@@ -1186,36 +1210,39 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatPartialAggregateTransaction(txns: Transaction[]): Promise<PartialAggregateTransaction[]>{
+    async formatPartialAggregateTransaction(txns: Transaction[]): Promise<PartialAggregateTransaction[]> {
 
-        let formatedTxns : PartialAggregateTransaction[] = [];
+        let formatedTxns: PartialAggregateTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialAggregateTransaction, formattedTxn) as PartialAggregateTransaction;
-            
-            if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
-                let aggregateTxn = txns[i] as AggregateTransaction;
 
-                if(aggregateTxn.innerTransactions.length === 0){
+            if (txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE) {
+                let aggregateTxn: AggregateTransaction | null = txns[i] as AggregateTransaction;
+
+                if (aggregateTxn.innerTransactions.length === 0) {
                     aggregateTxn = await this.autoFindAggregateTransaction(txn.hash);
+                }
+                if (!aggregateTxn) {
+                    throw new Error("Service unavailable")
                 }
                 txn.aggregateLength = aggregateTxn.innerTransactions.length;
                 txn.cosigners = aggregateTxn.cosignatures.map(cosignature => cosignature.signer.publicKey);
-                
-                for(let x=0; x < aggregateTxn.innerTransactions.length; ++x){
+
+                for (let x = 0; x < aggregateTxn.innerTransactions.length; ++x) {
                     let txnType = aggregateTxn.innerTransactions[x].type;
                     let listFound = txn.txnList.find(txn => txn.type === txnType);
-                    
-                    if(listFound){
+
+                    if (listFound) {
                         listFound.total += 1;
                     }
-                    else{
+                    else {
                         let txnList: TxnList = {
                             type: txnType,
                             name: TransactionUtils.getTransactionTypeName(txnType),
                             total: 1
-                        }; 
+                        };
                         txn.txnList.push(txnList);
                     }
                 }
@@ -1228,26 +1255,26 @@ export class DashboardService {
     }
 
     //-------------Asset Txn-----------------------------------------------------------
-    async formatUnconfirmedAssetTransaction(txns: Transaction[]): Promise<UnconfirmedAssetTransaction[]>{
+    async formatUnconfirmedAssetTransaction(txns: Transaction[]): Promise<UnconfirmedAssetTransaction[]> {
 
-        let formatedTxns : UnconfirmedAssetTransaction[] = [];
+        let formatedTxns: UnconfirmedAssetTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAssetTransaction, formattedTxn) as UnconfirmedAssetTransaction;
 
-            if(txns[i].type === TransactionType.MOSAIC_DEFINITION){
+            if (txns[i].type === TransactionType.MOSAIC_DEFINITION) {
                 let assetDefinitionTxn = txns[i] as MosaicDefinitionTransaction;
 
                 txn.assetId = assetDefinitionTxn.mosaicId.toHex();
                 txn.divisibility = assetDefinitionTxn.mosaicProperties.divisibility;
-                txn.duration = assetDefinitionTxn.mosaicProperties.duration ? 
+                txn.duration = assetDefinitionTxn.mosaicProperties.duration ?
                     assetDefinitionTxn.mosaicProperties.duration.compact() : undefined;
                 txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
                 txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
                 txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
             }
-            else if(txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE){
+            else if (txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE) {
                 let assetSupplyChangeTxn = txns[i] as MosaicSupplyChangeTransaction;
 
                 let assetId = assetSupplyChangeTxn.mosaicId.toHex();
@@ -1256,7 +1283,7 @@ export class DashboardService {
                 txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
                 txn.supplyDeltaIsRaw = true;
 
-                if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
+                if (assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease) {
                     txn.supplyDelta = -txn.supplyDelta;
                 }
 
@@ -1266,12 +1293,12 @@ export class DashboardService {
                     txn.supplyDelta = DashboardService.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
 
                     txn.supplyDeltaIsRaw = false;
-                    
+
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY){
+            else if (txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY) {
                 let assetModifyLevyTxn = txns[i] as MosaicModifyLevyTransaction;
 
                 let assetId = assetModifyLevyTxn.mosaicId.toHex();
@@ -1288,7 +1315,7 @@ export class DashboardService {
                 try {
                     let assetName = await DashboardService.getAssetName(assetId);
 
-                    if(assetName.names.length){
+                    if (assetName.names.length) {
                         txn.namespaceName = assetName.names[0].name;
                     }
 
@@ -1300,59 +1327,59 @@ export class DashboardService {
 
                     let levyAssetName = await DashboardService.getAssetName(levyAssetId);
 
-                    if(levyAssetName.names.length){
+                    if (levyAssetName.names.length) {
                         txn.levyAssetName = levyAssetName.names[0].name;
                     }
-                
+
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.REMOVE_MOSAIC_LEVY){
+            else if (txns[i].type === TransactionType.REMOVE_MOSAIC_LEVY) {
                 let assetRemoveLevyTxn = txns[i] as MosaicRemoveLevyTransaction;
 
                 let assetId = assetRemoveLevyTxn.mosaicId.toHex();
 
                 txn.assetId = assetId;
-                
+
                 try {
                     let assetName = await DashboardService.getAssetName(assetId);
 
-                    if(assetName.names.length){
+                    if (assetName.names.length) {
                         txn.namespaceName = assetName.names[0].name;
                     }
-                
+
                 } catch (error) {
-                    
+
                 }
             }
-            
+
             formatedTxns.push(txn);
         }
 
         return formatedTxns;
     }
 
-    async formatConfirmedAssetTransaction(txns: Transaction[]): Promise<ConfirmedAssetTransaction[]>{
+    async formatConfirmedAssetTransaction(txns: Transaction[]): Promise<ConfirmedAssetTransaction[]> {
 
-        let formatedTxns : ConfirmedAssetTransaction[] = [];
+        let formatedTxns: ConfirmedAssetTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedAssetTransaction, formattedTxn) as ConfirmedAssetTransaction;
-            
-            if(txns[i].type === TransactionType.MOSAIC_DEFINITION){
+
+            if (txns[i].type === TransactionType.MOSAIC_DEFINITION) {
                 let assetDefinitionTxn = txns[i] as MosaicDefinitionTransaction;
 
                 txn.assetId = assetDefinitionTxn.mosaicId.toHex();
                 txn.divisibility = assetDefinitionTxn.mosaicProperties.divisibility;
-                txn.duration = assetDefinitionTxn.mosaicProperties.duration ? 
+                txn.duration = assetDefinitionTxn.mosaicProperties.duration ?
                     assetDefinitionTxn.mosaicProperties.duration.compact() : undefined;
                 txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
                 txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
                 txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
             }
-            else if(txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE){
+            else if (txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE) {
                 let assetSupplyChangeTxn = txns[i] as MosaicSupplyChangeTransaction;
 
                 let assetId = assetSupplyChangeTxn.mosaicId.toHex();
@@ -1361,7 +1388,7 @@ export class DashboardService {
                 txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
                 txn.supplyDeltaIsRaw = true;
 
-                if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
+                if (assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease) {
                     txn.supplyDelta = -txn.supplyDelta;
                 }
 
@@ -1371,12 +1398,12 @@ export class DashboardService {
                     txn.supplyDelta = DashboardService.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
 
                     txn.supplyDeltaIsRaw = false;
-                    
+
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY){
+            else if (txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY) {
                 let assetModifyLevyTxn = txns[i] as MosaicModifyLevyTransaction;
 
                 let assetId = assetModifyLevyTxn.mosaicId.toHex();
@@ -1393,7 +1420,7 @@ export class DashboardService {
                 try {
                     let assetName = await DashboardService.getAssetName(assetId);
 
-                    if(assetName.names.length){
+                    if (assetName.names.length) {
                         txn.namespaceName = assetName.names[0].name;
                     }
 
@@ -1405,30 +1432,30 @@ export class DashboardService {
 
                     let levyAssetName = await DashboardService.getAssetName(levyAssetId);
 
-                    if(levyAssetName.names.length){
+                    if (levyAssetName.names.length) {
                         txn.levyAssetName = levyAssetName.names[0].name;
                     }
-                
+
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.REMOVE_MOSAIC_LEVY){
+            else if (txns[i].type === TransactionType.REMOVE_MOSAIC_LEVY) {
                 let assetRemoveLevyTxn = txns[i] as MosaicRemoveLevyTransaction;
 
                 let assetId = assetRemoveLevyTxn.mosaicId.toHex();
 
                 txn.assetId = assetId;
-                
+
                 try {
                     let assetName = await DashboardService.getAssetName(assetId);
 
-                    if(assetName.names.length){
+                    if (assetName.names.length) {
                         txn.namespaceName = assetName.names[0].name;
                     }
-                
+
                 } catch (error) {
-                    
+
                 }
             }
 
@@ -1438,26 +1465,26 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatPartialAssetTransaction(txns: Transaction[]): Promise<PartialAssetTransaction[]>{
+    async formatPartialAssetTransaction(txns: Transaction[]): Promise<PartialAssetTransaction[]> {
 
-        let formatedTxns : PartialAssetTransaction[] = [];
+        let formatedTxns: PartialAssetTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialAssetTransaction, formattedTxn) as PartialAssetTransaction;
-            
-            if(txns[i].type === TransactionType.MOSAIC_DEFINITION){
+
+            if (txns[i].type === TransactionType.MOSAIC_DEFINITION) {
                 let assetDefinitionTxn = txns[i] as MosaicDefinitionTransaction;
 
                 txn.assetId = assetDefinitionTxn.mosaicId.toHex();
                 txn.divisibility = assetDefinitionTxn.mosaicProperties.divisibility;
-                txn.duration = assetDefinitionTxn.mosaicProperties.duration ? 
+                txn.duration = assetDefinitionTxn.mosaicProperties.duration ?
                     assetDefinitionTxn.mosaicProperties.duration.compact() : undefined;
                 txn.transferable = assetDefinitionTxn.mosaicProperties.transferable;
                 txn.supplyMutable = assetDefinitionTxn.mosaicProperties.supplyMutable;
                 txn.nonce = assetDefinitionTxn.mosaicNonce.toNumber();
             }
-            else if(txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE){
+            else if (txns[i].type === TransactionType.MOSAIC_SUPPLY_CHANGE) {
                 let assetSupplyChangeTxn = txns[i] as MosaicSupplyChangeTransaction;
 
                 let assetId = assetSupplyChangeTxn.mosaicId.toHex();
@@ -1466,7 +1493,7 @@ export class DashboardService {
                 txn.supplyDelta = assetSupplyChangeTxn.delta.compact();
                 txn.supplyDeltaIsRaw = true;
 
-                if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
+                if (assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease) {
                     txn.supplyDelta = -txn.supplyDelta;
                 }
 
@@ -1476,12 +1503,12 @@ export class DashboardService {
                     txn.supplyDelta = DashboardService.convertToExactAmount(txn.supplyDelta, assetInfo.divisibility);
 
                     txn.supplyDeltaIsRaw = false;
-                    
+
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY){
+            else if (txns[i].type === TransactionType.MODIFY_MOSAIC_LEVY) {
                 let assetModifyLevyTxn = txns[i] as MosaicModifyLevyTransaction;
 
                 let assetId = assetModifyLevyTxn.mosaicId.toHex();
@@ -1498,7 +1525,7 @@ export class DashboardService {
                 try {
                     let assetName = await DashboardService.getAssetName(assetId);
 
-                    if(assetName.names.length){
+                    if (assetName.names.length) {
                         txn.namespaceName = assetName.names[0].name;
                     }
 
@@ -1510,80 +1537,80 @@ export class DashboardService {
 
                     let levyAssetName = await DashboardService.getAssetName(levyAssetId);
 
-                    if(levyAssetName.names.length){
+                    if (levyAssetName.names.length) {
                         txn.levyAssetName = levyAssetName.names[0].name;
                     }
-                
+
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.REMOVE_MOSAIC_LEVY){
+            else if (txns[i].type === TransactionType.REMOVE_MOSAIC_LEVY) {
                 let assetRemoveLevyTxn = txns[i] as MosaicRemoveLevyTransaction;
 
                 let assetId = assetRemoveLevyTxn.mosaicId.toHex();
 
                 txn.assetId = assetId;
-                
+
                 try {
                     let assetName = await DashboardService.getAssetName(assetId);
 
-                    if(assetName.names.length){
+                    if (assetName.names.length) {
                         txn.namespaceName = assetName.names[0].name;
                     }
-                
+
                 } catch (error) {
-                    
+
                 }
             }
 
             formatedTxns.push(txn);
         }
-    
+
         return formatedTxns;
     }
 
     //-------------Chain Txn-----------------------------------------------------------
-    async formatUnconfirmedChainTransaction(txns: Transaction[]): Promise<UnconfirmedChainTransaction[]>{
+    async formatUnconfirmedChainTransaction(txns: Transaction[]): Promise<UnconfirmedChainTransaction[]> {
 
-        let formatedTxns : UnconfirmedChainTransaction[] = [];
+        let formatedTxns: UnconfirmedChainTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedChainTransaction, formattedTxn) as UnconfirmedChainTransaction;
 
-            if(txns[i].type === TransactionType.CHAIN_CONFIGURE){
+            if (txns[i].type === TransactionType.CHAIN_CONFIGURE) {
                 let chainConfigureTxn = txns[i] as ChainConfigTransaction;
 
                 txn.applyHeightDelta = chainConfigureTxn.applyHeightDelta.compact();
             }
-            else if(txns[i].type === TransactionType.CHAIN_UPGRADE){
+            else if (txns[i].type === TransactionType.CHAIN_UPGRADE) {
                 let chainUpgradeTxn = txns[i] as ChainUpgradeTransaction;
 
                 txn.upgradePeriod = chainUpgradeTxn.upgradePeriod.compact();
                 txn.newVersion = chainUpgradeTxn.newBlockchainVersion.toHex()
             }
-            
+
             formatedTxns.push(txn);
         }
 
         return formatedTxns;
     }
 
-    async formatConfirmedChainTransaction(txns: Transaction[]): Promise<ConfirmedChainTransaction[]>{
+    async formatConfirmedChainTransaction(txns: Transaction[]): Promise<ConfirmedChainTransaction[]> {
 
-        let formatedTxns : ConfirmedChainTransaction[] = [];
+        let formatedTxns: ConfirmedChainTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedChainTransaction, formattedTxn) as ConfirmedChainTransaction;
-            
-            if(txns[i].type === TransactionType.CHAIN_CONFIGURE){
+
+            if (txns[i].type === TransactionType.CHAIN_CONFIGURE) {
                 let chainConfigureTxn = txns[i] as ChainConfigTransaction;
 
                 txn.applyHeightDelta = chainConfigureTxn.applyHeightDelta.compact();
             }
-            else if(txns[i].type === TransactionType.CHAIN_UPGRADE){
+            else if (txns[i].type === TransactionType.CHAIN_UPGRADE) {
                 let chainUpgradeTxn = txns[i] as ChainUpgradeTransaction;
 
                 txn.upgradePeriod = chainUpgradeTxn.upgradePeriod.compact();
@@ -1596,20 +1623,20 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatPartialChainTransaction(txns: Transaction[]): Promise<PartialChainTransaction[]>{
+    async formatPartialChainTransaction(txns: Transaction[]): Promise<PartialChainTransaction[]> {
 
-        let formatedTxns : PartialChainTransaction[] = [];
+        let formatedTxns: PartialChainTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialChainTransaction, formattedTxn) as PartialChainTransaction;
-            
-            if(txns[i].type === TransactionType.CHAIN_CONFIGURE){
+
+            if (txns[i].type === TransactionType.CHAIN_CONFIGURE) {
                 let chainConfigureTxn = txns[i] as ChainConfigTransaction;
 
                 txn.applyHeightDelta = chainConfigureTxn.applyHeightDelta.compact();
             }
-            else if(txns[i].type === TransactionType.CHAIN_UPGRADE){
+            else if (txns[i].type === TransactionType.CHAIN_UPGRADE) {
                 let chainUpgradeTxn = txns[i] as ChainUpgradeTransaction;
 
                 txn.upgradePeriod = chainUpgradeTxn.upgradePeriod.compact();
@@ -1623,19 +1650,19 @@ export class DashboardService {
     }
 
     //-------------Exchange Txn-----------------------------------------------------------
-    async formatUnconfirmedExchangeTransaction(txns: Transaction[]): Promise<UnconfirmedExchangeTransaction[]>{
+    async formatUnconfirmedExchangeTransaction(txns: Transaction[]): Promise<UnconfirmedExchangeTransaction[]> {
 
-        let formatedTxns : UnconfirmedExchangeTransaction[] = [];
+        let formatedTxns: UnconfirmedExchangeTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedExchangeTransaction, formattedTxn) as UnconfirmedExchangeTransaction;
 
-            if(txns[i].type === TransactionType.EXCHANGE_OFFER){
+            if (txns[i].type === TransactionType.EXCHANGE_OFFER) {
                 txn.isTakingOffer = true;
                 let exchangeOfferTxn = txns[i] as ExchangeOfferTransaction;
 
-                for(let i = 0; i < exchangeOfferTxn.offers.length; ++i){
+                for (let i = 0; i < exchangeOfferTxn.offers.length; ++i) {
                     let tempExchangeOffer = exchangeOfferTxn.offers[i];
 
                     let assetId = tempExchangeOffer.mosaicId.toHex();
@@ -1647,33 +1674,33 @@ export class DashboardService {
                         assetId: assetId,
                         cost: DashboardService.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
                         owner: tempExchangeOffer.owner.publicKey,
-                        type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                    }; 
+                        type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy",
+                    };
 
                     try {
                         let assetInfo = await DashboardService.getAssetInfo(assetId);
 
                         newTxnExchangeOffer.amountIsRaw = false;
                         newTxnExchangeOffer.amount = DashboardService.convertToExactAmount(amount, assetInfo.divisibility);
-                        
+
                         let assetName = await DashboardService.getAssetName(assetId);
 
-                        if(assetName.names.length){
+                        if (assetName.names.length) {
                             newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
                         }
 
                     } catch (error) {
-                        
-                    }                    
+
+                    }
 
                     txn.exchangeOffers.push(newTxnExchangeOffer);
                 }
             }
-            else if(txns[i].type === TransactionType.ADD_EXCHANGE_OFFER){
+            else if (txns[i].type === TransactionType.ADD_EXCHANGE_OFFER) {
 
                 let addExchangeOfferTxn = txns[i] as AddExchangeOfferTransaction;
 
-                for(let i = 0; i < addExchangeOfferTxn.offers.length; ++i){
+                for (let i = 0; i < addExchangeOfferTxn.offers.length; ++i) {
                     let tempExchangeOffer = addExchangeOfferTxn.offers[i];
 
                     let assetId = tempExchangeOffer.mosaicId.toHex();
@@ -1685,8 +1712,8 @@ export class DashboardService {
                         assetId: assetId,
                         cost: DashboardService.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
                         duration: tempExchangeOffer.duration.compact(),
-                        type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                    }; 
+                        type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy",
+                    };
 
                     try {
                         let assetInfo = await DashboardService.getAssetInfo(assetId);
@@ -1696,41 +1723,41 @@ export class DashboardService {
 
                         let assetName = await DashboardService.getAssetName(assetId);
 
-                        if(assetName.names.length){
+                        if (assetName.names.length) {
                             newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
                         }
 
                     } catch (error) {
-                        
-                    }                    
+
+                    }
 
                     txn.exchangeOffers.push(newTxnExchangeOffer);
                 }
             }
-            else if(txns[i].type === TransactionType.REMOVE_EXCHANGE_OFFER){
+            else if (txns[i].type === TransactionType.REMOVE_EXCHANGE_OFFER) {
 
                 let removeExchangeOfferTxn = txns[i] as RemoveExchangeOfferTransaction;
 
-                for(let i = 0; i < removeExchangeOfferTxn.offers.length; ++i){
+                for (let i = 0; i < removeExchangeOfferTxn.offers.length; ++i) {
                     let tempExchangeOffer = removeExchangeOfferTxn.offers[i];
 
                     let assetId = tempExchangeOffer.mosaicId.toHex();
 
                     let newTxnExchangeOffer: TxnExchangeOffer = {
                         assetId: assetId,
-                        type: tempExchangeOffer.offerType === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                    }; 
+                        type: tempExchangeOffer.offerType === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy",
+                    };
 
                     try {
                         let assetName = await DashboardService.getAssetName(assetId);
 
-                        if(assetName.names.length){
+                        if (assetName.names.length) {
                             newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
                         }
 
                     } catch (error) {
-                        
-                    }                    
+
+                    }
 
                     txn.exchangeOffers.push(newTxnExchangeOffer);
                 }
@@ -1740,26 +1767,26 @@ export class DashboardService {
             let allSellOffers = txn.exchangeOffers.filter(x => x.type === "Sell");
 
             txn.exchangeOffers = txn.isTakingOffer ? allSellOffers.concat(allBuyOffers) : allBuyOffers.concat(allSellOffers);
-            
+
             formatedTxns.push(txn);
         }
 
         return formatedTxns;
     }
 
-    async formatConfirmedExchangeTransaction(txns: Transaction[]): Promise<ConfirmedExchangeTransaction[]>{
+    async formatConfirmedExchangeTransaction(txns: Transaction[]): Promise<ConfirmedExchangeTransaction[]> {
 
-        let formatedTxns : ConfirmedExchangeTransaction[] = [];
+        let formatedTxns: ConfirmedExchangeTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedExchangeTransaction, formattedTxn) as ConfirmedExchangeTransaction;
 
-            if(txns[i].type === TransactionType.EXCHANGE_OFFER){
+            if (txns[i].type === TransactionType.EXCHANGE_OFFER) {
                 txn.isTakingOffer = true;
                 let exchangeOfferTxn = txns[i] as ExchangeOfferTransaction;
 
-                for(let i = 0; i < exchangeOfferTxn.offers.length; ++i){
+                for (let i = 0; i < exchangeOfferTxn.offers.length; ++i) {
                     let tempExchangeOffer = exchangeOfferTxn.offers[i];
 
                     let assetId = tempExchangeOffer.mosaicId.toHex();
@@ -1771,8 +1798,8 @@ export class DashboardService {
                         assetId: assetId,
                         cost: DashboardService.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
                         owner: tempExchangeOffer.owner.publicKey,
-                        type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                    }; 
+                        type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy",
+                    };
 
                     try {
                         let assetInfo = await DashboardService.getAssetInfo(assetId);
@@ -1782,22 +1809,22 @@ export class DashboardService {
 
                         let assetName = await DashboardService.getAssetName(assetId);
 
-                        if(assetName.names.length){
+                        if (assetName.names.length) {
                             newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
                         }
 
                     } catch (error) {
-                        
-                    }                    
+
+                    }
 
                     txn.exchangeOffers.push(newTxnExchangeOffer);
                 }
             }
-            else if(txns[i].type === TransactionType.ADD_EXCHANGE_OFFER){
+            else if (txns[i].type === TransactionType.ADD_EXCHANGE_OFFER) {
 
                 let addExchangeOfferTxn = txns[i] as AddExchangeOfferTransaction;
 
-                for(let i = 0; i < addExchangeOfferTxn.offers.length; ++i){
+                for (let i = 0; i < addExchangeOfferTxn.offers.length; ++i) {
                     let tempExchangeOffer = addExchangeOfferTxn.offers[i];
 
                     let assetId = tempExchangeOffer.mosaicId.toHex();
@@ -1809,8 +1836,8 @@ export class DashboardService {
                         assetId: assetId,
                         cost: DashboardService.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
                         duration: tempExchangeOffer.duration.compact(),
-                        type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                    }; 
+                        type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy",
+                    };
 
                     try {
                         let assetInfo = await DashboardService.getAssetInfo(assetId);
@@ -1820,41 +1847,41 @@ export class DashboardService {
 
                         let assetName = await DashboardService.getAssetName(assetId);
 
-                        if(assetName.names.length){
+                        if (assetName.names.length) {
                             newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
                         }
 
                     } catch (error) {
-                        
-                    }                    
+
+                    }
 
                     txn.exchangeOffers.push(newTxnExchangeOffer);
                 }
             }
-            else if(txns[i].type === TransactionType.REMOVE_EXCHANGE_OFFER){
+            else if (txns[i].type === TransactionType.REMOVE_EXCHANGE_OFFER) {
 
                 let removeExchangeOfferTxn = txns[i] as RemoveExchangeOfferTransaction;
 
-                for(let i = 0; i < removeExchangeOfferTxn.offers.length; ++i){
+                for (let i = 0; i < removeExchangeOfferTxn.offers.length; ++i) {
                     let tempExchangeOffer = removeExchangeOfferTxn.offers[i];
 
                     let assetId = tempExchangeOffer.mosaicId.toHex();
 
                     let newTxnExchangeOffer: TxnExchangeOffer = {
                         assetId: assetId,
-                        type: tempExchangeOffer.offerType === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                    }; 
+                        type: tempExchangeOffer.offerType === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy",
+                    };
 
                     try {
                         let assetName = await DashboardService.getAssetName(assetId);
 
-                        if(assetName.names.length){
+                        if (assetName.names.length) {
                             newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
                         }
 
                     } catch (error) {
-                        
-                    }                    
+
+                    }
 
                     txn.exchangeOffers.push(newTxnExchangeOffer);
                 }
@@ -1871,19 +1898,19 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatPartialExchangeTransaction(txns: Transaction[]): Promise<PartialExchangeTransaction[]>{
+    async formatPartialExchangeTransaction(txns: Transaction[]): Promise<PartialExchangeTransaction[]> {
 
-        let formatedTxns : PartialExchangeTransaction[] = [];
+        let formatedTxns: PartialExchangeTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialExchangeTransaction, formattedTxn) as PartialExchangeTransaction;
-            
-            if(txns[i].type === TransactionType.EXCHANGE_OFFER){
+
+            if (txns[i].type === TransactionType.EXCHANGE_OFFER) {
                 txn.isTakingOffer = true;
                 let exchangeOfferTxn = txns[i] as ExchangeOfferTransaction;
 
-                for(let i = 0; i < exchangeOfferTxn.offers.length; ++i){
+                for (let i = 0; i < exchangeOfferTxn.offers.length; ++i) {
                     let tempExchangeOffer = exchangeOfferTxn.offers[i];
 
                     let assetId = tempExchangeOffer.mosaicId.toHex();
@@ -1895,8 +1922,8 @@ export class DashboardService {
                         assetId: assetId,
                         cost: DashboardService.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
                         owner: tempExchangeOffer.owner.publicKey,
-                        type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                    }; 
+                        type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy",
+                    };
 
                     try {
                         let assetInfo = await DashboardService.getAssetInfo(assetId);
@@ -1906,22 +1933,22 @@ export class DashboardService {
 
                         let assetName = await DashboardService.getAssetName(assetId);
 
-                        if(assetName.names.length){
+                        if (assetName.names.length) {
                             newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
                         }
 
                     } catch (error) {
-                        
-                    }                    
+
+                    }
 
                     txn.exchangeOffers.push(newTxnExchangeOffer);
                 }
             }
-            else if(txns[i].type === TransactionType.ADD_EXCHANGE_OFFER){
+            else if (txns[i].type === TransactionType.ADD_EXCHANGE_OFFER) {
 
                 let addExchangeOfferTxn = txns[i] as AddExchangeOfferTransaction;
 
-                for(let i = 0; i < addExchangeOfferTxn.offers.length; ++i){
+                for (let i = 0; i < addExchangeOfferTxn.offers.length; ++i) {
                     let tempExchangeOffer = addExchangeOfferTxn.offers[i];
 
                     let assetId = tempExchangeOffer.mosaicId.toHex();
@@ -1933,8 +1960,8 @@ export class DashboardService {
                         assetId: assetId,
                         cost: DashboardService.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
                         duration: tempExchangeOffer.duration.compact(),
-                        type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                    }; 
+                        type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy",
+                    };
 
                     try {
                         let assetInfo = await DashboardService.getAssetInfo(assetId);
@@ -1944,41 +1971,41 @@ export class DashboardService {
 
                         let assetName = await DashboardService.getAssetName(assetId);
 
-                        if(assetName.names.length){
+                        if (assetName.names.length) {
                             newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
                         }
 
                     } catch (error) {
-                        
-                    }                    
+
+                    }
 
                     txn.exchangeOffers.push(newTxnExchangeOffer);
                 }
             }
-            else if(txns[i].type === TransactionType.REMOVE_EXCHANGE_OFFER){
+            else if (txns[i].type === TransactionType.REMOVE_EXCHANGE_OFFER) {
 
                 let removeExchangeOfferTxn = txns[i] as RemoveExchangeOfferTransaction;
 
-                for(let i = 0; i < removeExchangeOfferTxn.offers.length; ++i){
+                for (let i = 0; i < removeExchangeOfferTxn.offers.length; ++i) {
                     let tempExchangeOffer = removeExchangeOfferTxn.offers[i];
 
                     let assetId = tempExchangeOffer.mosaicId.toHex();
 
                     let newTxnExchangeOffer: TxnExchangeOffer = {
                         assetId: assetId,
-                        type: tempExchangeOffer.offerType === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-                    }; 
+                        type: tempExchangeOffer.offerType === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy",
+                    };
 
                     try {
                         let assetName = await DashboardService.getAssetName(assetId);
 
-                        if(assetName.names.length){
+                        if (assetName.names.length) {
                             newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
                         }
 
                     } catch (error) {
-                        
-                    }                    
+
+                    }
 
                     txn.exchangeOffers.push(newTxnExchangeOffer);
                 }
@@ -1996,15 +2023,15 @@ export class DashboardService {
     }
 
     //-------------Link Txn-----------------------------------------------------------
-    async formatUnconfirmedLinkTransaction(txns: Transaction[]): Promise<UnconfirmedLinkTransaction[]>{
+    async formatUnconfirmedLinkTransaction(txns: Transaction[]): Promise<UnconfirmedLinkTransaction[]> {
 
-        let formatedTxns : UnconfirmedLinkTransaction[] = [];
+        let formatedTxns: UnconfirmedLinkTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedLinkTransaction, formattedTxn) as UnconfirmedLinkTransaction;
 
-            if(txns[i].type === TransactionType.LINK_ACCOUNT){
+            if (txns[i].type === TransactionType.LINK_ACCOUNT) {
 
                 let linkAccTxn = txns[i] as AccountLinkTransaction;
 
@@ -2019,15 +2046,15 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatConfirmedLinkTransaction(txns: Transaction[]): Promise<ConfirmedLinkTransaction[]>{
+    async formatConfirmedLinkTransaction(txns: Transaction[]): Promise<ConfirmedLinkTransaction[]> {
 
-        let formatedTxns : ConfirmedLinkTransaction[] = [];
+        let formatedTxns: ConfirmedLinkTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedLinkTransaction, formattedTxn) as ConfirmedLinkTransaction;
-            
-            if(txns[i].type === TransactionType.LINK_ACCOUNT){
+
+            if (txns[i].type === TransactionType.LINK_ACCOUNT) {
 
                 let linkAccTxn = txns[i] as AccountLinkTransaction;
 
@@ -2042,15 +2069,15 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatPartialLinkTransaction(txns: Transaction[]): Promise<PartialLinkTransaction[]>{
+    async formatPartialLinkTransaction(txns: Transaction[]): Promise<PartialLinkTransaction[]> {
 
-        let formatedTxns : PartialLinkTransaction[] = [];
+        let formatedTxns: PartialLinkTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialLinkTransaction, formattedTxn) as PartialLinkTransaction;
-            
-            if(txns[i].type === TransactionType.LINK_ACCOUNT){
+
+            if (txns[i].type === TransactionType.LINK_ACCOUNT) {
 
                 let linkAccTxn = txns[i] as AccountLinkTransaction;
 
@@ -2066,16 +2093,16 @@ export class DashboardService {
     }
 
     //-------------Lock Txn-----------------------------------------------------------
-    async formatUnconfirmedLockTransaction(txns: Transaction[]): Promise<UnconfirmedLockTransaction[]>{
+    async formatUnconfirmedLockTransaction(txns: Transaction[]): Promise<UnconfirmedLockTransaction[]> {
 
-        let formatedTxns : UnconfirmedLockTransaction[] = [];
+        let formatedTxns: UnconfirmedLockTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedLockTransaction, formattedTxn) as UnconfirmedLockTransaction;
 
             let lockFundTxn = txns[i] as LockFundsTransaction;
-            
+
             txn.lockHash = lockFundTxn.hash;
             txn.duration = lockFundTxn.duration.compact();
             let amount = lockFundTxn.mosaic.amount.compact()
@@ -2087,14 +2114,16 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatConfirmedLockTransaction(txns: Transaction[]): Promise<ConfirmedLockTransaction[]>{
+    async formatConfirmedLockTransaction(txns: Transaction[]): Promise<ConfirmedLockTransaction[]> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
+        let formatedTxns: ConfirmedLockTransaction[] = [];
 
-        let formatedTxns : ConfirmedLockTransaction[] = [];
-
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedLockTransaction, formattedTxn) as ConfirmedLockTransaction;
-            
+
             let lockFundTxn = txns[i] as LockFundsTransaction;
 
             txn.lockHash = lockFundTxn.hash;
@@ -2116,14 +2145,14 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatPartialLockTransaction(txns: Transaction[]): Promise<PartialLockTransaction[]>{
+    async formatPartialLockTransaction(txns: Transaction[]): Promise<PartialLockTransaction[]> {
 
-        let formatedTxns : PartialLockTransaction[] = [];
+        let formatedTxns: PartialLockTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialLockTransaction, formattedTxn) as PartialLockTransaction;
-            
+
             let lockFundTxn = txns[i] as LockFundsTransaction;
 
             txn.lockHash = lockFundTxn.hash;
@@ -2138,25 +2167,28 @@ export class DashboardService {
     }
 
     //-------------Namespace Txn-----------------------------------------------------------
-    async formatUnconfirmedNamespaceTransaction(txns: Transaction[]): Promise<UnconfirmedNamespaceTransaction[]>{
+    async formatUnconfirmedNamespaceTransaction(txns: Transaction[]): Promise<UnconfirmedNamespaceTransaction[]> {
 
-        let formatedTxns : UnconfirmedNamespaceTransaction[] = [];
+        let formatedTxns: UnconfirmedNamespaceTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedNamespaceTransaction, formattedTxn) as UnconfirmedNamespaceTransaction;
 
-            if(txns[i].type === TransactionType.REGISTER_NAMESPACE){
+            if (txns[i].type === TransactionType.REGISTER_NAMESPACE) {
                 let registerTxn = txns[i] as RegisterNamespaceTransaction;
-                
+
                 txn.namespaceName = registerTxn.namespaceName;
 
-                if(registerTxn.namespaceType === NamespaceType.RootNamespace){
-                    txn.duration = registerTxn.duration.compact();
+                if (registerTxn.namespaceType === NamespaceType.RootNamespace) {
+                    txn.duration = registerTxn.duration?.compact();
                     txn.registerType = NamespaceType.RootNamespace;
                     txn.registerTypeName = "Root namespace";
                 }
-                else{
+                else {
+                    if (!registerTxn.parentId) {
+                        throw new Error("Service unavailable")
+                    }
                     txn.registerType = NamespaceType.SubNamespace;
                     txn.registerTypeName = "Sub namespace";
                     txn.parentId = registerTxn.parentId.toHex();
@@ -2166,32 +2198,35 @@ export class DashboardService {
 
                 txn.namespaceId = registerTxn.namespaceId.toHex();
             }
-            
+
             formatedTxns.push(txn);
         }
 
         return formatedTxns;
     }
 
-    async formatConfirmedNamespaceTransaction(txns: Transaction[]): Promise<ConfirmedNamespaceTransaction[]>{
+    async formatConfirmedNamespaceTransaction(txns: Transaction[]): Promise<ConfirmedNamespaceTransaction[]> {
 
-        let formatedTxns : ConfirmedNamespaceTransaction[] = [];
+        let formatedTxns: ConfirmedNamespaceTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedNamespaceTransaction, formattedTxn) as ConfirmedNamespaceTransaction;
-            
-            if(txns[i].type === TransactionType.REGISTER_NAMESPACE){
+
+            if (txns[i].type === TransactionType.REGISTER_NAMESPACE) {
                 let registerTxn = txns[i] as RegisterNamespaceTransaction;
-                
+
                 txn.namespaceName = registerTxn.namespaceName;
 
-                if(registerTxn.namespaceType === NamespaceType.RootNamespace){
-                    txn.duration = registerTxn.duration.compact();
+                if (registerTxn.namespaceType === NamespaceType.RootNamespace) {
+                    txn.duration = registerTxn.duration?.compact();
                     txn.registerType = NamespaceType.RootNamespace;
                     txn.registerTypeName = "Root namespace";
                 }
-                else{
+                else {
+                    if (!registerTxn.parentId) {
+                        throw new Error("Service unavailable")
+                    }
                     txn.registerType = NamespaceType.SubNamespace;
                     txn.registerTypeName = "Sub namespace";
                     txn.parentId = registerTxn.parentId.toHex();
@@ -2201,32 +2236,35 @@ export class DashboardService {
 
                 txn.namespaceId = registerTxn.namespaceId.toHex();
             }
-            
+
             formatedTxns.push(txn);
         }
 
         return formatedTxns;
     }
 
-    async formatPartialNamespaceTransaction(txns: Transaction[]): Promise<PartialNamespaceTransaction[]>{
+    async formatPartialNamespaceTransaction(txns: Transaction[]): Promise<PartialNamespaceTransaction[]> {
 
-        let formatedTxns : PartialNamespaceTransaction[] = [];
+        let formatedTxns: PartialNamespaceTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialNamespaceTransaction, formattedTxn) as PartialNamespaceTransaction;
-            
-            if(txns[i].type === TransactionType.REGISTER_NAMESPACE){
+
+            if (txns[i].type === TransactionType.REGISTER_NAMESPACE) {
                 let registerTxn = txns[i] as RegisterNamespaceTransaction;
-                
+
                 txn.namespaceName = registerTxn.namespaceName;
 
-                if(registerTxn.namespaceType === NamespaceType.RootNamespace){
-                    txn.duration = registerTxn.duration.compact();
+                if (registerTxn.namespaceType === NamespaceType.RootNamespace) {
+                    txn.duration = registerTxn.duration?.compact();
                     txn.registerType = NamespaceType.RootNamespace;
                     txn.registerTypeName = "Root namespace";
                 }
-                else{
+                else {
+                    if (!registerTxn.parentId) {
+                        throw new Error("Service unavailable")
+                    }
                     txn.registerType = NamespaceType.SubNamespace;
                     txn.registerTypeName = "Sub namespace";
                     txn.parentId = registerTxn.parentId.toHex();
@@ -2236,7 +2274,7 @@ export class DashboardService {
 
                 txn.namespaceId = registerTxn.namespaceId.toHex();
             }
-            
+
             formatedTxns.push(txn);
         }
 
@@ -2244,22 +2282,22 @@ export class DashboardService {
     }
 
     //-------------Restriction Txn-----------------------------------------------------------
-    async formatUnconfirmedRestrictionTransaction(txns: Transaction[]): Promise<UnconfirmedRestrictionTransaction[]>{
+    async formatUnconfirmedRestrictionTransaction(txns: Transaction[]): Promise<UnconfirmedRestrictionTransaction[]> {
 
-        let formatedTxns : UnconfirmedRestrictionTransaction[] = [];
+        let formatedTxns: UnconfirmedRestrictionTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedRestrictionTransaction, formattedTxn) as UnconfirmedRestrictionTransaction;
 
-            if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS){
+            if (txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS) {
 
                 let accAddressRestrictionTxn = txns[i] as AccountAddressRestrictionModificationTransaction;
 
                 txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAddressRestrictionTxn.restrictionType).action;
 
-                for(let i = 0; i < accAddressRestrictionTxn.modifications.length; ++i){
-                    
+                for (let i = 0; i < accAddressRestrictionTxn.modifications.length; ++i) {
+
                     let modification = accAddressRestrictionTxn.modifications[i];
 
                     let newRestrictionModification: RestrictionModification = {
@@ -2269,14 +2307,14 @@ export class DashboardService {
                     txn.modification.push(newRestrictionModification);
                 }
             }
-            else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC){
+            else if (txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC) {
 
                 let accAssetRestrictionTxn = txns[i] as AccountMosaicRestrictionModificationTransaction;
 
                 txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAssetRestrictionTxn.restrictionType).action;
 
-                for(let i = 0; i < accAssetRestrictionTxn.modifications.length; ++i){
-                    
+                for (let i = 0; i < accAssetRestrictionTxn.modifications.length; ++i) {
+
                     let modification = accAssetRestrictionTxn.modifications[i];
 
                     let newRestrictionModification: RestrictionModification = {
@@ -2286,32 +2324,32 @@ export class DashboardService {
 
                     try {
                         let assetId = newRestrictionModification.value;
-                        if(assetId === AppState.nativeToken.assetId){
+                        if (assetId === AppState.nativeToken.assetId) {
                             newRestrictionModification.name = AppState.nativeToken.label;
                         }
-                        else{
+                        else {
                             let assetName = await DashboardService.getAssetName(assetId);
 
-                            if(assetName.names.length){
+                            if (assetName.names.length) {
                                 newRestrictionModification.name = assetName.names[0].name;
                             }
                         }
 
                     } catch (error) {
-                        
-                    } 
+
+                    }
 
                     txn.modification.push(newRestrictionModification);
                 }
             }
-            else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION){
+            else if (txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION) {
 
                 let accOperationRestrictionTxn = txns[i] as AccountOperationRestrictionModificationTransaction;
 
                 txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accOperationRestrictionTxn.restrictionType).action;
 
-                for(let i = 0; i < accOperationRestrictionTxn.modifications.length; ++i){
-        
+                for (let i = 0; i < accOperationRestrictionTxn.modifications.length; ++i) {
+
                     let modification = accOperationRestrictionTxn.modifications[i];
 
                     let newRestrictionModification: RestrictionModification = {
@@ -2334,22 +2372,22 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatConfirmedRestrictionTransaction(txns: Transaction[]): Promise<ConfirmedRestrictionTransaction[]>{
+    async formatConfirmedRestrictionTransaction(txns: Transaction[]): Promise<ConfirmedRestrictionTransaction[]> {
 
-        let formatedTxns : ConfirmedRestrictionTransaction[] = [];
+        let formatedTxns: ConfirmedRestrictionTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedRestrictionTransaction, formattedTxn) as ConfirmedRestrictionTransaction;
-            
-            if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS){
+
+            if (txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS) {
 
                 let accAddressRestrictionTxn = txns[i] as AccountAddressRestrictionModificationTransaction;
 
                 txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAddressRestrictionTxn.restrictionType).action;
 
-                for(let i = 0; i < accAddressRestrictionTxn.modifications.length; ++i){
-                    
+                for (let i = 0; i < accAddressRestrictionTxn.modifications.length; ++i) {
+
                     let modification = accAddressRestrictionTxn.modifications[i];
 
                     let newRestrictionModification: RestrictionModification = {
@@ -2359,14 +2397,14 @@ export class DashboardService {
                     txn.modification.push(newRestrictionModification);
                 }
             }
-            else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC){
+            else if (txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC) {
 
                 let accAssetRestrictionTxn = txns[i] as AccountMosaicRestrictionModificationTransaction;
 
                 txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAssetRestrictionTxn.restrictionType).action;
 
-                for(let i = 0; i < accAssetRestrictionTxn.modifications.length; ++i){
-                    
+                for (let i = 0; i < accAssetRestrictionTxn.modifications.length; ++i) {
+
                     let modification = accAssetRestrictionTxn.modifications[i];
 
                     let newRestrictionModification: RestrictionModification = {
@@ -2376,32 +2414,32 @@ export class DashboardService {
 
                     try {
                         let assetId = newRestrictionModification.value;
-                        if(assetId === AppState.nativeToken.assetId){
+                        if (assetId === AppState.nativeToken.assetId) {
                             newRestrictionModification.name = AppState.nativeToken.label;
                         }
-                        else{
+                        else {
                             let assetName = await DashboardService.getAssetName(assetId);
 
-                            if(assetName.names.length){
+                            if (assetName.names.length) {
                                 newRestrictionModification.name = assetName.names[0].name;
                             }
                         }
 
                     } catch (error) {
-                        
-                    } 
+
+                    }
 
                     txn.modification.push(newRestrictionModification);
                 }
             }
-            else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION){
+            else if (txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION) {
 
                 let accOperationRestrictionTxn = txns[i] as AccountOperationRestrictionModificationTransaction;
 
                 txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accOperationRestrictionTxn.restrictionType).action;
 
-                for(let i = 0; i < accOperationRestrictionTxn.modifications.length; ++i){
-        
+                for (let i = 0; i < accOperationRestrictionTxn.modifications.length; ++i) {
+
                     let modification = accOperationRestrictionTxn.modifications[i];
 
                     let newRestrictionModification: RestrictionModification = {
@@ -2424,22 +2462,22 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatPartialRestrictionTransaction(txns: Transaction[]): Promise<PartialRestrictionTransaction[]>{
+    async formatPartialRestrictionTransaction(txns: Transaction[]): Promise<PartialRestrictionTransaction[]> {
 
-        let formatedTxns : PartialRestrictionTransaction[] = [];
+        let formatedTxns: PartialRestrictionTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialRestrictionTransaction, formattedTxn) as PartialRestrictionTransaction;
-            
-            if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS){
+
+            if (txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS) {
 
                 let accAddressRestrictionTxn = txns[i] as AccountAddressRestrictionModificationTransaction;
 
                 txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAddressRestrictionTxn.restrictionType).action;
 
-                for(let i = 0; i < accAddressRestrictionTxn.modifications.length; ++i){
-                    
+                for (let i = 0; i < accAddressRestrictionTxn.modifications.length; ++i) {
+
                     let modification = accAddressRestrictionTxn.modifications[i];
 
                     let newRestrictionModification: RestrictionModification = {
@@ -2449,14 +2487,14 @@ export class DashboardService {
                     txn.modification.push(newRestrictionModification);
                 }
             }
-            else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC){
+            else if (txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC) {
 
                 let accAssetRestrictionTxn = txns[i] as AccountMosaicRestrictionModificationTransaction;
 
                 txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAssetRestrictionTxn.restrictionType).action;
 
-                for(let i = 0; i < accAssetRestrictionTxn.modifications.length; ++i){
-                    
+                for (let i = 0; i < accAssetRestrictionTxn.modifications.length; ++i) {
+
                     let modification = accAssetRestrictionTxn.modifications[i];
 
                     let newRestrictionModification: RestrictionModification = {
@@ -2467,32 +2505,32 @@ export class DashboardService {
                     try {
                         let assetId = newRestrictionModification.value;
 
-                        if(assetId === AppState.nativeToken.assetId){
+                        if (assetId === AppState.nativeToken.assetId) {
                             newRestrictionModification.name = AppState.nativeToken.label;
                         }
-                        else{
+                        else {
                             let assetName = await DashboardService.getAssetName(assetId);
 
-                            if(assetName.names.length){
+                            if (assetName.names.length) {
                                 newRestrictionModification.name = assetName.names[0].name;
                             }
                         }
-                        
+
                     } catch (error) {
-                        
-                    } 
+
+                    }
 
                     txn.modification.push(newRestrictionModification);
                 }
             }
-            else if(txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION){
+            else if (txns[i].type === TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION) {
 
                 let accOperationRestrictionTxn = txns[i] as AccountOperationRestrictionModificationTransaction;
 
                 txn.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accOperationRestrictionTxn.restrictionType).action;
 
-                for(let i = 0; i < accOperationRestrictionTxn.modifications.length; ++i){
-        
+                for (let i = 0; i < accOperationRestrictionTxn.modifications.length; ++i) {
+
                     let modification = accOperationRestrictionTxn.modifications[i];
 
                     let newRestrictionModification: RestrictionModification = {
@@ -2516,15 +2554,15 @@ export class DashboardService {
     }
 
     //-------------Secret Txn-----------------------------------------------------------
-    async formatUnconfirmedSecretTransaction(txns: Transaction[]): Promise<UnconfirmedSecretTransaction[]>{
+    async formatUnconfirmedSecretTransaction(txns: Transaction[]): Promise<UnconfirmedSecretTransaction[]> {
 
-        let formatedTxns : UnconfirmedSecretTransaction[] = [];
+        let formatedTxns: UnconfirmedSecretTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedSecretTransaction, formattedTxn) as UnconfirmedSecretTransaction;
 
-            if(txns[i].type === TransactionType.SECRET_LOCK){
+            if (txns[i].type === TransactionType.SECRET_LOCK) {
                 let secretLockTxn = txns[i] as SecretLockTransaction;
                 txn.duration = secretLockTxn.duration.compact();
                 txn.secret = secretLockTxn.secret;
@@ -2535,16 +2573,16 @@ export class DashboardService {
                 let isNamespace = DashboardService.isNamespace(secretLockTxn.mosaic.id);
 
                 try {
-                    if(!isNamespace){
+                    if (!isNamespace) {
                         txn.assetId = secretLockTxn.mosaic.id.toHex();
 
                         let assetsNames = await DashboardService.getAssetsName([secretLockTxn.mosaic.id]);
 
-                        if(assetsNames[0].names.length){
+                        if (assetsNames[0].names.length) {
                             txn.namespaceName = assetsNames[0].names[0].name;
                         }
                     }
-                    else{
+                    else {
                         let namespaceId = new NamespaceId(secretLockTxn.mosaic.id.toDTO().id);
                         let linkedAssetId = await DashboardService.getAssetAlias(namespaceId);
 
@@ -2555,22 +2593,22 @@ export class DashboardService {
                         txn.namespaceName = nsNames[0].name;
                     }
 
-                    if(txn.namespaceName && txn.namespaceName === AppState.nativeToken.fullNamespace){
+                    if (txn.namespaceName && txn.namespaceName === AppState.nativeToken.fullNamespace) {
                         txn.namespaceName = AppState.nativeToken.label;
                     }
 
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
 
-                    if(assetInfo.divisibility > 0){
+                    if (assetInfo.divisibility > 0) {
                         txn.amount = DashboardService.convertToExactAmount(txn.amount, assetInfo.divisibility);
                     }
-                    
-                    txn.amountIsRaw = false;                    
+
+                    txn.amountIsRaw = false;
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.SECRET_PROOF){
+            else if (txns[i].type === TransactionType.SECRET_PROOF) {
                 let secretProofTxn = txns[i] as SecretProofTransaction;
                 txn.secret = secretProofTxn.secret;
                 txn.recipient = secretProofTxn.recipient.plain();
@@ -2583,15 +2621,15 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatConfirmedSecretTransaction(txns: Transaction[]): Promise<ConfirmedSecretTransaction[]>{
+    async formatConfirmedSecretTransaction(txns: Transaction[]): Promise<ConfirmedSecretTransaction[]> {
 
-        let formatedTxns : ConfirmedSecretTransaction[] = [];
+        let formatedTxns: ConfirmedSecretTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedSecretTransaction, formattedTxn) as ConfirmedSecretTransaction;
 
-            if(txns[i].type === TransactionType.SECRET_LOCK){
+            if (txns[i].type === TransactionType.SECRET_LOCK) {
                 let secretLockTxn = txns[i] as SecretLockTransaction;
                 txn.duration = secretLockTxn.duration.compact();
                 txn.secret = secretLockTxn.secret;
@@ -2600,19 +2638,21 @@ export class DashboardService {
                 txn.hashType = myHashType[secretLockTxn.hashType];
 
                 let isNamespace = DashboardService.isNamespace(secretLockTxn.mosaic.id);
-                let resolvedAssetId = await DashboardService.getResolvedAsset(secretLockTxn.mosaic.id, txn.block); 
-
+                let resolvedAssetId = await DashboardService.getResolvedAsset(secretLockTxn.mosaic.id, txn.block);
+                if (!resolvedAssetId) {
+                    throw new Error('Service unavailable')
+                }
                 txn.assetId = resolvedAssetId.toHex();
 
                 try {
-                    if(!isNamespace){
+                    if (!isNamespace) {
                         let assetsNames = await DashboardService.getAssetsName([secretLockTxn.mosaic.id]);
 
-                        if(assetsNames[0].names.length){
+                        if (assetsNames[0].names.length) {
                             txn.namespaceName = assetsNames[0].names[0].name;
                         }
                     }
-                    else{
+                    else {
                         txn.isSendWithNamespace = true;
                         let namespaceId = new NamespaceId(secretLockTxn.mosaic.id.toDTO().id);
 
@@ -2620,22 +2660,22 @@ export class DashboardService {
                         txn.namespaceName = nsNames[0].name;
                     }
 
-                    if(txn.namespaceName && txn.namespaceName === AppState.nativeToken.fullNamespace){
+                    if (txn.namespaceName && txn.namespaceName === AppState.nativeToken.fullNamespace) {
                         txn.namespaceName = AppState.nativeToken.label;
                     }
 
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
 
-                    if(assetInfo.divisibility > 0){
+                    if (assetInfo.divisibility > 0) {
                         txn.amount = DashboardService.convertToExactAmount(txn.amount, assetInfo.divisibility);
                     }
-                    
-                    txn.amountIsRaw = false;                    
+
+                    txn.amountIsRaw = false;
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.SECRET_PROOF){
+            else if (txns[i].type === TransactionType.SECRET_PROOF) {
                 let secretProofTxn = txns[i] as SecretProofTransaction;
                 txn.secret = secretProofTxn.secret;
                 txn.recipient = secretProofTxn.recipient.plain();
@@ -2648,15 +2688,15 @@ export class DashboardService {
         return formatedTxns;
     }
 
-    async formatPartialSecretTransaction(txns: Transaction[]): Promise<PartialSecretTransaction[]>{
+    async formatPartialSecretTransaction(txns: Transaction[]): Promise<PartialSecretTransaction[]> {
 
-        let formatedTxns : PartialSecretTransaction[] = [];
+        let formatedTxns: PartialSecretTransaction[] = [];
 
-        for(let i=0; i < txns.length; ++i){
+        for (let i = 0; i < txns.length; ++i) {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialSecretTransaction, formattedTxn) as PartialSecretTransaction;
 
-            if(txns[i].type === TransactionType.SECRET_LOCK){
+            if (txns[i].type === TransactionType.SECRET_LOCK) {
                 let secretLockTxn = txns[i] as SecretLockTransaction;
                 txn.duration = secretLockTxn.duration.compact();
                 txn.secret = secretLockTxn.secret;
@@ -2667,16 +2707,16 @@ export class DashboardService {
                 let isNamespace = DashboardService.isNamespace(secretLockTxn.mosaic.id);
 
                 try {
-                    if(!isNamespace){
+                    if (!isNamespace) {
                         txn.assetId = secretLockTxn.mosaic.id.toHex();
 
                         let assetsNames = await DashboardService.getAssetsName([secretLockTxn.mosaic.id]);
 
-                        if(assetsNames[0].names.length){
+                        if (assetsNames[0].names.length) {
                             txn.namespaceName = assetsNames[0].names[0].name;
                         }
                     }
-                    else{
+                    else {
                         let namespaceId = new NamespaceId(secretLockTxn.mosaic.id.toDTO().id);
                         let linkedAssetId = await DashboardService.getAssetAlias(namespaceId);
 
@@ -2687,22 +2727,22 @@ export class DashboardService {
                         txn.namespaceName = nsNames[0].name;
                     }
 
-                    if(txn.namespaceName && txn.namespaceName === AppState.nativeToken.fullNamespace){
+                    if (txn.namespaceName && txn.namespaceName === AppState.nativeToken.fullNamespace) {
                         txn.namespaceName = AppState.nativeToken.label;
                     }
 
                     let assetInfo = await DashboardService.getAssetInfo(txn.assetId);
 
-                    if(assetInfo.divisibility > 0){
+                    if (assetInfo.divisibility > 0) {
                         txn.amount = DashboardService.convertToExactAmount(txn.amount, assetInfo.divisibility);
                     }
-                    
-                    txn.amountIsRaw = false;                    
+
+                    txn.amountIsRaw = false;
                 } catch (error) {
-                    
+
                 }
             }
-            else if(txns[i].type === TransactionType.SECRET_PROOF){
+            else if (txns[i].type === TransactionType.SECRET_PROOF) {
                 let secretProofTxn = txns[i] as SecretProofTransaction;
                 txn.secret = secretProofTxn.secret;
                 txn.recipient = secretProofTxn.recipient.plain();
@@ -2716,17 +2756,21 @@ export class DashboardService {
     }
 
     //------------- format groupType transaction ------------------------------------------
-    async formatPartialTransaction(txn: Transaction): Promise<PartialTransaction>{
-
+    async formatPartialTransaction(txn: Transaction): Promise<PartialTransaction> {
+        if (!txn.transactionInfo) {
+            throw new Error("Service unavailable")
+        }
         let transactionInfo: TransactionInfo | AggregateTransactionInfo = txn.transactionInfo;
-        let txnHash = transactionInfo instanceof AggregateTransactionInfo ? 
-            transactionInfo.aggregateHash : transactionInfo.hash;
-
+        let txnHash = transactionInfo instanceof AggregateTransactionInfo ?
+            transactionInfo.aggregateHash : transactionInfo.hash ?? "";
+        if (!txn.signer) {
+            throw new Error("Service unavailable")
+        }
         let initiator = txn.signer.publicKey;
 
         let formattedTxn = new PartialTransaction(txnHash);
         formattedTxn.type = TransactionUtils.getTransactionTypeName(txn.type);
-        formattedTxn.maxFee = transactionInfo instanceof AggregateTransactionInfo ? 
+        formattedTxn.maxFee = transactionInfo instanceof AggregateTransactionInfo ?
             null : DashboardService.convertToExactNativeAmount(txn.maxFee.compact());
 
         formattedTxn.signer = txn.signer.publicKey;
@@ -2734,26 +2778,28 @@ export class DashboardService {
 
         let deadline = null;
 
-        if(transactionInfo instanceof AggregateTransactionInfo){
+        if (transactionInfo instanceof AggregateTransactionInfo) {
             try {
                 let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
-                
-                deadline = aggregateTxn.deadline.adjustedValue.compact();
-                initiator = aggregateTxn.signer.publicKey;
+                if (aggregateTxn && aggregateTxn.signer) {
+                    deadline = aggregateTxn.deadline.adjustedValue.compact();
+                    initiator = aggregateTxn.signer.publicKey;
+                }
+
             } catch (error) {
-                    
-            }   
+
+            }
         }
-        else{
+        else {
             deadline = txn.deadline.adjustedValue.compact();
         }
         formattedTxn.deadline = deadline;
         formattedTxn.initiator = initiator;
 
-        if(txn.type === TransactionType.AGGREGATE_BONDED || txn.type === TransactionType.AGGREGATE_COMPLETE){
+        if (txn.type === TransactionType.AGGREGATE_BONDED || txn.type === TransactionType.AGGREGATE_COMPLETE) {
             let aggregateTxn = txn as AggregateTransaction;
 
-            for(let i = 0; i < aggregateTxn.cosignatures.length; ++i){
+            for (let i = 0; i < aggregateTxn.cosignatures.length; ++i) {
                 formattedTxn.cosignedPublickKey.push(aggregateTxn.cosignatures[i].signer.publicKey);
             }
         }
@@ -2761,35 +2807,40 @@ export class DashboardService {
         return formattedTxn;
     }
 
-    async formatUnconfirmedTransaction(txn: Transaction): Promise<UnconfirmedTransaction>{
-
+    async formatUnconfirmedTransaction(txn: Transaction): Promise<UnconfirmedTransaction> {
+        if (!txn.transactionInfo) {
+            throw new Error("Service unavailable")
+        }
         let transactionInfo: TransactionInfo | AggregateTransactionInfo = txn.transactionInfo;
-        let txnHash = transactionInfo instanceof AggregateTransactionInfo ? 
-            transactionInfo.aggregateHash : transactionInfo.hash;
-
+        let txnHash = transactionInfo instanceof AggregateTransactionInfo ?
+            transactionInfo.aggregateHash : transactionInfo.hash ?? "";
+        if (!txn.signer) {
+            throw new Error("Service unavailable")
+        }
         let initiator = txn.signer.publicKey;
 
         let formattedTxn = new UnconfirmedTransaction(txnHash);
         formattedTxn.type = TransactionUtils.getTransactionTypeName(txn.type);
-        formattedTxn.maxFee = transactionInfo instanceof AggregateTransactionInfo ? 
+        formattedTxn.maxFee = transactionInfo instanceof AggregateTransactionInfo ?
             null : DashboardService.convertToExactNativeAmount(txn.maxFee.compact());
 
         formattedTxn.signer = txn.signer.publicKey;
         formattedTxn.signerAddress = txn.signer.address.plain();
-        
+
         let deadline = null;
 
-        if(transactionInfo instanceof AggregateTransactionInfo){
+        if (transactionInfo instanceof AggregateTransactionInfo) {
             try {
                 let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
-                
-                deadline = aggregateTxn.deadline.adjustedValue.compact();
-                initiator = aggregateTxn.signer.publicKey;
+                if (aggregateTxn && aggregateTxn.signer) {
+                    deadline = aggregateTxn.deadline.adjustedValue.compact();
+                    initiator = aggregateTxn.signer.publicKey;
+                }
             } catch (error) {
 
-            }   
+            }
         }
-        else{
+        else {
             deadline = txn.deadline.adjustedValue.compact();
         }
 
@@ -2799,37 +2850,47 @@ export class DashboardService {
         return formattedTxn;
     }
 
-    async formatConfirmedTransaction(txn: Transaction): Promise<ConfirmedTransaction>{
-
+    async formatConfirmedTransaction(txn: Transaction): Promise<ConfirmedTransaction> {
+        if (!txn.transactionInfo) {
+            throw new Error("Service unavailable")
+        }
         let transactionInfo: TransactionInfo | AggregateTransactionInfo = txn.transactionInfo;
-        let txnHash = transactionInfo instanceof AggregateTransactionInfo ? 
-            transactionInfo.aggregateHash : transactionInfo.hash;
+        let txnHash = transactionInfo instanceof AggregateTransactionInfo ?
+            transactionInfo.aggregateHash : transactionInfo.hash ?? "";
 
         let blockHeight: number = 0;
         let txnBytes: number = 0;
         let deadline = null;
+        if (!txn.signer) {
+            throw new Error("Service unavailable")
+        }
         let initiator = txn.signer.publicKey;
 
-        if(transactionInfo instanceof AggregateTransactionInfo){
+        if (transactionInfo instanceof AggregateTransactionInfo) {
             let aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
+            if (!aggregateTxn || !aggregateTxn.signer) {
+                throw new Error("Service unavailable")
+            }
             initiator = aggregateTxn.signer.publicKey;
             blockHeight = transactionInfo.height.compact();
             //txnBytes = aggregateTxn.serialize().length / 2;
             //deadline = aggregateTxn.deadline.adjustedValue.compact();
         }
-        else if(txn.type === TransactionType.AGGREGATE_BONDED || txn.type === TransactionType.AGGREGATE_COMPLETE){
+        else if (txn.type === TransactionType.AGGREGATE_BONDED || txn.type === TransactionType.AGGREGATE_COMPLETE) {
 
-            let aggregateTxn = txn as AggregateTransaction;
+            let aggregateTxn: AggregateTransaction | null = txn as AggregateTransaction;
 
-            if(aggregateTxn.innerTransactions.length === 0){
+            if (aggregateTxn.innerTransactions.length === 0) {
                 aggregateTxn = await this.autoFindAggregateTransaction(txnHash);
             }
-             
+            if (!aggregateTxn?.transactionInfo) {
+                throw new Error("Service unavailable")
+            }
             blockHeight = aggregateTxn.transactionInfo.height.compact();
             txnBytes = aggregateTxn.serialize().length / 2;
             deadline = aggregateTxn.deadline.adjustedValue.compact();
         }
-        else{
+        else {
             blockHeight = transactionInfo.height.compact();
 
             // wait SDK to fix
@@ -2838,10 +2899,12 @@ export class DashboardService {
             } catch (error) {
                 console.log(error);
             }
-            
+
             deadline = txn.deadline.adjustedValue.compact();
         }
-
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
         let blockInfo = await AppState.chainAPI.blockAPI.getBlockByHeight(blockHeight);
 
         let fee = txnBytes * blockInfo.feeMultiplier;
@@ -2850,7 +2913,7 @@ export class DashboardService {
         formattedTxn.block = blockHeight;
         formattedTxn.deadline = deadline;
         formattedTxn.type = TransactionUtils.getTransactionTypeName(txn.type);
-        formattedTxn.maxFee = transactionInfo instanceof AggregateTransactionInfo ? 
+        formattedTxn.maxFee = transactionInfo instanceof AggregateTransactionInfo ?
             null : DashboardService.convertToExactNativeAmount(txn.maxFee.compact());
 
         formattedTxn.signer = txn.signer.publicKey;
@@ -2859,7 +2922,7 @@ export class DashboardService {
 
         formattedTxn.fee = DashboardService.convertToExactNativeAmount(fee);
 
-        if(transactionInfo instanceof AggregateTransactionInfo){
+        if (transactionInfo instanceof AggregateTransactionInfo) {
             formattedTxn.fee = null;
         }
 
@@ -2868,32 +2931,36 @@ export class DashboardService {
         return formattedTxn;
     }
 
-    searchAggregateTransaction(hash: string): AggregateTransaction | null{
-        let txnFound = this.savedAggregateTxn.find(txn => txn.transactionInfo.hash === hash);
+    searchAggregateTransaction(hash: string): AggregateTransaction | null {
+        let txnFound = this.savedAggregateTxn.find(txn => txn.transactionInfo?.hash === hash);
 
-        if(txnFound){
+        if (txnFound) {
             return txnFound;
         }
 
         return null;
     }
 
-    async autoFindAggregateTransaction(hash: string): Promise<AggregateTransaction> | null{
-
+    async autoFindAggregateTransaction(hash: string): Promise<AggregateTransaction | null> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
         let foundTxn = this.searchAggregateTransaction(hash);
 
-        if(foundTxn){
+        if (foundTxn) {
             return foundTxn;
         }
 
         let statusGroup = "";
-        let txn: Transaction = null;
+        let txn: Transaction | null = null;
 
-        while (txn === null && statusGroup !== "confirmed" && statusGroup !== "error"){
+        while (txn === null && statusGroup !== "confirmed" && statusGroup !== "error") {
 
             try {
                 let txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(hash);
-
+                if (!txnStatus.group) {
+                    throw new Error("Service unavailable")
+                }
                 statusGroup = txnStatus.group;
 
                 switch (statusGroup) {
@@ -2903,24 +2970,24 @@ export class DashboardService {
                         } catch (error) {
                             statusGroup = "error"
                         }
-                        
+
                         break;
 
                     case TransactionGroupType.UNCONFIRMED:
                         try {
                             txn = await AppState.chainAPI.transactionAPI.getUnconfirmedTransaction(hash);
                         } catch (error) {
-                            
+
                         }
                         break;
                     case TransactionGroupType.PARTIAL:
                         try {
                             txn = await AppState.chainAPI.transactionAPI.getPartialTransaction(hash);
                         } catch (error) {
-                            
+
                         }
                         break;
-                
+
                     default:
                         statusGroup = "error";
                         break;
@@ -2930,24 +2997,24 @@ export class DashboardService {
             }
         }
 
-        if(statusGroup === "error" || txn === null){
+        if (statusGroup === "error" || txn === null) {
             return null;
         }
-        else{
+        else {
             let aggregateTxn = txn as AggregateTransaction
             this.addAggregateTxns(aggregateTxn as AggregateTransaction);
             return aggregateTxn;
         }
     }
-    
-    addAggregateTxns(txn: AggregateTransaction): boolean{
 
-        let txnFound = this.savedAggregateTxn.find(txn => txn.transactionInfo.hash === txn.transactionInfo.hash);
+    addAggregateTxns(txn: AggregateTransaction): boolean {
 
-        if(txnFound){
+        let txnFound = this.savedAggregateTxn.find(txn => txn.transactionInfo?.hash === txn.transactionInfo?.hash);
+
+        if (txnFound) {
             return false;
         }
-        else{
+        else {
             this.savedAggregateTxn.push(txn);
             return true;
         }
@@ -2960,61 +3027,81 @@ export class DashboardService {
      * @param valueChange - hex string
      * @param sizeDelta
      */
-    static applyValueChange(oldValue: string,  valueChange: string, sizeDelta: number): string{
+    static applyValueChange(oldValue: string, valueChange: string, sizeDelta: number): string {
 
-        let newSize = (Convert.utf8ToHex(oldValue).length /2) + sizeDelta;
+        let newSize = (Convert.utf8ToHex(oldValue).length / 2) + sizeDelta;
         let oldValueBytes = Convert.hexToUint8(Convert.utf8ToHex(oldValue));
         let valueChangeBytes = Convert.hexToUint8(valueChange);
 
         let valueUint8Array = new Uint8Array(newSize);
 
-        for(let i = 0; i < valueUint8Array.length; ++i){
+        for (let i = 0; i < valueUint8Array.length; ++i) {
             valueUint8Array[i] = oldValueBytes[i] ^ valueChangeBytes[i];
         }
 
         return Convert.decodeHexToUtf8(Convert.uint8ToHex(valueUint8Array));
     }
 
-    static async getAssetInfo(assetId: string): Promise<MosaicInfo>{
+    static async getAssetInfo(assetId: string): Promise<MosaicInfo> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
         let mosaicId = new MosaicId(assetId);
         let assetInfo = await AppState.chainAPI.assetAPI.getMosaic(mosaicId);
- 
-        return assetInfo;
-     }
 
-     static async getAssetName(assetId: string): Promise<MosaicNames>{
+        return assetInfo;
+    }
+
+    static async getAssetName(assetId: string): Promise<MosaicNames> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
         let mosaicId = new MosaicId(assetId);
         let assetNames = await AppState.chainAPI.assetAPI.getMosaicsNames([mosaicId]);
- 
+
         return assetNames[0];
-     }
+    }
 
-    static async getAssetsName(mosaicIds: MosaicId[]): Promise<MosaicNames[]>{
+    static async getAssetsName(mosaicIds: MosaicId[]): Promise<MosaicNames[]> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
         let assetNames = await AppState.chainAPI.assetAPI.getMosaicsNames(mosaicIds);
- 
-        return assetNames;
-     }
 
-    static async getNamespacesName(namespaceIds: NamespaceId[]): Promise<NamespaceName[]>{
+        return assetNames;
+    }
+
+    static async getNamespacesName(namespaceIds: NamespaceId[]): Promise<NamespaceName[]> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
         let namespacesName = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
- 
+
         return namespacesName;
     }
 
-    static async getAddressAlias(namespaceId: NamespaceId): Promise<Address>{
-       let address = await AppState.chainAPI.namespaceAPI.getLinkedAddress(namespaceId);
+    static async getAddressAlias(namespaceId: NamespaceId): Promise<Address> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
+        let address = await AppState.chainAPI.namespaceAPI.getLinkedAddress(namespaceId);
 
-       return address;
+        return address;
     }
 
-    static async getAssetAlias(namespaceId: NamespaceId): Promise<MosaicId>{
-
+    static async getAssetAlias(namespaceId: NamespaceId): Promise<MosaicId> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
         let assetId = await AppState.chainAPI.namespaceAPI.getLinkedMosaicId(namespaceId);
 
-       return assetId;
+        return assetId;
     }
 
-    static async getAssetMetadata(assetId: MosaicId, scopedMetadataKey: UInt64): Promise<MetadataEntry>{
+    static async getAssetMetadata(assetId: MosaicId, scopedMetadataKey: UInt64): Promise<MetadataEntry | null> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
         let metadataQP = new MetadataQueryParams();
         metadataQP.metadataType = MetadataType.MOSAIC;
         metadataQP.scopedMetadataKey = scopedMetadataKey;
@@ -3025,7 +3112,10 @@ export class DashboardService {
         return metadataResult.metadataEntries.length ? metadataResult.metadataEntries[0] : null;
     }
 
-    static async getNamespaceMetadata(nsId: NamespaceId, scopedMetadataKey: UInt64): Promise<MetadataEntry>{
+    static async getNamespaceMetadata(nsId: NamespaceId, scopedMetadataKey: UInt64): Promise<MetadataEntry | null> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
         let metadataQP = new MetadataQueryParams();
         metadataQP.metadataType = MetadataType.NAMESPACE;
         metadataQP.scopedMetadataKey = scopedMetadataKey;
@@ -3036,7 +3126,10 @@ export class DashboardService {
         return metadataResult.metadataEntries.length ? metadataResult.metadataEntries[0] : null;
     }
 
-    static async getAccountMetadata(targetKey: PublicAccount, scopedMetadataKey: UInt64): Promise<MetadataEntry>{
+    static async getAccountMetadata(targetKey: PublicAccount, scopedMetadataKey: UInt64): Promise<MetadataEntry | null> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
         let metadataQP = new MetadataQueryParams();
         metadataQP.metadataType = MetadataType.ACCOUNT;
         metadataQP.scopedMetadataKey = scopedMetadataKey;
@@ -3047,94 +3140,99 @@ export class DashboardService {
         return metadataResult.metadataEntries.length ? metadataResult.metadataEntries[0] : null;
     }
 
-    static async getRecipient(transferTxn: TransferTransaction, blockHeight: number): Promise<Address>{
+    static async getRecipient(transferTxn: TransferTransaction, blockHeight: number): Promise<Address | null> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
 
-        let recipient: Address = null;
+        let recipient: Address | null = null;
 
-        if(transferTxn.recipient instanceof NamespaceId){
+        if (transferTxn.recipient instanceof NamespaceId) {
 
             let receipts = await AppState.chainAPI.blockAPI.getBlockReceipts(blockHeight);
 
-            for(let i=0; i < receipts.addressResolutionStatements.length; ++i){
+            for (let i = 0; i < receipts.addressResolutionStatements.length; ++i) {
                 let unresolved = receipts.addressResolutionStatements[i].unresolved;
                 let resolved = receipts.addressResolutionStatements[i].resolutionEntries[0].resolved;
-                if(unresolved instanceof MosaicId){ // actually is namespaceId
+                if (unresolved instanceof MosaicId) { // actually is namespaceId
                     let namespaceIdHex: string = unresolved.toHex();
 
-                    if(transferTxn.recipient.toHex() !== namespaceIdHex){
+                    if (transferTxn.recipient.toHex() !== namespaceIdHex) {
                         continue;
                     }
 
-                    if(resolved instanceof AddressAlias){
-                        recipient = resolved.address;
+                    if (resolved instanceof AddressAlias) {
+                        return resolved.address;
                         break;
                     }
-                    else{
+                    else {
                         continue;
                     }
                 }
-                else{
+                else {
                     continue;
                 }
             }
         }
-        else{
+        else {
             recipient = transferTxn.recipient;
         }
 
         return recipient;
     }
 
-    static isNamespace(mosaicId: MosaicId): boolean{
+    static isNamespace(mosaicId: MosaicId): boolean {
         return Array.from(namespaceIdFirstCharacterString).includes(mosaicId.toHex().toUpperCase().substring(0, 1));
     }
 
-    static async getResolvedAsset(mosaicId: MosaicId, blockHeight: number): Promise<MosaicId>{
+    static async getResolvedAsset(mosaicId: MosaicId, blockHeight: number): Promise<MosaicId | null> {
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
+        let resolvedAsset: MosaicId | null = null;
 
-        let resolvedAsset: MosaicId = null;
-
-        if(DashboardService.isNamespace(mosaicId)){
+        if (DashboardService.isNamespace(mosaicId)) {
 
             let receipts = await AppState.chainAPI.blockAPI.getBlockReceipts(blockHeight);
 
-            for(let i=0; i < receipts.mosaicResolutionStatements.length; ++i){
+            for (let i = 0; i < receipts.mosaicResolutionStatements.length; ++i) {
                 let unresolved = receipts.mosaicResolutionStatements[i].unresolved;
                 let resolved = receipts.mosaicResolutionStatements[i].resolutionEntries[0].resolved;
-                if(unresolved instanceof MosaicId){ // actually is namespaceId
+                if (unresolved instanceof MosaicId) { // actually is namespaceId
                     let namespaceIdHex: string = unresolved.toHex();
 
-                    if(mosaicId.toHex() !== namespaceIdHex){
+                    if (mosaicId.toHex() !== namespaceIdHex) {
                         continue;
                     }
 
-                    if(resolved instanceof MosaicAlias){
+                    if (resolved instanceof MosaicAlias) {
                         resolvedAsset = resolved.mosaicId;
                         break;
                     }
-                    else{
+                    else {
                         continue;
                     }
                 }
-                else{
+                else {
                     continue;
                 }
             }
         }
-        else{
+        else {
             resolvedAsset = mosaicId;
         }
 
         return resolvedAsset;
     }
 
-    static getRestrictionTypeName(restrictionType: RestrictionType){
+    static getRestrictionTypeName(restrictionType: RestrictionType) {
 
         let restrictionTypeName = {
             action: '',
             type: ''
         };
 
-        switch(restrictionType){
+        switch (restrictionType) {
             case RestrictionType.AllowAddress:
                 restrictionTypeName.action = "Allow";
                 restrictionTypeName.type = "Address"
@@ -3166,61 +3264,61 @@ export class DashboardService {
         return restrictionTypeName;
     }
 
-    async getAllAccountTransactions(): Promise<Transaction[]>{
+    async getAllAccountTransactions(): Promise<Transaction[]> {
 
         let transactions: Transaction[] = [];
 
-        for(let i = 0; i < this.wallet.accounts.length; ++i){
+        for (let i = 0; i < this.wallet.accounts.length; ++i) {
             let accountTransactions = await DashboardService.getAccountAllTransactions(this.wallet.accounts[i]);
             transactions = transactions.concat(accountTransactions);
         }
 
-        for(let i = 0; i < this.wallet.others.length; ++i){
+        for (let i = 0; i < this.wallet.others.length; ++i) {
             let accountTransactions = await DashboardService.getAccountAllTransactions(this.wallet.others[i]);
             transactions = transactions.concat(accountTransactions);
         }
 
         return transactions.filter((transaction, index, array) =>
-            index === array.findIndex(foundTx => foundTx.transactionInfo.id === transaction.transactionInfo.id));
+            index === array.findIndex(foundTx => foundTx.transactionInfo?.id === transaction.transactionInfo?.id));
     }
 
-    async getAllAccountUnconfirmedTransactions(): Promise<Transaction[]>{
+    async getAllAccountUnconfirmedTransactions(): Promise<Transaction[]> {
 
         let transactions: Transaction[] = [];
 
-        for(let i = 0; i < this.wallet.accounts.length; ++i){
+        for (let i = 0; i < this.wallet.accounts.length; ++i) {
             let accountTransactions = await DashboardService.getAccountAllUnconfirmedTransactions(this.wallet.accounts[i]);
             transactions = transactions.concat(accountTransactions);
         }
 
-        for(let i = 0; i < this.wallet.others.length; ++i){
+        for (let i = 0; i < this.wallet.others.length; ++i) {
             let accountTransactions = await DashboardService.getAccountAllUnconfirmedTransactions(this.wallet.others[i]);
             transactions = transactions.concat(accountTransactions);
         }
 
         return transactions.filter((transaction, index, array) =>
-            index === array.findIndex(foundTx => foundTx.transactionInfo.id === transaction.transactionInfo.id));
+            index === array.findIndex(foundTx => foundTx.transactionInfo?.id === transaction.transactionInfo?.id));
     }
 
-    async getAllAccountPartialTransactions(): Promise<Transaction[]>{
+    async getAllAccountPartialTransactions(): Promise<Transaction[]> {
 
         let transactions: Transaction[] = [];
 
-        for(let i = 0; i < this.wallet.accounts.length; ++i){
+        for (let i = 0; i < this.wallet.accounts.length; ++i) {
             let accountTransactions = await DashboardService.getAccountAllPartialTransactions(this.wallet.accounts[i]);
             transactions = transactions.concat(accountTransactions);
         }
 
-        for(let i = 0; i < this.wallet.others.length; ++i){
+        for (let i = 0; i < this.wallet.others.length; ++i) {
             let accountTransactions = await DashboardService.getAccountAllPartialTransactions(this.wallet.others[i]);
             transactions = transactions.concat(accountTransactions);
         }
 
         return transactions.filter((transaction, index, array) =>
-            index === array.findIndex(foundTx => foundTx.transactionInfo.id === transaction.transactionInfo.id));
+            index === array.findIndex(foundTx => foundTx.transactionInfo?.id === transaction.transactionInfo?.id));
     }
 
-    static async getAccountAllTransactions(account: myAccount): Promise<Transaction[]>{
+    static async getAccountAllTransactions(account: myAccount): Promise<Transaction[]> {
         let pageNum = 1;
         let publicAccount = Helper.createPublicAccount(account.publicKey, AppState.networkType);
 
@@ -3230,13 +3328,12 @@ export class DashboardService {
         queryParams.pageNumber = pageNum;
 
         let transactions: Transaction[] = await TransactionUtils.getTransactions(publicAccount, queryParams);
-        
+
         fullTransaction = fullTransaction.concat(transactions);
 
         while (transactions.length === 100) {
             pageNum += 1;
             queryParams.pageNumber = pageNum;
-            let lastId = transactions[transactions.length - 1].transactionInfo.id;
             // queryParams = Helper.createQueryParams(100, lastId);
             transactions = await TransactionUtils.getTransactions(publicAccount, queryParams);
             fullTransaction = fullTransaction.concat(transactions);
@@ -3245,7 +3342,7 @@ export class DashboardService {
         return fullTransaction;
     }
 
-    static async getAccountAllUnconfirmedTransactions(account: myAccount): Promise<Transaction[]>{
+    static async getAccountAllUnconfirmedTransactions(account: myAccount): Promise<Transaction[]> {
         let pageNum = 1;
         let publicAccount = Helper.createPublicAccount(account.publicKey, AppState.networkType);
 
@@ -3255,13 +3352,12 @@ export class DashboardService {
         queryParams.pageNumber = pageNum;
 
         let transactions: Transaction[] = await TransactionUtils.getUnconfirmedTransactions(publicAccount, queryParams);
-        
+
         fullTransaction = fullTransaction.concat(transactions);
 
         while (transactions.length === 100) {
             pageNum += 1;
             queryParams.pageNumber = pageNum;
-            let lastId = transactions[transactions.length - 1].transactionInfo.id;
             // queryParams = Helper.createQueryParams(100, lastId);
             transactions = await TransactionUtils.getUnconfirmedTransactions(publicAccount, queryParams);
             fullTransaction = fullTransaction.concat(transactions);
@@ -3270,7 +3366,7 @@ export class DashboardService {
         return fullTransaction;
     }
 
-    static async getAccountAllPartialTransactions(account: myAccount): Promise<Transaction[]>{
+    static async getAccountAllPartialTransactions(account: myAccount): Promise<Transaction[]> {
         let pageNum = 1;
         let publicAccount = Helper.createPublicAccount(account.publicKey, AppState.networkType);
 
@@ -3281,27 +3377,28 @@ export class DashboardService {
 
         let transactions: Transaction[] = await TransactionUtils.getPartialTransactions(publicAccount, queryParams);
 
-        if(transactions){
+        if (transactions) {
             fullTransaction = fullTransaction.concat(transactions);
 
             while (transactions && transactions.length === 100) {
                 pageNum += 1;
                 queryParams.pageNumber = pageNum;
-                let lastId = transactions[transactions.length - 1].transactionInfo.id;
                 // queryParams = Helper.createQueryParams(100, lastId);
                 transactions = await TransactionUtils.getPartialTransactions(publicAccount, queryParams);
-                
-                if(transactions){
+
+                if (transactions) {
                     fullTransaction = fullTransaction.concat(transactions);
                 }
             }
         }
-        
+
         return fullTransaction;
     }
 
-    async getAccountTransactionsCount(account: myAccount){
-
+    async getAccountTransactionsCount(account: myAccount) {
+        if (!AppState.chainAPI) {
+            throw new Error('Service unavailable')
+        }
         let transactionsCount = {
             confirmed: 0,
             unconfirmed: 0,
@@ -3322,43 +3419,46 @@ export class DashboardService {
         return transactionsCount;
     }
 
-    convertToSwapType(txnMessage: string){
+    convertToSwapType(txnMessage: string) {
         let newType = null;
-        
-        try {
-            if(txnMessage){
-               let messageData = JSON.parse(txnMessage);
 
-               if(messageData.type){
+        try {
+            if (txnMessage) {
+                let messageData = JSON.parse(txnMessage);
+
+                if (messageData.type) {
                     switch (messageData.type) {
                         case 'Swap':
-                            newType = t('general.swap') +' (nis1-XPX)';
+                            newType = t('general.swap') + ' (nis1-XPX)';
                             break;
                         case 'Swap-bsc-xpx':
-                            newType = t('general.swap') +' (BSC-XPX)';
+                            newType = t('general.swap') + ' (BSC-XPX)';
                             break;
                         case 'Swap-xpx-bsc':
-                            newType = t('general.swap') +' (XPX-BSC)';
+                            newType = t('general.swap') + ' (XPX-BSC)';
                             break;
                         case 'Swap-xpx-bsc-fees':
-                            newType = t('dashboard.swapFee') +' (XPX-BSC)';
+                            newType = t('dashboard.swapFee') + ' (XPX-BSC)';
                             break;
                         default:
                             break;
                     }
-               }
+                }
             }
         } catch (error) {
 
-        }    
+        }
 
         return newType;
     }
 
     // -----------------------------------extract Transfer only--------------------------------------------------- 
     async extractConfirmedTransfer(transferTxn: TransferTransaction, blockNum: number): Promise<InnerTransferTransaction> {
+        if (!transferTxn.signer) {
+            throw new Error('Service unavailable')
+        }
         let txnDetails = new InnerTransferTransaction();
-        
+
         txnDetails.signer = transferTxn.signer.publicKey;
         txnDetails.signerAddress = transferTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(transferTxn.type);
@@ -3368,14 +3468,14 @@ export class DashboardService {
         txnDetails.message = transferTxn.message.payload;
         txnDetails.messageType = transferTxn.message.type;
 
-        if(txnDetails.messageType === MessageType.PlainMessage){
+        if (txnDetails.messageType === MessageType.PlainMessage) {
             let newType = this.convertToSwapType(txnDetails.message);
-        
-            if(newType){
+
+            if (newType) {
                 txnDetails.type = newType;
             }
         }
-        switch(txnDetails.messageType){
+        switch (txnDetails.messageType) {
             case MessageType.PlainMessage:
                 txnDetails.messageTypeTitle = "Plain Message";
                 break;
@@ -3386,29 +3486,32 @@ export class DashboardService {
                 txnDetails.messageTypeTitle = "Hexadecimal Message";
                 break;
         }
-        let recipientIsNamespace = transferTxn.recipient instanceof NamespaceId ? true : false;
 
-        if(transferTxn.recipient instanceof NamespaceId){
+        if (transferTxn.recipient instanceof NamespaceId) {
             txnDetails.recipientNamespaceId = transferTxn.recipient.toHex();
             let namespacesName = await DashboardService.getNamespacesName([transferTxn.recipient]);
             txnDetails.recipientNamespaceName = namespacesName[0].name;
         }
 
         let recipient = await DashboardService.getRecipient(transferTxn, blockNum);
-
-        txnDetails.recipient = recipient.plain();
+        if (recipient) {
+            txnDetails.recipient = recipient.plain();
+        }
         txnDetails.sender = transferTxn.signer.address.plain();
-        txnDetails.in_out = this.selectedAccount.address === txnDetails.sender ? false: true;
+        txnDetails.in_out = this.selectedAccount.address === txnDetails.sender ? false : true;
 
-        for(let y = 0; y < transferTxn.mosaics.length; ++y){
+        for (let y = 0; y < transferTxn.mosaics.length; ++y) {
 
             let rawAmount = transferTxn.mosaics[y].amount.compact();
             let actualAmount = rawAmount;
             let isSendWithNamespace = DashboardService.isNamespace(transferTxn.mosaics[y].id);
             let assetId = await DashboardService.getResolvedAsset(transferTxn.mosaics[y].id, blockNum);
+            if (!assetId) {
+                throw new Error('Service unavailable')
+            }
             let assetIdHex = assetId.toHex();
 
-            if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
+            if ([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)) {
                 txnDetails.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
                 continue;
             }
@@ -3421,7 +3524,7 @@ export class DashboardService {
                 sendWithNamespace: isSendWithNamespace
             };
 
-            if(isSendWithNamespace){
+            if (isSendWithNamespace) {
                 let namespaceId = transferTxn.mosaics[y].id;
 
                 newSDA.sendWithAlias = {
@@ -3433,21 +3536,28 @@ export class DashboardService {
             sdas.push(newSDA);
         }
 
-        let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => Helper.createNamespaceId(sda.sendWithAlias.id));
+        let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => {
+            if (!sda.sendWithAlias) {
+                throw new Error('Service unavailable')
+            }
+            return Helper.createNamespaceId(sda.sendWithAlias.id)
+        })
 
-        let allAssetId = sdas.filter(sda =>{ 
+        let allAssetId = sdas.filter(sda => {
             return sda.amountIsRaw
         }).map(sda => Helper.createAssetId(sda.id));
-
-        if(namespaceIds.length || allAssetId.length){
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
+        if (namespaceIds.length || allAssetId.length) {
             let namespacesNames: NamespaceName[] = [];
             namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
             let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
             let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
 
-            for(let x= 0; x < sdas.length; ++x){
+            for (let x = 0; x < sdas.length; ++x) {
 
-                let assetProperties = assetsProperties.filter(aliasName=> aliasName.mosaicId.toHex() === sdas[x].id)[0];
+                let assetProperties = assetsProperties.filter(aliasName => aliasName.mosaicId.toHex() === sdas[x].id)[0];
 
                 sdas[x].divisibility = assetProperties.divisibility;
                 sdas[x].amount = DashboardService.convertToExactAmount(sdas[x].amount, assetProperties.divisibility);
@@ -3455,13 +3565,13 @@ export class DashboardService {
 
                 let mosaicNames: MosaicNames = aliasNames.filter(aliaName => aliaName.mosaicId.toHex() === sdas[x].id)[0];
                 let currentAliasNames: NamespaceName[] = mosaicNames.names;
-                sdas[x].currentAlias = currentAliasNames.map(currentAlias =>{ 
+                sdas[x].currentAlias = currentAliasNames.map(currentAlias => {
                     return { name: currentAlias.name, id: currentAlias.namespaceId.toDTO().id, idHex: currentAlias.namespaceId.toHex() }
                 });
-
-                if(sdas[x].sendWithAlias){
-                    sdas[x].sendWithAlias.name = namespacesNames
-                        .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
+                const { sendWithAlias } = sdas[x]
+                if (sendWithAlias) {
+                    sendWithAlias.name = namespacesNames
+                        .filter(nsName => nsName.namespaceId.toHex() === sendWithAlias.idHex)
                         .map(nsName => nsName.name)[0]
                 }
             }
@@ -3473,10 +3583,10 @@ export class DashboardService {
     async extractUnconfirmedTransfer(transferTxn: TransferTransaction): Promise<InnerTransferTransaction> {
         let txnDetails = await this.extractPartialTransfer(transferTxn);
 
-        if(txnDetails.messageType === MessageType.PlainMessage){
-            let newType = this.convertToSwapType(txnDetails.message);
-        
-            if(newType){
+        if (txnDetails.messageType === MessageType.PlainMessage) {
+            let newType = this.convertToSwapType(txnDetails.message ?? "");
+
+            if (newType) {
                 txnDetails.type = newType;
             }
         }
@@ -3485,7 +3595,9 @@ export class DashboardService {
 
     async extractPartialTransfer(transferTxn: TransferTransaction): Promise<InnerTransferTransaction> {
         let txnDetails = new InnerTransferTransaction();
-        
+        if (!transferTxn.signer) {
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = transferTxn.signer.publicKey;
         txnDetails.signerAddress = transferTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(transferTxn.type);
@@ -3495,7 +3607,7 @@ export class DashboardService {
         txnDetails.message = transferTxn.message.payload;
         txnDetails.messageType = transferTxn.message.type;
 
-        switch(txnDetails.messageType){
+        switch (txnDetails.messageType) {
             case MessageType.PlainMessage:
                 txnDetails.messageTypeTitle = "Plain Message";
                 break;
@@ -3510,21 +3622,21 @@ export class DashboardService {
 
         let recipient;
 
-        if(transferTxn.recipient instanceof NamespaceId){
+        if (transferTxn.recipient instanceof NamespaceId) {
             txnDetails.recipientNamespaceId = transferTxn.recipient.toHex();
             recipient = await DashboardService.getAddressAlias(transferTxn.recipient);
             let namespacesName = await DashboardService.getNamespacesName([transferTxn.recipient]);
             txnDetails.recipientNamespaceName = namespacesName[0].name;
         }
-        else{
+        else {
             recipient = transferTxn.recipient;
         }
 
         txnDetails.recipient = recipient.plain();
         txnDetails.sender = transferTxn.signer.address.plain();
-        txnDetails.in_out = this.selectedAccount.address === txnDetails.sender ? false: true;
+        txnDetails.in_out = this.selectedAccount.address === txnDetails.sender ? false : true;
 
-        for(let y = 0; y < transferTxn.mosaics.length; ++y){
+        for (let y = 0; y < transferTxn.mosaics.length; ++y) {
 
             let rawAmount = transferTxn.mosaics[y].amount.compact();
             let actualAmount = rawAmount;
@@ -3532,17 +3644,17 @@ export class DashboardService {
             let assetId;
             let isSendWithNamespace = DashboardService.isNamespace(transferTxn.mosaics[y].id);
 
-            if(isSendWithNamespace){
+            if (isSendWithNamespace) {
                 let namespaceId = new NamespaceId(transferTxn.mosaics[y].id.toDTO().id);
                 assetId = await DashboardService.getAssetAlias(namespaceId);
             }
-            else{
+            else {
                 assetId = transferTxn.mosaics[y].id;
             }
 
             let assetIdHex = assetId.toHex();
 
-            if([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)){
+            if ([AppState.nativeToken.assetId, nativeTokenNamespaceId.value].includes(assetIdHex)) {
                 txnDetails.amountTransfer = DashboardService.convertToExactNativeAmount(actualAmount);
                 continue;
             }
@@ -3555,7 +3667,7 @@ export class DashboardService {
                 sendWithNamespace: isSendWithNamespace
             };
 
-            if(isSendWithNamespace){
+            if (isSendWithNamespace) {
                 let namespaceId = transferTxn.mosaics[y].id;
 
                 newSDA.sendWithAlias = {
@@ -3567,21 +3679,28 @@ export class DashboardService {
             sdas.push(newSDA);
         }
 
-        let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => Helper.createNamespaceId(sda.sendWithAlias.id));
+        let namespaceIds = sdas.filter(sda => sda.sendWithNamespace).map(sda => {
+            if (!sda.sendWithAlias) {
+                throw new Error('Service unavailable')
+            }
+            return Helper.createNamespaceId(sda.sendWithAlias.id)
+        })
 
-        let allAssetId = sdas.filter(sda =>{ 
+        let allAssetId = sdas.filter(sda => {
             return sda.amountIsRaw
         }).map(sda => Helper.createAssetId(sda.id));
-
-        if(namespaceIds.length || allAssetId.length){
+        if (!AppState.chainAPI) {
+            throw new Error("Service unavailable")
+        }
+        if (namespaceIds.length || allAssetId.length) {
             let namespacesNames: NamespaceName[] = [];
             namespacesNames = await AppState.chainAPI.namespaceAPI.getNamespacesName(namespaceIds);
             let assetsProperties = await AppState.chainAPI.assetAPI.getMosaics(allAssetId);
             let aliasNames: MosaicNames[] = await AppState.chainAPI.assetAPI.getMosaicsNames(allAssetId);
 
-            for(let x= 0; x < sdas.length; ++x){
+            for (let x = 0; x < sdas.length; ++x) {
 
-                let assetProperties = assetsProperties.filter(aliasName=> aliasName.mosaicId.toHex() === sdas[x].id)[0];
+                let assetProperties = assetsProperties.filter(aliasName => aliasName.mosaicId.toHex() === sdas[x].id)[0];
 
                 sdas[x].divisibility = assetProperties.divisibility;
                 sdas[x].amount = DashboardService.convertToExactAmount(sdas[x].amount, assetProperties.divisibility);
@@ -3589,13 +3708,13 @@ export class DashboardService {
 
                 let mosaicNames: MosaicNames = aliasNames.filter(aliaName => aliaName.mosaicId.toHex() === sdas[x].id)[0];
                 let currentAliasNames: NamespaceName[] = mosaicNames.names;
-                sdas[x].currentAlias = currentAliasNames.map(currentAlias =>{ 
+                sdas[x].currentAlias = currentAliasNames.map(currentAlias => {
                     return { name: currentAlias.name, id: currentAlias.namespaceId.toDTO().id, idHex: currentAlias.namespaceId.toHex() }
                 });
-
-                if(sdas[x].sendWithAlias){
-                    sdas[x].sendWithAlias.name = namespacesNames
-                        .filter(nsName => nsName.namespaceId.toHex() === sdas[x].sendWithAlias.idHex)
+                const { sendWithAlias } = sdas[x]
+                if (sendWithAlias) {
+                    sendWithAlias.name = namespacesNames
+                        .filter(nsName => nsName.namespaceId.toHex() === sendWithAlias.idHex)
                         .map(nsName => nsName.name)[0]
                 }
             }
@@ -3605,11 +3724,11 @@ export class DashboardService {
     }
 
     async extractNonconfirmedTransfer(transferTxn: TransferTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.UNCONFIRMED): Promise<InnerTransferTransaction> {
-        
-        if(txnGroupType === TransactionGroupType.UNCONFIRMED){
+
+        if (txnGroupType === TransactionGroupType.UNCONFIRMED) {
             return await this.extractUnconfirmedTransfer(transferTxn);
         }
-        else{
+        else {
             return await this.extractPartialTransfer(transferTxn);
         }
     }
@@ -3618,7 +3737,9 @@ export class DashboardService {
     // -----------------------------------extract Modify Multisig only--------------------------------------------------- 
     async extractConfirmedModifyMultisig(modifyMultisigTxn: ModifyMultisigAccountTransaction): Promise<InnerAccountTransaction> {
         let txnDetails = new InnerAccountTransaction();
-        
+        if(!modifyMultisigTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = modifyMultisigTxn.signer.publicKey;
         txnDetails.signerAddress = modifyMultisigTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(modifyMultisigTxn.type);
@@ -3629,7 +3750,7 @@ export class DashboardService {
             .map(x => x.cosignatoryPublicAccount.publicKey);
         txnDetails.removedCosigner = modifyMultisigTxn.modifications.filter(x => x.type === MultisigCosignatoryModificationType.Remove)
             .map(x => x.cosignatoryPublicAccount.publicKey);
-        
+
         return txnDetails;
     }
 
@@ -3639,7 +3760,9 @@ export class DashboardService {
 
     async extractPartialModifyMultisig(modifyMultisigTxn: ModifyMultisigAccountTransaction): Promise<InnerAccountTransaction> {
         let txnDetails = new InnerAccountTransaction();
-        
+        if(!modifyMultisigTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = modifyMultisigTxn.signer.publicKey;
         txnDetails.signerAddress = modifyMultisigTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(modifyMultisigTxn.type);
@@ -3650,11 +3773,13 @@ export class DashboardService {
             .map(x => x.cosignatoryPublicAccount.publicKey);
         txnDetails.removedCosigner = modifyMultisigTxn.modifications.filter(x => x.type === MultisigCosignatoryModificationType.Remove)
             .map(x => x.cosignatoryPublicAccount.publicKey);
-
+        if(!AppState.chainAPI){
+            throw new Error("Service unavailable")
+        }
         try {
             let multisigInfo = await AppState.chainAPI.accountAPI.getMultisigAccountInfo(modifyMultisigTxn.signer.address);
 
-            if(multisigInfo){
+            if (multisigInfo) {
                 txnDetails.oldApprovalNumber = multisigInfo.minApproval;
                 txnDetails.oldRemovalNumber = multisigInfo.minRemoval;
             }
@@ -3663,19 +3788,19 @@ export class DashboardService {
             txnDetails.oldApprovalNumber = 0;
             txnDetails.oldRemovalNumber = 0;
         }
-        
+
         return txnDetails;
     }
 
     async extractModifyMultisig(modifyMultisigTxn: ModifyMultisigAccountTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED): Promise<InnerAccountTransaction> {
-        
-        if(txnGroupType === TransactionGroupType.CONFIRMED){
+
+        if (txnGroupType === TransactionGroupType.CONFIRMED) {
             return await this.extractConfirmedModifyMultisig(modifyMultisigTxn);
         }
-        else if(txnGroupType === TransactionGroupType.UNCONFIRMED){
+        else if (txnGroupType === TransactionGroupType.UNCONFIRMED) {
             return await this.extractUnconfirmedModifyMultisig(modifyMultisigTxn);
         }
-        else{
+        else {
             return await this.extractPartialModifyMultisig(modifyMultisigTxn);
         }
     }
@@ -3684,7 +3809,9 @@ export class DashboardService {
     // -----------------------------------extract Address Alias only--------------------------------------------------- 
     async extractAddressAlias(addressAliasTxn: AddressAliasTransaction): Promise<InnerAliasTransaction> {
         let txnDetails = new InnerAliasTransaction();
-        
+        if(!addressAliasTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = addressAliasTxn.signer.publicKey;
         txnDetails.signerAddress = addressAliasTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(addressAliasTxn.type);
@@ -3692,7 +3819,7 @@ export class DashboardService {
         txnDetails.address = addressAliasTxn.address.plain();
         txnDetails.aliasType = addressAliasTxn.actionType;
         txnDetails.aliasTypeName = addressAliasTxn.actionType === AliasActionType.Link ? "Link" : "Unlink";
-        
+
         let nsId = addressAliasTxn.namespaceId;
 
         try {
@@ -3700,9 +3827,9 @@ export class DashboardService {
 
             txnDetails.aliasName = nsName[0].name;
         } catch (error) {
-            
+
         }
-        
+
         return txnDetails;
     }
     // --------------------------------------end------------------------------------------------------------------
@@ -3710,7 +3837,9 @@ export class DashboardService {
     // -----------------------------------extract Asset Alias only--------------------------------------------------- 
     async extractAssetAlias(assetAliasTxn: MosaicAliasTransaction): Promise<InnerAliasTransaction> {
         let txnDetails = new InnerAliasTransaction();
-        
+        if(!assetAliasTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = assetAliasTxn.signer.publicKey;
         txnDetails.signerAddress = assetAliasTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(assetAliasTxn.type);
@@ -3726,9 +3855,9 @@ export class DashboardService {
 
             txnDetails.aliasName = nsName[0].name;
         } catch (error) {
-            
+
         }
-        
+
         return txnDetails;
     }
     // --------------------------------------end------------------------------------------------------------------
@@ -3736,7 +3865,9 @@ export class DashboardService {
     // -----------------------------------extract Account Metadata_v2 only--------------------------------------------------- 
     async extractConfirmedAccountMetadata(accMetadataTxn: AccountMetadataTransaction): Promise<InnerMetadataTransaction> {
         let txnDetails = new InnerMetadataTransaction();
-        
+        if(!accMetadataTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = accMetadataTxn.signer.publicKey;
         txnDetails.signerAddress = accMetadataTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(accMetadataTxn.type);
@@ -3747,22 +3878,24 @@ export class DashboardService {
         txnDetails.scopedMetadataKey = accMetadataTxn.scopedMetadataKey.toHex();
         txnDetails.targetPublicKey = accMetadataTxn.targetPublicKey.publicKey;
         txnDetails.sizeChanged = accMetadataTxn.valueSizeDelta;
-        
+
         return txnDetails;
     }
 
     async extractUnconfirmedAccountMetadata(accMetadataTxn: AccountMetadataTransaction): Promise<InnerMetadataTransaction> {
-        
+
         return await this.extractPartialAccountMetadata(accMetadataTxn);
     }
 
     async extractPartialAccountMetadata(accMetadataTxn: AccountMetadataTransaction): Promise<InnerMetadataTransaction> {
         let txnDetails = new InnerMetadataTransaction();
-        
+        if(!accMetadataTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = accMetadataTxn.signer.publicKey;
         txnDetails.signerAddress = accMetadataTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(accMetadataTxn.type);
-        
+
         txnDetails.metadataType = MetadataType.ACCOUNT;
         txnDetails.metadataTypeName = "Account";
 
@@ -3773,30 +3906,30 @@ export class DashboardService {
 
         try {
             let nsMetadataEntry = await DashboardService.getAccountMetadata(accMetadataTxn.targetPublicKey, accMetadataTxn.scopedMetadataKey);
-            
-            if(nsMetadataEntry){
+
+            if (nsMetadataEntry) {
                 txnDetails.oldValue = nsMetadataEntry.value;
                 txnDetails.newValue = DashboardService.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
             }
-            else{
+            else {
                 txnDetails.newValue = DashboardService.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
             }
         } catch (error) {
-            
+
         }
-        
+
         return txnDetails;
     }
 
     async extractAccMetadata(accMetadataTxn: AccountMetadataTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED): Promise<InnerMetadataTransaction> {
-        
-        if(txnGroupType === TransactionGroupType.CONFIRMED){
+
+        if (txnGroupType === TransactionGroupType.CONFIRMED) {
             return await this.extractConfirmedAccountMetadata(accMetadataTxn);
         }
-        else if(txnGroupType === TransactionGroupType.UNCONFIRMED){
+        else if (txnGroupType === TransactionGroupType.UNCONFIRMED) {
             return await this.extractUnconfirmedAccountMetadata(accMetadataTxn);
         }
-        else{
+        else {
             return await this.extractPartialAccountMetadata(accMetadataTxn);
         }
     }
@@ -3805,7 +3938,9 @@ export class DashboardService {
     // -----------------------------------extract Namespace Metadata_v2 only--------------------------------------------------- 
     async extractConfirmedNamespaceMetadata(nsMetadataTxn: NamespaceMetadataTransaction): Promise<InnerMetadataTransaction> {
         let txnDetails = new InnerMetadataTransaction();
-        
+        if(!nsMetadataTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = nsMetadataTxn.signer.publicKey;
         txnDetails.signerAddress = nsMetadataTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(nsMetadataTxn.type);
@@ -3822,29 +3957,31 @@ export class DashboardService {
         try {
             let nsName = await DashboardService.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
 
-            if(nsName.length){
+            if (nsName.length) {
                 txnDetails.targetIdName = nsName[0].name;
             }
-            
+
         } catch (error) {
-            
+
         }
-        
+
         return txnDetails;
     }
 
     async extractUnconfirmedNamespaceMetadata(nsMetadataTxn: NamespaceMetadataTransaction): Promise<InnerMetadataTransaction> {
-        
+
         return await this.extractPartialNamespaceMetadata(nsMetadataTxn);
     }
 
     async extractPartialNamespaceMetadata(nsMetadataTxn: NamespaceMetadataTransaction): Promise<InnerMetadataTransaction> {
         let txnDetails = new InnerMetadataTransaction();
-        
+        if(!nsMetadataTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = nsMetadataTxn.signer.publicKey;
         txnDetails.signerAddress = nsMetadataTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(nsMetadataTxn.type);
-        
+
         let nsId = nsMetadataTxn.targetNamespaceId.toHex();
 
         txnDetails.metadataType = MetadataType.NAMESPACE;
@@ -3858,36 +3995,36 @@ export class DashboardService {
         try {
             let nsName = await DashboardService.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
 
-            if(nsName.length){
+            if (nsName.length) {
                 txnDetails.targetIdName = nsName[0].name;
             }
 
             let nsMetadataEntry = await DashboardService.getNamespaceMetadata(nsMetadataTxn.targetNamespaceId, nsMetadataTxn.scopedMetadataKey);
-            
-            if(nsMetadataEntry){
+
+            if (nsMetadataEntry) {
                 txnDetails.oldValue = nsMetadataEntry.value;
                 txnDetails.newValue = DashboardService.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
             }
-            else{
+            else {
                 txnDetails.newValue = DashboardService.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
             }
-            
+
         } catch (error) {
-            
+
         }
-        
+
         return txnDetails;
     }
 
     async extractNamespaceMetadata(nsMetadataTxn: NamespaceMetadataTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED): Promise<InnerMetadataTransaction> {
-        
-        if(txnGroupType === TransactionGroupType.CONFIRMED){
+
+        if (txnGroupType === TransactionGroupType.CONFIRMED) {
             return await this.extractConfirmedNamespaceMetadata(nsMetadataTxn);
         }
-        else if(txnGroupType === TransactionGroupType.UNCONFIRMED){
+        else if (txnGroupType === TransactionGroupType.UNCONFIRMED) {
             return await this.extractUnconfirmedNamespaceMetadata(nsMetadataTxn);
         }
-        else{
+        else {
             return await this.extractPartialNamespaceMetadata(nsMetadataTxn);
         }
     }
@@ -3896,7 +4033,9 @@ export class DashboardService {
     // -----------------------------------extract Asset Metadata_v2 only--------------------------------------------------- 
     async extractConfirmedAssetMetadata(assetMetadataTxn: MosaicMetadataTransaction): Promise<InnerMetadataTransaction> {
         let txnDetails = new InnerMetadataTransaction();
-        
+        if(!assetMetadataTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = assetMetadataTxn.signer.publicKey;
         txnDetails.signerAddress = assetMetadataTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(assetMetadataTxn.type);
@@ -3913,29 +4052,31 @@ export class DashboardService {
         try {
             let assetName = await DashboardService.getAssetName(assetId);
 
-            if(assetName.names.length){
+            if (assetName.names.length) {
                 txnDetails.targetIdName = assetName.names[0].name;
             }
-            
+
         } catch (error) {
-            
+
         }
-        
+
         return txnDetails;
     }
 
     async extractUnconfirmedAssetMetadata(assetMetadataTxn: MosaicMetadataTransaction): Promise<InnerMetadataTransaction> {
-        
+
         return await this.extractPartialAssetMetadata(assetMetadataTxn);
     }
 
     async extractPartialAssetMetadata(assetMetadataTxn: MosaicMetadataTransaction): Promise<InnerMetadataTransaction> {
         let txnDetails = new InnerMetadataTransaction();
-        
+        if(!assetMetadataTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = assetMetadataTxn.signer.publicKey;
         txnDetails.signerAddress = assetMetadataTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(assetMetadataTxn.type);
-        
+
         let assetId = assetMetadataTxn.targetMosaicId.toHex();
 
         txnDetails.metadataType = MetadataType.MOSAIC;
@@ -3949,36 +4090,36 @@ export class DashboardService {
         try {
             let assetName = await DashboardService.getAssetName(assetId);
 
-            if(assetName.names.length){
+            if (assetName.names.length) {
                 txnDetails.targetIdName = assetName.names[0].name;
             }
 
             let assetMetadataEntry = await DashboardService.getAssetMetadata(assetMetadataTxn.targetMosaicId, assetMetadataTxn.scopedMetadataKey);
-            
-            if(assetMetadataEntry){
+
+            if (assetMetadataEntry) {
                 txnDetails.oldValue = assetMetadataEntry.value;
                 txnDetails.newValue = DashboardService.applyValueChange(txnDetails.oldValue, txnDetails.valueChange, txnDetails.sizeChanged);
             }
-            else{
+            else {
                 txnDetails.newValue = DashboardService.applyValueChange("", txnDetails.valueChange, txnDetails.sizeChanged);
             }
-            
+
         } catch (error) {
-            
+
         }
-        
+
         return txnDetails;
     }
 
     async extractAssetMetadata(assetMetadataTxn: MosaicMetadataTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED): Promise<InnerMetadataTransaction> {
-        
-        if(txnGroupType === TransactionGroupType.CONFIRMED){
+
+        if (txnGroupType === TransactionGroupType.CONFIRMED) {
             return await this.extractConfirmedAssetMetadata(assetMetadataTxn);
         }
-        else if(txnGroupType === TransactionGroupType.UNCONFIRMED){
+        else if (txnGroupType === TransactionGroupType.UNCONFIRMED) {
             return await this.extractUnconfirmedAssetMetadata(assetMetadataTxn);
         }
-        else{
+        else {
             return await this.extractPartialAssetMetadata(assetMetadataTxn);
         }
     }
@@ -3987,7 +4128,9 @@ export class DashboardService {
     // -----------------------------------extract Secret Proof only--------------------------------------------------- 
     extractSecretProof(secretProofTxn: SecretProofTransaction): InnerSecretTransaction {
         let txnDetails = new InnerSecretTransaction();
-        
+        if(!secretProofTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = secretProofTxn.signer.publicKey;
         txnDetails.signerAddress = secretProofTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(secretProofTxn.type);
@@ -3996,7 +4139,7 @@ export class DashboardService {
         txnDetails.recipient = secretProofTxn.recipient.plain();
         txnDetails.hashType = myHashType[secretProofTxn.hashType];
         txnDetails.proof = secretProofTxn.proof;
-        
+
         return txnDetails;
     }
     // --------------------------------------end------------------------------------------------------------------
@@ -4005,7 +4148,9 @@ export class DashboardService {
     async extractConfirmedSecretLock(secretLockTxn: SecretLockTransaction, blockNum: number): Promise<InnerSecretTransaction> {
 
         let txnDetails = new InnerSecretTransaction();
-        
+        if(!secretLockTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = secretLockTxn.signer.publicKey;
         txnDetails.signerAddress = secretLockTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(secretLockTxn.type);
@@ -4017,19 +4162,21 @@ export class DashboardService {
         txnDetails.hashType = myHashType[secretLockTxn.hashType];
 
         let isNamespace = DashboardService.isNamespace(secretLockTxn.mosaic.id);
-        let resolvedAssetId = await DashboardService.getResolvedAsset(secretLockTxn.mosaic.id, blockNum); 
-
+        let resolvedAssetId = await DashboardService.getResolvedAsset(secretLockTxn.mosaic.id, blockNum);
+        if(!resolvedAssetId){
+            throw new Error("Service unavailable")
+        }
         txnDetails.assetId = resolvedAssetId.toHex();
 
         try {
-            if(!isNamespace){
+            if (!isNamespace) {
                 let assetsNames = await DashboardService.getAssetsName([secretLockTxn.mosaic.id]);
 
-                if(assetsNames[0].names.length){
+                if (assetsNames[0].names.length) {
                     txnDetails.namespaceName = assetsNames[0].names[0].name;
                 }
             }
-            else{
+            else {
                 txnDetails.isSendWithNamespace = true;
                 let namespaceId = new NamespaceId(secretLockTxn.mosaic.id.toDTO().id);
 
@@ -4037,19 +4184,19 @@ export class DashboardService {
                 txnDetails.namespaceName = nsNames[0].name;
             }
 
-            if(txnDetails.namespaceName && txnDetails.namespaceName === AppState.nativeToken.fullNamespace){
+            if (txnDetails.namespaceName && txnDetails.namespaceName === AppState.nativeToken.fullNamespace) {
                 txnDetails.namespaceName = AppState.nativeToken.label;
             }
 
             let assetInfo = await DashboardService.getAssetInfo(txnDetails.assetId);
 
-            if(assetInfo.divisibility > 0){
+            if (assetInfo.divisibility > 0) {
                 txnDetails.amount = DashboardService.convertToExactAmount(txnDetails.amount, assetInfo.divisibility);
             }
-            
-            txnDetails.amountIsRaw = false;                    
+
+            txnDetails.amountIsRaw = false;
         } catch (error) {
-            
+
         }
         return txnDetails;
     }
@@ -4060,7 +4207,9 @@ export class DashboardService {
 
     async extractPartialSecretLock(secretLockTxn: SecretLockTransaction): Promise<InnerSecretTransaction> {
         let txnDetails = new InnerSecretTransaction();
-        
+        if(!secretLockTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = secretLockTxn.signer.publicKey;
         txnDetails.signerAddress = secretLockTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(secretLockTxn.type);
@@ -4074,16 +4223,16 @@ export class DashboardService {
         let isNamespace = DashboardService.isNamespace(secretLockTxn.mosaic.id);
 
         try {
-            if(!isNamespace){
+            if (!isNamespace) {
                 txnDetails.assetId = secretLockTxn.mosaic.id.toHex();
 
                 let assetsNames = await DashboardService.getAssetsName([secretLockTxn.mosaic.id]);
 
-                if(assetsNames[0].names.length){
+                if (assetsNames[0].names.length) {
                     txnDetails.namespaceName = assetsNames[0].names[0].name;
                 }
             }
-            else{
+            else {
                 let namespaceId = new NamespaceId(secretLockTxn.mosaic.id.toDTO().id);
                 let linkedAssetId = await DashboardService.getAssetAlias(namespaceId);
 
@@ -4094,30 +4243,30 @@ export class DashboardService {
                 txnDetails.namespaceName = nsNames[0].name;
             }
 
-            if(txnDetails.namespaceName && txnDetails.namespaceName === AppState.nativeToken.fullNamespace){
+            if (txnDetails.namespaceName && txnDetails.namespaceName === AppState.nativeToken.fullNamespace) {
                 txnDetails.namespaceName = AppState.nativeToken.label;
             }
 
             let assetInfo = await DashboardService.getAssetInfo(txnDetails.assetId);
 
-            if(assetInfo.divisibility > 0){
+            if (assetInfo.divisibility > 0) {
                 txnDetails.amount = DashboardService.convertToExactAmount(txnDetails.amount, assetInfo.divisibility);
             }
-            
-            txnDetails.amountIsRaw = false;                    
+
+            txnDetails.amountIsRaw = false;
         } catch (error) {
-            
+
         }
 
         return txnDetails;
     }
 
     async extractNonconfirmedSecretLock(secretLockTxn: SecretLockTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.UNCONFIRMED): Promise<InnerSecretTransaction> {
-        
-        if(txnGroupType === TransactionGroupType.UNCONFIRMED){
+
+        if (txnGroupType === TransactionGroupType.UNCONFIRMED) {
             return await this.extractUnconfirmedSecretLock(secretLockTxn);
         }
-        else{
+        else {
             return await this.extractPartialSecretLock(secretLockTxn);
         }
     }
@@ -4127,27 +4276,34 @@ export class DashboardService {
     async extractRegisterNamespace(registerNSTxn: RegisterNamespaceTransaction): Promise<InnerNamespaceTransaction> {
 
         let txnDetails = new InnerNamespaceTransaction();
-        
+        if(!registerNSTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = registerNSTxn.signer.publicKey;
         txnDetails.signerAddress = registerNSTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(registerNSTxn.type);
 
         txnDetails.namespaceName = registerNSTxn.namespaceName;
 
-        if(registerNSTxn.namespaceType === NamespaceType.RootNamespace){
-            txnDetails.duration = registerNSTxn.duration.compact();
+        if (registerNSTxn.namespaceType === NamespaceType.RootNamespace) {
+            txnDetails.duration = registerNSTxn.duration?.compact();
             txnDetails.registerType = NamespaceType.RootNamespace;
             txnDetails.registerTypeName = "Root namespace";
-
+            if(!AppState.chainAPI){
+                throw new Error("Service unavailable")
+            }
             try {
-               let namespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespace(registerNSTxn.namespaceId);
+                await AppState.chainAPI.namespaceAPI.getNamespace(registerNSTxn.namespaceId);
 
-               txnDetails.isExtend = true;
+                txnDetails.isExtend = true;
             } catch (error) {
-                
+
             }
         }
-        else{
+        else {
+            if(!registerNSTxn.parentId){
+                throw new Error("Service unavailable")
+            }
             txnDetails.registerType = NamespaceType.SubNamespace;
             txnDetails.registerTypeName = "Sub namespace";
             txnDetails.parentId = registerNSTxn.parentId.toHex();
@@ -4156,7 +4312,7 @@ export class DashboardService {
         }
 
         txnDetails.namespaceId = registerNSTxn.namespaceId.toHex();
-        
+
         return txnDetails;
     }
     // --------------------------------------end------------------------------------------------------------------
@@ -4165,19 +4321,21 @@ export class DashboardService {
     extractAssetDefinition(assetDefTxn: MosaicDefinitionTransaction): InnerAssetTransaction {
 
         let txnDetails = new InnerAssetTransaction();
-        
+        if(!assetDefTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = assetDefTxn.signer.publicKey;
         txnDetails.signerAddress = assetDefTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(assetDefTxn.type);
 
         txnDetails.assetId = assetDefTxn.mosaicId.toHex();
         txnDetails.divisibility = assetDefTxn.mosaicProperties.divisibility;
-        txnDetails.duration = assetDefTxn.mosaicProperties.duration ? 
-                assetDefTxn.mosaicProperties.duration.compact() : undefined;
+        txnDetails.duration = assetDefTxn.mosaicProperties.duration ?
+            assetDefTxn.mosaicProperties.duration.compact() : undefined;
         txnDetails.transferable = assetDefTxn.mosaicProperties.transferable;
         txnDetails.supplyMutable = assetDefTxn.mosaicProperties.supplyMutable;
         txnDetails.nonce = assetDefTxn.mosaicNonce.toNumber();
-        
+
         return txnDetails;
     }
     // --------------------------------------end------------------------------------------------------------------
@@ -4186,7 +4344,9 @@ export class DashboardService {
     async extractAssetSupplyChange(assetSupplyChangeTxn: MosaicSupplyChangeTransaction): Promise<InnerAssetTransaction> {
 
         let txnDetails = new InnerAssetTransaction();
-        
+        if(!assetSupplyChangeTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = assetSupplyChangeTxn.signer.publicKey;
         txnDetails.signerAddress = assetSupplyChangeTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(assetSupplyChangeTxn.type);
@@ -4197,7 +4357,7 @@ export class DashboardService {
         txnDetails.supplyDelta = assetSupplyChangeTxn.delta.compact();
         txnDetails.supplyDeltaIsRaw = true;
 
-        if(assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease){
+        if (assetSupplyChangeTxn.direction === MosaicSupplyType.Decrease) {
             txnDetails.supplyDelta = -txnDetails.supplyDelta;
         }
 
@@ -4207,9 +4367,9 @@ export class DashboardService {
             txnDetails.supplyDelta = DashboardService.convertToExactAmount(txnDetails.supplyDelta, assetInfo.divisibility);
 
             txnDetails.supplyDeltaIsRaw = false;
-            
+
         } catch (error) {
-            
+
         }
 
         return txnDetails;
@@ -4220,7 +4380,9 @@ export class DashboardService {
     async extractAssetModifyLevy(assetModifyLevyTxn: MosaicModifyLevyTransaction): Promise<InnerAssetTransaction> {
 
         let txnDetails = new InnerAssetTransaction();
-        
+        if(!assetModifyLevyTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = assetModifyLevyTxn.signer.publicKey;
         txnDetails.signerAddress = assetModifyLevyTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(assetModifyLevyTxn.type);
@@ -4239,7 +4401,7 @@ export class DashboardService {
         try {
             let assetName = await DashboardService.getAssetName(assetId);
 
-            if(assetName.names.length){
+            if (assetName.names.length) {
                 txnDetails.namespaceName = assetName.names[0].name;
             }
 
@@ -4251,12 +4413,12 @@ export class DashboardService {
 
             let levyAssetName = await DashboardService.getAssetName(levyAssetId);
 
-            if(levyAssetName.names.length){
+            if (levyAssetName.names.length) {
                 txnDetails.levyAssetName = levyAssetName.names[0].name;
             }
-        
+
         } catch (error) {
-            
+
         }
 
         return txnDetails;
@@ -4267,7 +4429,9 @@ export class DashboardService {
     async extractAssetRemoveLevy(assetRemoveLevyTxn: MosaicRemoveLevyTransaction): Promise<InnerAssetTransaction> {
 
         let txnDetails = new InnerAssetTransaction();
-        
+        if(!assetRemoveLevyTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = assetRemoveLevyTxn.signer.publicKey;
         txnDetails.signerAddress = assetRemoveLevyTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(assetRemoveLevyTxn.type);
@@ -4275,16 +4439,16 @@ export class DashboardService {
         let assetId = assetRemoveLevyTxn.mosaicId.toHex();
 
         txnDetails.assetId = assetId;
-        
+
         try {
             let assetName = await DashboardService.getAssetName(assetId);
 
-            if(assetName.names.length){
+            if (assetName.names.length) {
                 txnDetails.namespaceName = assetName.names[0].name;
             }
-        
+
         } catch (error) {
-            
+
         }
 
         return txnDetails;
@@ -4295,14 +4459,16 @@ export class DashboardService {
     extractAccOperationRestriction(accOperationRestrictTxn: AccountOperationRestrictionModificationTransaction): InnerRestrictionTransaction {
 
         let txnDetails = new InnerRestrictionTransaction();
-        
+        if(!accOperationRestrictTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = accOperationRestrictTxn.signer.publicKey;
         txnDetails.signerAddress = accOperationRestrictTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(accOperationRestrictTxn.type);
 
         txnDetails.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accOperationRestrictTxn.restrictionType).action;
 
-        for(let i = 0; i < accOperationRestrictTxn.modifications.length; ++i){
+        for (let i = 0; i < accOperationRestrictTxn.modifications.length; ++i) {
 
             let modification = accOperationRestrictTxn.modifications[i];
 
@@ -4327,15 +4493,17 @@ export class DashboardService {
     extractAccAddressRestriction(accAddressRestrictTxn: AccountAddressRestrictionModificationTransaction): InnerRestrictionTransaction {
 
         let txnDetails = new InnerRestrictionTransaction();
-        
+        if(!accAddressRestrictTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = accAddressRestrictTxn.signer.publicKey;
         txnDetails.signerAddress = accAddressRestrictTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(accAddressRestrictTxn.type);
 
         txnDetails.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAddressRestrictTxn.restrictionType).action;
 
-        for(let i = 0; i < accAddressRestrictTxn.modifications.length; ++i){
-            
+        for (let i = 0; i < accAddressRestrictTxn.modifications.length; ++i) {
+
             let modification = accAddressRestrictTxn.modifications[i];
 
             let newRestrictionModification: RestrictionModification = {
@@ -4358,15 +4526,17 @@ export class DashboardService {
     async extractAccAssetRestriction(accAssetRestrictTxn: AccountMosaicRestrictionModificationTransaction): Promise<InnerRestrictionTransaction> {
 
         let txnDetails = new InnerRestrictionTransaction();
-        
+        if(!accAssetRestrictTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = accAssetRestrictTxn.signer.publicKey;
         txnDetails.signerAddress = accAssetRestrictTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(accAssetRestrictTxn.type);
 
         txnDetails.restrictionTypeOutput = DashboardService.getRestrictionTypeName(accAssetRestrictTxn.restrictionType).action;
 
-        for(let i = 0; i < accAssetRestrictTxn.modifications.length; ++i){
-            
+        for (let i = 0; i < accAssetRestrictTxn.modifications.length; ++i) {
+
             let modification = accAssetRestrictTxn.modifications[i];
 
             let newRestrictionModification: RestrictionModification = {
@@ -4377,20 +4547,20 @@ export class DashboardService {
             try {
                 let assetId = newRestrictionModification.value;
 
-                if(assetId === AppState.nativeToken.assetId){
+                if (assetId === AppState.nativeToken.assetId) {
                     newRestrictionModification.name = AppState.nativeToken.label;
                 }
-                else{
+                else {
                     let assetName = await DashboardService.getAssetName(assetId);
 
-                    if(assetName.names.length){
+                    if (assetName.names.length) {
                         newRestrictionModification.name = assetName.names[0].name;
                     }
                 }
-                
+
             } catch (error) {
-                
-            } 
+
+            }
 
             txnDetails.modification.push(newRestrictionModification);
         }
@@ -4408,7 +4578,9 @@ export class DashboardService {
     async extractConfirmedLockHash(lockFundTxn: LockFundsTransaction): Promise<InnerLockTransaction> {
 
         let txnDetails = new InnerLockTransaction();
-        
+        if(!lockFundTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = lockFundTxn.signer.publicKey;
         txnDetails.signerAddress = lockFundTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(lockFundTxn.type);
@@ -4420,6 +4592,9 @@ export class DashboardService {
         txnDetails.amountLocking = AppState.nativeToken.divisibility ? amount / Math.pow(10, AppState.nativeToken.divisibility) : amount;
 
         try {
+            if(!AppState.chainAPI){
+                throw new Error("Service unavailable")
+            }
             let txnStatus = await AppState.chainAPI.transactionAPI.getTransactionStatus(lockFundTxn.hash);
             txnDetails.isRefunded = txnStatus.group === TransactionGroupType.CONFIRMED;
         } catch (error) {
@@ -4436,7 +4611,9 @@ export class DashboardService {
     extractPartialLockHash(lockFundTxn: LockFundsTransaction): InnerLockTransaction {
 
         let txnDetails = new InnerLockTransaction();
-        
+        if(!lockFundTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = lockFundTxn.signer.publicKey;
         txnDetails.signerAddress = lockFundTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(lockFundTxn.type);
@@ -4452,13 +4629,13 @@ export class DashboardService {
 
     async extractLockHash(lockFundTxn: LockFundsTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED): Promise<InnerLockTransaction> {
 
-        if(txnGroupType === TransactionGroupType.CONFIRMED){
+        if (txnGroupType === TransactionGroupType.CONFIRMED) {
             return await this.extractConfirmedLockHash(lockFundTxn);
         }
-        if(txnGroupType === TransactionGroupType.UNCONFIRMED){
+        if (txnGroupType === TransactionGroupType.UNCONFIRMED) {
             return this.extractUnconfirmedLockHash(lockFundTxn);
         }
-        else{
+        else {
             return this.extractPartialLockHash(lockFundTxn);
         }
     }
@@ -4468,7 +4645,9 @@ export class DashboardService {
     extractAccountLink(accLinkTxn: AccountLinkTransaction): InnerLinkTransaction {
 
         let txnDetails = new InnerLinkTransaction();
-        
+        if(!accLinkTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = accLinkTxn.signer.publicKey;
         txnDetails.signerAddress = accLinkTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(accLinkTxn.type);
@@ -4485,7 +4664,9 @@ export class DashboardService {
     extractChainUpgrade(chainUpdateTxn: ChainUpgradeTransaction): InnerChainTransaction {
 
         let txnDetails = new InnerChainTransaction();
-        
+        if(!chainUpdateTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = chainUpdateTxn.signer.publicKey;
         txnDetails.signerAddress = chainUpdateTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(chainUpdateTxn.type);
@@ -4501,7 +4682,9 @@ export class DashboardService {
     extractChainConfig(chainConfigureTxn: ChainConfigTransaction): InnerChainTransaction {
 
         let txnDetails = new InnerChainTransaction();
-        
+        if(!chainConfigureTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = chainConfigureTxn.signer.publicKey;
         txnDetails.signerAddress = chainConfigureTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(chainConfigureTxn.type);
@@ -4516,12 +4699,14 @@ export class DashboardService {
     async extractAddExchangeOffer(addExchangeOfferTxn: AddExchangeOfferTransaction): Promise<InnerExchangeTransaction> {
 
         let txnDetails = new InnerExchangeTransaction();
-        
+        if(!addExchangeOfferTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = addExchangeOfferTxn.signer.publicKey;
         txnDetails.signerAddress = addExchangeOfferTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(addExchangeOfferTxn.type);
 
-        for(let i = 0; i < addExchangeOfferTxn.offers.length; ++i){
+        for (let i = 0; i < addExchangeOfferTxn.offers.length; ++i) {
             let tempExchangeOffer = addExchangeOfferTxn.offers[i];
 
             let assetId = tempExchangeOffer.mosaicId.toHex();
@@ -4533,8 +4718,8 @@ export class DashboardService {
                 assetId: assetId,
                 cost: DashboardService.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
                 duration: tempExchangeOffer.duration.compact(),
-                type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-            }; 
+                type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy",
+            };
 
             try {
                 let assetInfo = await DashboardService.getAssetInfo(assetId);
@@ -4544,18 +4729,18 @@ export class DashboardService {
 
                 let assetName = await DashboardService.getAssetName(assetId);
 
-                if(assetName.names.length){
+                if (assetName.names.length) {
                     newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
                 }
 
             } catch (error) {
-                
-            }                    
+
+            }
 
             txnDetails.exchangeOffers.push(newTxnExchangeOffer);
         }
 
-        
+
         let allBuyOffers = txnDetails.exchangeOffers.filter(x => x.type === "Buy");
         let allSellOffers = txnDetails.exchangeOffers.filter(x => x.type === "Sell");
 
@@ -4569,31 +4754,33 @@ export class DashboardService {
     async extractRemoveExchangeOffer(removeExchangeOfferTxn: RemoveExchangeOfferTransaction): Promise<InnerExchangeTransaction> {
 
         let txnDetails = new InnerExchangeTransaction();
-        
+        if(!removeExchangeOfferTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = removeExchangeOfferTxn.signer.publicKey;
         txnDetails.signerAddress = removeExchangeOfferTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(removeExchangeOfferTxn.type);
 
-        for(let i = 0; i < removeExchangeOfferTxn.offers.length; ++i){
+        for (let i = 0; i < removeExchangeOfferTxn.offers.length; ++i) {
             let tempExchangeOffer = removeExchangeOfferTxn.offers[i];
 
             let assetId = tempExchangeOffer.mosaicId.toHex();
 
             let newTxnExchangeOffer: TxnExchangeOffer = {
                 assetId: assetId,
-                type: tempExchangeOffer.offerType === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-            }; 
+                type: tempExchangeOffer.offerType === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy",
+            };
 
             try {
                 let assetName = await DashboardService.getAssetName(assetId);
 
-                if(assetName.names.length){
+                if (assetName.names.length) {
                     newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
                 }
 
             } catch (error) {
-                
-            }                    
+
+            }
 
             txnDetails.exchangeOffers.push(newTxnExchangeOffer);
         }
@@ -4611,14 +4798,16 @@ export class DashboardService {
     async extractExchangeOffer(exchangeOfferTxn: ExchangeOfferTransaction): Promise<InnerExchangeTransaction> {
 
         let txnDetails = new InnerExchangeTransaction();
-        
+        if(!exchangeOfferTxn.signer){
+            throw new Error("Service unavailable")
+        }
         txnDetails.signer = exchangeOfferTxn.signer.publicKey;
         txnDetails.signerAddress = exchangeOfferTxn.signer.address.plain();
         txnDetails.type = TransactionUtils.getTransactionTypeName(exchangeOfferTxn.type);
 
         txnDetails.isTakingOffer = true;
-                
-        for(let i = 0; i < exchangeOfferTxn.offers.length; ++i){
+
+        for (let i = 0; i < exchangeOfferTxn.offers.length; ++i) {
             let tempExchangeOffer = exchangeOfferTxn.offers[i];
 
             let assetId = tempExchangeOffer.mosaicId.toHex();
@@ -4630,8 +4819,8 @@ export class DashboardService {
                 assetId: assetId,
                 cost: DashboardService.convertToExactNativeAmount(tempExchangeOffer.cost.compact()),
                 owner: tempExchangeOffer.owner.publicKey,
-                type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy", 
-            }; 
+                type: tempExchangeOffer.type === ExchangeOfferType.SELL_OFFER ? "Sell" : "Buy",
+            };
 
             try {
                 let assetInfo = await DashboardService.getAssetInfo(assetId);
@@ -4641,13 +4830,13 @@ export class DashboardService {
 
                 let assetName = await DashboardService.getAssetName(assetId);
 
-                if(assetName.names.length){
+                if (assetName.names.length) {
                     newTxnExchangeOffer.assetNamespace = assetName.names[0].name;
                 }
 
             } catch (error) {
-                
-            }                    
+
+            }
 
             txnDetails.exchangeOffers.push(newTxnExchangeOffer);
         }
@@ -4662,14 +4851,14 @@ export class DashboardService {
     // --------------------------------------end------------------------------------------------------------------
 
 
-    async extractPartialInnerTransaction(innerTransaction: InnerTransaction): Promise<InnerTxnDetails> {
+    async extractPartialInnerTransaction(innerTransaction: InnerTransaction): Promise<InnerTxnDetails | null> {
 
-        let transactionDetails: InnerTxnDetails;
+        let transactionDetails: InnerTxnDetails | null = null;
 
         let tempData: MyInnerTxn;
 
         switch (innerTransaction.type) {
-            case TransactionType.ADDRESS_ALIAS:{
+            case TransactionType.ADDRESS_ALIAS: {
                 let addressAliasTx = innerTransaction as AddressAliasTransaction;
                 tempData = await this.extractAddressAlias(addressAliasTx);
                 let addressAliasFormat = tempData as InnerAliasTransaction;
@@ -4693,7 +4882,7 @@ export class DashboardService {
                 let addressInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Address",
-                    value: addressAliasFormat.address
+                    value: addressAliasFormat.address??""
                 };
                 infos.push(addressInfo);
 
@@ -4708,7 +4897,7 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.MOSAIC_ALIAS:{
+            case TransactionType.MOSAIC_ALIAS: {
                 let mosaicAliasTx = innerTransaction as MosaicAliasTransaction;
                 tempData = await this.extractAssetAlias(mosaicAliasTx);
                 let assetAliasFormat = tempData as InnerAliasTransaction;
@@ -4732,7 +4921,7 @@ export class DashboardService {
                 let assetInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Asset",
-                    value: assetAliasFormat.assetId
+                    value: assetAliasFormat.assetId??''
                 };
                 infos.push(assetInfo);
 
@@ -4747,19 +4936,19 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.ADD_EXCHANGE_OFFER:{
+            case TransactionType.ADD_EXCHANGE_OFFER: {
                 let addExchangeOfferTx = innerTransaction as AddExchangeOfferTransaction;
                 tempData = await this.extractAddExchangeOffer(addExchangeOfferTx);
                 let addExchangeOfferFormat = tempData as InnerExchangeTransaction;
 
                 let infos: TxnDetails[] = [];
 
-                for(let i =0; i < addExchangeOfferFormat.exchangeOffers.length; ++i){
+                for (let i = 0; i < addExchangeOfferFormat.exchangeOffers.length; ++i) {
                     let offer = addExchangeOfferFormat.exchangeOffers[i];
-                    let offeringAssetString = `${offer.amount} ${offer.assetId}` + offer.assetNamespace ? ` (${offer.assetNamespace})`: '';
+                    let offeringAssetString = `${offer.amount} ${offer.assetId}` + offer.assetNamespace ? ` (${offer.assetNamespace})` : '';
                     let costString = `${offer.cost} ${AppState.nativeToken.label}`;
                     let offerInfo: TxnDetails = {
-                        type: offer.type === "Buy" ? MsgType.GREEN: MsgType.RED,
+                        type: offer.type === "Buy" ? MsgType.GREEN : MsgType.RED,
                         value: costString + " - " + offeringAssetString + `. Duration: ${offer.duration}`
                     };
                     infos.push(offerInfo);
@@ -4776,21 +4965,21 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.EXCHANGE_OFFER:{
+            case TransactionType.EXCHANGE_OFFER: {
                 let exchangeOfferTx = innerTransaction as ExchangeOfferTransaction;
                 tempData = await this.extractExchangeOffer(exchangeOfferTx);
                 let exchangeOfferFormat = tempData as InnerExchangeTransaction;
 
                 let infos: TxnDetails[] = [];
 
-                for(let i =0; i < exchangeOfferFormat.exchangeOffers.length; ++i){
+                for (let i = 0; i < exchangeOfferFormat.exchangeOffers.length; ++i) {
                     let offer = exchangeOfferFormat.exchangeOffers[i];
-                    let offeringAssetString = `${offer.amount} ${offer.assetId}` + offer.assetNamespace ? ` (${offer.assetNamespace})`: '';
+                    let offeringAssetString = `${offer.amount} ${offer.assetId}` + offer.assetNamespace ? ` (${offer.assetNamespace})` : '';
                     let costString = `${offer.cost} ${AppState.nativeToken.label}`;
-                    let ownerPublicAccount = PublicAccount.createFromPublicKey(offer.owner, AppState.networkType);
+                    let ownerPublicAccount = PublicAccount.createFromPublicKey(offer.owner??"", AppState.networkType);
                     let owner = this.wallet.convertAddressToName(ownerPublicAccount.address.plain());
                     let offerInfo: TxnDetails = {
-                        type: offer.type === "Buy" ? MsgType.RED: MsgType.GREEN,
+                        type: offer.type === "Buy" ? MsgType.RED : MsgType.GREEN,
                         value: costString + " - " + offeringAssetString + `. From: ${owner}`
                     };
                     infos.push(offerInfo);
@@ -4807,19 +4996,19 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.REMOVE_EXCHANGE_OFFER:{
+            case TransactionType.REMOVE_EXCHANGE_OFFER: {
                 let removeExchangeOfferTx = innerTransaction as RemoveExchangeOfferTransaction;
                 tempData = await this.extractRemoveExchangeOffer(removeExchangeOfferTx);
                 let removeExchangeOfferFormat = tempData as InnerExchangeTransaction;
 
                 let infos: TxnDetails[] = [];
 
-                for(let i =0; i < removeExchangeOfferFormat.exchangeOffers.length; ++i){
+                for (let i = 0; i < removeExchangeOfferFormat.exchangeOffers.length; ++i) {
                     let offer = removeExchangeOfferFormat.exchangeOffers[i];
-                    let offeringAssetString = `${offer.assetId}` + offer.assetNamespace ? ` (${offer.assetNamespace})`: '';
+                    let offeringAssetString = `${offer.assetId}` + offer.assetNamespace ? ` (${offer.assetNamespace})` : '';
 
                     let offerInfo: TxnDetails = {
-                        type: offer.type === "Buy" ? MsgType.GREEN: MsgType.RED,
+                        type: offer.type === "Buy" ? MsgType.GREEN : MsgType.RED,
                         value: offeringAssetString
                     };
                     infos.push(offerInfo);
@@ -4836,7 +5025,7 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.CHAIN_CONFIGURE:{
+            case TransactionType.CHAIN_CONFIGURE: {
                 let chainConfigureTx = innerTransaction as ChainConfigTransaction;
                 tempData = this.extractChainConfig(chainConfigureTx);
                 let chainConfigFormat = tempData as InnerChainTransaction;
@@ -4861,7 +5050,7 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.CHAIN_UPGRADE:{
+            case TransactionType.CHAIN_UPGRADE: {
                 let chainUpgradeTx = innerTransaction as ChainUpgradeTransaction;
                 tempData = this.extractChainUpgrade(chainUpgradeTx);
                 let chainUpgradeFormat = tempData as InnerChainTransaction;
@@ -4893,8 +5082,8 @@ export class DashboardService {
                 };
             }
                 break;
-            
-            case TransactionType.LINK_ACCOUNT:{
+
+            case TransactionType.LINK_ACCOUNT: {
                 let accountLinkTx = innerTransaction as AccountLinkTransaction;
                 tempData = this.extractAccountLink(accountLinkTx);
                 let accountLinkFormat = tempData as InnerLinkTransaction;
@@ -4918,7 +5107,7 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.LOCK:{
+            case TransactionType.LOCK: {
                 let lockFundTx = innerTransaction as LockFundsTransaction;
                 tempData = await this.extractLockHash(lockFundTx, TransactionGroupType.PARTIAL);
                 let lockFundFormat = tempData as InnerLockTransaction;
@@ -4931,7 +5120,7 @@ export class DashboardService {
                     value: lockFundFormat.lockHash
                 };
                 infos.push(hashInfo);
-                
+
                 let durationInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Action",
@@ -4958,7 +5147,7 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS:{
+            case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS: {
                 let accAddressRestrictionTx = innerTransaction as AccountAddressRestrictionModificationTransaction;
                 tempData = this.extractAccAddressRestriction(accAddressRestrictionTx);
                 let accAddressRestrictionFormat = tempData as InnerRestrictionTransaction;
@@ -4972,17 +5161,17 @@ export class DashboardService {
                 };
 
                 infos.push(actionInfo);
-                
-                for(let i =0; i < accAddressRestrictionFormat.modification.length; ++i){
+
+                for (let i = 0; i < accAddressRestrictionFormat.modification.length; ++i) {
                     let modification = accAddressRestrictionFormat.modification[i];
 
                     let restrictInfo: TxnDetails = {
-                        type:  modification.action === "Add" ? MsgType.GREEN : MsgType.RED,
+                        type: modification.action === "Add" ? MsgType.GREEN : MsgType.RED,
                         value: modification.value,
                         short: this.wallet.convertAddressToName(modification.value)
                     };
-    
-                    infos.push(restrictInfo); 
+
+                    infos.push(restrictInfo);
                 }
 
                 transactionDetails = {
@@ -4996,7 +5185,7 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC:{
+            case TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC: {
                 let accMosaicModifyTx = innerTransaction as AccountMosaicRestrictionModificationTransaction;
                 tempData = await this.extractAccAssetRestriction(accMosaicModifyTx);
                 let accAssetRestrictionFormat = tempData as InnerRestrictionTransaction;
@@ -5010,16 +5199,16 @@ export class DashboardService {
                 };
 
                 infos.push(actionInfo);
-                
-                for(let i =0; i < accAssetRestrictionFormat.modification.length; ++i){
+
+                for (let i = 0; i < accAssetRestrictionFormat.modification.length; ++i) {
                     let modification = accAssetRestrictionFormat.modification[i];
 
                     let restrictInfo: TxnDetails = {
-                        type:  modification.action === "Add" ? MsgType.GREEN : MsgType.RED,
+                        type: modification.action === "Add" ? MsgType.GREEN : MsgType.RED,
                         value: modification.value + modification.name ? `(${modification.name})` : ''
                     };
-    
-                    infos.push(restrictInfo); 
+
+                    infos.push(restrictInfo);
                 }
 
                 transactionDetails = {
@@ -5033,7 +5222,7 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION:{
+            case TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION: {
                 let accOperationModifyTx = innerTransaction as AccountOperationRestrictionModificationTransaction;
                 tempData = this.extractAccOperationRestriction(accOperationModifyTx);
                 let accOperationRestrictionFormat = tempData as InnerRestrictionTransaction;
@@ -5047,16 +5236,16 @@ export class DashboardService {
                 };
 
                 infos.push(actionInfo);
-                
-                for(let i =0; i < accOperationRestrictionFormat.modification.length; ++i){
+
+                for (let i = 0; i < accOperationRestrictionFormat.modification.length; ++i) {
                     let modification = accOperationRestrictionFormat.modification[i];
 
                     let restrictInfo: TxnDetails = {
-                        type:  modification.action === "Add" ? MsgType.GREEN : MsgType.RED,
+                        type: modification.action === "Add" ? MsgType.GREEN : MsgType.RED,
                         value: modification.value
                     };
-    
-                    infos.push(restrictInfo); 
+
+                    infos.push(restrictInfo);
                 }
 
                 transactionDetails = {
@@ -5070,54 +5259,54 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.MODIFY_MULTISIG_ACCOUNT:{
+            case TransactionType.MODIFY_MULTISIG_ACCOUNT: {
                 let modifyMultisigAccountTx = innerTransaction as ModifyMultisigAccountTransaction;
                 tempData = await this.extractModifyMultisig(modifyMultisigAccountTx, TransactionGroupType.PARTIAL);
                 let modifyMultisigFormat = tempData as InnerAccountTransaction;
 
                 let infos: TxnDetails[] = [];
-                
+
                 let approvalChanges: string;
 
-                if(modifyMultisigFormat.approvalDelta === 0){
+                if (modifyMultisigFormat.approvalDelta === 0) {
                     approvalChanges = '';
                 }
-                else if(modifyMultisigFormat.approvalDelta > 0){
+                else if (modifyMultisigFormat.approvalDelta > 0) {
                     approvalChanges = ` (+${modifyMultisigFormat.approvalDelta})`;
                 }
-                else{
+                else {
                     approvalChanges = ` (${modifyMultisigFormat.approvalDelta})`;
                 }
 
                 let minApprovalInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Minimum Approval",
-                    value: modifyMultisigFormat.oldApprovalNumber + approvalChanges 
+                    value: modifyMultisigFormat.oldApprovalNumber + approvalChanges
                 };
 
                 infos.push(minApprovalInfo);
 
                 let removalChanges: string;
 
-                if(modifyMultisigFormat.removalDelta === 0){
+                if (modifyMultisigFormat.removalDelta === 0) {
                     removalChanges = '';
                 }
-                else if(modifyMultisigFormat.removalDelta > 0){
+                else if (modifyMultisigFormat.removalDelta > 0) {
                     removalChanges = ` (+${modifyMultisigFormat.removalDelta})`;
                 }
-                else{
+                else {
                     removalChanges = ` (${modifyMultisigFormat.removalDelta})`;
                 }
 
                 let minRemovalInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Minimum Removal",
-                    value: modifyMultisigFormat.oldRemovalNumber + removalChanges 
+                    value: modifyMultisigFormat.oldRemovalNumber + removalChanges
                 };
 
                 infos.push(minRemovalInfo);
 
-                for(let i =0; i < modifyMultisigFormat.addedCosigner.length; ++i){
+                for (let i = 0; i < modifyMultisigFormat.addedCosigner.length; ++i) {
                     let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.addedCosigner[i], AppState.networkType)
                     let tryShortName = this.wallet.convertAddressToName(publicAccount.address.plain());
                     let shortName = tryShortName === publicAccount.address.plain() ? '' : tryShortName;
@@ -5126,19 +5315,19 @@ export class DashboardService {
                         value: modifyMultisigFormat.addedCosigner[i],
                         short: shortName
                     };
-    
-                    infos.push(addCosignerInfo); 
+
+                    infos.push(addCosignerInfo);
                 }
 
-                for(let i =0; i < modifyMultisigFormat.removedCosigner.length; ++i){
+                for (let i = 0; i < modifyMultisigFormat.removedCosigner.length; ++i) {
                     let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.removedCosigner[i], AppState.networkType)
                     let removeCosignerInfo: TxnDetails = {
                         type: MsgType.GREEN,
                         value: modifyMultisigFormat.removedCosigner[i],
                         short: this.wallet.convertAddressToName(publicAccount.address.plain())
                     };
-    
-                    infos.push(removeCosignerInfo); 
+
+                    infos.push(removeCosignerInfo);
                 }
 
                 transactionDetails = {
@@ -5152,13 +5341,13 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.MOSAIC_DEFINITION:{
+            case TransactionType.MOSAIC_DEFINITION: {
                 let mosaicDefinitionTx = innerTransaction as MosaicDefinitionTransaction;
                 tempData = this.extractAssetDefinition(mosaicDefinitionTx);
                 let assetDefFormat = tempData as InnerAssetTransaction;
 
                 let infos: TxnDetails[] = [];
-                
+
                 let assetInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Asset",
@@ -5188,13 +5377,13 @@ export class DashboardService {
 
                 infos.push(assetSupplyMutableInfo);
 
-                if(assetDefFormat.duration){
+                if (assetDefFormat.duration) {
                     let assetDurationInfo: TxnDetails = {
                         type: MsgType.NONE,
                         label: "Duration",
                         value: assetDefFormat.duration
                     };
-    
+
                     infos.push(assetDurationInfo);
                 }
 
@@ -5209,13 +5398,13 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.MOSAIC_SUPPLY_CHANGE:{
+            case TransactionType.MOSAIC_SUPPLY_CHANGE: {
                 let mosaicSupplyTx = innerTransaction as MosaicSupplyChangeTransaction;
                 tempData = await this.extractAssetSupplyChange(mosaicSupplyTx);
                 let assetSupplyFormat = tempData as InnerAssetTransaction;
 
                 let infos: TxnDetails[] = [];
-                
+
                 let assetInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Asset",
@@ -5223,7 +5412,9 @@ export class DashboardService {
                 };
 
                 infos.push(assetInfo);
-
+                if(!assetSupplyFormat.supplyDelta){
+                    throw new Error("Service unavailable")
+                }
                 let assetSupplyInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Delta",
@@ -5243,13 +5434,13 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.MODIFY_MOSAIC_LEVY:{
+            case TransactionType.MODIFY_MOSAIC_LEVY: {
                 let assetLevyTx = innerTransaction as MosaicModifyLevyTransaction;
                 tempData = await this.extractAssetModifyLevy(assetLevyTx);
                 let assetLevyFormat = tempData as InnerAssetTransaction;
 
                 let infos: TxnDetails[] = [];
-                
+
                 let assetInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Asset",
@@ -5269,8 +5460,8 @@ export class DashboardService {
                 let levyAssetRecipientInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Levy Recipient",
-                    value: assetLevyFormat.levyRecipient,
-                    short: this.wallet.convertAddressToName(assetLevyFormat.levyRecipient)
+                    value: assetLevyFormat.levyRecipient??"",
+                    short: this.wallet.convertAddressToName(assetLevyFormat.levyRecipient??"")
                 };
 
                 infos.push(levyAssetRecipientInfo);
@@ -5286,13 +5477,13 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.REMOVE_MOSAIC_LEVY:{
+            case TransactionType.REMOVE_MOSAIC_LEVY: {
                 let assetRemoveLevyTx = innerTransaction as MosaicRemoveLevyTransaction;
                 tempData = await this.extractAssetRemoveLevy(assetRemoveLevyTx);
                 let removeAssetLevyFormat = tempData as InnerAssetTransaction;
 
                 let infos: TxnDetails[] = [];
-                
+
                 let assetInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Asset",
@@ -5312,13 +5503,13 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.REGISTER_NAMESPACE:{
+            case TransactionType.REGISTER_NAMESPACE: {
                 let registerNamespaceTx = innerTransaction as RegisterNamespaceTransaction;
                 tempData = await this.extractRegisterNamespace(registerNamespaceTx);
                 let registerNamespaceFormat = tempData as InnerNamespaceTransaction;
 
                 let infos: TxnDetails[] = [];
-                
+
                 let typeInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Type",
@@ -5335,23 +5526,23 @@ export class DashboardService {
 
                 infos.push(nameInfo);
 
-                if(registerNamespaceFormat.parentName){
+                if (registerNamespaceFormat.parentName) {
                     let parentNameInfo: TxnDetails = {
                         type: MsgType.NONE,
                         label: "Parent Name",
                         value: registerNamespaceFormat.parentName
                     };
-    
+
                     infos.push(parentNameInfo);
                 }
 
-                if(registerNamespaceFormat.duration){
+                if (registerNamespaceFormat.duration) {
                     let durationInfo: TxnDetails = {
                         type: MsgType.NONE,
                         label: "Duration",
                         value: registerNamespaceFormat.duration.toString()
                     };
-    
+
                     infos.push(durationInfo);
                 }
 
@@ -5366,7 +5557,7 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.SECRET_LOCK:{
+            case TransactionType.SECRET_LOCK: {
                 let secretLockTx = innerTransaction as SecretLockTransaction;
                 tempData = await this.extractNonconfirmedSecretLock(secretLockTx, TransactionGroupType.PARTIAL);
                 let secretLockFormat = tempData as InnerSecretTransaction;
@@ -5374,7 +5565,7 @@ export class DashboardService {
                 let infos: TxnDetails[] = [];
                 let sdas = [];
 
-                let sdaString = `${secretLockFormat.amount} ${secretLockFormat.assetId}` + secretLockFormat.namespaceName ? ` (${secretLockFormat.namespaceName})`: '';
+                let sdaString = `${secretLockFormat.amount} ${secretLockFormat.assetId}` + secretLockFormat.namespaceName ? ` (${secretLockFormat.namespaceName})` : '';
 
                 sdas.push(sdaString);
 
@@ -5422,7 +5613,7 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.SECRET_PROOF:{
+            case TransactionType.SECRET_PROOF: {
                 let secretProofTx = innerTransaction as SecretProofTransaction;
                 tempData = this.extractSecretProof(secretProofTx);
                 let secretProofFormat = tempData as InnerSecretTransaction;
@@ -5457,7 +5648,7 @@ export class DashboardService {
                 let proofInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Proof",
-                    value: secretProofFormat.proof
+                    value: secretProofFormat.proof??""
                 };
 
                 infos.push(proofInfo);
@@ -5473,52 +5664,52 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.TRANSFER:{
+            case TransactionType.TRANSFER: {
                 let transferTx = innerTransaction as TransferTransaction;
                 tempData = await this.extractNonconfirmedTransfer(transferTx, TransactionGroupType.PARTIAL);
                 let transferFormat = tempData as InnerTransferTransaction;
                 let sdas = [];
                 let infos: TxnDetails[] = [];
 
-                let shortName = this.wallet.convertAddressToName(transferFormat.recipient);
-                
-                if(shortName === transferFormat.recipient && transferFormat.recipientNamespaceName){
+                let shortName = this.wallet.convertAddressToName(transferFormat.recipient??"");
+
+                if (shortName === transferFormat.recipient && transferFormat.recipientNamespaceName) {
                     shortName = transferFormat.recipientNamespaceName;
                 }
-                else if(shortName === transferFormat.recipient){
+                else if (shortName === transferFormat.recipient) {
                     shortName = '';
                 }
 
                 let recipientInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Recipient",
-                    value: Address.createFromRawAddress(transferFormat.recipient).pretty(),
+                    value: Address.createFromRawAddress(transferFormat.recipient??"").pretty(),
                     short: shortName
                 };
 
                 infos.push(recipientInfo);
 
-                if(transferFormat.message){
+                if (transferFormat.message) {
                     let msgInfo: TxnDetails = {
                         type: MsgType.NONE,
                         label: transferFormat.messageTypeTitle,
                         value: transferFormat.messageType === MessageType.EncryptedMessage ? 'xxxxxx' : transferFormat.message,
                     };
-    
+
                     infos.push(msgInfo);
                 }
 
-                if(transferFormat.amountTransfer){
+                if (transferFormat.amountTransfer) {
                     sdas.push(`${transferFormat.amountTransfer} ${AppState.nativeToken.label}`);
                 }
 
-                for(let i = 0; i < transferFormat.sda.length; ++i){
+                for (let i = 0; i < transferFormat.sda.length; ++i) {
                     let tempSDA = transferFormat.sda[i];
                     let sdaString = '';
-                    if(tempSDA.currentAlias && tempSDA.currentAlias.length){
+                    if (tempSDA.currentAlias && tempSDA.currentAlias.length) {
                         sdaString = (tempSDA.amount + ` ${tempSDA.id} ` + `(${tempSDA.currentAlias[0].name})`);
                     }
-                      else{
+                    else {
                         sdaString = (tempSDA.amount + ' ' + tempSDA.id);
                     }
                     sdas.push(sdaString);
@@ -5535,14 +5726,14 @@ export class DashboardService {
                 };
             }
                 break;
-            
-            case TransactionType.ACCOUNT_METADATA_V2:{
+
+            case TransactionType.ACCOUNT_METADATA_V2: {
                 let accMetadataTx = innerTransaction as AccountMetadataTransaction;
                 tempData = await this.extractAccMetadata(accMetadataTx, TransactionGroupType.PARTIAL);
                 let accMetadataFormat = tempData as InnerMetadataTransaction;
                 let infos: TxnDetails[] = [];
 
-                let targetPublicAccount =  PublicAccount.createFromPublicKey(accMetadataFormat.targetPublicKey, AppState.networkType);
+                let targetPublicAccount = PublicAccount.createFromPublicKey(accMetadataFormat.targetPublicKey, AppState.networkType);
                 let targetAddress = targetPublicAccount.address.plain();
 
                 let accountInfo: TxnDetails = {
@@ -5562,7 +5753,7 @@ export class DashboardService {
 
                 infos.push(scopedMetadataKeyInfo);
 
-                if(accMetadataFormat.oldValue){
+                if (accMetadataFormat.oldValue) {
                     let oldValueInfo: TxnDetails = {
                         type: MsgType.NONE,
                         label: "Current Value",
@@ -5575,7 +5766,7 @@ export class DashboardService {
                 let newValueInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "New Value",
-                    value: accMetadataFormat.newValue
+                    value: accMetadataFormat.newValue??""
                 };
 
                 infos.push(newValueInfo);
@@ -5591,8 +5782,8 @@ export class DashboardService {
                 };
             }
                 break;
-            
-            case TransactionType.NAMESPACE_METADATA_V2:{
+
+            case TransactionType.NAMESPACE_METADATA_V2: {
                 let nsMetadataTx = innerTransaction as NamespaceMetadataTransaction;
                 tempData = await this.extractNamespaceMetadata(nsMetadataTx, TransactionGroupType.PARTIAL);
                 let namespaceMetadataFormat = tempData as InnerMetadataTransaction;
@@ -5602,7 +5793,7 @@ export class DashboardService {
                 let namespaceInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Namespace",
-                    value: namespaceMetadataFormat.targetIdName ? namespaceMetadataFormat.targetIdName: namespaceMetadataFormat.targetId
+                    value: namespaceMetadataFormat.targetIdName ? namespaceMetadataFormat.targetIdName : namespaceMetadataFormat.targetId??""
                 };
 
                 infos.push(namespaceInfo);
@@ -5615,7 +5806,7 @@ export class DashboardService {
 
                 infos.push(scopedMetadataKeyInfo);
 
-                if(namespaceMetadataFormat.oldValue){
+                if (namespaceMetadataFormat.oldValue) {
                     let oldValueInfo: TxnDetails = {
                         type: MsgType.NONE,
                         label: "Current Value",
@@ -5628,7 +5819,7 @@ export class DashboardService {
                 let newValueInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "New Value",
-                    value: namespaceMetadataFormat.newValue
+                    value: namespaceMetadataFormat.newValue??""
                 };
 
                 infos.push(newValueInfo);
@@ -5644,8 +5835,8 @@ export class DashboardService {
                 };
             }
                 break;
-            
-            case TransactionType.MOSAIC_METADATA_V2:{
+
+            case TransactionType.MOSAIC_METADATA_V2: {
                 let assetMetadataTx = innerTransaction as MosaicMetadataTransaction;
                 tempData = await this.extractAssetMetadata(assetMetadataTx, TransactionGroupType.PARTIAL);
                 let assetMetadataFormat = tempData as InnerMetadataTransaction;
@@ -5655,7 +5846,7 @@ export class DashboardService {
                 let namespaceInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "Asset",
-                    value: assetMetadataFormat.targetIdName ? assetMetadataFormat.targetIdName: assetMetadataFormat.targetId
+                    value: assetMetadataFormat.targetIdName ? assetMetadataFormat.targetIdName : assetMetadataFormat.targetId??""
                 };
 
                 infos.push(namespaceInfo);
@@ -5668,7 +5859,7 @@ export class DashboardService {
 
                 infos.push(scopedMetadataKeyInfo);
 
-                if(assetMetadataFormat.oldValue){
+                if (assetMetadataFormat.oldValue) {
                     let oldValueInfo: TxnDetails = {
                         type: MsgType.NONE,
                         label: "Current Value",
@@ -5681,7 +5872,7 @@ export class DashboardService {
                 let newValueInfo: TxnDetails = {
                     type: MsgType.NONE,
                     label: "New Value",
-                    value: assetMetadataFormat.newValue
+                    value: assetMetadataFormat.newValue??""
                 };
 
                 infos.push(newValueInfo);
@@ -5690,43 +5881,43 @@ export class DashboardService {
                     signer: assetMetadataFormat.signer,
                     signerAddressPlain: assetMetadataFormat.signerAddress,
                     signerAddressPretty: Address.createFromRawAddress(assetMetadataFormat.signerAddress).pretty(),
-                    infos:infos,
+                    infos: infos,
                     sdas: [],
                     legendType: InnerTxnLegendType.NONE,
                     typeName: assetMetadataFormat.type
                 };
             }
                 break;
-            
+
             default:
-                break;
+                return null
         }
 
         return transactionDetails;
     }
 
-    addressConvertToName(address: string){
+    addressConvertToName(address: string) {
         let name = this.wallet.convertAddressToName(address);
-        
+
         return name === address ? Address.createFromRawAddress(name).pretty() : name;
     }
 
-    publickKeyConvertToName(publicKey: string){
+    publickKeyConvertToName(publicKey: string) {
         let address = PublicAccount.createFromPublicKey(publicKey, AppState.networkType).address.plain();
         let name = this.wallet.convertAddressToName(address);
-        
+
         return name === address ? publicKey : name;
     }
 
-    static convertToExactNativeAmount(amount: number){
-        if(AppState.nativeToken.divisibility === 0){
+    static convertToExactNativeAmount(amount: number) {
+        if (AppState.nativeToken.divisibility === 0) {
             return amount;
         }
         return amount > 0 ? amount / Math.pow(10, AppState.nativeToken.divisibility) : 0;
     }
 
-    static convertToExactAmount(amount: number, divisibility: number){
-        if(divisibility === 0){
+    static convertToExactAmount(amount: number, divisibility: number) {
+        if (divisibility === 0) {
             return amount;
         }
         return amount > 0 ? amount / Math.pow(10, divisibility) : 0;

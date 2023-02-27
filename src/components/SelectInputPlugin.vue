@@ -6,33 +6,20 @@
           <span v-if="showSelectTitle" class="text-xs text-blue-400">{{ placeholder }}</span>
         </transition>
       </div>
-      <Multiselect
-        class = 'border w-8/12'
-        :placeholder="placeholder"
-        :options="options"
-        mode="single"
-        :canDeselect="canDeselect"
-        @change="makeSelection"
-        v-model="selected"
-        :noOptionsText="noOptionsText"
-        @close="closeSelection"
-        :maxHeight="maxHeight"
-        @deselect="$emit('update:modelValue', selected)"
-        @select="makeSelection;$emit('update:modelValue', selected);$emit('show-selection', selected)"
-        @clear="$emit('clear-selection')"
-        ref="selectRef"
-        :disabled="disabled"
-      />
+      <Multiselect class='border w-8/12' :placeholder="placeholder" :options="options" mode="single"
+        :canDeselect="canDeselect" @change="makeSelection" v-model="selected" :noOptionsText="noOptionsText"
+        @close="closeSelection" :maxHeight="maxHeight" @deselect="$emit('update:modelValue', selected)"
+        @select="makeSelection; $emit('update:modelValue', selected); $emit('show-selection', selected)"
+        @clear="$emit('clear-selection')" ref="selectRef" :disabled="disabled" />
       <div class="h-3 mb-2"></div>
     </div>
   </div>
 </template>
 
-<script>
-import { defineComponent, ref } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 import Multiselect from '@vueform/multiselect';
 
-export default defineComponent({
   props: [
     'placeholder',
     'errorMessage',
@@ -43,12 +30,10 @@ export default defineComponent({
     'disabled',
     'noOptionsText',
   ],
-  emits:[
+  emits: [
     'update:modelValue', 'show-selection', 'clear-selection'
   ],
-  name: 'SelectInputPlugin',
 
-  setup(p){
     const showSelectTitle = ref(false);
     const selectErr = ref(false);
     const selectModel = ref(0);
@@ -56,7 +41,7 @@ export default defineComponent({
     const maxHeight = ref(300);
     const canDeselect = ref(true);
 
-    if(p.showSelectTitleProp){
+    if (p.showSelectTitleProp) {
       showSelectTitle.value = true;
     }
 
@@ -66,51 +51,35 @@ export default defineComponent({
       selectErr.value = true;
     };
 
-    const makeSelection =() => {
+    const makeSelection = () => {
       showSelectTitle.value = true;
       selectErr.value = false;
     };
 
-    const closeSelection =() => {
-      if(!selected.value){
+    const closeSelection = () => {
+      if (!selected.value) {
         clearSelection();
       }
     };
 
-    return {
-      showSelectTitle,
-      selectErr,
-      selectModel,
-      selected,
-      clearSelection,
-      makeSelection,
-      closeSelection,
-      maxHeight,
-      canDeselect,
-    };
-  },
-
-  components: {
-    Multiselect,
-  },
 
   methods: {
-    clear: function() {
-      if(this.$refs.selectRef){
+    clear: function () {
+      if (this.$refs.selectRef) {
         this.$refs.selectRef.clear();
       }
     }
   },
 
   mounted() {
-    if(this.selectDefault){
+    if (this.selectDefault) {
       this.$refs.selectRef.select(this.selectDefault, this.options);
     }
 
     this.emitter.on('CLEAR_SELECT', this.clear)
   },
 
-  beforeUnmount(){
+  beforeUnmount() {
     this.emitter.off('CLEAR_SELECT', this.clear)
   },
   created() {
@@ -122,7 +91,7 @@ export default defineComponent({
     //   }
     // });
   }
-});
+
 </script>
 
 <style lang="scss" scoped>

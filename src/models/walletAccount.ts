@@ -1,5 +1,5 @@
 import { Account } from './account';
-import { nis1Account } from './nis1Account';
+import type { nis1Account } from './nis1Account';
 import { SimpleAccount } from './simpleAccount';
 
 export class WalletAccount extends Account{

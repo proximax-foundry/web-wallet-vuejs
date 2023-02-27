@@ -4,7 +4,6 @@ import { Label } from './label';
 import { SimpleAccount } from './simpleAccount';
 
 const walletKey = "sw";
-const walletUpdateTimeKey = "sw_updated"
 
 export class SimpleWallets {
     wallets: SimpleWallet[] = [];

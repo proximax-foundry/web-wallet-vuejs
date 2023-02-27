@@ -1,5 +1,3 @@
-const walletKey = 'sw';
-
 export class StoreProperties{
 
     storeName: string;

@@ -1,6 +1,5 @@
 import { StoreProperties } from "./storeProperties";
-import { Wallets } from "../wallets";
-import { Wallet } from "../wallet";
+
 
 const key = "ChainProfilesName";
 

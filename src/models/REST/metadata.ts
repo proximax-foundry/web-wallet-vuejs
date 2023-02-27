@@ -1,6 +1,6 @@
 import { 
     MetadataHttp, NetworkHttp,
-    MosaicId, NamespaceId, MetadataQueryParams,
+    MetadataQueryParams,
     MetadataEntry, MetadataSearch
 } from "tsjs-xpx-chain-sdk";
 import {RequestAuth} from './auth';
