@@ -282,7 +282,7 @@ import { useRouter } from "vue-router";
 import { Helper } from "@/util/typeHelper";
 import selectLanguageModal from "@/modules/home/components/selectLanguageModal.vue";
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
-import { useToast } from "@/types/useToast.d.";
+import { useToast } from "primevue/usetoast";
 import { listenerState, AnnounceType } from "@/state/listenerState";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { WalletUtils } from "@/util/walletUtils";
@@ -291,6 +291,7 @@ import { NotificationUtils } from "@/util/notificationUtils";
 import { UnitConverter } from "@/util/unitConverter";
 import { TimeUnit } from "@/models/const/timeUnit";
 import { AppStateUtils } from "@/state/utils/appStateUtils";
+import type { ToastMessageOptions } from "primevue/toast";
 
 const wideScreen = ref(false);
 const { t } = useI18n();
@@ -805,6 +806,15 @@ const createTxnHashExplorerLink = (txnHash: string) => {
   return `${networkState.currentNetworkProfile.chainExplorer.url}/${networkState.currentNetworkProfile.chainExplorer.hashRoute}/${txnHash}`;
 };
 
+interface myToastMessageOptions extends ToastMessageOptions{
+  detail2?: string,
+  detail3?: string,
+  detail4?: string,
+  url?: string
+}
+const modifiedToast = (data :myToastMessageOptions) =>{
+  return toast.add(data)
+}
 const addTxnToastMessage = (
   status: string,
   txnHash: string,
@@ -814,7 +824,7 @@ const addTxnToastMessage = (
   let txnHashExplorerLink = createTxnHashExplorerLink(txnHash);
 
   if (status === "failed") {
-    toast.add({
+    modifiedToast({
       severity: "error",
       summary: t("transaction.txError"),
       detail: "Transaction Failed with error",
@@ -825,7 +835,7 @@ const addTxnToastMessage = (
       life: 10000,
     });
   } else if (status === transactionGroupType.UNCONFIRMED) {
-    toast.add({
+    modifiedToast({
       severity: "warn",
       summary: t("transaction.txAdded", 1),
       detail: t("transaction.txUnconfirmed", 1),
@@ -836,7 +846,7 @@ const addTxnToastMessage = (
       life: 5000,
     });
   } else if (status === transactionGroupType.PARTIAL) {
-    toast.add({
+    modifiedToast({
       severity: "warn",
       summary: t("transaction.partialAdded", 1),
       detail: "Transaction Hash: ",
@@ -847,7 +857,7 @@ const addTxnToastMessage = (
     });
   } else if (status === transactionGroupType.CONFIRMED) {
     if (extraData === "swap") {
-      toast.add({
+      modifiedToast({
         severity: "success",
         summary: t("transaction.swapTx", 1),
         detail: "Transaction Hash: ",
@@ -857,7 +867,7 @@ const addTxnToastMessage = (
         life: 8000,
       });
     } else {
-      toast.add({
+      modifiedToast({
         severity: "success",
         summary: t("transaction.txConfirmed", 1),
         detail: "Transaction Hash: ",
@@ -904,7 +914,7 @@ watch(
     if (newValue > oldValue) {
       let data = AppState.txnActivityLog[newValue - 1];
 
-      toast.add({
+      modifiedToast({
         severity: "info",
         summary: "Transaction announced",
         detail: "Transaction Hash:",
@@ -922,7 +932,7 @@ watch(
     if (newValue > oldValue) {
       let data = AppState.txnCosignLog[newValue - 1];
 
-      toast.add({
+      modifiedToast({
         severity: "info",
         summary: "Transaction Cosigned",
         detail: "Transaction Hash:",

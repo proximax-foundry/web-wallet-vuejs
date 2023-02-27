@@ -1,0 +1,86 @@
+{
+    "Sirius Mainnet": {
+      "version": "0.7.1",
+      "apiNodes":[
+          "betelgeuse.xpxsirius.io"
+      ],
+      "httpPort": 3000,
+      "generationHash": "10540AD3A1BF46B1A05D8B1CF0252BC9FB2E0B53CFD748262B0CE341CEAFEB6B",
+      "network":{
+        "type": 184,
+        "currency":{
+            "name": "XPX",
+            "namespace": "prx.xpx",
+            "assetId": "",
+            "namespaceId": "bffb42a19116bdf6",
+            "divisibility": 6
+        }
+      },
+      "secured": false,
+      "chainExplorer": {
+        "url": "https://explorer.xpxsirius.io",
+        "blockRoute": "#/block",
+        "publicKeyRoute": "#/account",
+        "addressRoute": "#/account",
+        "hashRoute": "#/tx",
+        "namespaceInfoRoute": "#/namespace",
+        "assetInfoRoute": "#/asset"
+      }
+    },
+    "Sirius Testnet 1": {
+      "version": "0.0.6",
+      "apiNodes":[
+          "bctestnet3.brimstone.xpxsirius.io"
+      ],
+      "httpPort": 3000,
+      "generationHash": "56D112C98F7A7E34D1AEDC4BD01BC06CA2276DD546A93E36690B785E82439CA9",
+      "network":{
+        "type": 168,
+        "currency":{
+            "name": "XPX",
+            "namespace": "prx.xpx",
+            "assetId": "",
+            "namespaceId": "bffb42a19116bdf6",
+            "divisibility": 6
+        }
+      },
+      "secured": false,
+      "chainExplorer": {
+        "url": "https://proximax-foundry.github.io/web-explorer-vuejs",
+        "blockRoute": "#/block",
+        "publicKeyRoute": "#/account",
+        "addressRoute": "#/account",
+        "hashRoute": "#/tx",
+        "namespaceInfoRoute": "#/namespace",
+        "assetInfoRoute": "#/asset"
+      }
+    },
+    "Sirius Testnet 2": {
+      "version": "0.0.6",
+      "apiNodes":[
+          "api-2.testnet2.xpxsirius.io"
+      ],
+      "httpPort": 3000,
+      "generationHash": "56D112C98F7A7E34D1AEDC4BD01BC06CA2276DD546A93E36690B785E82439CA9",
+      "network":{
+        "type": 168,
+        "currency":{
+            "name": "XPX",
+            "namespace": "prx.xpx",
+            "assetId": "",
+            "namespaceId": "bffb42a19116bdf6",
+            "divisibility": 6
+        }
+      },
+      "secured": false,
+      "chainExplorer": {
+        "url": "https://proximax-foundry.github.io/web-explorer-vuejs",
+        "blockRoute": "#/block",
+        "publicKeyRoute": "#/account",
+        "addressRoute": "#/account",
+        "hashRoute": "#/tx",
+        "namespaceInfoRoute": "#/namespace",
+        "assetInfoRoute": "#/asset"
+      }
+    }
+}

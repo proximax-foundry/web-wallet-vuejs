@@ -1,8 +1,17 @@
 import type { ChainProfile, ChainSwapConfig } from "./stores";
 
-export class AppSetting {
+export interface ChainProfileKey {
+  [key: string]: ChainProfile
+}
+
+export interface ChainSwapKey {
+  [key: string]: ChainSwapConfig
+}
+
+export class AppSetting{
+
   backupOldWallet: boolean = true;
   theme: any;
-  chainSwap: ChainSwapConfig[] = [];
-  chainProfile: ChainProfile[] = [];
+  chainSwap: ChainSwapKey = {};
+  chainProfile: ChainProfileKey = {};
 }

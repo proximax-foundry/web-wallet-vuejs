@@ -52,7 +52,6 @@ import { Label } from "@/models/label";
 import { AssetInfo } from "@/models/assetInfo";
 import { OtherAcountType } from "@/models/const/otherAccountType";
 
-const config = require("@/../config/config.json");
 const dataPerRequest = 50;
 const assetInfoSessionKey = "assetsInfo";
 const namespaceInfoSessionKey = "namespacesInfo";
@@ -596,15 +595,8 @@ export class WalletUtils {
       networkName,
       name
     );
-    if (!wallet) {
-      if (config.debug) {
-        console.error("wallet not found", name, networkName);
-      }
-      return false;
-    }
-
-    if (config.debug) {
-      console.log("verifyWalletPassword triggered with", name, networkName);
+    if(!wallet){
+      return false
     }
 
     const account = wallet.accounts[0];

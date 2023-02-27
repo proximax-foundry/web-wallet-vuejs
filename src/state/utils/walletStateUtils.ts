@@ -131,7 +131,7 @@ class WalletSessionToken {
   static create(walletName: string, networkName: string): string {
     const salt = WalletSessionToken.genToken(10);
 
-    const verifiableToken: VerifiableToken = {
+    const verifiableToken = {
       name: walletName,
       sub: "sessionLogin",
       iat: Math.floor(Date.now() / 1000),

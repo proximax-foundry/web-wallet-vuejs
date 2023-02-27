@@ -1,0 +1,57 @@
+{
+  "localStorage": {
+    "chainNodesKey": "chain-nodes",
+    "walletKey": "sw"
+  },
+  "chainNodes": [
+    {
+      "protocol": "http",
+      "sslProtocol": "https",
+      "hostname": "bctestnet1.brimstone.xpxsirius.io",
+      "port": 3000
+    },
+    {
+      "protocol": "http",
+      "sslProtocol": "https",
+      "hostname": "bctestnet2.brimstone.xpxsirius.io",
+      "port": 3000
+    },
+    {
+      "protocol": "http",
+      "sslProtocol": "https",
+      "hostname": "bctestnet3.brimstone.xpxsirius.io",
+      "port": 3000
+    },
+    {
+      "protocol": "http",
+      "sslProtocol": "https",
+      "hostname": "bctestnet4.brimstone.xpxsirius.io",
+      "port": 3000
+    }
+  ],
+  "network": [{
+    "name": "Public Testnet",
+    "type": 168,
+    "generationHash": "56D112C98F7A7E34D1AEDC4BD01BC06CA2276DD546A93E36690B785E82439CA9",
+    "mosaicXpxInfo": {
+      "name": "XPX",
+      "mosaicId": "13bfc518e40549d7",
+      "mosaicIdUint64": [3825551831, 331334936],
+      "namespace": "prx.xpx",
+      "namespaceId": "bffb42a19116bdf6",
+      "namespaceIdUint64": [2434186742, 3220914849],
+      "divisibility": 6
+    }
+  }],
+
+  "networkType":{
+    "PRIVATE": "Private",
+    "PRIVATE_TEST": "Private Testnet"
+  },
+
+  "chainExplorer": {
+    "url": "https://bctestnetexplorer.xpxsirius.io",
+    "blockRoute": "#/result/blockHeight",
+    "publicKeyRoute": "#/result/publicKey"
+  }
+}

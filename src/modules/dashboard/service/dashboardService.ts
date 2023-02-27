@@ -126,7 +126,7 @@ import {
 } from "../model/transactions/transaction";
 import type { Account as MyAccount } from "../../../models/account";
 import { AppState } from "@/state/appState";
-import { useI18n } from "vue-i18n";
+import i18n from "@/i18n";
 
 const namespaceIdFirstCharacterString = "89ABCDEF";
 const nativeTokenNamespaceId = computed(() =>
@@ -166,7 +166,6 @@ export interface InnerTxnDetails {
   sdas: string[];
 }
 
-const { t } = useI18n({ useScope: "global" });
 
 export class DashboardService {
   wallet: Wallet;
@@ -4119,16 +4118,16 @@ export class DashboardService {
         if (messageData.type) {
           switch (messageData.type) {
             case "Swap":
-              newType = t("general.swap") + " (nis1-XPX)";
+              newType = "Swap" + " (nis1-XPX)";
               break;
             case "Swap-bsc-xpx":
-              newType = t("general.swap") + " (BSC-XPX)";
+              newType = "Swap" + " (BSC-XPX)";
               break;
             case "Swap-xpx-bsc":
-              newType = t("general.swap") + " (XPX-BSC)";
+              newType = "Swap" + " (XPX-BSC)";
               break;
             case "Swap-xpx-bsc-fees":
-              newType = t("dashboard.swapFee") + " (XPX-BSC)";
+              newType = "Swap Fee" + " (XPX-BSC)";
               break;
             default:
               break;
