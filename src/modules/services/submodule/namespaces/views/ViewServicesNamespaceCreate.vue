@@ -394,13 +394,9 @@ export default {
     watch(isNotCosigner, (n) => {
       if(n){
         disabledPassword.value = true;
-        disabledDuration.value = true;
-        disableNamespaceName.value = true;
         disableSelectNamespace.value = true;
       }else{
         disabledPassword.value = false;
-        disabledDuration.value = false;
-        disableNamespaceName.value = false;
         disableSelectNamespace.value = false;
       }
     });
@@ -487,21 +483,15 @@ export default {
         cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
         if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
           disabledPassword.value = true;
-          disabledDuration.value = true;
-          disableNamespaceName.value = true;
           disableSelectNamespace.value = true;
           cosignerBalanceInsufficient.value = true;
         } else {
           disabledPassword.value = false;
-          disabledDuration.value = false;
-          disableNamespaceName.value = false;
           disableSelectNamespace.value = false;
           cosignerBalanceInsufficient.value = false;
         }
       } else {
         disabledPassword.value = true;
-        disabledDuration.value = true;
-        disableNamespaceName.value = true;
         disableSelectNamespace.value = true;
       }
     }
@@ -513,28 +503,20 @@ export default {
         cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
         if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
           disabledPassword.value = true;
-          disabledDuration.value = true;
-          disableNamespaceName.value = true;
           disableSelectNamespace.value = true;
           cosignerBalanceInsufficient.value = true;
         } else {
           disabledPassword.value = false;
-          disabledDuration.value = false;
-          disableNamespaceName.value = false;
           disableSelectNamespace.value = false;
           cosignerBalanceInsufficient.value = false;
         }
       } else {
         disabledPassword.value = true;
-        disabledDuration.value = true;
-        disableNamespaceName.value = true;
         disableSelectNamespace.value = true;
         cosignerBalanceInsufficient.value = true;
       }
     } else{
         disabledPassword.value = false;
-        disabledDuration.value = false;
-        disableNamespaceName.value = false;
         disableSelectNamespace.value = false;
         cosignerBalanceInsufficient.value = false;
     }
@@ -547,14 +529,10 @@ export default {
       ) {
         cosignerBalanceInsufficient.value = true;
         disabledPassword.value = true;
-        disabledDuration.value = true;
-        disableNamespaceName.value = true;
         disableSelectNamespace.value = true;
       } else {
         cosignerBalanceInsufficient.value = false;
         disabledPassword.value = false;
-        disabledDuration.value = false;
-        disableNamespaceName.value = false;
         disableSelectNamespace.value = false;
       }
       
