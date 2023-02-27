@@ -1,164 +1,298 @@
 <template>
   <header class="z-10 fixed w-full">
-    <div class="header-height flex items-stretch lg:pr-2 bg-gray-50 filter drop-shadow-xl" v-if="loginStatus">
-      <div class="w-12 lg:w-16 flex flex-row items-center left-gray-line lg:hidden ">
-        <div class="text-center w-full h-6" @mouseover="hoverOverNavigation" @mouseout="hoverOutNavigation">
-          <img src="@/assets/img/icon-menu.svg" class="h-4 w-4 opacity-80 hover:opacity-100 inline-block cursor-pointer"
-            @click="toggleSidebar">
+    <div
+      class="header-height flex items-stretch lg:pr-2 bg-gray-50 filter drop-shadow-xl"
+      v-if="loginStatus"
+    >
+      <div
+        class="w-12 lg:w-16 flex flex-row items-center left-gray-line lg:hidden"
+      >
+        <div
+          class="text-center w-full h-6"
+          @mouseover="hoverOverNavigation"
+          @mouseout="hoverOutNavigation"
+        >
+          <img
+            src="@/assets/img/icon-menu.svg"
+            class="h-4 w-4 opacity-80 hover:opacity-100 inline-block cursor-pointer"
+            @click="toggleSidebar"
+          />
         </div>
       </div>
-      <div class=" flex justify-center items-center lg:bg-navy-primary logo-header">
-        <router-link :to="loginStatus ? { name: 'ViewDashboard' } : { name: 'Home' }">
-          <img src="@/assets/img/sirius-logo-whitetext.svg" class="w-24 -ml-4 tsm:w-40 hidden lg:inline-block">
+      <div
+        class="flex justify-center items-center lg:bg-navy-primary logo-header"
+      >
+        <router-link
+          :to="loginStatus ? { name: 'ViewDashboard' } : { name: 'Home' }"
+        >
+          <img
+            src="@/assets/img/sirius-logo-whitetext.svg"
+            class="w-24 -ml-4 tsm:w-40 hidden lg:inline-block"
+          />
         </router-link>
       </div>
-      <div class=" flex items-center ml-auto mr-28 lg:mr-auto lg:ml-10 logo-header">
+      <div
+        class="flex items-center ml-auto mr-28 lg:mr-auto lg:ml-10 logo-header"
+      >
         <div class="hidden lg:block">Wallet {{ walletName }}</div>
-        <router-link :to="loginStatus ? { name: 'ViewDashboard' } : { name: 'Home' }">
-          <img src="@/assets/img/sirius-logo-blacktext.svg" class="w-40 lg:hidden">
+        <router-link
+          :to="loginStatus ? { name: 'ViewDashboard' } : { name: 'Home' }"
+        >
+          <img
+            src="@/assets/img/sirius-logo-blacktext.svg"
+            class="w-40 lg:hidden"
+          />
         </router-link>
       </div>
 
       <div class="flex flex-row ml-auto h-full">
-        <div class="hidden lg:flex w-16 flex-row items-center left-gray-line relative">
-          <div class="text-center w-full h-7 cursor-pointer" @mouseover="setHoverSupportToTrue"
-            @mouseout="setHoverSupportToFalse">
-            <img src="@/assets/img/icon-support-contact.svg"
-              class="opacity-80 hover:opacity-100 inline-block h-4 w-4 lg:h-5 lg:w-5">
+        <div
+          class="hidden lg:flex w-16 flex-row items-center left-gray-line relative"
+        >
+          <div
+            class="text-center w-full h-7 cursor-pointer"
+            @mouseover="setHoverSupportToTrue"
+            @mouseout="setHoverSupportToFalse"
+          >
+            <img
+              src="@/assets/img/icon-support-contact.svg"
+              class="opacity-80 hover:opacity-100 inline-block h-4 w-4 lg:h-5 lg:w-5"
+            />
           </div>
           <div
             class="absolute z-20 w-96 text-left bg-gray-50 shadow-sm rounded-md right-0 p-2 text-tsm transition duration-200 block"
-            style="top: 60px" v-if="isShowSupport" @mouseover="isShowSupport = true; isHoverSupportPanel = true;"
-            @mouseout="hideSupportPanel">
-            <div class="font-bold p-2 text-txs uppercase">{{ $t('home.beginnerGuide') }}</div>
+            style="top: 60px"
+            v-if="isShowSupport"
+            @mouseover="
+              isShowSupport = true;
+              isHoverSupportPanel = true;
+            "
+            @mouseout="hideSupportPanel"
+          >
+            <div class="font-bold p-2 text-txs uppercase">
+              {{ $t("home.beginnerGuide") }}
+            </div>
             <div class="grid grid-cols-2">
               <div>
                 <div class="p-2">
-                  <a class="mb-2 block text-blue-primary" href="https://bcdocs.xpxsirius.io/"
-                    target=_new>{{ $t('home.gettingStarted') }}<img src="@/assets/img/icon-open_in_new.svg"
-                      class="inline-block absolute -top-1 ml-2"></a>
-                  <div class="text-txs h-10">{{ $t('home.allInfo') }}</div>
+                  <a
+                    class="mb-2 block text-blue-primary"
+                    href="https://bcdocs.xpxsirius.io/"
+                    target="_new"
+                    >{{ $t("home.gettingStarted")
+                    }}<img
+                      src="@/assets/img/icon-open_in_new.svg"
+                      class="inline-block absolute -top-1 ml-2"
+                  /></a>
+                  <div class="text-txs h-10">{{ $t("home.allInfo") }}</div>
                 </div>
                 <div class="p-2">
-                  <a class="mb-2 block text-blue-primary"
+                  <a
+                    class="mb-2 block text-blue-primary"
                     href="https://bcdocs.xpxsirius.io/docs/getting-started/what-is-proximax-sirius-chain/"
-                    target=_new>{{ $t('home.siriusChain') }}<img src="@/assets/img/icon-open_in_new.svg"
-                      class="inline-block absolute -top-1 ml-2"></a>
-                  <div class="text-txs h-10">{{ $t('home.siriusChainTitle') }}</div>
+                    target="_new"
+                    >{{ $t("home.siriusChain")
+                    }}<img
+                      src="@/assets/img/icon-open_in_new.svg"
+                      class="inline-block absolute -top-1 ml-2"
+                  /></a>
+                  <div class="text-txs h-10">
+                    {{ $t("home.siriusChainTitle") }}
+                  </div>
                 </div>
               </div>
               <div>
                 <div class="p-2">
-                  <a class="mb-2 block text-blue-primary"
+                  <a
+                    class="mb-2 block text-blue-primary"
                     href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/"
-                    target=_new>{{ $t('general.namespaceQues') }}<img src="@/assets/img/icon-open_in_new.svg"
-                      class="inline-block absolute -top-1 ml-2"></a>
-                  <div class="text-txs h-10">{{ $t('home.namespaceAns') }}</div>
+                    target="_new"
+                    >{{ $t("general.namespaceQues")
+                    }}<img
+                      src="@/assets/img/icon-open_in_new.svg"
+                      class="inline-block absolute -top-1 ml-2"
+                  /></a>
+                  <div class="text-txs h-10">{{ $t("home.namespaceAns") }}</div>
                 </div>
                 <div class="p-2">
-                  <a class="mb-2 block text-blue-primary"
+                  <a
+                    class="mb-2 block text-blue-primary"
                     href="https://bcdocs.xpxsirius.io/docs/built-in-features/mosaic/"
-                    target=_new>{{ $t('general.assetQues') }}<img src="@/assets/img/icon-open_in_new.svg"
-                      class="inline-block absolute -top-1 ml-2"></a>
-                  <div class="text-txs h-10">{{ $t('home.assetAns') }}</div>
+                    target="_new"
+                    >{{ $t("general.assetQues")
+                    }}<img
+                      src="@/assets/img/icon-open_in_new.svg"
+                      class="inline-block absolute -top-1 ml-2"
+                  /></a>
+                  <div class="text-txs h-10">{{ $t("home.assetAns") }}</div>
                 </div>
               </div>
             </div>
             <div class="w-full p-2 pt-3 border-t border-gray-100">
-              <a href="https://t.me/proximaxhelpdesk" target=_new
-                class="text-xs text-blue-primary">{{ $t('home.contactTeam') }}</a>
+              <a
+                href="https://t.me/proximaxhelpdesk"
+                target="_new"
+                class="text-xs text-blue-primary"
+                >{{ $t("home.contactTeam") }}</a
+              >
             </div>
           </div>
         </div>
         <div class="w-12 lg:w-16 flex flex-row items-center left-gray-line">
-          <router-link :to="{ name: 'ViewNotification' }" class="text-center w-full h-7 relative">
-            <span class="flex h-5 w-5 items-center justify-center absolute notification_counter" v-if="isNewNotification">
-              <span class="animate-ping absolute inline-flex rounded-full bg-orange-primary opacity-75 h-4 w-4"></span>
-              <span class="relative inline-flex rounded-full h-3 w-3 bg-orange-primary"></span>
+          <router-link
+            :to="{ name: 'ViewNotification' }"
+            class="text-center w-full h-7 relative"
+          >
+            <span
+              class="flex h-5 w-5 items-center justify-center absolute notification_counter"
+              v-if="isNewNotification"
+            >
+              <span
+                class="animate-ping absolute inline-flex rounded-full bg-orange-primary opacity-75 h-4 w-4"
+              ></span>
+              <span
+                class="relative inline-flex rounded-full h-3 w-3 bg-orange-primary"
+              ></span>
             </span>
-            <span class="flex items-center justify-center absolute notification_counter" v-else>
-              <span v-if="newNotificationCount > 0"
-                class="relative inline-flex rounded-full z-20 h-4 w-4 bg-orange-primary text-xxs text-white items-center justify-center">{{
-                  newNotificationCount }}</span>
+            <span
+              class="flex items-center justify-center absolute notification_counter"
+              v-else
+            >
+              <span
+                v-if="newNotificationCount > 0"
+                class="relative inline-flex rounded-full z-20 h-4 w-4 bg-orange-primary text-xxs text-white items-center justify-center"
+                >{{ newNotificationCount }}</span
+              >
             </span>
             <div class="mt-2 h-3 w-3 lg:mt-1 lg:h-5 lg:w-5 inline-block">
-              <img src="@/assets/img/icon-bell.svg" class="opacity-80 hover:opacity-100">
+              <img
+                src="@/assets/img/icon-bell.svg"
+                class="opacity-80 hover:opacity-100"
+              />
             </div>
           </router-link>
         </div>
-        <div class="hidden lg:flex w-16 lg:flex-row items-center left-gray-line">
+        <div
+          class="hidden lg:flex w-16 lg:flex-row items-center left-gray-line"
+        >
           <div class="text-center w-full h-4 lg:h-6">
-            <router-link :to="{ name: 'ViewSettings' }" class="h-7 w-4 lg:h-6 lg:w-6 inline-block">
-              <img src="@/assets/img/icon-setting.svg" class="opacity-80 hover:opacity-100 transition-all duration-300">
+            <router-link
+              :to="{ name: 'ViewSettings' }"
+              class="h-7 w-4 lg:h-6 lg:w-6 inline-block"
+            >
+              <img
+                src="@/assets/img/icon-setting.svg"
+                class="opacity-80 hover:opacity-100 transition-all duration-300"
+              />
             </router-link>
           </div>
         </div>
-        <div class="hidden w-40 pl-3 text-center lg:flex items-center left-gray-line">
+        <div
+          class="hidden w-40 pl-3 text-center lg:flex items-center left-gray-line"
+        >
           <div class="lg:flex lg:items-center">
-            <img src="@/assets/img/icon-testnet-block.svg" class="w-3 lg:w-7 block lg:inline-block"
-              :title="chainAPIEndpoint" v-if="wideScreen">
-            <div class="block lg:inline-block text-txs text-white text-left lg:ml-2">
-              <div class="text-xxs lg:text-tsm text-navy-primary">{{ networkState.chainNetworkName }}</div>
+            <img
+              src="@/assets/img/icon-testnet-block.svg"
+              class="w-3 lg:w-7 block lg:inline-block"
+              :title="chainAPIEndpoint"
+              v-if="wideScreen"
+            />
+            <div
+              class="block lg:inline-block text-txs text-white text-left lg:ml-2"
+            >
+              <div class="text-xxs lg:text-tsm text-navy-primary">
+                {{ networkState.chainNetworkName }}
+              </div>
             </div>
           </div>
         </div>
-
       </div>
     </div>
 
-    <div class="container mx-auto header-height flex items-stretch bg-navy-primary" v-else>
+    <div
+      class="container mx-auto header-height flex items-stretch bg-navy-primary"
+      v-else
+    >
       <div class="flex-none self-center flex items-end ml-2 lg:ml-0">
-        <router-link :to="loginStatus ? { name: 'ViewDashboard' } : { name: 'Home' }"><img
-            src="@/assets/img/sirius-logo-whitetext.svg" class="w-24 lg:w-40"></router-link>
+        <router-link
+          :to="loginStatus ? { name: 'ViewDashboard' } : { name: 'Home' }"
+          ><img
+            src="@/assets/img/sirius-logo-whitetext.svg"
+            class="w-24 lg:w-40"
+        /></router-link>
       </div>
       <div class="flex-grow"></div>
       <div class="flex-none self-center header-menu">
         <div class="w-20 inline-block ml-2 sm:ml-0" v-if="wideScreen">
-          <router-link :to="{ name: 'Home' }"
-            class="font-normal hover:font-bold inline-block text-white">{{ $t('home.home') }}</router-link>
+          <router-link
+            :to="{ name: 'Home' }"
+            class="font-normal hover:font-bold inline-block text-white"
+            >{{ $t("home.home") }}</router-link
+          >
         </div>
         <div class="w-20 inline-block" v-if="wideScreen">
-          <router-link :to="{ name: 'ViewWallets' }"
-            class="hover:font-bold text-white">{{ $t('general.wallet', 2) }}</router-link>
+          <router-link
+            :to="{ name: 'ViewWallets' }"
+            class="hover:font-bold text-white"
+            >{{ $t("general.wallet", 2) }}</router-link
+          >
         </div>
         <div class="text-center inline-block text-white">
           <selectLanguageModal :loginStatus="loginStatus" />
         </div>
       </div>
     </div>
-    <div v-if="!wideScreen && !loginStatus" class="py-1 text-center" style="background: #484A69">
+    <div
+      v-if="!wideScreen && !loginStatus"
+      class="py-1 text-center"
+      style="background: #484a69"
+    >
       <div class="w-20 text-center inline-block text-gray-300">
-        <router-link :to="{ name: 'Home' }"
-          class="font-normal hover:font-bold inline-block text-xs sm:text-sm">{{ $t('home.home') }}</router-link>
+        <router-link
+          :to="{ name: 'Home' }"
+          class="font-normal hover:font-bold inline-block text-xs sm:text-sm"
+          >{{ $t("home.home") }}</router-link
+        >
       </div>
       <div class="w-20 text-center inline-block text-gray-300">
-        <router-link :to="{ name: 'ViewWallets' }"
-          class="hover:font-bold text-xs sm:text-sm">{{ $t('general.wallet', 2) }}</router-link>
+        <router-link
+          :to="{ name: 'ViewWallets' }"
+          class="hover:font-bold text-xs sm:text-sm"
+          >{{ $t("general.wallet", 2) }}</router-link
+        >
       </div>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, inject, ref, watch, onUnmounted, onMounted } from "vue";
+import {
+  computed,
+  getCurrentInstance,
+  inject,
+  ref,
+  watch,
+  onUnmounted,
+  onMounted,
+} from "vue";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { AppState } from "@/state/appState";
 import { useRouter } from "vue-router";
-import { Helper } from '@/util/typeHelper';
-import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue'
+import { Helper } from "@/util/typeHelper";
+import selectLanguageModal from "@/modules/home/components/selectLanguageModal.vue";
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { useToast } from "@/types/useToast.d.";
 import { listenerState, AnnounceType } from "@/state/listenerState";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { WalletUtils } from "@/util/walletUtils";
-import { useI18n } from 'vue-i18n'
-import { NotificationUtils } from '@/util/notificationUtils';
-import { UnitConverter } from '@/util/unitConverter';
-import { TimeUnit } from '@/models/const/timeUnit';
+import { useI18n } from "vue-i18n";
+import { NotificationUtils } from "@/util/notificationUtils";
+import { UnitConverter } from "@/util/unitConverter";
+import { TimeUnit } from "@/models/const/timeUnit";
 import { AppStateUtils } from "@/state/utils/appStateUtils";
 
-const wideScreen = ref(false)
+const wideScreen = ref(false);
 const { t } = useI18n();
 const toast = useToast();
 const internalInstance = getCurrentInstance();
@@ -180,7 +314,7 @@ const isHoverSupportPanel = ref(false);
 const setHoverSupportToTrue = () => {
   isHoverSupport.value = true;
   isShowSupport.value = true;
-}
+};
 const setHoverSupportToFalse = () => {
   isHoverSupport.value = false;
   setTimeout(() => {
@@ -188,7 +322,7 @@ const setHoverSupportToFalse = () => {
       isShowSupport.value = false;
     }
   }, 100);
-}
+};
 const hideSupportPanel = () => {
   isHoverSupportPanel.value = false;
   setTimeout(() => {
@@ -196,10 +330,11 @@ const hideSupportPanel = () => {
       isShowSupport.value = false;
     }
   }, 100);
-}
+};
 
-const navigationSideBar :{isOpen : boolean, inNavi: boolean} | undefined = inject('navigationSideBar');
-const chainAPIEndpoint = computed(() => AppState.nodeFullURL)
+const navigationSideBar: { isOpen: boolean; inNavi: boolean } | undefined =
+  inject("navigationSideBar");
+const chainAPIEndpoint = computed(() => AppState.nodeFullURL);
 const loginStatus = computed(() => walletState.isLogin);
 
 const doLogout = () => {
@@ -215,12 +350,14 @@ const doLogout = () => {
     if (doTxnCheckingInterval.value) {
       clearInterval(doTxnCheckingInterval.value);
     }
-  } catch (error) {
+  } catch (error) {}
+};
 
-  }
-}
-
-const walletName = computed(() => walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.name : '')
+const walletName = computed(() =>
+  walletState.currentLoggedInWallet
+    ? walletState.currentLoggedInWallet.name
+    : ""
+);
 const logout = () => {
   doLogout();
   WalletStateUtils.doLogout();
@@ -230,24 +367,38 @@ const logout = () => {
 };
 
 const doLogin = async () => {
-  if (loginStatus.value && AppState.isReady && walletState.currentLoggedInWallet && networkState.currentNetworkProfile) {
-    await WalletUtils.refreshAllAccountDetails(walletState.currentLoggedInWallet, networkState.currentNetworkProfile);
+  if (
+    loginStatus.value &&
+    AppState.isReady &&
+    walletState.currentLoggedInWallet &&
+    networkState.currentNetworkProfile
+  ) {
+    await WalletUtils.refreshAllAccountDetails(
+      walletState.currentLoggedInWallet,
+      networkState.currentNetworkProfile
+    );
     doGetNotification();
     //connectListener();
-  }
-  else if (!loginStatus.value || !AppState.isReady || !walletState.currentLoggedInWallet || !networkState.currentNetworkProfile) {
+  } else if (
+    !loginStatus.value ||
+    !AppState.isReady ||
+    !walletState.currentLoggedInWallet ||
+    !networkState.currentNetworkProfile
+  ) {
     setTimeout(doLogin, 100);
   }
-}
+};
 
 const doGetNotification = async () => {
-  if (loginStatus.value && AppState.isReady && notificationLoading.value === false) {
+  if (
+    loginStatus.value &&
+    AppState.isReady &&
+    notificationLoading.value === false
+  ) {
     if (notificationTimeout.value) {
       try {
         clearTimeout(notificationTimeout.value);
-      } catch (error) {
-
-      }
+      } catch (error) {}
     }
     notificationLoading.value = true;
     let notification = await NotificationUtils.getNotification();
@@ -256,49 +407,57 @@ const doGetNotification = async () => {
 
     notificationLoading.value = false;
     notificationTimeout.value = setTimeout(doGetNotification, 90000); // 1.5 minutes- 90 seconds
-  }
-  else if (loginStatus.value && !AppState.isReady) {
+  } else if (loginStatus.value && !AppState.isReady) {
     setTimeout(doGetNotification, 100);
   }
-}
+};
 
 const targetBlockSeconds = computed(() => {
   if (!networkState.currentNetworkProfileConfig) {
-    return 0
+    return 0;
   }
-  return UnitConverter.configReturn(networkState.currentNetworkProfileConfig.blockGenerationTargetTime, TimeUnit.SECOND);
-})
+  return UnitConverter.configReturn(
+    networkState.currentNetworkProfileConfig.blockGenerationTargetTime,
+    TimeUnit.SECOND
+  );
+});
 
 const doConfirmedTxnChecking = async () => {
-
   if (loginStatus.value && AppState.isReady) {
-
-    doConfirmedTxnCheckingInterval.value = setInterval(WalletUtils.checkConfirmedTxnChecking, 60000); // 1 minute
-  }
-  else if (loginStatus.value && !AppState.isReady) {
+    doConfirmedTxnCheckingInterval.value = setInterval(
+      WalletUtils.checkConfirmedTxnChecking,
+      60000
+    ); // 1 minute
+  } else if (loginStatus.value && !AppState.isReady) {
     setTimeout(doConfirmedTxnChecking, 100);
   }
-}
+};
 
 const doRecheckAssetsNames = async () => {
-
   if (loginStatus.value && AppState.isReady) {
-
-    doRecheckAssetsNamesInterval.value = setInterval(WalletUtils.recheckAssetsNames, 60000 * 5); // 5 minute
-  }
-  else if (loginStatus.value && !AppState.isReady) {
+    doRecheckAssetsNamesInterval.value = setInterval(
+      WalletUtils.recheckAssetsNames,
+      60000 * 5
+    ); // 5 minute
+  } else if (loginStatus.value && !AppState.isReady) {
     setTimeout(doRecheckAssetsNames, 100);
   }
-}
+};
 
 const checkTxnStatus = async () => {
   if (!AppState.chainAPI) {
-    return
+    return;
   }
   let endStatuses = ["failed", transactionGroupType.CONFIRMED];
-  let txnsHash1 = AppState.txnActivityLog.filter(x => x.checkedNum < 10 && !endStatuses.includes(x.status)).map(x => x.txnHash);
-  let txnsHash2 = AppState.txnCosignLog.filter(x => x.checkedNum < 10 && !endStatuses.includes(x.status)).map(x => x.txnHash);
-  let txnsHash3 = AppState.txnSwapLog.filter(x => x.checkedNum < 10 && !endStatuses.includes(x.status)).map(x => x.txnHash);
+  let txnsHash1 = AppState.txnActivityLog
+    .filter((x) => x.checkedNum < 10 && !endStatuses.includes(x.status))
+    .map((x) => x.txnHash);
+  let txnsHash2 = AppState.txnCosignLog
+    .filter((x) => x.checkedNum < 10 && !endStatuses.includes(x.status))
+    .map((x) => x.txnHash);
+  let txnsHash3 = AppState.txnSwapLog
+    .filter((x) => x.checkedNum < 10 && !endStatuses.includes(x.status))
+    .map((x) => x.txnHash);
   let allTransasctionHash = txnsHash1.concat(txnsHash2, txnsHash3);
 
   if (allTransasctionHash.length === 0) {
@@ -318,7 +477,9 @@ const checkTxnStatus = async () => {
     let requestData = allTransasctionHash.slice(startIndex, endIndex);
 
     try {
-      requests.push(AppState.chainAPI.transactionAPI.getTransactionsStatuses(requestData));
+      requests.push(
+        AppState.chainAPI.transactionAPI.getTransactionsStatuses(requestData)
+      );
     } catch (error) {
       continue;
     }
@@ -333,70 +494,93 @@ const checkTxnStatus = async () => {
   let displayedTxn: string[] = [];
 
   for (let i = 0; i < transactionStatuses.length; ++i) {
-    const transactionStatus = transactionStatuses[i]
+    const transactionStatus = transactionStatuses[i];
     if (!transactionStatus.hash) {
-      continue
+      continue;
     }
     txnsHashFound.push(transactionStatus.hash);
 
     if (txnsHash1.includes(transactionStatus.hash)) {
-      let txnActivity = AppState.txnActivityLog.find(x => x.txnHash === transactionStatus.hash);
+      let txnActivity = AppState.txnActivityLog.find(
+        (x) => x.txnHash === transactionStatus.hash
+      );
       if (!txnActivity) {
-        continue
+        continue;
       }
-      if (txnActivity.status !== transactionStatus.group && transactionStatus.group) {
+      if (
+        txnActivity.status !== transactionStatus.group &&
+        transactionStatus.group
+      ) {
         txnActivity.status = transactionStatus.group;
 
         if (txnActivity.status === "failed") {
           txnActivity.statusMsg = transactionStatus.status;
-        }
-        else if (txnActivity.status === transactionGroupType.CONFIRMED) {
+        } else if (txnActivity.status === transactionGroupType.CONFIRMED) {
           txnHashesConfirmed.push(txnActivity.txnHash);
           listenerState.allConfirmedTransactionsHash.push(txnActivity.txnHash);
         }
 
         displayedTxn.push(transactionStatus.hash);
-        addTxnToastMessage(txnActivity.status, transactionStatus.hash, txnActivity.statusMsg);
+        addTxnToastMessage(
+          txnActivity.status,
+          transactionStatus.hash,
+          txnActivity.statusMsg
+        );
       }
-    }
-    else if (txnsHash2.includes(transactionStatus.hash)) {
-      let txnCosign = AppState.txnCosignLog.find(x => x.txnHash === transactionStatus.hash);
+    } else if (txnsHash2.includes(transactionStatus.hash)) {
+      let txnCosign = AppState.txnCosignLog.find(
+        (x) => x.txnHash === transactionStatus.hash
+      );
       if (!txnCosign) {
-        continue
+        continue;
       }
-      if (txnCosign.status !== transactionStatus.group && transactionStatus.group) {
+      if (
+        txnCosign.status !== transactionStatus.group &&
+        transactionStatus.group
+      ) {
         txnCosign.status = transactionStatus.group;
 
         if (txnCosign.status === "failed") {
           txnCosign.statusMsg = transactionStatus.status;
-        }
-        else if (txnCosign.status === transactionGroupType.CONFIRMED) {
+        } else if (txnCosign.status === transactionGroupType.CONFIRMED) {
           txnHashesConfirmed.push(txnCosign.txnHash);
           listenerState.allConfirmedTransactionsHash.push(txnCosign.txnHash);
         }
 
         if (!displayedTxn.includes(transactionStatus.hash)) {
-          addTxnToastMessage(txnCosign.status, transactionStatus.hash, txnCosign.statusMsg);
+          addTxnToastMessage(
+            txnCosign.status,
+            transactionStatus.hash,
+            txnCosign.statusMsg
+          );
         }
       }
-    }
-    else {
-      let txnSwap = AppState.txnSwapLog.find(x => x.txnHash === transactionStatus.hash);
+    } else {
+      let txnSwap = AppState.txnSwapLog.find(
+        (x) => x.txnHash === transactionStatus.hash
+      );
       if (!txnSwap) {
-        continue
+        continue;
       }
-      if (txnSwap.status !== transactionStatus.group && transactionStatus.group) {
+      if (
+        txnSwap.status !== transactionStatus.group &&
+        transactionStatus.group
+      ) {
         txnSwap.status = transactionStatus.group;
 
         if (txnSwap.status === "failed") {
           txnSwap.statusMsg = transactionStatus.status;
-        }
-        else if (txnSwap.status === transactionGroupType.CONFIRMED) {
+        } else if (txnSwap.status === transactionGroupType.CONFIRMED) {
           txnHashesConfirmed.push(txnSwap.txnHash);
           listenerState.allConfirmedTransactionsHash.push(txnSwap.txnHash);
         }
 
-        addTxnToastMessage(txnSwap.status, transactionStatus.hash, txnSwap.statusMsg, "swap");
+        addTxnToastMessage(
+          txnSwap.status,
+          transactionStatus.hash,
+          txnSwap.statusMsg,
+          "swap"
+        );
       }
     }
   }
@@ -406,94 +590,101 @@ const checkTxnStatus = async () => {
   }
   WalletUtils.transactionConfirmed(txnHashesConfirmed);
 
-  let txnsHashNotFound = allTransasctionHash.filter(x => !txnsHashFound.includes(x));
+  let txnsHashNotFound = allTransasctionHash.filter(
+    (x) => !txnsHashFound.includes(x)
+  );
 
   for (let i = 0; i < txnsHashNotFound.length; ++i) {
     if (txnsHash1.includes(txnsHashNotFound[i])) {
-      let txnActivity = AppState.txnActivityLog.find(x => x.txnHash === txnsHashNotFound[i]);
-      if(txnActivity){
+      let txnActivity = AppState.txnActivityLog.find(
+        (x) => x.txnHash === txnsHashNotFound[i]
+      );
+      if (txnActivity) {
         txnActivity.checkedNum = txnActivity.checkedNum + 1;
       }
-    }
-    else if (txnsHash2.includes(txnsHashNotFound[i])) {
-      let txnCosign = AppState.txnCosignLog.find(x => x.txnHash === txnsHashNotFound[i]);
-      if(txnCosign){
+    } else if (txnsHash2.includes(txnsHashNotFound[i])) {
+      let txnCosign = AppState.txnCosignLog.find(
+        (x) => x.txnHash === txnsHashNotFound[i]
+      );
+      if (txnCosign) {
         txnCosign.checkedNum = txnCosign.checkedNum + 1;
       }
-    }
-    else {
-      let txnSwap = AppState.txnSwapLog.find(x => x.txnHash === txnsHashNotFound[i]);
-      if(txnSwap){
+    } else {
+      let txnSwap = AppState.txnSwapLog.find(
+        (x) => x.txnHash === txnsHashNotFound[i]
+      );
+      if (txnSwap) {
         txnSwap.checkedNum = txnSwap.checkedNum + 1;
       }
     }
   }
-}
+};
 
 const doTxnChecking = async () => {
   if (loginStatus.value && AppState.isReady) {
-
-    doTxnCheckingInterval.value = setInterval(checkTxnStatus, targetBlockSeconds.value * 1000);
-  }
-  else if (loginStatus.value && !AppState.isReady) {
+    doTxnCheckingInterval.value = setInterval(
+      checkTxnStatus,
+      targetBlockSeconds.value * 1000
+    );
+  } else if (loginStatus.value && !AppState.isReady) {
     setTimeout(doTxnChecking, 100);
   }
-}
+};
 
 const toggleSidebar = () => {
-  if(navigationSideBar){
+  if (navigationSideBar) {
     navigationSideBar.isOpen = !navigationSideBar.isOpen;
   }
-}
+};
 
 const hoverOverNavigation = () => {
-  if(navigationSideBar){
+  if (navigationSideBar) {
     navigationSideBar.inNavi = true;
   }
-}
+};
 
 const hoverOutNavigation = () => {
-  if(navigationSideBar){
+  if (navigationSideBar) {
     navigationSideBar.inNavi = false;
   }
-}
+};
 
 /*  doLogin();
  doTxnChecking();
  doConfirmedTxnChecking();
  doRecheckAssetsNames();
 */
-watch(() => loginStatus.value, async (newValue) => {
-  if (newValue) {
-    doLogin();
-    doTxnChecking();
-    doConfirmedTxnChecking();
-    doRecheckAssetsNames();
-    emitter.emit('LOGIN');
+watch(
+  () => loginStatus.value,
+  async (newValue) => {
+    if (newValue) {
+      doLogin();
+      doTxnChecking();
+      doConfirmedTxnChecking();
+      doRecheckAssetsNames();
+      emitter.emit("LOGIN");
+    } else {
+      logout();
+      // terminateListener();
+      emitter.emit("LOGOUT");
+    }
   }
-  else {
-    logout();
-    // terminateListener();
-    emitter.emit('LOGOUT');
-  }
-})
-
+);
 
 const totalPendingNum = ref(0);
 
-
 const doAutoAnnounce = async () => {
-  if (!AppState.isReady ) {
+  if (!AppState.isReady) {
     setTimeout(doAutoAnnounce, 1000);
   }
-  if(!AppState.chainAPI){
-    return
+  if (!AppState.chainAPI) {
+    return;
   }
 
-  let currentBlockHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight();
+  let currentBlockHeight =
+    await AppState.chainAPI.chainAPI.getBlockchainHeight();
 
   for (let i = 0; i < listenerState.autoAnnounceSignedTransaction.length; ++i) {
-
     let letAnnouce = false;
 
     let currentAutoAnnounceTx = listenerState.autoAnnounceSignedTransaction[i];
@@ -502,23 +693,39 @@ const doAutoAnnounce = async () => {
       continue;
     }
 
-    if (currentAutoAnnounceTx.announceAtBlock && currentBlockHeight >= currentAutoAnnounceTx.announceAtBlock) {
+    if (
+      currentAutoAnnounceTx.announceAtBlock &&
+      currentBlockHeight >= currentAutoAnnounceTx.announceAtBlock
+    ) {
       letAnnouce = true;
-    }
-    else if (currentAutoAnnounceTx.hashAnnounceBlock && currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock) {
-      if (currentBlockHeight > currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock + currentAutoAnnounceTx.hashAnnounceBlock.annouceAfterBlockNum) {
+    } else if (
+      currentAutoAnnounceTx.hashAnnounceBlock &&
+      currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock
+    ) {
+      if (
+        currentBlockHeight >
+        currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock +
+          currentAutoAnnounceTx.hashAnnounceBlock.annouceAfterBlockNum
+      ) {
         letAnnouce = true;
       }
-    }
-    else if (currentAutoAnnounceTx.hashAnnounceBlock) {
+    } else if (currentAutoAnnounceTx.hashAnnounceBlock) {
       try {
-        let txnStatusInfo = await AppState.chainAPI.transactionAPI.getTransactionStatus(currentAutoAnnounceTx.hashAnnounceBlock.trackHash);
+        let txnStatusInfo =
+          await AppState.chainAPI.transactionAPI.getTransactionStatus(
+            currentAutoAnnounceTx.hashAnnounceBlock.trackHash
+          );
 
         if (txnStatusInfo.group === transactionGroupType.CONFIRMED) {
           currentAutoAnnounceTx.hashAnnounceBlock.hashFound = true;
-          currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock = txnStatusInfo.height?txnStatusInfo.height.compact():0
+          currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock =
+            txnStatusInfo.height ? txnStatusInfo.height.compact() : 0;
 
-          if (currentBlockHeight > currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock + currentAutoAnnounceTx.hashAnnounceBlock.annouceAfterBlockNum) {
+          if (
+            currentBlockHeight >
+            currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock +
+              currentAutoAnnounceTx.hashAnnounceBlock.annouceAfterBlockNum
+          ) {
             letAnnouce = true;
           }
         }
@@ -529,150 +736,155 @@ const doAutoAnnounce = async () => {
 
     if (letAnnouce) {
       if (currentAutoAnnounceTx.type === AnnounceType.NORMAL) {
-        await AppState.chainAPI.transactionAPI.announce(currentAutoAnnounceTx.signedTransaction);
-      }
-      else {
-        await AppState.chainAPI.transactionAPI.announceAggregateBonded(currentAutoAnnounceTx.signedTransaction);
+        await AppState.chainAPI.transactionAPI.announce(
+          currentAutoAnnounceTx.signedTransaction
+        );
+      } else {
+        await AppState.chainAPI.transactionAPI.announceAggregateBonded(
+          currentAutoAnnounceTx.signedTransaction
+        );
       }
 
       currentAutoAnnounceTx.announced = true;
     }
   }
 
-  let remainingTransactionsToAnnounce = listenerState.autoAnnounceSignedTransaction.filter(
-    (autoTx) => !autoTx.announced
-  );
+  let remainingTransactionsToAnnounce =
+    listenerState.autoAnnounceSignedTransaction.filter(
+      (autoTx) => !autoTx.announced
+    );
 
   listenerState.autoAnnounceSignedTransaction = remainingTransactionsToAnnounce;
 
   if (listenerState.autoAnnounceSignedTransaction.length) {
     setTimeout(doAutoAnnounce, 15000);
-  }
-  else {
+  } else {
     AppState.isPendingTxnAnnounce = false;
   }
-}
+};
 
-watch(() => AppState.isPendingTxnAnnounce, async (newValue) => {
-  if (newValue) {
-    setTimeout(doAutoAnnounce, 5000);
-  }
-  else {
-    toast.removeGroup("tr-wait");
-  }
-}, { immediate: true });
-
-watch(() => listenerState.autoAnnounceSignedTransaction, (newValue) => {
-  let newLength = newValue.length;
-
-  if (newLength !== totalPendingNum.value) {
-    toast.removeGroup("tr-wait");
-
-    if (newLength) {
-      let singularPluralText = newLength > 1 ? "s" : "";
-      toast.add(
-        {
-          severity: 'info',
-          summary: newLength + " " + t('transaction.inQueue', newLength),
-          detail: t('transaction.dontRefresh'),
-          group: 'tr-wait'
-        }
-      );
+watch(
+  () => AppState.isPendingTxnAnnounce,
+  async (newValue) => {
+    if (newValue) {
+      setTimeout(doAutoAnnounce, 5000);
+    } else {
+      toast.removeGroup("tr-wait");
     }
-  }
+  },
+  { immediate: true }
+);
 
-  totalPendingNum.value = newLength;
-}, { immediate: true });
+watch(
+  () => listenerState.autoAnnounceSignedTransaction,
+  (newValue) => {
+    let newLength = newValue.length;
 
-const createTxnHashExplorerLink = (txnHash :string) => {
-  if(!networkState.currentNetworkProfile){
-    return ''
+    if (newLength !== totalPendingNum.value) {
+      toast.removeGroup("tr-wait");
+
+      if (newLength) {
+        toast.add({
+          severity: "info",
+          summary: newLength + " " + t("transaction.inQueue", newLength),
+          detail: t("transaction.dontRefresh"),
+          group: "tr-wait",
+        });
+      }
+    }
+
+    totalPendingNum.value = newLength;
+  },
+  { immediate: true }
+);
+
+const createTxnHashExplorerLink = (txnHash: string) => {
+  if (!networkState.currentNetworkProfile) {
+    return "";
   }
   return `${networkState.currentNetworkProfile.chainExplorer.url}/${networkState.currentNetworkProfile.chainExplorer.hashRoute}/${txnHash}`;
-}
+};
 
-const addTxnToastMessage = (status :string, txnHash :string, statusMessage :string, extraData = "") => {
+const addTxnToastMessage = (
+  status: string,
+  txnHash: string,
+  statusMessage: string,
+  extraData = ""
+) => {
   let txnHashExplorerLink = createTxnHashExplorerLink(txnHash);
 
   if (status === "failed") {
     toast.add({
-      severity: 'error',
-      summary: t('transaction.txError'),
+      severity: "error",
+      summary: t("transaction.txError"),
       detail: "Transaction Failed with error",
       detail2: "Transaction Hash: ",
       detail3: txnHash.slice(0, 20) + "...",
       detail4: statusMessage,
-      group: 'br-custom',
-      life: 10000
+      group: "br-custom",
+      life: 10000,
     });
-  }
-  else if (status === transactionGroupType.UNCONFIRMED) {
-    toast.add(
-      {
-        severity: 'warn',
-        summary: t('transaction.txAdded', 1),
-        detail: t('transaction.txUnconfirmed', 1),
-        detail2: "Transaction Hash: ",
-        detail3: txnHash.slice(0, 20) + "...",
-        url: txnHashExplorerLink,
-        group: 'br-custom',
-        life: 5000
-      }
-    );
-  }
-  else if (status === transactionGroupType.PARTIAL) {
+  } else if (status === transactionGroupType.UNCONFIRMED) {
     toast.add({
-      severity: 'warn',
-      summary: t('transaction.partialAdded', 1),
+      severity: "warn",
+      summary: t("transaction.txAdded", 1),
+      detail: t("transaction.txUnconfirmed", 1),
+      detail2: "Transaction Hash: ",
+      detail3: txnHash.slice(0, 20) + "...",
+      url: txnHashExplorerLink,
+      group: "br-custom",
+      life: 5000,
+    });
+  } else if (status === transactionGroupType.PARTIAL) {
+    toast.add({
+      severity: "warn",
+      summary: t("transaction.partialAdded", 1),
       detail: "Transaction Hash: ",
       detail3: txnHash.slice(0, 20) + "...",
       url: txnHashExplorerLink,
-      group: 'br-custom',
-      life: 6000
+      group: "br-custom",
+      life: 6000,
     });
-  }
-  else if (status === transactionGroupType.CONFIRMED) {
+  } else if (status === transactionGroupType.CONFIRMED) {
     if (extraData === "swap") {
       toast.add({
-        severity: 'success',
-        summary: t('transaction.swapTx', 1),
+        severity: "success",
+        summary: t("transaction.swapTx", 1),
         detail: "Transaction Hash: ",
         detail3: txnHash.slice(0, 20) + "...",
         url: txnHashExplorerLink,
-        group: 'br-custom',
-        life: 8000
+        group: "br-custom",
+        life: 8000,
       });
-    }
-    else {
-      toast.add(
-        {
-          severity: 'success',
-          summary: t('transaction.txConfirmed', 1),
-          detail: "Transaction Hash: ",
-          detail3: txnHash.slice(0, 20) + "...",
-          url: txnHashExplorerLink,
-          group: 'br-custom',
-          life: 8000
-        });
+    } else {
+      toast.add({
+        severity: "success",
+        summary: t("transaction.txConfirmed", 1),
+        detail: "Transaction Hash: ",
+        detail3: txnHash.slice(0, 20) + "...",
+        url: txnHashExplorerLink,
+        group: "br-custom",
+        life: 8000,
+      });
       let verifySwitch = sessionStorage.getItem("soundSetting");
       if (verifySwitch === "true") {
-        beep()
+        beep();
       }
     }
   }
-}
+};
 
 function beep() {
-  return new Promise<void>((resolve, reject)  => {
+  return new Promise<void>((resolve, reject) => {
     /*volume = volume || 100;*/
 
     try {
-      let sound = new Audio(require('@/assets/audio/ding.ogg'));
+      let sound = new Audio(require("@/assets/audio/ding.ogg"));
 
       // Set volume
       /*sound.volume = volume / 100;*/
 
-      sound.onended = ()=> {
+      sound.onended = () => {
         resolve();
       };
 
@@ -686,44 +898,42 @@ function beep() {
 let txnActivityLogLength = computed(() => AppState.txnActivityLogNum);
 let txnCosignLogLength = computed(() => AppState.txnCosignLogNum);
 
-watch(() => txnActivityLogLength.value, (newValue, oldValue) => {
+watch(
+  () => txnActivityLogLength.value,
+  (newValue, oldValue) => {
+    if (newValue > oldValue) {
+      let data = AppState.txnActivityLog[newValue - 1];
 
-  if (newValue > oldValue) {
-
-    let data = AppState.txnActivityLog[newValue - 1];
-
-    toast.add(
-      {
-        severity: 'info',
+      toast.add({
+        severity: "info",
         summary: "Transaction announced",
         detail: "Transaction Hash:",
         detail3: data.txnHash.slice(0, 20) + "...",
-        group: 'br-custom',
-        life: 5000
-      }
-    );
+        group: "br-custom",
+        life: 5000,
+      });
+    }
   }
-});
+);
 
-watch(() => txnCosignLogLength.value, (newValue, oldValue) => {
+watch(
+  () => txnCosignLogLength.value,
+  (newValue, oldValue) => {
+    if (newValue > oldValue) {
+      let data = AppState.txnCosignLog[newValue - 1];
 
-  if (newValue > oldValue) {
-
-    let data = AppState.txnCosignLog[newValue - 1];
-
-    toast.add(
-      {
-        severity: 'info',
+      toast.add({
+        severity: "info",
         summary: "Transaction Cosigned",
         detail: "Transaction Hash:",
         detail3: data.txnHash.slice(0, 20) + "...",
         url: createTxnHashExplorerLink(data.txnHash),
-        group: 'br-custom',
-        life: 5000
-      }
-    );
+        group: "br-custom",
+        life: 5000,
+      });
+    }
   }
-});
+);
 
 emitter.on("VIEW_NOTIFICATION", async () => {
   doGetNotification();
@@ -735,16 +945,14 @@ const headerMenuHandler = () => {
   } else {
     wideScreen.value = true;
   }
-}
+};
 onUnmounted(() => {
   window.removeEventListener("resize", headerMenuHandler);
-})
+});
 onMounted(() => {
-  headerMenuHandler()
+  headerMenuHandler();
   window.addEventListener("resize", headerMenuHandler);
-})
-
-
+});
 </script>
 
 <style lang="scss">
@@ -759,7 +967,7 @@ onMounted(() => {
 }
 
 .gray-bar {
-  background: #3F4058;
+  background: #3f4058;
 }
 
 .lang-mobile-placement {
@@ -846,20 +1054,21 @@ onMounted(() => {
   padding: 3px 5px;
   padding-right: 0px;
   border: 1px solid #ced4da;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+    box-shadow 0.2s;
   appearance: none;
   border-radius: 3px;
 }
 
 .p-inputtext:enabled:hover {
-  border-color: #2196F3;
+  border-color: #2196f3;
 }
 
 .p-inputtext:enabled:focus {
   outline: 0 none;
   outline-offset: 0;
   box-shadow: 0 0 0 0.2rem #a6d5fa;
-  border-color: #2196F3;
+  border-color: #2196f3;
 }
 
 .p-inputtext.p-invalid.p-component {
@@ -885,7 +1094,8 @@ onMounted(() => {
 .p-dropdown {
   background: #ffffff;
   border-bottom: 1px solid #ced4da;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+    box-shadow 0.2s;
   border-radius: 3px;
   width: 110px;
   margin-top: 10px;
@@ -926,7 +1136,8 @@ onMounted(() => {
   color: #495057;
   border: 0 none;
   border-radius: 3px;
-  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+    0 1px 10px 0 rgba(0, 0, 0, 0.12);
 }
 
 .p-dropdown-panel .p-dropdown-header {
@@ -970,7 +1181,7 @@ onMounted(() => {
 
 .p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-disabled):hover {
   color: #495057;
-  background: #E3F2FD;
+  background: #e3f2fd;
 }
 
 .p-dropdown-panel .p-dropdown-items .p-dropdown-item-group {
@@ -1032,4 +1243,5 @@ onMounted(() => {
     right: 15px;
     top: -2px;
   }
-}</style>
+}
+</style>

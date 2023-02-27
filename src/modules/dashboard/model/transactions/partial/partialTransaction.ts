@@ -1,20 +1,22 @@
-import { CommonTransaction } from "../commonTransaction"
+import { CommonTransaction } from "../commonTransaction";
 
-export class PartialTransaction extends CommonTransaction{
+export class PartialTransaction extends CommonTransaction {
+  cosignedPublickKey: string[] = [];
+  allCosignerPublicKey: string[] = [];
+  pendingCosignPublicKey: string[] = [];
+  groupType: string = "partial";
 
-    cosignedPublickKey: string[] = [];
-    allCosignerPublicKey: string[] = [];
-    pendingCosignPublicKey: string[] = [];
-    groupType: string = "partial";
+  constructor(txnHash: string) {
+    super(txnHash);
+  }
 
-    constructor(txnHash: string){
-        super(txnHash);
-    }
+  static convertToSubClass(
+    subclass: typeof PartialTransaction,
+    instance: PartialTransaction
+  ) {
+    const newTxn = new subclass(instance.hash);
 
-    static convertToSubClass(subclass: typeof PartialTransaction, instance: PartialTransaction){
-        let newTxn = new subclass(instance.hash);
-
-        Object.assign(newTxn, instance);
-        return newTxn;
-    }
+    Object.assign(newTxn, instance);
+    return newTxn;
+  }
 }

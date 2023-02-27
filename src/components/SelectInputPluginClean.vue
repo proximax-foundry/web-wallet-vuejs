@@ -1,36 +1,57 @@
 <template>
   <div>
-    <div class="border border-gray-200 select selectPlugin py-1 relative rounded-md"
-      :class="`${!placeholder ? 'pt-2' : ''}`">
-      <div class="uppercase text-gray-400 font-light text-txs text-left mb-2 pl-2" v-if="placeholder">{{ placeholder }}
+    <div
+      class="border border-gray-200 select selectPlugin py-1 relative rounded-md"
+      :class="`${!placeholder ? 'pt-2' : ''}`"
+    >
+      <div
+        class="uppercase text-gray-400 font-light text-txs text-left mb-2 pl-2"
+        v-if="placeholder"
+      >
+        {{ placeholder }}
       </div>
-      <img src="@/assets/img/icon-arrow-down.svg" class="inline-block float-right absolute right-0" style="top: 4px;">
-      <Multiselect class='border' :placeholder="placeholder" :options="options" mode="single" :canDeselect="canDeselect"
-        v-model="selected" :noOptionsText="noOptionsText" @close="closeSelection" :maxHeight="maxHeight"
+      <img
+        src="@/assets/img/icon-arrow-down.svg"
+        class="inline-block float-right absolute right-0"
+        style="top: 4px"
+      />
+      <Multiselect
+        class="border"
+        :placeholder="placeholder"
+        :options="options"
+        mode="single"
+        :canDeselect="canDeselect"
+        v-model="selected"
+        :noOptionsText="noOptionsText"
+        @close="closeSelection"
+        :maxHeight="maxHeight"
         @deselect="$emit('update:modelValue', selected)"
-        @select="$emit('update:modelValue', selected); $emit('show-selection', selected)"
-        @clear="$emit('clear-selection')" :disabled="disabled" />
+        @select="
+          $emit('update:modelValue', selected);
+          $emit('show-selection', selected);
+        "
+        @clear="$emit('clear-selection')"
+        :disabled="disabled"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import Multiselect from '@vueform/multiselect';
+import { ref } from "vue";
+import Multiselect from "@vueform/multiselect";
 
-const p = defineProps({
+defineProps({
   placeholder: String,
   errorMessage: String,
   options: Array,
   modelValue: String,
   selectDefault: String,
   disabled: Boolean,
-  noOptionsText: String
-})
+  noOptionsText: String,
+});
 
-defineEmits([
-  'update:modelValue', 'show-selection', 'clear-selection'
-])
+defineEmits(["update:modelValue", "show-selection", "clear-selection"]);
 
 const maxHeight = ref(300);
 const canDeselect = ref(false);
@@ -41,17 +62,11 @@ const clearSelection = () => {
   selectModel.value = 0;
 };
 
-const closeSelection =() => {
-  if(!selected.value){
+const closeSelection = () => {
+  if (!selected.value) {
     clearSelection();
   }
 };
-
-
-
-
-
-
 </script>
 
 <style lang="scss" scoped>
@@ -72,7 +87,7 @@ const closeSelection =() => {
     margin-top: 4px;
   }
 
-  >.border {
+  > .border {
     border-width: 0px !important;
   }
 }

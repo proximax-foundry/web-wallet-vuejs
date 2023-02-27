@@ -1,7 +1,6 @@
-import type{  MosaicId } from "tsjs-xpx-chain-sdk";
+import type { MosaicId } from "tsjs-xpx-chain-sdk";
 
-export class DashboardTip{
-    
+export class DashboardTip {
   tipType: string = "";
   displayValue: string = "";
   value: string = "";
@@ -13,24 +12,20 @@ export class DashboardTip{
   value3: string = "";
   valueType3: string = "";
 
-  constructor(tipType: string){
+  constructor(tipType: string) {
     this.tipType = tipType;
   }
 }
 
-export class RowDashboardTip{
-    
+export class RowDashboardTip {
   rowTips: DashboardTip[] = [];
-
 }
 
-export class DashboardTipList{
-    
+export class DashboardTipList {
   list: RowDashboardTip[] = [];
-  
 }
 
-export enum TipType{
+export enum TipType {
   ADDRESS = "address",
   ASSET = "asset",
   NAMESPACE_STR = "namespace",
@@ -60,16 +55,16 @@ export enum TipType{
   MSG_NAMESPACE = "msgNamespace",
   LINK_PUBLICKEY = "linkPublicKey",
   UNLINK_PUBLICKEY = "unlinkPublicKey",
-  AMOUNT_ASSET_VIA_NAMESPACE = "amountAssetViaNamespace"
+  AMOUNT_ASSET_VIA_NAMESPACE = "amountAssetViaNamespace",
 }
 
-export enum AmountType{
+export enum AmountType {
   RAW = "raw",
-  EXACT = "exact"
+  EXACT = "exact",
 }
 
-export class OtherAsset{
-  asset: string = '';
+export class OtherAsset {
+  asset: string = "";
   amount: number = 0;
   assetId: MosaicId | null = null;
   isLinked: boolean = false;

@@ -1,11 +1,10 @@
 import { InnerTransaction } from "./innerTxn";
 
-export class InnerLinkTransaction extends InnerTransaction{
+export class InnerLinkTransaction extends InnerTransaction {
+  remotePublicKey: string = "";
+  action: string = "";
 
-    remotePublicKey: string = "";
-    action: string = "";
-  
-    constructor(){
-      super();
-    }
+  constructor() {
+    super();
+  }
 }

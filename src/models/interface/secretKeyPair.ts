@@ -1,4 +1,4 @@
-export interface SecretKeyPair{
-    password: string,
-    privateKey: string
+export interface SecretKeyPair {
+  password: string;
+  privateKey: string;
 }

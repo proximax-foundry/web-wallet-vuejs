@@ -1,33 +1,45 @@
 import {
-    TransactionType,
-    NamespaceId, Address,
-    TransactionGroupType, TransactionHash,
-    EmptyMessage,
-    Account, PublicAccount,
-    Mosaic, UInt64, TransferTransaction, AggregateTransaction, MosaicId, type InnerTransaction, SignedTransaction
-} from 'tsjs-xpx-chain-sdk';
+  TransactionType,
+  NamespaceId,
+  Address,
+  TransactionGroupType,
+  TransactionHash,
+  EmptyMessage,
+  Account,
+  PublicAccount,
+  Mosaic,
+  UInt64,
+  TransferTransaction,
+  AggregateTransaction,
+  MosaicId,
+  type InnerTransaction,
+  SignedTransaction,
+} from "tsjs-xpx-chain-sdk";
 import { bignumber, multiply } from "mathjs";
-import type { SimpleSDA } from './sda'
+import type { SimpleSDA } from "./sda";
 import { ChainConfigUtils } from "../util/chainConfigUtils";
 import { networkState } from "../state/networkState";
 import { AppState } from "../state/appState";
 
 export interface DistributeListInterface {
-    publicKeyOrAddress: string
-    amount: number
+  publicKeyOrAddress: string;
+  amount: number;
 }
 
-let knownToken = [{
+const knownToken = [
+  {
     namespace: "prx.xpx",
-    name: "XPX"
-},
-{
+    name: "XPX",
+  },
+  {
     namespace: "prx.metx",
-    name: "METX"
-}, {
+    name: "METX",
+  },
+  {
     namespace: "xarcade.xar",
-    name: "XAR"
-}];
+    name: "XAR",
+  },
+];
 
 // let api = "https://api-2.testnet2.xpxsirius.io";
 // let explorerURL = "https://bctestnetexplorer.xpxsirius.io";
@@ -38,47 +50,65 @@ let knownToken = [{
 // let transactionBuilder = new TransactionBuilderFactory()
 
 export class Sirius {
+  static createAccount(privateKey: string) {
+    return Account.createFromPrivateKey(privateKey, AppState.networkType);
+  }
 
-    static createAccount(privateKey: string) {
-        return Account.createFromPrivateKey(privateKey, AppState.networkType);
+  static async scanAsset(publicKey: string): Promise<SimpleSDA[]> {
+    const distributorPublicAccount = PublicAccount.createFromPublicKey(
+      publicKey,
+      AppState.networkType
+    );
+
+    try {
+      const accountInfo = await AppState.chainAPI!.accountAPI.getAccountInfo(
+        distributorPublicAccount.address
+      );
+
+      const assetIds: MosaicId[] = accountInfo.mosaics.map(
+        (asset) => asset.id as MosaicId
+      );
+
+      const assetsInfo = await AppState.chainAPI!.assetAPI.getMosaics(assetIds);
+      const assetsNames = await AppState.chainAPI!.assetAPI.getMosaicsNames(
+        assetIds
+      );
+
+      const assetList = accountInfo.mosaics.map((assetData) => {
+        const assetIdHex = assetData.id.toHex();
+        const divisibility = assetsInfo.find(
+          (x) => x.mosaicId.toHex() === assetIdHex
+        )!.divisibility;
+        const assetNames = assetsNames.find(
+          (x) => x.mosaicId.toHex() === assetIdHex
+        )!.names;
+        const assetName = assetNames.length ? assetNames[0].name : "";
+        const knownAsset = knownToken.find((x) => x.namespace === assetName);
+        const asset: SimpleSDA = {
+          id: assetIdHex,
+          amount: divisibility
+            ? assetData.amount.compact() / Math.pow(10, divisibility)
+            : assetData.amount.compact(),
+          divisibility: divisibility,
+          namespaceName: assetName,
+        };
+
+        asset.label = knownAsset
+          ? knownAsset.name
+          : asset.namespaceName
+          ? asset.namespaceName
+          : asset.id.toUpperCase();
+
+        return asset;
+      });
+
+      return assetList;
+    } catch (error) {
+      return [];
     }
+  }
 
-    static async scanAsset(publicKey: string): Promise<SimpleSDA[]> {
-        let distributorPublicAccount = PublicAccount.createFromPublicKey(publicKey, AppState.networkType);
-
-        try {
-            let accountInfo = await AppState.chainAPI!.accountAPI.getAccountInfo(distributorPublicAccount.address);
-
-            let assetIds: MosaicId[] = accountInfo.mosaics.map(asset => asset.id as MosaicId);
-
-            let assetsInfo = await AppState.chainAPI!.assetAPI.getMosaics(assetIds);
-            let assetsNames = await AppState.chainAPI!.assetAPI.getMosaicsNames(assetIds);
-
-            let assetList = accountInfo.mosaics.map(assetData => {
-                let assetIdHex = assetData.id.toHex();
-                let divisibility = assetsInfo.find(x => x.mosaicId.toHex() === assetIdHex)!.divisibility;
-                let assetNames = assetsNames.find(x => x.mosaicId.toHex() === assetIdHex)!.names;
-                let assetName = assetNames.length ? assetNames[0].name : "";
-                let knownAsset = knownToken.find(x => x.namespace === assetName);
-                let asset: SimpleSDA = {
-                    id: assetIdHex,
-                    amount: divisibility ? assetData.amount.compact() / Math.pow(10, divisibility) : assetData.amount.compact(),
-                    divisibility: divisibility,
-                    namespaceName: assetName
-                };
-
-                asset.label = knownAsset ? knownAsset.name : (asset.namespaceName ? asset.namespaceName : asset.id.toUpperCase());
-
-                return asset;
-            });
-
-            return assetList;
-        } catch (error) {
-            return [];
-        }
-    }
-
-    /*
+  /*
         static async getBlockHeight() {
             try {
                let queryParams = new TransactionQueryParams();
@@ -141,152 +171,202 @@ export class Sirius {
         }
         }
         */
-    static createDistributeAggregateTransactions(distributorPublicKey: string, distributionList: DistributeListInterface[], aggregateNum: number, sda: SimpleSDA): AggregateTransaction[] {
+  static createDistributeAggregateTransactions(
+    distributorPublicKey: string,
+    distributionList: DistributeListInterface[],
+    aggregateNum: number,
+    sda: SimpleSDA
+  ): AggregateTransaction[] {
+    const distributorPublicAccount = PublicAccount.createFromPublicKey(
+      distributorPublicKey,
+      AppState.networkType
+    );
+    const txns: AggregateTransaction[] = [];
 
-        let distributorPublicAccount = PublicAccount.createFromPublicKey(distributorPublicKey, AppState.networkType);
-        let txns: AggregateTransaction[] = [];
+    const totalTxnCount = Math.ceil(distributionList.length / aggregateNum);
+    // let transferList = [];
+    const transferTxns: TransferTransaction[] = [];
+    const atomicMultiplier = Math.pow(10, sda.divisibility);
+    const assetId = sda.namespaceName
+      ? new NamespaceId(sda.namespaceName)
+      : new MosaicId(sda.id);
 
-        let totalTxnCount = Math.ceil(distributionList.length / aggregateNum);
-        // let transferList = [];
-        let transferTxns: TransferTransaction[] = [];
-        let atomicMultiplier = Math.pow(10, sda.divisibility);
-        let assetId = sda.namespaceName ? new NamespaceId(sda.namespaceName) : new MosaicId(sda.id);
+    for (let i = 0; i < distributionList.length; ++i) {
+      const atomicRaw = multiply(
+        bignumber(distributionList[i].amount),
+        atomicMultiplier
+      );
+      const atomicAmount = Number(atomicRaw.toString());
 
-        for (let i = 0; i < distributionList.length; ++i) {
+      let recipient: Address;
 
-            let atomicRaw = multiply(bignumber(distributionList[i].amount), atomicMultiplier);
-            let atomicAmount = Number(atomicRaw.toString());
-
-            let recipient: Address;
-
-            if (distributionList[i].publicKeyOrAddress.length === 64) {
-                let publicAccount = PublicAccount.createFromPublicKey(distributionList[i].publicKeyOrAddress, AppState.networkType);
-                recipient = publicAccount.address;
-            }
-            else {
-                recipient = Address.createFromRawAddress(distributionList[i].publicKeyOrAddress);
-            }
-
-            let mosaicToSend = new Mosaic(assetId, UInt64.fromUint(atomicAmount))
-            let transferTxn = AppState.buildTxn!.transfer(recipient, EmptyMessage, [mosaicToSend]);
-
-            transferTxns.push(transferTxn);
-        }
-
-        for (let i = 0; i < totalTxnCount; ++i) {
-
-            let startIndex = i * aggregateNum;
-            let endIndex = (i + 1) * aggregateNum;
-
-            let transferTxnRange = transferTxns.slice(startIndex, endIndex);
-
-            let innerTxn: InnerTransaction[] = [];
-
-            for (let x = 0; x < transferTxnRange.length; ++x) {
-                innerTxn.push(transferTxnRange[x].toAggregate(distributorPublicAccount));
-            }
-
-            let aggregateTransaction = AppState.buildTxn!.aggregateBonded(innerTxn);
-
-            txns.push(aggregateTransaction);
-        }
-
-        return txns;
-    }
-
-    static getLockFundTransactionFee(): number {
-        // const nativeTokenNamespace = AppState.nativeToken.fullNamespace
-        const lockingAtomicFee = networkState.currentNetworkProfileConfig!.lockedFundsPerAggregate ?? 0;
-        let transactionHash = new TransactionHash("0".repeat(64), TransactionType.AGGREGATE_BONDED);
-        let lockFundTxn = AppState.buildTxn!.hashLock(
-            new Mosaic(new NamespaceId("prx.xpx"), UInt64.fromUint(lockingAtomicFee)),
-            UInt64.fromUint(ChainConfigUtils.getABTMaxSafeDuration()),
-            transactionHash
+      if (distributionList[i].publicKeyOrAddress.length === 64) {
+        const publicAccount = PublicAccount.createFromPublicKey(
+          distributionList[i].publicKeyOrAddress,
+          AppState.networkType
         );
+        recipient = publicAccount.address;
+      } else {
+        recipient = Address.createFromRawAddress(
+          distributionList[i].publicKeyOrAddress
+        );
+      }
 
-        return lockFundTxn.maxFee.compact();
+      const mosaicToSend = new Mosaic(assetId, UInt64.fromUint(atomicAmount));
+      const transferTxn = AppState.buildTxn!.transfer(recipient, EmptyMessage, [
+        mosaicToSend,
+      ]);
+
+      transferTxns.push(transferTxn);
     }
 
-    static async signAllAbtAndAnnounce(aggregateBondedTxns: AggregateTransaction[], account: Account): Promise<string[]> {
+    for (let i = 0; i < totalTxnCount; ++i) {
+      const startIndex = i * aggregateNum;
+      const endIndex = (i + 1) * aggregateNum;
 
-        interface TxnConfirmationBlock {
-            txnHash: string
-            block: number | null
-        }
+      const transferTxnRange = transferTxns.slice(startIndex, endIndex);
 
-        interface TxnLockingSet {
-            txnHash: string
-            hashLockHash: string
-        }
+      const innerTxn: InnerTransaction[] = [];
 
-        const lockingAtomicFee = networkState.currentNetworkProfileConfig!.lockedFundsPerAggregate!;
-        let signedABTs: SignedTransaction[] = [];
-        let signedHashLockTxns: SignedTransaction[] = [];
-        let txnsConfirmationBlock: TxnConfirmationBlock[] = [];
-        let txnLockingSet: TxnLockingSet[] = [];
+      for (let x = 0; x < transferTxnRange.length; ++x) {
+        innerTxn.push(
+          transferTxnRange[x].toAggregate(distributorPublicAccount)
+        );
+      }
 
-        for (let i = 0; i < aggregateBondedTxns.length; ++i) {
+      const aggregateTransaction = AppState.buildTxn!.aggregateBonded(innerTxn);
 
-            let signedABT = account.sign(aggregateBondedTxns[i], networkState.currentNetworkProfile!.generationHash);
-            signedABTs.push(signedABT);
+      txns.push(aggregateTransaction);
+    }
 
-            let lockFundTxn = AppState.buildTxn!.hashLock(
-                new Mosaic(new NamespaceId(AppState.nativeToken.fullNamespace.trim()), UInt64.fromUint(lockingAtomicFee)),
-                UInt64.fromUint(ChainConfigUtils.getABTMaxSafeDuration()),
-                signedABT
+    return txns;
+  }
+
+  static getLockFundTransactionFee(): number {
+    // const nativeTokenNamespace = AppState.nativeToken.fullNamespace
+    const lockingAtomicFee =
+      networkState.currentNetworkProfileConfig!.lockedFundsPerAggregate ?? 0;
+    const transactionHash = new TransactionHash(
+      "0".repeat(64),
+      TransactionType.AGGREGATE_BONDED
+    );
+    const lockFundTxn = AppState.buildTxn!.hashLock(
+      new Mosaic(new NamespaceId("prx.xpx"), UInt64.fromUint(lockingAtomicFee)),
+      UInt64.fromUint(ChainConfigUtils.getABTMaxSafeDuration()),
+      transactionHash
+    );
+
+    return lockFundTxn.maxFee.compact();
+  }
+
+  static async signAllAbtAndAnnounce(
+    aggregateBondedTxns: AggregateTransaction[],
+    account: Account
+  ): Promise<string[]> {
+    interface TxnConfirmationBlock {
+      txnHash: string;
+      block: number | null;
+    }
+
+    interface TxnLockingSet {
+      txnHash: string;
+      hashLockHash: string;
+    }
+
+    const lockingAtomicFee =
+      networkState.currentNetworkProfileConfig!.lockedFundsPerAggregate!;
+    const signedABTs: SignedTransaction[] = [];
+    const signedHashLockTxns: SignedTransaction[] = [];
+    const txnsConfirmationBlock: TxnConfirmationBlock[] = [];
+    const txnLockingSet: TxnLockingSet[] = [];
+
+    for (let i = 0; i < aggregateBondedTxns.length; ++i) {
+      const signedABT = account.sign(
+        aggregateBondedTxns[i],
+        networkState.currentNetworkProfile!.generationHash
+      );
+      signedABTs.push(signedABT);
+
+      const lockFundTxn = AppState.buildTxn!.hashLock(
+        new Mosaic(
+          new NamespaceId(AppState.nativeToken.fullNamespace.trim()),
+          UInt64.fromUint(lockingAtomicFee)
+        ),
+        UInt64.fromUint(ChainConfigUtils.getABTMaxSafeDuration()),
+        signedABT
+      );
+      const signedHashLockTxn = account.sign(
+        lockFundTxn,
+        networkState.currentNetworkProfile!.generationHash
+      );
+      signedHashLockTxns.push(signedHashLockTxn);
+
+      txnsConfirmationBlock.push({ txnHash: signedABT.hash, block: null });
+      txnsConfirmationBlock.push({
+        txnHash: signedHashLockTxn.hash,
+        block: null,
+      });
+      txnLockingSet.push({
+        txnHash: signedABT.hash,
+        hashLockHash: signedHashLockTxn.hash,
+      });
+    }
+
+    let allABTAnnounced = false;
+
+    for (let i = 0; i < signedHashLockTxns.length; ++i) {
+      await AppState.chainAPI!.transactionAPI.announce(signedHashLockTxns[i]);
+    }
+
+    console.log("All LockHash Txn announced, pending ABT announcement...");
+
+    const announcedABTsHash: string[] = [];
+
+    while (!allABTAnnounced) {
+      await new Promise((r) => setTimeout(r, 15000));
+      console.log("Checking LockHash Txn confirmation...");
+
+      const latestBlock =
+        await AppState.chainAPI!.chainAPI.getBlockchainHeight();
+      const blockHeight = latestBlock;
+      const transactionWaiting = signedABTs.filter(
+        (x) => !announcedABTsHash.includes(x.hash)
+      );
+
+      for (let i = 0; i < transactionWaiting.length; ++i) {
+        const lockHashTxnHash = txnLockingSet.find(
+          (x) => x.txnHash === transactionWaiting[i].hash
+        )!.hashLockHash;
+        const txnStatus =
+          await AppState.chainAPI!.transactionAPI.getTransactionStatus(
+            lockHashTxnHash
+          );
+
+        if (txnStatus.group === TransactionGroupType.CONFIRMED) {
+          const confirmedAtHeight = txnStatus.height!.compact();
+          const blockConfirmation = txnsConfirmationBlock.find(
+            (x) => x.txnHash === lockHashTxnHash
+          );
+          blockConfirmation!.block = confirmedAtHeight;
+
+          if (blockHeight >= blockConfirmation!.block + 1) {
+            await AppState.chainAPI!.transactionAPI.announceAggregateBonded(
+              transactionWaiting[i]
             );
-            let signedHashLockTxn = account.sign(lockFundTxn, networkState.currentNetworkProfile!.generationHash);
-            signedHashLockTxns.push(signedHashLockTxn);
-
-            txnsConfirmationBlock.push({ txnHash: signedABT.hash, block: null });
-            txnsConfirmationBlock.push({ txnHash: signedHashLockTxn.hash, block: null });
-            txnLockingSet.push({ txnHash: signedABT.hash, hashLockHash: signedHashLockTxn.hash });
+            announcedABTsHash.push(transactionWaiting[i].hash);
+          }
         }
+      }
 
-        let allABTAnnounced = false;
-
-        for (let i = 0; i < signedHashLockTxns.length; ++i) {
-
-            await AppState.chainAPI!.transactionAPI.announce(signedHashLockTxns[i]);
-        }
-
-        console.log("All LockHash Txn announced, pending ABT announcement...");
-
-        let announcedABTsHash: string[] = [];
-
-        while (!allABTAnnounced) {
-            await new Promise(r => setTimeout(r, 15000));
-            console.log("Checking LockHash Txn confirmation...");
-
-            let latestBlock = await AppState.chainAPI!.chainAPI.getBlockchainHeight();
-            let blockHeight = latestBlock;
-            let transactionWaiting = signedABTs.filter(x => !announcedABTsHash.includes(x.hash))
-
-            for (let i = 0; i < transactionWaiting.length; ++i) {
-                let lockHashTxnHash = txnLockingSet.find(x => x.txnHash === transactionWaiting[i].hash)!.hashLockHash;
-                let txnStatus = await AppState.chainAPI!.transactionAPI.getTransactionStatus(lockHashTxnHash);
-
-                if (txnStatus.group === TransactionGroupType.CONFIRMED) {
-                    let confirmedAtHeight = txnStatus.height!.compact();
-                    let blockConfirmation = txnsConfirmationBlock.find(x => x.txnHash === lockHashTxnHash);
-                    blockConfirmation!.block = confirmedAtHeight;
-
-                    if (blockHeight >= (blockConfirmation!.block + 1)) {
-                        await AppState.chainAPI!.transactionAPI.announceAggregateBonded(transactionWaiting[i]);
-                        announcedABTsHash.push(transactionWaiting[i].hash);
-                    }
-                }
-            }
-
-            if (announcedABTsHash.length === signedABTs.length) {
-                allABTAnnounced = true;
-            }
-        }
-
-        return announcedABTsHash;
+      if (announcedABTsHash.length === signedABTs.length) {
+        allABTAnnounced = true;
+      }
     }
 
-    /*
+    return announcedABTsHash;
+  }
+
+  /*
      static async stakingDistribute(walletPrivateKey, distributeAcc){
          
  
@@ -501,5 +581,4 @@ export class Sirius {
          Sirius.setStakingDistributionDone(transactionsData, sseClients);
      }
      */
-
 }

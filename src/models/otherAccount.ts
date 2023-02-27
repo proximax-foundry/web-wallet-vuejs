@@ -1,12 +1,16 @@
-import { Account } from './account';
-import type { OtherAcountType } from "./const/otherAccountType"
+import { Account } from "./account";
+import type { OtherAcountType } from "./const/otherAccountType";
 
-export class OtherAccount extends Account{
+export class OtherAccount extends Account {
+  type: OtherAcountType;
 
-    type: OtherAcountType;
-
-    constructor(name: string, publicKey: string, address: string, type: OtherAcountType){
-        super(name, publicKey, address);
-        this.type = type;
-    }
+  constructor(
+    name: string,
+    publicKey: string,
+    address: string,
+    type: OtherAcountType
+  ) {
+    super(name, publicKey, address);
+    this.type = type;
+  }
 }

@@ -1,17 +1,16 @@
 import { PartialTransaction } from "./partialTransaction";
 
-export class PartialNamespaceTransaction extends PartialTransaction{
+export class PartialNamespaceTransaction extends PartialTransaction {
+  namespaceId: string = "";
+  namespaceName: string = "";
+  registerType: number = 0;
+  registerTypeName: string = "";
+  isExtend: boolean = false;
+  duration?: number = 0;
+  parentId?: string = "";
+  parentName?: string = "";
 
-    namespaceId: string = "";
-    namespaceName: string = "";
-    registerType: number = 0;
-    registerTypeName: string = "";
-    isExtend: boolean = false;
-    duration?: number = 0;
-    parentId?: string = "";
-    parentName?: string = ""; 
-
-    constructor(txnHash: string){
-      super(txnHash);
-    }
+  constructor(txnHash: string) {
+    super(txnHash);
+  }
 }

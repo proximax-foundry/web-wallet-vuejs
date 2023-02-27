@@ -1,7 +1,6 @@
 import { UnconfirmedTransaction } from "./unconfirmedTransaction";
 
 export class UnconfirmedAssetTransaction extends UnconfirmedTransaction {
-
   assetId: string = "";
   nonce?: number | null = null;
   namespaceName?: string | null = null;

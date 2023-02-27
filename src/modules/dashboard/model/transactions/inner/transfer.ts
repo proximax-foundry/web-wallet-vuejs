@@ -2,7 +2,6 @@ import type { SDA } from "../sda";
 import { InnerTransaction } from "./innerTxn";
 
 export class InnerTransferTransaction extends InnerTransaction {
-
   in_out: boolean | null = null;
   sender: string | null = null;
   recipient: string | null = null;

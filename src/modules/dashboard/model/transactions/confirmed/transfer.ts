@@ -2,7 +2,6 @@ import type { SDA } from "../sda";
 import { ConfirmedTransaction } from "./confirmedTransaction";
 
 export class ConfirmedTransferTransaction extends ConfirmedTransaction {
-
   in_out: boolean | null = null;
   sender: string | null = null;
   recipient: string | null = null;
