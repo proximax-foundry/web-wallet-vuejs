@@ -663,8 +663,8 @@ export default {
       }
     });
 
-    watch(amount, () => {
-      if(selectedAccount.value.balance < (amount.value + minBalanceAmount.value)){
+    watch([selectedAccountBalance, amount], () => {
+      if(selectedAccountBalance.value < (amount.value + minBalanceAmount.value)){
         showAmountErr.value = true;
       }else{
         showAmountErr.value = false;
@@ -692,7 +692,7 @@ export default {
           err.value = "";
           updateRemoteAddress();
           changeGasStrategy(bscGasStrategy.value);
-          
+          selectedToken
           if(selectedToken.value.name=='xpx'){
             if((amount.value + gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
               addErrorToast(t('swap.insufficientAmount'), t('swap.swapInsufficientAmount'), 5000);
