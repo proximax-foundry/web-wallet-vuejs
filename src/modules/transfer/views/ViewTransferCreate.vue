@@ -634,7 +634,6 @@ export default {
   };
   
   watch(selectedAccAdd, (n, o) => {
-    isNotCosigner.value = false
     showAssetBalanceErr.value = []
     for(let i=0;i<mosaics.value.length;i++){
       showAssetBalanceErr.value.push(false)
@@ -651,7 +650,6 @@ export default {
             disableAllInput.value = false;
           }
         } else {
-          isNotCosigner.value = true
           disableAllInput.value = true;
         }
     }
