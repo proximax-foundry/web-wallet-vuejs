@@ -158,7 +158,7 @@ export default {
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
-    const isNotCosigner = ref(false);
+    const isNotCosigner = computed(() => getWalletCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
     const cosignAddress = ref("");
     
     const disableAllInput = ref(false);
@@ -634,7 +634,6 @@ export default {
   };
   
   watch(selectedAccAdd, (n, o) => {
-    isNotCosigner.value = false
     showAssetBalanceErr.value = []
     for(let i=0;i<mosaics.value.length;i++){
       showAssetBalanceErr.value.push(false)
@@ -651,7 +650,6 @@ export default {
             disableAllInput.value = false;
           }
         } else {
-          isNotCosigner.value = true
           disableAllInput.value = true;
         }
     }
