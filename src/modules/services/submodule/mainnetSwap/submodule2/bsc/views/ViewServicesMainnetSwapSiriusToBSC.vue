@@ -322,7 +322,7 @@ export default {
     const err = ref('');
     const bscAddress = ref('');
     const isDisabledSwap = computed(() => 
-      !(amount.value > 0 && walletPasswd.value.match(passwdPattern) && bscAddress.value != '' && !swapInProgress.value )
+      !(amount.value > 0 && walletPasswd.value.match(passwdPattern) && bscAddress.value != '' && !swapInProgress.value && showAmountErr.value==false)
     );
     const amount = ref(0);
 
@@ -663,6 +663,14 @@ export default {
       }
     });
 
+    watch([selectedAccountBalance, amount], () => {
+      if(selectedAccountBalance.value < (amount.value + minBalanceAmount.value)){
+        showAmountErr.value = true;
+      }else{
+        showAmountErr.value = false;
+      }
+    })
+
     const siriusTransactionHash = ref('');
 
     const swap = () => {
@@ -684,7 +692,6 @@ export default {
           err.value = "";
           updateRemoteAddress();
           changeGasStrategy(bscGasStrategy.value);
-          
           if(selectedToken.value.name=='xpx'){
             if((amount.value + gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
               addErrorToast(t('swap.insufficientAmount'), t('swap.swapInsufficientAmount'), 5000);
