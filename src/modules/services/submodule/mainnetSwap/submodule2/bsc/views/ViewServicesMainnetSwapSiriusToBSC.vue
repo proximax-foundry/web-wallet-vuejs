@@ -692,7 +692,6 @@ export default {
           err.value = "";
           updateRemoteAddress();
           changeGasStrategy(bscGasStrategy.value);
-          selectedToken
           if(selectedToken.value.name=='xpx'){
             if((amount.value + gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
               addErrorToast(t('swap.insufficientAmount'), t('swap.swapInsufficientAmount'), 5000);
