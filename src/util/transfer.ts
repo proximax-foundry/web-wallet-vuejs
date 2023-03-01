@@ -31,7 +31,7 @@ export const createTransaction = async (
   recipient: string,
   sendXPX: string,
   messageText: string,
-  mosaicsSent: { amount: number; id: string }[],
+  mosaicsSent: { amount: string; id: string }[],
   mosaicDivisibility: number[],
   walletPassword: string,
   senderAccAddress: string,
@@ -74,13 +74,13 @@ export const createTransaction = async (
   }
   if (mosaicsSent.length > 0) {
     mosaicsSent.forEach((mosaicSentInfo, index) => {
-      if (mosaicSentInfo.amount > 0) {
+      if (parseFloat(mosaicSentInfo.amount) > 0) {
         mosaics.push(
           new Mosaic(
             new MosaicId(mosaicSentInfo.id),
             UInt64.fromUint(
               Number(
-                mosaicSentInfo.amount * Math.pow(10, mosaicDivisibility[index])
+                parseFloat(mosaicSentInfo.amount) * Math.pow(10, mosaicDivisibility[index])
               )
             )
           )
@@ -237,7 +237,7 @@ const calculate_aggregate_fee = (
   message: string,
   amount: string,
   mosaic: { id: string; amount: string }[]
-): string => {
+): number => {
   const transactionBuilder = AppState.buildTxn;
   if (!transactionBuilder) {
     throw new Error("Service unavailable");
@@ -258,17 +258,16 @@ const calculate_aggregate_fee = (
     .aggregateBondedBuilder()
     .innerTransactions(innerTxn)
     .build();
-  return Helper.amountFormatterSimple(
-    aggregateBondedTx.maxFee.compact(),
-    AppState.nativeToken.divisibility
-  );
+
+  return aggregateBondedTx.maxFee.compact() / AppState.nativeToken.divisibility
+
 };
 
 const calculate_fee = (
   message: string,
   amount: string,
   mosaic: { id: string; amount: string }[]
-): string => {
+): number => {
   const transactionBuilder = AppState.buildTxn;
   if (!transactionBuilder) {
     throw new Error("Service unavailable");
@@ -280,10 +279,8 @@ const calculate_fee = (
     .mosaics(mosaics)
     .message(PlainMessage.create(message))
     .build();
-  return Helper.amountFormatterSimple(
-    transferTransaction.maxFee.compact(),
-    AppState.nativeToken.divisibility
-  );
+  return transferTransaction.maxFee.compact() / AppState.nativeToken.divisibility
+
 };
 
 export const makeTransaction = readonly({

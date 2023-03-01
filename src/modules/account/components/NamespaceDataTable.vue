@@ -126,36 +126,26 @@ onUnmounted(() => {
 onMounted(() => {
     window.addEventListener("resize", screenResizeHandler);
 });
-const props = defineProps({
+defineProps({
     namespaces: Array,
     address: String
 })
-const explorerLink = assetId=>{  
+const explorerLink = (assetId :string)=>{  
     if(!networkState.currentNetworkProfile){
         return ''
     }
     return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + assetId
 }
-const displayTokenName = (name :string) =>{
-    if (name=='prx.xpx'){
-        return {name:'XPX',registered:true}
-    }else if (name=='prx.metx'){
-        return {name:'METX',registered:true}
-    }else if (name=='xarcade.xar'){
-        return {name:'XAR',registered:true}
-    }else{
-        return {name:name,registered:false}
-    }
-}
-const isMenuShow = ref([]);
+
+const isMenuShow = ref<boolean[]>([]);
 
 const currentMenu = ref(0); 
-const showMenu = (i) => {
+const showMenu = (i :number) => {
     currentMenu.value = i;
     isMenuShow.value[i] = !isMenuShow.value[i];
 } 
 const internalInstance = getCurrentInstance(); 
-const emitter = internalInstance.appContext.config.globalProperties.emitter; 
+const emitter = internalInstance?.appContext.config.globalProperties.emitter; 
     // emitted from App.vue when click on any part of the page
 emitter.on('PAGE_CLICK', () => {
     var k = 0;
@@ -167,7 +157,7 @@ emitter.on('PAGE_CLICK', () => {
     }
 });
 
-const hoverOverMenu = (i) => {
+const hoverOverMenu = (i :number) => {
     currentMenu.value = i;
 };
 

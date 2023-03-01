@@ -80,11 +80,12 @@ import { TransactionUtils } from "@/util/transactionUtils";
     };
 
     let loadInQueueTransactions = ()=>{
-        if(!acc.value){
-            return
-        }
+       
         let txns = []
         listenerState.autoAnnounceSignedTransaction.forEach((tx)=>{
+            if(!acc.value){
+                return
+            }
             let txn = TransactionMapping.createFromPayload(tx.signedTransaction.payload)
             let aggregateTxn = TransactionUtils.castToAggregate(txn)
             if (aggregateTxn.innerTransactions.find(tx=>tx.signer.address.plain()==props.address)!=undefined ||

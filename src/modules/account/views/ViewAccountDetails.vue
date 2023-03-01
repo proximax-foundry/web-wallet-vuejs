@@ -56,7 +56,7 @@
           <div class='flex '>
             <div v-if="!showPwPK && !showPK" class='break-all font-semibold truncate md:text-clip md:w-auto'>
               ****************************************************************</div>
-            <PkPasswordModal v-if="!showPwPK && !showPK" :account='acc' />
+            <PkPasswordModal v-if="!showPwPK && !showPK && acc instanceof WalletAccount" :account='acc' />
           </div>
           <div class='flex'>
             <div id="private" class="text-xs mt-1 font-semibold break-all truncate md:text-clip md:w-auto" type="text"
@@ -120,7 +120,7 @@
   </div>
 </template>
 
-<script setup >
+<script setup lang="ts">
 import { getXPXcurrencyPrice } from '@/util/functions';
 import { watch, ref, computed, getCurrentInstance, defineComponent } from "vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
@@ -131,25 +131,27 @@ import { walletState } from "@/state/walletState";
 import { Helper } from "@/util/typeHelper";
 import { networkState } from "@/state/networkState";
 import { WalletUtils } from "@/util/walletUtils";
-import { useI18n } from 'vue-i18n';
 import { pdfWalletPaperImg } from '@/modules/account/pdfPaperWalletBackground';
 import jsPDF from 'jspdf';
-import qrcode from 'qrcode-generator';
+import qrcode from 'qrcode';
 import PkPasswordModal from '@/modules/account/components/PkPasswordModal.vue'
 import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
 import { AppState } from '@/state/appState';
 import { Address } from 'tsjs-xpx-chain-sdk';
+import { WalletAccount } from '@/models/walletAccount';
 
 defineComponent({
   name: "ViewAccountDetails"
 })
 
 const p = defineProps({
-  address: String,
+  address: {
+    type: String,
+    required: true
+  },
   accountCreated: Boolean
 })
 
-const { t } = useI18n();
 const toast = useToast();
 const showModal = ref(false)
 
@@ -188,7 +190,7 @@ if (p.accountCreated) {
 }
 
 const internalInstance = getCurrentInstance();
-const emitter = internalInstance.appContext.config.globalProperties.emitter;
+const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 const prettyAddress = computed(() => {
   if (p.address) {
     try {
@@ -203,12 +205,21 @@ const showPwPK = ref(false);
 const showPK = ref(false);
 const privateKey = ref("");
 
-const copy = (id) => {
-  let stringToCopy = document.getElementById(id).getAttribute("copyValue");
-  let copySubject = document.getElementById(id).getAttribute("copySubject");
-  copyToClipboard(stringToCopy);
-
-  toast.add({ severity: 'info', detail: copySubject + ' ' + t('general.copied'), group: 'br-custom', life: 3000 });
+const copy = (id: string) => {
+  let element = document.getElementById(id);
+  if (element) {
+    let stringToCopy = element.getAttribute("copyValue");
+    let copySubject = element.getAttribute("copySubject");
+    if (stringToCopy) {
+      copyToClipboard(stringToCopy);
+      toast.add({
+        severity: "info",
+        detail: copySubject + " copied",
+        group: "br-custom",
+        life: 3000,
+      });
+    }
+  }
 };
 
 const currencyConvert = ref('');
@@ -252,14 +263,11 @@ if (AppState.nativeToken.label === "XPX") {
 }
 
 
-const generateQR = (url, size = 2, margin = 0) => {
-  const qr = qrcode(10, 'H');
-  qr.addData(url);
-  qr.make();
-  return qr.createDataURL(size, margin);
+const generateQR = async(url :string, size = 2, margin = 0) => {
+  return await qrcode.toString(url, { width: size, margin: margin });
 }
 
-const saveWalletPaper = (password) => {
+const saveWalletPaper = async(password :string) => {
   const doc = new jsPDF({
     unit: 'px'
   });
@@ -267,9 +275,8 @@ const saveWalletPaper = (password) => {
 
   // QR Code Address
   const passwordInstance = WalletUtils.createPassword(password);
-  const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance, acc.value.encrypted, acc.value.iv);
-  let privateKey = walletPrivateKey.toUpperCase();
-  doc.addImage(generateQR(privateKey, 1, 0), 151.5, 105);
+ 
+  doc.addImage(await generateQR(privateKey.value, 1, 0), "JPEG", 133, 120, 151.5, 105);
 
   // Addres number
   doc.setFontSize(8);
@@ -292,7 +299,7 @@ const topUpUrl = computed(() => {
 })
 
 const linkedAccountKey = ref('')
-const linkedNamespace = ref([])
+const linkedNamespace = ref<string[]>([])
 
 const getLinkedAccountKey = async () => {
   if (acc.value) {
@@ -301,27 +308,30 @@ const getLinkedAccountKey = async () => {
 }
 
 const getLinkedNamespace = async () => {
+  if(!AppState.chainAPI || !acc.value){
+    return
+  }
   const accountNames = await AppState.chainAPI.accountAPI.getAccountsNames([Address.createFromRawAddress(acc.value.address)])
   accountNames[0].names.forEach(name => {
     linkedNamespace.value.push(name.name)
   })
 }
 
-const explorerLink = namespace => {
+const explorerLink = (namespace :string) => {
   if (!networkState.currentNetworkProfile) {
     return ''
   }
   return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespace
 }
 
-const explorerAccountLink = publicKey=>{ 
+const explorerAccountLink = (publicKey :string)=>{ 
    if(!networkState.currentNetworkProfile){
      return ''
    }
    return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.publicKeyRoute + '/' + publicKey
 }
 
-const findAccountAddress = publicKey => {
+const findAccountAddress = (publicKey :string)=> {
   if (!walletState.currentLoggedInWallet) {
     return ''
   }
@@ -358,14 +368,15 @@ const init = () => {
 init()
 
 
-emitter.on("revealPK", (e) => {
+emitter.on("revealPK", (e :boolean) => {
   showPK.value = e;
 });
-emitter.on("pkValue", (e) => {
+
+emitter.on("pkValue", (e :string) => {
   privateKey.value = e
 });
 
-emitter.on("unlockWalletPaper", (e) => {
+emitter.on("unlockWalletPaper", (e :string) => {
   saveWalletPaper(e)
 });
 

@@ -31,6 +31,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import ConfirmationService from 'primevue/confirmationservice';
+import VueBlocksTree from "vue3-blocks-tree";
 
 library.add(
   fas, faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
@@ -43,6 +44,7 @@ app.config.globalProperties.emitter = emitter;
 
 app.use(PrimeVue);
 app.use(ToastService);
+app.use(VueBlocksTree /* , {treeName:'blocks-tree'} */);
 
 app.component("Toast", Toast);
 app.component("Tree", Tree);

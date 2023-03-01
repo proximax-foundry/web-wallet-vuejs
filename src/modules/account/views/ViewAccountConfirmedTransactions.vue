@@ -83,7 +83,7 @@ import NamespaceTxnDataTable from '@/modules/dashboard/components/TransactionDat
 import RestrictionTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/RestrictionTxnDT.vue';
 import SecretTxnDataTable from '@/modules/dashboard/components/TransactionDataTable/SecretTxnDT.vue';
 import { AppState } from "@/state/appState";
-import { Transaction } from "tsjs-xpx-chain-sdk";
+import type { Transaction } from "tsjs-xpx-chain-sdk";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { networkState } from "@/state/networkState";
 

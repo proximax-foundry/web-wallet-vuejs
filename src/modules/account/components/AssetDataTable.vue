@@ -140,11 +140,12 @@ onUnmounted(() => {
 onMounted(() => {
     window.addEventListener("resize", screenResizeHandler);
 });
-const props = defineProps({
+
+defineProps({
     assets: Array,
     address: String
 })
-const explorerLink = assetId=>{  
+const explorerLink = (assetId :string)=>{  
     if(!networkState.currentNetworkProfile){
         return ''
     }
@@ -161,15 +162,15 @@ const displayTokenName = (name :string) =>{
         return {name:name,registered:false}
     }
 }
-const isMenuShow = ref([]);
+const isMenuShow = ref<boolean[]>([]);
 
 const currentMenu = ref(0); 
-const showMenu = (i) => {
+const showMenu = (i :number)  => {
     currentMenu.value = i;
     isMenuShow.value[i] = !isMenuShow.value[i];
 } 
 const internalInstance = getCurrentInstance(); 
-const emitter = internalInstance.appContext.config.globalProperties.emitter; 
+const emitter = internalInstance?.appContext.config.globalProperties.emitter; 
     // emitted from App.vue when click on any part of the page
 emitter.on('PAGE_CLICK', () => {
     var k = 0;
@@ -181,7 +182,7 @@ emitter.on('PAGE_CLICK', () => {
     }
 });
 
-const hoverOverMenu = (i) => {
+const hoverOverMenu = (i :number) => {
     currentMenu.value = i;
 };
 
@@ -192,7 +193,7 @@ const hoverOutMenu = () => {
 </script>
 
 <style lang="scss" scoped>
-::v-deep(.p-paginator) {
+::deep(.p-paginator) {
     .p-paginator-current {
         
         padding: 1rem;

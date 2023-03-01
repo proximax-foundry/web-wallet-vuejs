@@ -77,9 +77,9 @@ export class Account {
     this.multisigInfo = multisigInfo;
   }
 
-  getAssetBalance(assetId: string): number | null {
+  getAssetBalance(assetId: string): number  {
     const asset = this.assets.find((asset) => asset.idHex === assetId);
-    return asset ? asset.amount : null;
+    return asset ? asset.amount : 0;
   }
 
   updateBalance(assetId: string): void {

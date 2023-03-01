@@ -50,7 +50,7 @@ const props = defineProps({
     required: false,
   },
   disabled: {
-    type: String,
+    type: Boolean,
     required: false,
   },
   showError: {

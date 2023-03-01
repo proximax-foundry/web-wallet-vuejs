@@ -25,7 +25,7 @@ interface contact {
   key: string;
   label: string;
   selectable: boolean;
-  children: [];
+  children:{key:string,label:string,data:string}[];
 }
 
 defineProps({
@@ -34,7 +34,7 @@ defineProps({
     required: true,
   },
   selectedNode: {
-    type: Object as PropType<contact>,
+    type: Object as PropType<TreeNode>,
     required: true,
   },
 });

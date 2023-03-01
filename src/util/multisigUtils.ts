@@ -50,7 +50,7 @@ export class MultisigUtils {
     numApprove: number,
     numDelete: number,
     removeCosign?: string[]
-  ): Promise<string> => {
+  ): Promise<number> => {
     const wallet = walletState.currentLoggedInWallet;
 
     if (!AppState.chainAPI || !wallet) {
@@ -134,10 +134,7 @@ export class MultisigUtils {
         convertIntoMultisigTransaction.toAggregate(publicAcc),
       ])
       .build();
-    return Helper.amountFormatterSimple(
-      aggregateBondedTx.maxFee.compact(),
-      AppState.nativeToken.divisibility
-    );
+    return aggregateBondedTx.maxFee.compact()/Math.pow(10, AppState.nativeToken.divisibility)
   };
 
   /* coSign: array() */

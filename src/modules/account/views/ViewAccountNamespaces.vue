@@ -18,13 +18,16 @@ import AccountComponent from "@/modules/account/components/AccountComponent.vue"
 import { AppState } from "@/state/appState";
 import { networkState } from "@/state/networkState";
 import { walletState } from "@/state/walletState";
-import { Address, AliasType } from "tsjs-xpx-chain-sdk";
+import { Address } from "tsjs-xpx-chain-sdk";
 import { computed, getCurrentInstance, ref, watch } from "vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue"
 import NamespaceDataTable from "../components/NamespaceDataTable.vue"
     
   const props = defineProps({
-    address: String
+    address: {
+      type: String,
+      required:true
+    }
   }) 
 
   const acc = computed(()=>{
@@ -38,29 +41,10 @@ import NamespaceDataTable from "../components/NamespaceDataTable.vue"
     return acc
   })
 
-  const isDelegate = ()=>{
-    if(!walletState.currentLoggedInWallet){
-      return false
-    }
-    let account = walletState.currentLoggedInWallet.others.find(acc=>acc.address==props.address)
-    if(account){
-      return account.type=="DELEGATE"?true:false
-    }else{
-      return false
-    }
-  }
-  
-  const isMultiSig = computed(() => {
-    if(!acc.value){
-      return false
-    }
-    let isMulti = acc.value.getDirectParentMultisig().length? true: false
-    return isMulti;
-  });  
 
-  const toggleMenu = ref([])
+  const toggleMenu = ref<boolean[]>([])
 
-  const isHover = ref([])
+  const isHover = ref<boolean[]>([])
 
   /* const namespaces = ref<{name:string,id: string,linkType :AliasType,linkedAssetAddress:string,expiringBlock: number | string,isActive: boolean}[]>([]) */
   const namespaces = computed(()=>{
@@ -74,8 +58,8 @@ import NamespaceDataTable from "../components/NamespaceDataTable.vue"
         name:namespace.name,
         id: namespace.idHex,
         linkedAssetAddress: namespace.linkedId!=''?namespace.linkType==2?Address.createFromRawAddress(namespace.linkedId).pretty():namespace.linkedId:'-',
-        expiringBlock: namespace.endHeight,
-        isActive: validateExpiry(namespace.name)? true:  namespace.endHeight > AppState.readBlockHeight 
+        expiringBlock: namespace.endHeight??"",
+        isActive: validateExpiry(namespace.name)? true:  namespace.endHeight??0 > AppState.readBlockHeight ?true: false
       })
     }
     return namespaces
@@ -88,24 +72,12 @@ import NamespaceDataTable from "../components/NamespaceDataTable.vue"
     return false
   }
   
-  /* const getNamespaceInfo = () =>{
-    if(!acc.value){
-      return
-    }
-    acc.value.namespaces.forEach(namespace=>{
-      namespaces.push({
-        name:namespace.name,
-        id: namespace.idHex,
-        linkType: namespace.linkType,
-        linkedAssetAddress: namespace.linkedId!=''?namespace.linkType==2?Address.createFromRawAddress(namespace.linkedId).pretty():namespace.linkedId:'-',
-        expiringBlock: namespace.endHeight,
-        isActive: namespace.active
-      })
-    })
-  } */
 
   const init = async() =>{
     /* await getNamespaceInfo() */
+    if(!namespaces.value){
+      return
+    }
     for(let i = 0;i<namespaces.value.length;i++){
       isHover.value.push(false)
       toggleMenu.value.push(false)
@@ -123,14 +95,9 @@ import NamespaceDataTable from "../components/NamespaceDataTable.vue"
     });
   }
   const internalInstance = getCurrentInstance(); 
-  const emitter = internalInstance.appContext.config.globalProperties.emitter;
+  const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 
-   const explorerLink = namespaceId=>{ 
-    if(!networkState.currentNetworkProfile){
-      return ''
-    }
-    return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute + '/' + namespaceId
-  }
+  
 
   emitter.on('PAGE_CLICK', () => {
     if(isHover.value.every(value=>value==false) && toggleMenu.value.includes(true)){
@@ -138,8 +105,8 @@ import NamespaceDataTable from "../components/NamespaceDataTable.vue"
         toggleMenu.value[i] = false
       }
     } else if(isHover.value.includes(true) && toggleMenu.value.includes(true)){
-      let hoverIndexes = []
-      let menuIndexes = []
+      let hoverIndexes :number[] = []
+      let menuIndexes :number[] = []
       isHover.value.filter((elem, index)=>{
         if(elem == true) {
             hoverIndexes.push(index);
@@ -162,7 +129,7 @@ import NamespaceDataTable from "../components/NamespaceDataTable.vue"
 
 <style lang="scss" scoped>
 
-::v-deep(.p-paginator) {
+::deep(.p-paginator) {
     .p-paginator-current {
         
         padding: 1rem;

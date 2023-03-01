@@ -402,7 +402,7 @@ export class AccountUtils {
   static createDelegateTransaction = (
     selectedCosign: string,
     isMultisig: boolean,
-    multisigAccount: WalletAccount,
+    multisigAccount: WalletAccount | OtherAccount,
     walletPassword: string,
     accPublicKey: string,
     delegateAction: LinkAction
