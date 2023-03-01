@@ -10,7 +10,7 @@ const elements = {
     error_invalidpublickey: '.error',
     select_contact: 'div.border:nth-child(5)',
     select_contact2: 'div.border:nth-child(4) > svg.fa-id-card-alt',
-    contact_list: 'div.bg-gray-100:nth-child(1)',
+    contact_list: 'ul.p-tree-container > li > ul:nth-child(2) > li > div > span:nth-child(3)',
     reduce_txnapproval: 'div.flex.gap-2.pl-6 > div:nth-child(1) > div:nth-child(2) > button:nth-child(1)',
     add_txnapproval: 'div.flex.gap-2.pl-6 > div:nth-child(1) > div:nth-child(2) > button:nth-child(3)',
     reduce_dltapproval: 'div.flex.gap-2.pl-6 > div:nth-child(2) > div:nth-child(2) > button:nth-child(1)',
@@ -25,7 +25,9 @@ const elements = {
     trash_icon: 'div.flex > img.w-4.h-4.text-gray-500.cursor-pointer.mt-3.mx-1',
     schema: 'a.border-2.border-blue-primary.p-1.mb-3.w-16.text-blue-primary.text-xs.text-center.font-semibold',
     vertical_button: 'div.ml-2.mr-2.mt-5 > input[type=radio]:nth-child(6)',
-    vertical_tree: 'div.overflow-auto.w-full.border-2 > div.org-tree-container > div.org-tree'
+    vertical_tree: 'div.overflow-auto.w-full.border-2 > div.org-tree-container > div.org-tree',
+    owner_account: 'ul.p-tree-container > li > div:nth-child(1) > button',
+    close_contact: 'div.p-sidebar-mask > div.p-sidebar > div:nth-child(2) > button'
 
 }
 
@@ -130,6 +132,7 @@ const commands = {
         return this
         .pause(1000)
         .click("@select_contact")
+        .click('@owner_account')
         .isVisible('@contact_list', callback = result => {
             this.assert.equal(result.value, true, "If user clicks select contact button, a list of contacts is shown")
         })
@@ -139,9 +142,11 @@ const commands = {
         return this
         .pause(1000)
         .click("@select_contact2")
+        .click('@owner_account')
         .isVisible('@contact_list', callback = result => {
             this.assert.equal(result.value, true, "If user clicks select contact button, a list of contacts is shown")
         })
+        .click('@close_contact')
     },
 
     remove_test(){

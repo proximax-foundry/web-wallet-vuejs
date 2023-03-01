@@ -53,7 +53,6 @@ module.exports = {
         .navigation_swap(browser.launch_url)
         .home(browser.launch_url)
         .scanQR_code()
-        .navigation_multisig(browser.launch_url)
         .navigation_accounts(browser.launch_url)
         .copy_instancesatviewall()
         .navigation_createnewaccount(browser.launch_url)
