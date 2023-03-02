@@ -259,7 +259,7 @@ const calculate_aggregate_fee = (
     .innerTransactions(innerTxn)
     .build();
 
-  return aggregateBondedTx.maxFee.compact() / AppState.nativeToken.divisibility
+  return aggregateBondedTx.maxFee.compact() / Math.pow(10,AppState.nativeToken.divisibility)
 
 };
 
@@ -279,7 +279,7 @@ const calculate_fee = (
     .mosaics(mosaics)
     .message(PlainMessage.create(message))
     .build();
-  return transferTransaction.maxFee.compact() / AppState.nativeToken.divisibility
+  return transferTransaction.maxFee.compact() / Math.pow(10,AppState.nativeToken.divisibility)
 
 };
 
