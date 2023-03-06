@@ -12,7 +12,7 @@
         <div class="text-md my-5 font-semibold">{{ $t('addressBook.exportContacts') }}</div>
         <div class="text-tsm">{{ $t('addressBook.exportBackUpContact') }}</div>
         <div class="mt-4">
-          <SelectInputPluginClean v-model="filters['global'].value" placeholder="Group" :options="contactGroups"
+          <SelectInputPluginClean v-model="filters.global.value" placeholder="Group" :options="contactGroups"
             selectDefault="" class="w-60 inline-block mr-2" />
         </div>
       </div>
@@ -51,7 +51,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, getCurrentInstance, ref, onMounted } from "vue";
+import { computed, getCurrentInstance, ref} from "vue";
 import { walletState } from '@/state/walletState';
 import { Helper } from "@/util/typeHelper";
 import DataTable from 'primevue/datatable';
@@ -63,12 +63,12 @@ import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 
 const { t } = useI18n();
 const internalInstance = getCurrentInstance();
-const emitter = internalInstance.appContext.config.globalProperties.emitter;
-const list = ref([]);
+const emitter = internalInstance?.appContext.config.globalProperties.emitter;
+const list = ref<{name: string;address: string;group: string;publicKey: string | null}[]>([]);
 
-const contactGroupsList = ref([]);
+const contactGroupsList = ref<string[]>([]);
 
-function uniqueValue(value, index, self) {
+function uniqueValue(value :string, index :number, self:string[]) {
   return self.indexOf(value) === index;
 }
 
@@ -87,14 +87,14 @@ const contactGroups = computed(() => {
 });
 
 const filters = ref({
-  'global': { value: null, matchMode: FilterMatchMode.CONTAINS },
+  global: { value: "", matchMode: FilterMatchMode.CONTAINS },
 });
 
 const refreshList = () => {
   if (!walletState.currentLoggedInWallet) {
     return
   }
-  list.value = [];
+  list.value  = [];
   if (walletState.currentLoggedInWallet.contacts != undefined) {
     if (walletState.currentLoggedInWallet.contacts.length > 0) {
       walletState.currentLoggedInWallet.contacts.forEach((contact) => {
@@ -111,7 +111,7 @@ const refreshList = () => {
 }
 refreshList();
 
-emitter.on('REFRESH_CONTACT_LIST', status => {
+emitter.on('REFRESH_CONTACT_LIST', (status :boolean)=> {
   if (status) {
     // refresh list
     setTimeout(() => {
@@ -122,7 +122,7 @@ emitter.on('REFRESH_CONTACT_LIST', status => {
 
 const dt = ref();
 
-const exportCSV = (e) => {
+const exportCSV = (e :any) => {
   dt.value.exportCSV(e);
 };
 

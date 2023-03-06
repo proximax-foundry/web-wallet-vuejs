@@ -51,7 +51,7 @@
                 role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 <div role="none" class="my-2">
                   <router-link
-                    :to="{ name: 'ViewServicesAddressBookEditContact', params: { contactAddress: data.address, contactPublicKey: data.publicKey ? true : false } }"
+                    :to="{ name: 'ViewServicesAddressBookEditContact', params: { contactAddress: data.address, contactPublicKey: data.publicKey ?' true' : 'false' } }"
                     class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{ $t('general.edit') }}</router-link>
                   <ConfirmDeleteContactModal :data="data" class="block" />
                 </div>
@@ -85,8 +85,8 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n();
 const internalInstance = getCurrentInstance();
-const emitter = internalInstance.appContext.config.globalProperties.emitter;
-const isMenuShow = ref([]);
+const emitter = internalInstance?.appContext.config.globalProperties.emitter;
+const isMenuShow = ref<boolean[]>([]);
 const selectContactGroups = ref('');
 const borderColor = ref('border border-gray-200');
 const filters = ref({
@@ -101,7 +101,7 @@ const blurInputText = () => {
   borderColor.value = 'border border-gray-200';
 };
 
-const contactGroupsList = ref([]);
+const contactGroupsList = ref<string[]>([]);
 
 let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
 themeConfig.init();
@@ -109,7 +109,7 @@ const formattedContacts = computed(() => {
   if (!walletState.currentLoggedInWallet) {
     return []
   }
-  let contracts = []
+  let contacts :{i:number,name:string,address:string,group:string,publicKey:string | null,svgString:string}[] = []
   if (walletState.currentLoggedInWallet.contacts != undefined) {
     if (walletState.currentLoggedInWallet.contacts.length > 0) {
       if (selectContactGroups.value == '') {
@@ -122,7 +122,7 @@ const formattedContacts = computed(() => {
             publicKey: contact.publicKey ? contact.publicKey : null,
             svgString: toSvg(contact.address, 45, themeConfig.jdenticonConfig),
           };
-          contracts.push(data);
+          contacts.push(data);
           isMenuShow.value[i] = false;
           contactGroupsList.value.push(contact.group);
         });
@@ -136,24 +136,24 @@ const formattedContacts = computed(() => {
             publicKey: contact.publicKey ? contact.publicKey : null,
             svgString: toSvg(contact.address, 45, themeConfig.jdenticonConfig),
           };
-          contracts.push(data);
+          contacts.push(data);
           isMenuShow.value[i] = false;
           contactGroupsList.value.push(contact.group);
         });
       }
-      contracts.sort((a, b) => {
+      contacts.sort((a, b) => {
         if (a.name > b.name) return 1;
         if (a.name < b.name) return -1;
         return 0;
       });
     }
   }
-  return contracts;
+  return contacts;
 });
 
 const dt = ref();
 
-function uniqueValue(value, index, self) {
+function uniqueValue(value :string, index :number, self :string[]) {
   return self.indexOf(value) === index;
 }
 
@@ -171,12 +171,12 @@ const contactGroups = computed(() => {
   return action;
 });
 
-const showMenu = (i) => {
+const showMenu = (i :number)  => {
   currentMenu.value = i;
   isMenuShow.value[i] = !isMenuShow.value[i];
 }
 
-const currentMenu = ref<string | number>('');
+const currentMenu = ref<number>(-1);
 
 // emitted from App.vue when click on any part of the page
 emitter.on('PAGE_CLICK', () => {
@@ -197,12 +197,12 @@ emitter.on('CLOSE_CONTACTMENU_PANEL', () => {
   }
 });
 
-const hoverOverMenu = (i) => {
+const hoverOverMenu = (i :number) => {
   currentMenu.value = i;
 };
 
 const hoverOutMenu = () => {
-  currentMenu.value = 'e';
+  currentMenu.value = -1;
 };
 
 </script>

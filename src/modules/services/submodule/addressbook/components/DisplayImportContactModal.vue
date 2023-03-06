@@ -50,19 +50,20 @@ import { AddressBook } from '@/models/addressBook';
 import { walletState } from '@/state/walletState';
 import { useToast } from "primevue/usetoast";
 import { useI18n } from 'vue-i18n';
+import type { Account } from "@/models/account";
 
 const toggleModal = ref(false);
 const { t } = useI18n();
 const toast = useToast();
 const internalInstance = getCurrentInstance();
-const emitter = internalInstance.appContext.config.globalProperties.emitter;
-const csv = ref([]);
+const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 const contactAdded = ref(0);
 const contactExisted = ref(0);
-const contactInvalidAddress = ref([]);
-const onFileChange = (e) => {
-  var files = e.target.files || e.dataTransfer.files;
-  if (!files.length) return;
+const contactInvalidAddress = ref<{label:string,address:string,group:string,publicKey:string|null}[]>([]);
+const onFileChange = (e :Event) => {
+  const target = e.target as HTMLInputElement
+  var files = target.files
+  if (!files || !files.length ) return;
   createInput(files[0]);
 };
 
@@ -72,7 +73,10 @@ const closeModel = () => {
   contactInvalidAddress.value = [];
 };
 
-const createInput = (file) => {
+const createInput = (file :Blob) => {
+  if(walletState.currentLoggedInWallet){
+    return
+  }
   let promise = new Promise<string>((resolve) => {
     var reader = new FileReader();
     reader.onload = () => {
@@ -83,18 +87,16 @@ const createInput = (file) => {
 
   promise.then(
     result => {
-      if (!walletState.currentLoggedInWallet) {
-        return;
-      }
+      
       const wallet = walletState.currentLoggedInWallet;
       /* handle a successful result */
-      var array = result.match(/[^\r\n]+/g);
+      var array = result.match(/[^\r\n]+/g) as RegExpMatchArray
       let exist = [];
-      let addContact = [];
-      let errContact = [];
+      let addContact :{label:string,address:string,group:string,publicKey:string|null}[]= [];
+      let errContact:{label:string,address:string,group:string,publicKey:string|null}[] = [];
       array.shift();
       array.forEach(element => {
-        var label, address, group, publicKey;
+        var label :string, address :string, group, publicKey;
         var arr = element.split(',');
         if (arr.length > 4) {
           // merge all array as label except the last
@@ -123,11 +125,14 @@ const createInput = (file) => {
         // check for existing account address in wallet
         // const accountAddIndex = wallet.accounts.findIndex((account) => account.address == address);
         // check for existing account name in wallet
+        if (!wallet) {
+          return;
+        }
         const accountNameIndex = wallet.accounts.findIndex((account) => account.name.toLowerCase() == label.toLowerCase());
         const contactAddIndex = (wallet.contacts != undefined) ? wallet.contacts.findIndex((contact) => contact.address == address) : (-1);
         const contactNameIndex = (wallet.contacts != undefined) ? wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == label.toLowerCase()) : (-1);
-
-        const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
+        
+        const defaultAccount = wallet.accounts.find((account) => account.default == true) as Account
 
         if (contactAddIndex >= 0) {
           exist.push({ label, address, group, publicKey });
@@ -151,12 +156,15 @@ const createInput = (file) => {
         // display error
         contactExisted.value = exist.length;
       }
+      if (!wallet) {
+          return;
+        }
       if (addContact.length > 0) {
         addContact.forEach((element) => {
           let addressBook = new AddressBook(element.label, element.address, element.group, element.publicKey);
-          walletState.currentLoggedInWallet.addAddressBook(addressBook);
+          wallet.addAddressBook(addressBook);
         });
-        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
         contactAdded.value = addContact.length;
         emitter.emit('REFRESH_CONTACT_LIST', true);
         toast.add({ severity: 'info', summary: t('general.addressBook'), detail: t('addressBook.newContactImported', contactAdded.value), group: 'br-custom', life: 5000 });

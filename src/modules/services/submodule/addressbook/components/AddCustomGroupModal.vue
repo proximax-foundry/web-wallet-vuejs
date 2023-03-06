@@ -19,18 +19,21 @@
   <div class="fixed inset-0 bg-opacity-60 bg-gray-100 z-20" v-if="toggleModal" @click="closePanel"></div>
 </template>
 <script lang="ts" setup>
-import { computed, getCurrentInstance, toRefs } from "vue";
+import { computed, getCurrentInstance, toRefs} from "vue";
 import { walletState } from '@/state/walletState';
 import { ref } from "vue";
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
   toggleModal: Boolean,
-  groups: Object
+  groups:{
+    type:Array<{value:string,label:string}>,
+    required:true
+  } 
 })
 
 const internalInstance = getCurrentInstance();
-const emitter = internalInstance.appContext.config.globalProperties.emitter;
+const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 
 const { t } = useI18n();
 const err = ref('');
@@ -45,7 +48,7 @@ const closePanel = () => {
 }
 
 // generate group labels
-const groupList = ref([]);
+const groupList = ref<string[]>([]);
 if (walletState.currentLoggedInWallet) {
   if (walletState.currentLoggedInWallet.contacts != undefined) {
     if (walletState.currentLoggedInWallet.contacts.length > 0) {

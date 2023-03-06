@@ -20,13 +20,11 @@
 import { getCurrentInstance, ref } from "vue";
 import { walletState } from '@/state/walletState';
 import DisplayImportContactModal from '@/modules/services/submodule/addressbook/components/DisplayImportContactModal.vue';
-import { useI18n } from 'vue-i18n';
 
 
-const { t } = useI18n();
 const internalInstance = getCurrentInstance();
-const emitter = internalInstance.appContext.config.globalProperties.emitter;
-const list = ref([]);
+const emitter = internalInstance?.appContext.config.globalProperties.emitter;
+const list = ref<{name: string;address: string;group: string;publicKey: string | null}[]>([]);
 
 const refreshList = () => {
   if (!walletState.currentLoggedInWallet) {
@@ -48,7 +46,7 @@ const refreshList = () => {
 }
 refreshList();
 
-emitter.on('REFRESH_CONTACT_LIST', status => {
+emitter.on('REFRESH_CONTACT_LIST',( status :boolean)  => {
   if (status) {
     // refresh list
     setTimeout(() => {

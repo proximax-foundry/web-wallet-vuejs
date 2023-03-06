@@ -34,7 +34,7 @@
                 <div class="inline-block font-bold text-blue-primary mr-5 cursor-pointer" @click="closeRemoveModal">
                   {{ $t('general.cancel') }}</div>
                 <button type="submit" class="bg-red-primary text-white text-xs py-2 px-4 rounded-md"
-                  @click="deleteContact(data);">{{ $t('addressBook.removeContact') }}</button>
+                  @click="deleteContact();">{{ $t('addressBook.removeContact') }}</button>
               </div>
             </fieldset>
           </div>
@@ -46,17 +46,25 @@
 </template>
 
 <script lang="ts" setup>
-import { getCurrentInstance, ref } from 'vue';
+import { getCurrentInstance, ref, type PropType } from 'vue';
 import { walletState } from '@/state/walletState';
 
 
-const p = defineProps(['data'])
+const p = defineProps({
+  data :{
+    type: Object as PropType<{i:number,name:string,address:string,group:string,publicKey:string | null,svgString:string}>,
+    required:true
+  }
+})
 
 const internalInstance = getCurrentInstance();
-const emitter = internalInstance.appContext.config.globalProperties.emitter;
+const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 const err = ref(false);
 const toggleModal = ref(false);
-const deleteContact = (contact) => {
+const deleteContact = () => {
+  if(!walletState.currentLoggedInWallet){
+    return
+  }
   const contactIndex = walletState.currentLoggedInWallet.contacts.findIndex((contact) => contact.address == p.data.address);
   walletState.currentLoggedInWallet.removeAddressBook(contactIndex);
   walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);

@@ -44,10 +44,10 @@ import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import AddCustomGroupModal from "@/modules/services/submodule/addressbook/components/AddCustomGroupModal.vue";
 import { WalletUtils } from "@/util/walletUtils";
 import { AppState } from "@/state/appState";
-import { arrayExpression } from "@babel/types";
+import type { Account } from "@/models/account";
 
 const internalInstance = getCurrentInstance();
-const emitter = internalInstance.appContext.config.globalProperties.emitter;
+const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 
 const selectGroupDropdown = ref(null);
 
@@ -56,7 +56,7 @@ const toast = useToast();
 const contactName = ref('');
 const address = ref('');
 const addressOrPk = ref('');
-const publicKey = ref('');
+const publicKey = ref<string | null>('');
 const err = ref('');
 const verifyAdd = ref(false);
 const addMsg = ref('');
@@ -64,13 +64,13 @@ const router = useRouter();
 const selectContactGroups = ref('');
 
 const defaultGroups = ['-none-', 'Work', 'Friend', 'Family', 'Employee', 'Director'];
-let customGroup = [];
+let customGroup :string[] = [];
 
-const removeDuplicates = (arr) => {
+const removeDuplicates = (arr :string[]) => {
   return arr.filter((item, index) => arr.indexOf(item) === index);
 }
 
-const action = ref([]);
+const action = ref<{value:string,label:string}[]>([]);
 action.value.push(
   { value: '-none-', label: ' - ' },
   { value: 'Work', label: t('addressBook.work') },
@@ -134,7 +134,7 @@ watch(addressOrPk, () => {
   }
   if (addressOrPk.value.length <= 63 || addressOrPk.value.length >= 65) {
     address.value = addressOrPk.value
-    const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
+    const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true) as Account
     const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address.value);
     verifyAdd.value = verifyContactAddress.isPassed;
     addMsg.value = verifyContactAddress.errMessage;
@@ -152,7 +152,10 @@ watch(selectContactGroups, (value) => {
   }
 });
 
-const getPublicKey = async (address) => {
+const getPublicKey = async (address :string) => {
+  if(!AppState.chainAPI){
+    return
+  }
   try {
     let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
     if (accInfo.publicKey == "0000000000000000000000000000000000000000000000000000000000000000") {
@@ -183,7 +186,9 @@ const SaveContact = async () => {
   // let addressBook = new AddressBook(contactName.value, rawAddress.address);
   let addressBook = new AddressBook(contactName.value.trim(), rawAddress.plain(), selectContactGroups.value, publicKey.value);
   const wallet = walletState.currentLoggedInWallet;
-
+  if(!wallet){
+    return
+  }
   // check for existing account name in wallet
   const accountNameIndex = wallet.accounts.findIndex((account) => account.name.toLowerCase() == contactName.value.toLowerCase().trim());
   const contactAddIndex = (wallet.contacts != undefined) ? wallet.contacts.findIndex((contact) => Address.createFromRawAddress(contact.address).plain() == rawAddress.plain()) : (-1);
@@ -194,8 +199,8 @@ const SaveContact = async () => {
   } else if (contactNameIndex >= 0 || accountNameIndex >= 0) {
     err.value = t('addressBook.nameExist');
   } else {
-    walletState.currentLoggedInWallet.addAddressBook(addressBook);
-    walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+    wallet.addAddressBook(addressBook);
+    walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
     err.value = '';
     contactName.value = '';
     addressOrPk.value = '';
@@ -208,11 +213,9 @@ emitter.on('CLOSE_ADDCUSTOMGROUP_PANEL', () => {
   isDisplayAddCustomPanel.value = false;
 });
 
-emitter.on('ADD_CUSTOM_GROUP', customGroup => {
+emitter.on('ADD_CUSTOM_GROUP', (customGroup :string) => {
   action.value.push({ value: customGroup, label: customGroup });
-  if (selectGroupDropdown.value) {
-    selectGroupDropdown.value.select(customGroup);
-  }
+
   isDisplayAddCustomPanel.value = false;
 });
 

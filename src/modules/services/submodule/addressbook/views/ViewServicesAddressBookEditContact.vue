@@ -49,14 +49,21 @@ import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import AddCustomGroupModal from "@/modules/services/submodule/addressbook/components/AddCustomGroupModal.vue";
 import { AppState } from "@/state/appState";
 import { WalletUtils } from "@/util/walletUtils";
+import type { Account } from "@/models/account";
 
 const props = defineProps({
-  contactAddress: String,
-  contactPublicKey: String
+  contactAddress: {
+    type:String,
+    required:true
+  },
+  contactPublicKey: {
+    type:String,
+    required:true
+  },
 })
 
 const internalInstance = getCurrentInstance();
-const emitter = internalInstance.appContext.config.globalProperties.emitter;
+const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 
 const selectGroupDropdown = ref(null);
 
@@ -69,15 +76,15 @@ const router = useRouter();
 const selectContactGroups = ref('');
 
 // load particulars
-var contact = null
+var contact :{name:string,address:string,group:string,publicKey:string | null} | null = null
 if (walletState.currentLoggedInWallet) {
-  contact = walletState.currentLoggedInWallet.contacts.find((contact) => Helper.createAddress(contact.address).pretty() == props.contactAddress);
+  contact = walletState.currentLoggedInWallet.contacts.find((contact) => Helper.createAddress(contact.address).pretty() == props.contactAddress) as {name:string,address:string,group:string,publicKey:string | null}
 }
 
 const contactName = ref(contact ? contact.name : '');
 const addressOrPk = ref(props.contactAddress)
 const address = ref('');
-const publicKey = ref('');
+const publicKey = ref<string | null>('');
 address.value = addressOrPk.value
 
 const existingPublicKey = ref(false)
@@ -94,7 +101,7 @@ const newPublicKey = computed(() => {
   }
 })
 
-const contactGroupsList = ref([]);
+const contactGroupsList = ref<string[]>([]);
 if (walletState.currentLoggedInWallet) {
   walletState.currentLoggedInWallet.contacts.forEach((contact) => {
     contactGroupsList.value.push(contact.group);
@@ -102,11 +109,7 @@ if (walletState.currentLoggedInWallet) {
 }
 
 
-onMounted(() => {
-  selectGroupDropdown.value.select(contact ? contact.group : []);
-});
-
-function uniqueValue(value, index, self) {
+function uniqueValue(value :string, index :number, self:string[]) {
   return self.indexOf(value) === index;
 }
 
@@ -116,7 +119,7 @@ var uniqueGroupLabels = addressBookList.filter(uniqueValue);
 uniqueGroupLabels = uniqueGroupLabels.filter((value) => value != '-none-');
 uniqueGroupLabels.sort();
 
-const action = ref([]);
+const action = ref<{value:string,label:string}[]>([]);
 action.value.push({ value: '-none-', label: ' - ' });
 uniqueGroupLabels.forEach((label) => {
   action.value.push({ value: label, label });
@@ -154,7 +157,7 @@ watch(addressOrPk, () => {
   }
   if (addressOrPk.value.length <= 63 || addressOrPk.value.length >= 65) {
     address.value = addressOrPk.value
-    const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
+    const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true) as Account
     const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address.value);
     verifyAdd.value = verifyContactAddress.isPassed;
     addMsg.value = verifyContactAddress.errMessage;
@@ -173,7 +176,10 @@ watch(selectContactGroups, (value) => {
   }
 });
 
-const getPublicKey = async (address) => {
+const getPublicKey = async (address :string) => {
+  if(!AppState.chainAPI){
+    return
+  }
   try {
     let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
     if (accInfo.publicKey == "0000000000000000000000000000000000000000000000000000000000000000") {
@@ -203,9 +209,10 @@ const SaveContact = async () => {
     await getPublicKey(address.value)
   }
   //get index of editing contact
-  const contactIndex = walletState.currentLoggedInWallet.contacts.findIndex((contact) => Helper.createAddress(contact.address).pretty() == props.contactAddress);
+  const contactIndex = wallet.contacts.findIndex((contact) => Helper.createAddress(contact.address).pretty() == props.contactAddress);
   //contact list excluding editing contact itself
-  let tempContactList = wallet.contacts.filter(tempContact => tempContact.name.toLowerCase() != contact.name.toLowerCase().trim())
+  
+  let tempContactList = wallet.contacts.filter(tempContact => tempContact.name.toLowerCase() != (contact as {name:string,address:string,group:string,publicKey:string | null}).name.toLowerCase().trim())
   let findNameInTempContact = tempContactList.find(contact => contact.name.toLowerCase() == contactName.value.toLowerCase().trim())
   let findNameInAcc = wallet.accounts.find(acc => acc.name.toLowerCase() == contactName.value.toLowerCase().trim())
   let findAddressInTempContact = tempContactList.find(contact => Address.createFromRawAddress(contact.address).plain() == Address.createFromRawAddress(address.value).plain())
@@ -214,8 +221,8 @@ const SaveContact = async () => {
   } else if (findAddressInTempContact != undefined) {
     err.value = t('addressBook.addressExist');
   } else {
-    walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value.trim(), address: Address.createFromRawAddress(address.value).plain(), group: selectContactGroups.value, publicKey: publicKey.value });
-    walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+    wallet.updateAddressBook(contactIndex, { name: contactName.value.trim(), address: Address.createFromRawAddress(address.value).plain(), group: selectContactGroups.value, publicKey: publicKey.value });
+    walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
     toast.add({ severity: 'info', summary: t('general.addressBook'), detail: t('addressBook.contactUpdated'), group: 'br-custom', life: 5000 });
     router.push({ name: "ViewServicesAddressBook" });
   }
@@ -228,11 +235,9 @@ emitter.on('CLOSE_ADDCUSTOMGROUP_PANEL', () => {
   isDisplayAddCustomPanel.value = false;
 });
 
-emitter.on('ADD_CUSTOM_GROUP', customGroup => {
+emitter.on('ADD_CUSTOM_GROUP', (customGroup :string) => {
   action.value.push({ value: customGroup, label: customGroup });
-  if (selectGroupDropdown.value) {
-    selectGroupDropdown.value.select(customGroup);
-  }
+  
   isDisplayAddCustomPanel.value = false;
 });
 

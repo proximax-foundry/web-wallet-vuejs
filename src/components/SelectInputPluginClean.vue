@@ -45,7 +45,10 @@ defineProps({
   placeholder: String,
   errorMessage: String,
   options: Array,
-  modelValue: String,
+  modelValue: {
+    type:String ,
+    required:true
+  },
   selectDefault: String,
   disabled: Boolean,
   noOptionsText: String,

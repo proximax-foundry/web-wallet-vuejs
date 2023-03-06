@@ -20,8 +20,8 @@ import { walletState } from '@/state/walletState';
 
 
 const internalInstance = getCurrentInstance();
-const emitter = internalInstance.appContext.config.globalProperties.emitter;
-const list = ref([]);
+const emitter = internalInstance?.appContext.config.globalProperties.emitter;
+const list = ref<{name:string,address:string,group:string,publicKey:string | null}[]>([]);
 
 const refreshList = () => {
   if (!walletState.currentLoggedInWallet) {
@@ -42,7 +42,7 @@ const refreshList = () => {
   }
 }
 
-emitter.on('REFRESH_CONTACT_LIST', status => {
+emitter.on('REFRESH_CONTACT_LIST', (status :boolean) => {
   if (status) {
     // refresh list
     setTimeout(() => {
