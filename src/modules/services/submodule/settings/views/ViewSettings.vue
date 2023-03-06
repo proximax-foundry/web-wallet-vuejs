@@ -30,6 +30,3 @@ import selectSoundSetting from '@/modules/services/submodule/settings/components
 
 </script>
 
-<style>
-
-</style>
