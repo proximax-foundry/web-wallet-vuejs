@@ -62,7 +62,7 @@ import { useI18n } from "vue-i18n";
 defineProps({
   loginStatus: {
     type: Boolean,
-    required: true,
+    required: false,
   },
 });
 
