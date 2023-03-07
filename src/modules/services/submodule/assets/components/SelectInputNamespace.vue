@@ -44,10 +44,7 @@
 
 <script setup lang="ts">
 import { Address } from "tsjs-xpx-chain-sdk";
-import { networkState } from '@/state/networkState';
-import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
-import { walletState } from '@/state/walletState';
-import { computed, defineComponent, ref, watch, getCurrentInstance } from 'vue';
+import { computed,  ref } from 'vue';
 import { AssetsUtils } from '@/util/assetsUtils';
 
 defineEmits([
@@ -74,8 +71,6 @@ const props = defineProps({
 })
 
 const toggleSelection = ref(false);
-const internalInstance = getCurrentInstance();
-const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 
 const selectedNamespace = ref('');
 const selectNamespace = (ns: { value: string; label: string; disabled: boolean; level: string; }) => {

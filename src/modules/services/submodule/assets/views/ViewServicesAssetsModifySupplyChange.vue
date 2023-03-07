@@ -158,8 +158,6 @@ const props = defineProps({
 
 const { t } = useI18n();
 const router = useRouter();
-const toast = useToast();
-let maxAmount = 900000000000000;
 const currentNativeTokenName = computed(() => AppState.nativeToken.label);
 const showSupplyErr = ref(false);
 const walletPassword = ref('');
@@ -173,7 +171,6 @@ const showPasswdError = ref(false);
 const cosignerBalanceInsufficient = ref(false);
 const cosignerAddress = ref('');
 
-const currencyName = computed(() => AppState.nativeToken.label);
 const lockFund = computed(() => {
   if (networkState.currentNetworkProfileConfig) {
     return Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate as number, AppState.nativeToken.divisibility)
@@ -240,7 +237,6 @@ let account = computed(() => {
 })
 
 
-const isMultiSigBool = ref(isMultiSig(selectedAccAdd.value));
 let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
 themeConfig.init();
 

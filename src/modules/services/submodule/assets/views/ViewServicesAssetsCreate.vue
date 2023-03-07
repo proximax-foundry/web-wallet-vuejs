@@ -104,13 +104,9 @@ import CheckInput from '@/components/CheckInput.vue';
 import NumberInputClean from '@/modules/services/submodule/assets/components/NumberInputClean.vue';
 import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
 import { useI18n } from 'vue-i18n'
-import { ChainProfileConfig } from "@/models/stores/";
-import { Wallet } from "@/models/wallet";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
-import { Currency } from "@/models/currency";
 import { Helper } from '@/util/typeHelper';
-import { ChainUtils } from '@/util/chainUtils';
 import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { MultisigUtils } from '@/util/multisigUtils';
@@ -125,7 +121,6 @@ import type { Account } from '@/models/account';
 const router = useRouter();
 
 const currentNativeTokenName = computed(() => AppState.nativeToken.label);
-const currentNativeTokenDivisibility = computed(() => AppState.nativeToken.divisibility);
 const showSupplyErr = ref(false);
 const walletPassword = ref('');
 const { t } = useI18n();
@@ -150,12 +145,7 @@ const cosignerAddress = ref('');
 const supply = ref('0');
 const disableAllInput = ref(false);
 
-const currencyName = computed(() => AppState.nativeToken.label);
 
-const maxDuration = computed(() => {
-  return networkState.currentNetworkProfileConfig ?
-    Math.floor(UnitConverter.configReturn(networkState.currentNetworkProfileConfig.maxNamespaceDuration, TimeUnit.DAY)) : 0;
-});
 const ownerPublicAccount = ref<PublicAccount>()
 try {
   ownerPublicAccount.value = WalletUtils.createPublicAccount(walletState.currentLoggedInWallet ? (walletState.currentLoggedInWallet.selectDefaultAccount() as Account).publicKey : '', AppState.networkType)
@@ -274,9 +264,6 @@ if (balanceNumber.value < (rentalFee.value + Number(transactionFee.value))) {
   durationCheckDisabled.value = false;
 }
 
-const moreThanOneAccount = computed(() => {
-  return accounts.value.length > 1;
-});
 
 const changeSelection = (address: string) => {
   const account = accounts.value.find(acc => acc.address == selectedAccAdd.value) as Account
@@ -300,26 +287,7 @@ const clearInput = () => {
   isMutable.value = false;
 };
 
-/*
 
-watch(durationOption, () => {
-  duration.value = '1';
-});
-
-watch(disabledDuration, (n) => {
-  (n)?duration.value = '':duration.value = '1';
-});
-
-watch(duration, (n) =>{
-  if(durationOption.value=='year' && n > 10){
-    showDurationErr.value = true;
-  }else if(durationOption.value=='month' && n > 120){
-    showDurationErr.value = true;
-  }else{
-    showDurationErr.value = false;
-  }
-});
-*/
 
 // calculate fees
 const totalFee = computed(() => {

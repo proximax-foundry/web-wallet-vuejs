@@ -124,8 +124,6 @@ import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { toSvg } from "jdenticon";
 import { useI18n } from 'vue-i18n';
-import { useToast } from "primevue/usetoast";
-import Tooltip from 'primevue/tooltip';
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { MultisigUtils } from '@/util/multisigUtils';
 import { AppState } from '@/state/appState';
@@ -145,7 +143,6 @@ const props = defineProps({
 })
 const { t } = useI18n();
 const router = useRouter();
-const toast = useToast();
 const currentNativeTokenName = computed(() => AppState.nativeToken.label);
 const walletPassword = ref('');
 const err = ref('');
@@ -157,7 +154,6 @@ const showPasswdError = ref(false);
 const cosignerBalanceInsufficient = ref(false);
 const cosignerAddress = ref('');
 
-const currencyName = computed(() => AppState.nativeToken.label);
 const lockFund = computed(() => {
   if (networkState.currentNetworkProfileConfig) {
     return Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate as number, AppState.nativeToken.divisibility)
@@ -191,7 +187,6 @@ const selectedAccAdd = ref(Helper.createAddress(props.address).plain());
 const balance = ref('');
 const balanceNumber = ref(0);
 
-const isMultiSigBool = ref(isMultiSig(selectedAccAdd.value));
 
 const showNoBalance = computed(() => {
   if (isNotCosigner.value) {
