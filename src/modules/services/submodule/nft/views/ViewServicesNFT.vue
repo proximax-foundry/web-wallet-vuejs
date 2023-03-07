@@ -4,7 +4,7 @@
       <div class="flex">
         <div class='py-3 px-6 lg:flex items-center'>
           <div class="text-xl mr-2 mb-2">NFT</div>
-          <MultiDropdownPortfolioAccountComponent :account?="accounts" @checked='onCheck' />
+          <MultiDropdownPortfolioAccountComponent :account="accounts" @checked='onCheck' />
         </div>
       </div>
     </div>
@@ -59,7 +59,7 @@ const accounts = computed(
         return accounts
       }
     } else {
-      return null
+      return []
     }
   }
 );

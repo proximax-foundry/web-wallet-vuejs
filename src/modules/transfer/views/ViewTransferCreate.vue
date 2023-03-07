@@ -915,7 +915,7 @@ emitter.on("CONFIRM_PROCEED_SEND", (payload: boolean) => {
   background: #d9ebff;
 }
 
-.p-tree::v-deep {
+.p-tree::deep {
   .p-tree-container .p-treenode .p-treenode-content {
     padding-left: 2px;
     padding-top: 2px
@@ -934,7 +934,7 @@ emitter.on("CONFIRM_PROCEED_SEND", (payload: boolean) => {
   }
 }
 
-::v-deep(.p-inputtext) {
+::deep(.p-inputtext) {
   font-size: 1rem;
   text-align: left;
   padding: 0.5rem;
