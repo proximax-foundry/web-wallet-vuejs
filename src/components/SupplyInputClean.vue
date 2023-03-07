@@ -54,7 +54,7 @@ const props = defineProps({
     required: false,
   },
   showError: {
-    type: String,
+    type: Boolean,
     required: false,
   },
   errorMessage: {
