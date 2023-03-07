@@ -4,7 +4,7 @@
       <div class="flex">
         <div class='py-3 px-6 lg:flex items-center'>
           <div class="text-xl mr-2 mb-2">Portfolio</div>
-          <MultiDropdownPortfolioAccountComponent :account?="accounts" @checked='onCheck' />
+          <MultiDropdownPortfolioAccountComponent :account="accounts" @checked='onCheck' />
         </div>
       </div>
     </div>
@@ -32,21 +32,41 @@ interface walletAsset {
 }
 
 const selectedAccount = ref<Account[]>([])
-const accounts = computed(
+  const accounts = computed(
   () => {
     if (walletState.currentLoggedInWallet) {
       if (walletState.currentLoggedInWallet.others) {
-        const concatOther = { ...walletState.currentLoggedInWallet.accounts, ...walletState.currentLoggedInWallet.others }
+        const accounts = walletState.currentLoggedInWallet.accounts.map((acc) => {
+          return {
+            name: acc.name,
+            publicKey: acc.publicKey,
+            address: acc.address
+          }
+        })
+        const otherAccounts = walletState.currentLoggedInWallet.others.map((acc) => {
+          return {
+            name: acc.name,
+            publicKey: acc.publicKey,
+            address: acc.address,
+            type: acc.type
+          }
+        })
+        const concatOther = { ...accounts, ...otherAccounts }
         return concatOther.filter(item => {
           return item.type !== "DELEGATE";
         })
-      }
-      else {
-        const accounts = walletState.currentLoggedInWallet.accounts;
+      } else {
+        const accounts = walletState.currentLoggedInWallet.accounts.map((acc) => {
+          return {
+            name: acc.name,
+            publicKey: acc.publicKey,
+            address: acc.address
+          }
+        });
         return accounts
       }
     } else {
-      return null
+      return []
     }
   }
 );
