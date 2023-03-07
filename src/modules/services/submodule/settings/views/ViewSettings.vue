@@ -29,7 +29,3 @@ import NodeComponent from "@/modules/services/submodule/settings/components/Node
 import selectSoundSetting from '@/modules/services/submodule/settings/components/selectSoundSetting.vue'; 
 
 </script>
-
-<style>
-
-</style>
