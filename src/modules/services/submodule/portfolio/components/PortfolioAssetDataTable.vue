@@ -108,7 +108,7 @@ onMounted(() => {
 
 defineProps({
     assets: {
-        type: Array<{ i: number, id: string, name: string, balance: number }>,
+        type: Array<{ id: string, name: string, balance: number }>,
         required: true
     }
 })

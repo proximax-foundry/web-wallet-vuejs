@@ -22,7 +22,13 @@ import PortfolioAssetDataTable from '@/modules/services/submodule/portfolio/comp
 import { walletState } from '@/state/walletState';
 import { computed, ref } from "vue";
 import MultiDropdownPortfolioAccountComponent from '@/modules/services/submodule/portfolio/components/MultiDropdownPortfolioAccountComponent.vue'
-import type { Account } from '@/models/account';
+
+interface selectedAccount {
+  assets: Array<{ idHex: string, namespaceNames: string, amount: number}>,
+  name: string,
+  publicKey: string,
+  address: string
+}
 
 interface walletAsset {
   i: number,
@@ -31,7 +37,7 @@ interface walletAsset {
   balance: number,
 }
 
-const selectedAccount = ref<Account[]>([])
+const selectedAccount = ref<selectedAccount[]>([])
 const accounts = computed(
   () => {
     if (walletState.currentLoggedInWallet) {
@@ -70,7 +76,7 @@ const accounts = computed(
     }
   }
 );
-const onCheck = (val: Account[]) => {
+const onCheck = (val: selectedAccount[]) => {
   selectedAccount.value = val
 }
 const mosaics = computed(() => {
