@@ -4,7 +4,7 @@
       <div class="flex">
         <div class='py-3 px-6 lg:flex items-center'>
           <div class="text-xl mr-2 mb-2">NFT</div>
-          <MultiDropdownPortfolioAccountComponent :account="accounts" @checked='onCheck' />
+          <MultiDropdownPortfolioAccountComponent :account?="accounts" @checked='onCheck' />
         </div>
       </div>
     </div>
@@ -22,12 +22,9 @@ import DisplayNFTComponent from '@/modules/services/submodule/nft/components/Dis
 import { walletState } from '@/state/walletState';
 import { computed, ref } from "vue";
 import MultiDropdownPortfolioAccountComponent from '@/modules/services/submodule/portfolio/components/MultiDropdownPortfolioAccountComponent.vue'
+import type { Account } from '@/models/account';
 
-interface selectedAccount {
-  publicKey: string
-}
-
-const selectedAccount = ref<selectedAccount[]>([]);
+const selectedAccount = ref<Account[]>([]);
 const accounts = computed(
   () => {
     if (walletState.currentLoggedInWallet) {
@@ -66,7 +63,7 @@ const accounts = computed(
     }
   }
 );
-const onCheck = (val: selectedAccount[]) => {
+const onCheck = (val: Account[]) => {
   selectedAccount.value = val
 }
 
