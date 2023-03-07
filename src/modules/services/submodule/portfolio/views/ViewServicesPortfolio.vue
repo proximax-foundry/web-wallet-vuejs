@@ -3,14 +3,14 @@
     <div class="w-11/12 ml-auto mr-auto">
       <div class="flex">
         <div class='py-3 px-6 lg:flex items-center'>
-          <div class="text-xl mr-2 mb-2">NFT</div>
+          <div class="text-xl mr-2 mb-2">Portfolio</div>
           <MultiDropdownPortfolioAccountComponent :account="accounts" @checked='onCheck' />
         </div>
       </div>
     </div>
     <div class='mt-2 py-3 '>
       <div class="w-11/12 ml-auto mr-auto border-2">
-        <DisplayNFTComponent :publicKeys="WalletPublicKeys" />
+        <PortfolioAssetDataTable :assets="mosaics" />
       </div>
     </div>
     <div class="mb-36" />
@@ -18,16 +18,20 @@
 </template>
 
 <script setup lang="ts">
-import DisplayNFTComponent from '@/modules/services/submodule/nft/components/DisplayNFTComponent.vue';
+import PortfolioAssetDataTable from '@/modules/services/submodule/portfolio/components/PortfolioAssetDataTable.vue';
 import { walletState } from '@/state/walletState';
 import { computed, ref } from "vue";
 import MultiDropdownPortfolioAccountComponent from '@/modules/services/submodule/portfolio/components/MultiDropdownPortfolioAccountComponent.vue'
+import type { Account } from '@/models/account';
 
-interface selectedAccount {
-  publicKey: string
+interface walletAsset {
+  i: number,
+  id: string,
+  name: string,
+  balance: number,
 }
 
-const selectedAccount = ref<selectedAccount[]>([]);
+const selectedAccount = ref<Account[]>([])
 const accounts = computed(
   () => {
     if (walletState.currentLoggedInWallet) {
@@ -66,19 +70,32 @@ const accounts = computed(
     }
   }
 );
-const onCheck = (val: selectedAccount[]) => {
+const onCheck = (val: Account[]) => {
   selectedAccount.value = val
 }
-
-const WalletPublicKeys = computed(() => {
-  if (selectedAccount.value) {
-    const walletPublicKey = [];
+const mosaics = computed(() => {
+  if (selectedAccount.value.length) {
+    var walletAsset: walletAsset[] = [];
+    var totalAsset = []
     for (let j = 0; j < selectedAccount.value.length; j++) {
-      walletPublicKey.push({
-        publicKey: selectedAccount.value[j].publicKey
+      selectedAccount.value[j].assets.forEach((i, index) => {
+        walletAsset.push({
+          i: index,
+          id: i.idHex,
+          name: (i.namespaceNames.length > 0 ? i.namespaceNames[0] : ""),
+          balance: i.amount,
+        });
       });
     }
-    return walletPublicKey
+    totalAsset = walletAsset.reduce((obj: walletAsset[], item) => {
+      let find = obj.find(i => i.id === item.id);
+      let _d = {
+        ...item
+      }
+      find ? (find.balance += item.balance) : obj.push(_d);
+      return obj;
+    }, [])
+    return totalAsset
   } else {
     return []
   }
