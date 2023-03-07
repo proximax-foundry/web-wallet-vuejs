@@ -10,7 +10,7 @@
     </div>
     <div class='mt-2 py-3 '>
       <div class="w-11/12 ml-auto mr-auto border-2">
-        <DisplayNFTComponent :publicKeys?="WalletPublicKeys" />
+        <DisplayNFTComponent :publicKeys="WalletPublicKeys" />
       </div>
     </div>
     <div class="mb-36" />
@@ -22,9 +22,12 @@ import DisplayNFTComponent from '@/modules/services/submodule/nft/components/Dis
 import { walletState } from '@/state/walletState';
 import { computed, ref } from "vue";
 import MultiDropdownPortfolioAccountComponent from '@/modules/services/submodule/portfolio/components/MultiDropdownPortfolioAccountComponent.vue'
-import type { Account } from '@/models/account';
 
-const selectedAccount = ref<Account[]>([]);
+interface selectedAccount {
+  publicKey: string
+}
+
+const selectedAccount = ref<selectedAccount[]>([]);
 const accounts = computed(
   () => {
     if (walletState.currentLoggedInWallet) {
@@ -63,7 +66,7 @@ const accounts = computed(
     }
   }
 );
-const onCheck = (val: Account[]) => {
+const onCheck = (val: selectedAccount[]) => {
   selectedAccount.value = val
 }
 
@@ -77,7 +80,7 @@ const WalletPublicKeys = computed(() => {
     }
     return walletPublicKey
   } else {
-    return null
+    return []
   }
 })
 

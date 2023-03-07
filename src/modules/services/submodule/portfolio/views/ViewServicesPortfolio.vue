@@ -10,7 +10,7 @@
     </div>
     <div class='mt-2 py-3 '>
       <div class="w-11/12 ml-auto mr-auto border-2">
-        <PortfolioAssetDataTable :assets?="mosaics" />
+        <PortfolioAssetDataTable :assets="mosaics" />
       </div>
     </div>
     <div class="mb-36" />
@@ -32,7 +32,7 @@ interface walletAsset {
 }
 
 const selectedAccount = ref<Account[]>([])
-  const accounts = computed(
+const accounts = computed(
   () => {
     if (walletState.currentLoggedInWallet) {
       if (walletState.currentLoggedInWallet.others) {
@@ -97,7 +97,7 @@ const mosaics = computed(() => {
     }, [])
     return totalAsset
   } else {
-    return null
+    return []
   }
 })
 

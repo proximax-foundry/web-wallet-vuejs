@@ -29,8 +29,8 @@
                                 class='inline-block h-6 w-6 mr-2 '>
                             <div v-if="displayTokenName(data.name).registered"
                                 class="inline-block text-xs ml-2 mt-1 cursor-pointer text-blue-primary"><a
-                                    :href="explorerNamespaceLink(data.name)"
-                                    target=_blank>{{ displayTokenName(data.name).name }}</a></div>
+                                    :href="explorerNamespaceLink(data.name)" target=_blank>{{
+                                        displayTokenName(data.name).name }}</a></div>
                             <div v-else class="inline-block text-xs ml-2 cursor-pointer text-blue-primary mt-1"><a
                                     :href="explorerNamespaceLink(data.name)" target=_blank>{{ data.name }}</a></div>
                         </div>
@@ -64,8 +64,8 @@
                             class='inline-block h-6 w-6 mr-2 '>
                         <div v-if="displayTokenName(data.name).registered"
                             class="inline-block text-xs ml-2 mt-1 cursor-pointer text-blue-primary"><a
-                                :href="explorerNamespaceLink(data.name)"
-                                target=_blank>{{ displayTokenName(data.name).name }}</a></div>
+                                :href="explorerNamespaceLink(data.name)" target=_blank>{{ displayTokenName(data.name).name
+                                }}</a></div>
                         <div v-else class="inline-block text-xs ml-2 cursor-pointer text-blue-primary mt-1"><a
                                 :href="explorerNamespaceLink(data.name)" target=_blank>{{ data.name }}</a></div>
                     </div>
@@ -107,7 +107,10 @@ onMounted(() => {
 });
 
 defineProps({
-    assets: Array
+    assets: {
+        type: Array<{ i: number, id: string, name: string, balance: number }>,
+        required: true
+    }
 })
 
 const displayTokenName = (name: string) => {
@@ -161,4 +164,5 @@ const explorerNamespaceLink = (namespace: string) => {
         border-radius: 9999px;
     }
 
-}</style>
+}
+</style>

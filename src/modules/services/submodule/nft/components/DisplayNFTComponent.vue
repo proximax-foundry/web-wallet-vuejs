@@ -23,7 +23,10 @@ import { ref, watch } from 'vue';
 import isValidUTF8 from 'utf-8-validate';;
 
 const props = defineProps({
-    publicKeys: Array<PublicAccount>
+    publicKeys: {
+        type: Array<{ publicKey: string }>,
+        required: true
+    }
 })
 const testnetUrl = 'https://api-2.testnet2.xpxsirius.io'
 interface displayAsset {
@@ -31,7 +34,6 @@ interface displayAsset {
     name: string,
     id: string
 }
-
 
 const assets = ref<displayAsset[]>([])
 
