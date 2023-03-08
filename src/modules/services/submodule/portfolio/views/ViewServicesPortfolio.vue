@@ -23,21 +23,7 @@ import { walletState } from '@/state/walletState';
 import { computed, ref } from "vue";
 import MultiDropdownPortfolioAccountComponent from '@/modules/services/submodule/portfolio/components/MultiDropdownPortfolioAccountComponent.vue'
 
-interface selectedAccount {
-  assets: Array<{ idHex: string, namespaceNames: string, amount: number}>,
-  name: string,
-  publicKey: string,
-  address: string
-}
-
-interface walletAsset {
-  i: number,
-  id: string,
-  name: string,
-  balance: number,
-}
-
-const selectedAccount = ref<selectedAccount[]>([])
+const selectedAccount = ref<{ name: string, publicKey: string, address: string }[]>([])
 const accounts = computed(
   () => {
     if (walletState.currentLoggedInWallet) {
@@ -76,15 +62,21 @@ const accounts = computed(
     }
   }
 );
-const onCheck = (val: selectedAccount[]) => {
+const onCheck = (val: { name: string, publicKey: string, address: string }[]) => {
   selectedAccount.value = val
 }
 const mosaics = computed(() => {
   if (selectedAccount.value.length) {
-    var walletAsset: walletAsset[] = [];
+    var walletAsset: { i: number, id: string, name: string, balance: number }[] = [];
     var totalAsset = []
     for (let j = 0; j < selectedAccount.value.length; j++) {
-      selectedAccount.value[j].assets.forEach((i, index) => {
+      const assets = walletState.currentLoggedInWallet?.accounts.map((acc)=>{
+        if(acc.publicKey === selectedAccount.value[j].publicKey){
+          return acc.assets
+        }
+      })
+      if(assets){
+        assets[j]?.forEach((i, index) => {
         walletAsset.push({
           i: index,
           id: i.idHex,
@@ -93,7 +85,8 @@ const mosaics = computed(() => {
         });
       });
     }
-    totalAsset = walletAsset.reduce((obj: walletAsset[], item) => {
+   }
+    totalAsset = walletAsset.reduce((obj: { i: number, id: string, name: string, balance: number }[] , item) => {
       let find = obj.find(i => i.id === item.id);
       let _d = {
         ...item
