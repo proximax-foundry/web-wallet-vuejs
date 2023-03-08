@@ -40,7 +40,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['checked'])
 
-const selectedAccount = ref<{ name: string, publicKey: string, address: string }[]>([]);
+const selectedAccount = ref<Account[]>([]);
 const show = ref(false);
 const filterQuery = ref("");
 const filteredAccount = computed(() => {
