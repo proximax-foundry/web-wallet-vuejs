@@ -29,17 +29,18 @@
 </template>
 
 <script setup lang="ts">
+import type { Account } from '@/models/account';
 import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
   account: {
-    type:Array<{name:string,publicKey:string,address:string}>,
-    required:true
+    type: Array<Account>,
+    required: true
   }
 })
 const emit = defineEmits(['checked'])
 
-const selectedAccount = ref<{name:string,publicKey:string,address:string}[]>([]);
+const selectedAccount = ref<{ name: string, publicKey: string, address: string }[]>([]);
 const show = ref(false);
 const filterQuery = ref("");
 const filteredAccount = computed(() => {

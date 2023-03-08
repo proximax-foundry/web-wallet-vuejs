@@ -22,61 +22,32 @@ import PortfolioAssetDataTable from '@/modules/services/submodule/portfolio/comp
 import { walletState } from '@/state/walletState';
 import { computed, ref } from "vue";
 import MultiDropdownPortfolioAccountComponent from '@/modules/services/submodule/portfolio/components/MultiDropdownPortfolioAccountComponent.vue'
+import type { Account } from '@/models/account';
 
-const selectedAccount = ref<{ name: string, publicKey: string, address: string }[]>([])
+const selectedAccount = ref<Account[]>([])
 const accounts = computed(
   () => {
-    if (walletState.currentLoggedInWallet) {
-      if (walletState.currentLoggedInWallet.others) {
-        const accounts = walletState.currentLoggedInWallet.accounts.map((acc) => {
-          return {
-            name: acc.name,
-            publicKey: acc.publicKey,
-            address: acc.address
-          }
-        })
-        const otherAccounts = walletState.currentLoggedInWallet.others.map((acc) => {
-          return {
-            name: acc.name,
-            publicKey: acc.publicKey,
-            address: acc.address,
-            type: acc.type
-          }
-        })
-        const concatOther = { ...accounts, ...otherAccounts }
-        return concatOther.filter(item => {
-          return item.type !== "DELEGATE";
-        })
-      } else {
-        const accounts = walletState.currentLoggedInWallet.accounts.map((acc) => {
-          return {
-            name: acc.name,
-            publicKey: acc.publicKey,
-            address: acc.address
-          }
-        });
-        return accounts
-      }
-    } else {
+    if (!walletState.currentLoggedInWallet) {
       return []
     }
+    const accounts = walletState.currentLoggedInWallet.accounts.map((acc) => acc as Account)
+    const filteredOthers = walletState.currentLoggedInWallet.others.filter(acc => acc.type != "DELEGATE")
+    const otherAccounts = filteredOthers.map((acc) => acc as Account)
+    return accounts.concat(otherAccounts)
+
   }
 );
-const onCheck = (val: { name: string, publicKey: string, address: string }[]) => {
+
+const onCheck = (val: Account[]) => {
   selectedAccount.value = val
 }
+
 const mosaics = computed(() => {
   if (selectedAccount.value.length) {
     var walletAsset: { i: number, id: string, name: string, balance: number }[] = [];
     var totalAsset = []
     for (let j = 0; j < selectedAccount.value.length; j++) {
-      const assets = walletState.currentLoggedInWallet?.accounts.map((acc)=>{
-        if(acc.publicKey === selectedAccount.value[j].publicKey){
-          return acc.assets
-        }
-      })
-      if(assets){
-        assets[j]?.forEach((i, index) => {
+      selectedAccount.value[j].assets.forEach((i, index) => {
         walletAsset.push({
           i: index,
           id: i.idHex,
@@ -85,8 +56,7 @@ const mosaics = computed(() => {
         });
       });
     }
-   }
-    totalAsset = walletAsset.reduce((obj: { i: number, id: string, name: string, balance: number }[] , item) => {
+    totalAsset = walletAsset.reduce((obj: { i: number, id: string, name: string, balance: number }[], item) => {
       let find = obj.find(i => i.id === item.id);
       let _d = {
         ...item
