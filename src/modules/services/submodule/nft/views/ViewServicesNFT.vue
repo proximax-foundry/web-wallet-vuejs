@@ -22,51 +22,23 @@ import DisplayNFTComponent from '@/modules/services/submodule/nft/components/Dis
 import { walletState } from '@/state/walletState';
 import { computed, ref } from "vue";
 import MultiDropdownPortfolioAccountComponent from '@/modules/services/submodule/portfolio/components/MultiDropdownPortfolioAccountComponent.vue'
+import type { Account } from '@/models/account';
 
-interface selectedAccount {
-  publicKey: string
-}
-
-const selectedAccount = ref<selectedAccount[]>([]);
+const selectedAccount = ref<Account[]>([]);
 const accounts = computed(
   () => {
-    if (walletState.currentLoggedInWallet) {
-      if (walletState.currentLoggedInWallet.others) {
-        const accounts = walletState.currentLoggedInWallet.accounts.map((acc) => {
-          return {
-            name: acc.name,
-            publicKey: acc.publicKey,
-            address: acc.address
-          }
-        })
-        const otherAccounts = walletState.currentLoggedInWallet.others.map((acc) => {
-          return {
-            name: acc.name,
-            publicKey: acc.publicKey,
-            address: acc.address,
-            type: acc.type
-          }
-        })
-        const concatOther = { ...accounts, ...otherAccounts }
-        return concatOther.filter(item => {
-          return item.type !== "DELEGATE";
-        })
-      } else {
-        const accounts = walletState.currentLoggedInWallet.accounts.map((acc) => {
-          return {
-            name: acc.name,
-            publicKey: acc.publicKey,
-            address: acc.address
-          }
-        });
-        return accounts
-      }
-    } else {
+    if (!walletState.currentLoggedInWallet) {
       return []
     }
+    const accounts = walletState.currentLoggedInWallet.accounts.map((acc) => acc as Account)
+    const filteredOthers = walletState.currentLoggedInWallet.others.filter(acc => acc.type != "DELEGATE")
+    const otherAccounts = filteredOthers.map((acc) => acc as Account)
+    return accounts.concat(otherAccounts)
+
   }
 );
-const onCheck = (val: selectedAccount[]) => {
+
+const onCheck = (val: Account[]) => {
   selectedAccount.value = val
 }
 
