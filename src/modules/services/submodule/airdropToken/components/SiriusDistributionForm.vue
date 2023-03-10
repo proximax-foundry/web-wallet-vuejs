@@ -1,3 +1,160 @@
+<template>
+  <div class="container">
+    <div class="p-2">
+      <div class="flex flex-col">
+        <label class="font-semibold">Distributor Account</label>
+        <Dropdown v-model="selectedAccount" :options="accounts" optionLabel="name" placeholder="Select an account"
+          @change="scanDistributorAsset()" />
+        <!-- <div class="mb-3 w-3/4 flex justify-between">
+            <input type="text" class="border border-gray-200 rounded-l-md w-3/4 px-2 py-1 font-sans" v-model="distributePublicKey" placeholder="Enter Distributor Account's Public Key" aria-label="Distributor Account's Public Key" 
+            aria-describedby="button-addon">
+            <button class="border rounded-r-md border-black w-1/4 px-2 py-1 hover:bg-gray-700 hover:text-white" @click="scanDistributorAsset()" type="button" id="button-addon">Scan SDAs</button>
+          </div> -->
+        <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4">
+          <div v-if="getWalletCosigner.cosignerList.length > 0">
+            <div class="text-tsm">
+              {{ $t('general.initiateBy') }}:
+              <span class="font-bold" v-if="getWalletCosigner.cosignerList.length == 1">
+                {{ getWalletCosigner.cosignerList[0].name }} ({{ $t('general.balance') }}:{{
+                  getWalletCosigner.cosignerList[0].balance }} {{ currentNativeTokenName }})
+              </span>
+              <span class="font-bold" v-else>
+                <select class="" v-model="cosignAddress">
+                  <option v-for="(element, item) in  getWalletCosigner.cosignerList"
+                    :value="findAcc(element.publicKey)?.address" :key="item">
+                    {{ element.name }} ({{ $t('general.balance') }}: {{ element.balance }} {{ currentNativeTokenName }})
+                  </option>
+                </select>
+              </span>
+              <div v-if="cosignerBalanceInsufficient" class="error">
+                {{ $t('general.insufficientBalance') }}
+              </div>
+            </div>
+          </div>
+          <div class="error" v-else>
+            {{ $t('general.noCosigner') }}
+          </div>
+        </div>
+        <div v-if="noAssetFound" class="error error_box" role="alert">
+          No SDA found
+        </div>
+      </div>
+    </div>
+    <div class="p-2">
+      <div>
+        <div class="flex flex-col-reverse">
+          <div class="error error_box" v-if="sdaError != ''">{{ sdaError }}</div>
+          <select class="w-3/4" v-model="assetSelected" aria-label="Floating label select example">
+            <option value="" selected>Select SDA to distribute</option>
+            <option v-for='asset, index in assetList' :key='index' :value="asset.id">
+              {{ asset.amount }} - {{ asset.label }}
+            </option>
+          </select>
+          <label class="font-medium text-gray-400" for="floatingSelect">Sirius Digital Asset</label>
+        </div>
+      </div>
+    </div>
+    <div class="p-2">
+      <div>
+        <div class="flex flex-col-reverse">
+          <select class="w-3/4" v-model="aggregateNum" aria-label="Floating label select example">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+          </select>
+          <label class="font-medium text-gray-400" for="floatingSelect">Transactions per aggregate</label>
+        </div>
+      </div>
+    </div>
+    <div class="p-2">
+      <div>
+        <div class="border rounded-md border-gray-200 mb-3 w-3/4">
+          <input type="file" class="form-control" @change="loadCSV" id="inputGroupFile04"
+            aria-describedby="inputGroupFileAddon04" aria-label="Upload">
+        </div>
+        <div class="error error_box" v-if="recipientError != ''">{{ recipientError }}</div>
+      </div>
+    </div>
+    <div class="p-2">
+      <div>
+        <div v-if="fileError" class="error error_box" role="alert">
+          Invalid file
+        </div>
+
+        <div v-if="assetNotEnough" class="error error_box" role="alert">
+          Total distribution amount exceed selected asset amount (need {{ totalDistributeAmount }})
+        </div>
+        <div v-if="assetWrongDivisibility" class="error error_box" role="alert">
+          {{ assetWrongDivisibility }}
+        </div>
+      </div>
+    </div>
+    <div class="p-2 overflow-auto" v-if="distributionList.length">
+      <div>
+        <div class="table w-3/4">
+          <div class="table-header-group">
+            <div class="table-row">
+              <div class="table-cell border-b-2 font-semibold p-4 pt-0 pb-3">Recipient (Public Key or Address)</div>
+              <div class="table-cell border-b-2 font-semibold p-4 pt-0 pb-3">Amount</div>
+            </div>
+          </div>
+          <div class="table-row-group">
+            <div class="table-row" v-for="row, index in distributionList" :key="index">
+              <div class="table-cell border-b p-4 pt-0 pb-3">{{ row.publicKeyOrAddress }}</div>
+              <div class="table-cell border-b p-4 pt-0 pb-3">{{ row.amount }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="p-2">
+      <div class="mb-3 w-3/4 px-2 py-1">
+        <div class='font-semibold'>Enter your password to continue</div>
+        <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"
+          :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3"
+          :disabled="disablePassword" />
+        <div class="error error_box" v-if="err != ''">{{ err }}</div>
+        <button type="button" @click="distribute()" v-if="!distributing" :disabled="distributing && !distributeDone"
+          class="blue-btn px-3 py-3 text-md">Distribute</button>
+        <button v-if="distributing" class="blue-btn px-3 py-3 text-md flex items-center" type="button" disabled>
+          <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+          </svg>
+          Distributing...
+        </button>
+        <div v-if="distributionError" class="font-semibold text-red-600 mt-2" role="alert">
+          {{ distributionError }}
+        </div>
+        <div v-if="distributeDone" class="font-semibold text-red-600 mt-2" role="alert">
+          Distribution Done
+        </div>
+      </div>
+    </div>
+    <div class="p-2 overflow-auto" v-if="txnsHash.length">
+      <div>
+        <div class="table w-3/4">
+          <div class="table-header-group">
+            <div class="table-row">
+              <div class="table-cell border-b-2 p-4 pt-0 pb-3">Transaction Hash</div>
+            </div>
+          </div>
+          <div class="table-row-group">
+            <div class="table-row" v-for="txnHash, index in txnsHash" :key="index">
+              <div class="table-cell border-b p-4 pt-0 pb-3"><a :href="createTxnExplorerLink(txnHash)">{{ txnHash }}</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import {
@@ -397,163 +554,6 @@ watch(totalDistributeAmount, (value) => {
 });
 
 </script>
-
-<template>
-  <div class="container">
-    <div class="p-2">
-      <div class="flex flex-col">
-        <label class="font-semibold">Distributor Account</label>
-        <Dropdown v-model="selectedAccount" :options="accounts" optionLabel="name" placeholder="Select an account"
-          @change="scanDistributorAsset()" />
-        <!-- <div class="mb-3 w-3/4 flex justify-between">
-            <input type="text" class="border border-gray-200 rounded-l-md w-3/4 px-2 py-1 font-sans" v-model="distributePublicKey" placeholder="Enter Distributor Account's Public Key" aria-label="Distributor Account's Public Key" 
-            aria-describedby="button-addon">
-            <button class="border rounded-r-md border-black w-1/4 px-2 py-1 hover:bg-gray-700 hover:text-white" @click="scanDistributorAsset()" type="button" id="button-addon">Scan SDAs</button>
-          </div> -->
-        <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4">
-          <div v-if="getWalletCosigner.cosignerList.length > 0">
-            <div class="text-tsm">
-              {{ $t('general.initiateBy') }}:
-              <span class="font-bold" v-if="getWalletCosigner.cosignerList.length == 1">
-                {{ getWalletCosigner.cosignerList[0].name }} ({{ $t('general.balance') }}:{{
-                  getWalletCosigner.cosignerList[0].balance }} {{ currentNativeTokenName }})
-              </span>
-              <span class="font-bold" v-else>
-                <select class="" v-model="cosignAddress">
-                  <option v-for="(element, item) in  getWalletCosigner.cosignerList"
-                    :value="findAcc(element.publicKey)?.address" :key="item">
-                    {{ element.name }} ({{ $t('general.balance') }}: {{ element.balance }} {{ currentNativeTokenName }})
-                  </option>
-                </select>
-              </span>
-              <div v-if="cosignerBalanceInsufficient" class="error">
-                {{ $t('general.insufficientBalance') }}
-              </div>
-            </div>
-          </div>
-          <div class="error" v-else>
-            {{ $t('general.noCosigner') }}
-          </div>
-        </div>
-        <div v-if="noAssetFound" class="error error_box" role="alert">
-          No SDA found
-        </div>
-      </div>
-    </div>
-    <div class="p-2">
-      <div>
-        <div class="flex flex-col-reverse">
-          <div class="error error_box" v-if="sdaError != ''">{{ sdaError }}</div>
-          <select class="w-3/4" v-model="assetSelected" aria-label="Floating label select example">
-            <option value="" selected>Select SDA to distribute</option>
-            <option v-for='asset, index in assetList' :key='index' :value="asset.id">
-              {{ asset.amount }} - {{ asset.label }}
-            </option>
-          </select>
-          <label class="font-medium text-gray-400" for="floatingSelect">Sirius Digital Asset</label>
-        </div>
-      </div>
-    </div>
-    <div class="p-2">
-      <div>
-        <div class="flex flex-col-reverse">
-          <select class="w-3/4" v-model="aggregateNum" aria-label="Floating label select example">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-          </select>
-          <label class="font-medium text-gray-400" for="floatingSelect">Transactions per aggregate</label>
-        </div>
-      </div>
-    </div>
-    <div class="p-2">
-      <div>
-        <div class="border rounded-md border-gray-200 mb-3 w-3/4">
-          <input type="file" class="form-control" @change="loadCSV" id="inputGroupFile04"
-            aria-describedby="inputGroupFileAddon04" aria-label="Upload">
-        </div>
-        <div class="error error_box" v-if="recipientError != ''">{{ recipientError }}</div>
-      </div>
-    </div>
-    <div class="p-2">
-      <div>
-        <div v-if="fileError" class="error error_box" role="alert">
-          Invalid file
-        </div>
-
-        <div v-if="assetNotEnough" class="error error_box" role="alert">
-          Total distribution amount exceed selected asset amount (need {{ totalDistributeAmount }})
-        </div>
-        <div v-if="assetWrongDivisibility" class="error error_box" role="alert">
-          {{ assetWrongDivisibility }}
-        </div>
-      </div>
-    </div>
-    <div class="p-2 overflow-auto" v-if="distributionList.length">
-      <div>
-        <div class="table w-3/4">
-          <div class="table-header-group">
-            <div class="table-row">
-              <div class="table-cell border-b-2 font-semibold p-4 pt-0 pb-3">Recipient (Public Key or Address)</div>
-              <div class="table-cell border-b-2 font-semibold p-4 pt-0 pb-3">Amount</div>
-            </div>
-          </div>
-          <div class="table-row-group">
-            <div class="table-row" v-for="row, index in distributionList" :key="index">
-              <div class="table-cell border-b p-4 pt-0 pb-3">{{ row.publicKeyOrAddress }}</div>
-              <div class="table-cell border-b p-4 pt-0 pb-3">{{ row.amount }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="p-2">
-      <div class="mb-3 w-3/4 px-2 py-1">
-        <div class='font-semibold'>Enter your password to continue</div>
-        <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"
-          :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3"
-          :disabled="disablePassword" />
-        <div class="error error_box" v-if="err != ''">{{ err }}</div>
-        <button type="button" @click="distribute()" v-if="!distributing" :disabled="distributing && !distributeDone"
-          class="blue-btn px-3 py-3 text-md">Distribute</button>
-        <button v-if="distributing" class="blue-btn px-3 py-3 text-md flex items-center" type="button" disabled>
-          <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
-            viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-            </path>
-          </svg>
-          Distributing...
-        </button>
-        <div v-if="distributionError" class="font-semibold text-red-600 mt-2" role="alert">
-          {{ distributionError }}
-        </div>
-        <div v-if="distributeDone" class="font-semibold text-red-600 mt-2" role="alert">
-          Distribution Done
-        </div>
-      </div>
-    </div>
-    <div class="p-2 overflow-auto" v-if="txnsHash.length">
-      <div>
-        <div class="table w-3/4">
-          <div class="table-header-group">
-            <div class="table-row">
-              <div class="table-cell border-b-2 p-4 pt-0 pb-3">Transaction Hash</div>
-            </div>
-          </div>
-          <div class="table-row-group">
-            <div class="table-row" v-for="txnHash, index in txnsHash" :key="index">
-              <div class="table-cell border-b p-4 pt-0 pb-3"><a :href="createTxnExplorerLink(txnHash)">{{ txnHash }}</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
 
 <style scoped>
 a {
