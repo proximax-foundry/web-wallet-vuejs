@@ -19,7 +19,7 @@
                 <div class='text-center mt-2 text-xs font-semibold'>Add to Address Book</div>
                 <TextInputClean :placeholder="$t('general.name')" :errorMessage="$t('general.nameRequired')"
                     v-model="contactName" icon="id-card-alt" class="w-full md:w-96 inline-block mt-3  mr-2" />
-                <TextInputClean :placeholder="$t('general.address')" v-model="address" :disabled="true" icon="wallet"
+                <TextInputClean :placeholder="$t('general.address')" v-model="addressCopy" :disabled="true" icon="wallet"
                     class="w-full md:w-96 inline-block mr-2" />
                 <div class="flex justify-center">
                     <button @click="saveContact()"
@@ -32,7 +32,7 @@
                 <div class='text-center mt-2 text-xs font-semibold'>Edit Address Book</div>
                 <TextInputClean :placeholder="$t('general.name')" :errorMessage="$t('general.nameRequired')"
                     v-model="contactName" icon="id-card-alt" class="w-full md:w-96 inline-block mt-3  mr-2" />
-                <TextInputClean :placeholder="$t('general.address')" v-model="address" :disabled="true" icon="wallet"
+                <TextInputClean :placeholder="$t('general.address')" v-model="addressCopy" :disabled="true" icon="wallet"
                     class="w-full md:w-96 inline-block mr-2" />
                 <div class="flex justify-center">
                     <button @click="editContact()"
@@ -64,6 +64,8 @@ const props = defineProps({
         required: true
     }
 })
+
+const addressCopy = ref(props.address)
 const { t } = useI18n()
 const disabledConfirm = computed(() => {
     if (accountName.value.trim() != "") {

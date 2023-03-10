@@ -1762,7 +1762,7 @@ export class WalletUtils {
       );
 
       if (!accountInfo) {
-        throw new Error("Account not found");
+        continue
       }
 
       if (
