@@ -77,7 +77,9 @@ import { ref, watch } from 'vue';
 import { Address, Convert, MetadataQueryParams, MetadataType, NamespaceId } from 'tsjs-xpx-chain-sdk';
 import { AppState } from '@/state/appState';
 import isValidUtf8 from 'utf-8-validate';
+import { Buffer } from 'buffer';
 
+window.Buffer = Buffer;
 const props = defineProps({
     namespaceId: {
         type: String,
