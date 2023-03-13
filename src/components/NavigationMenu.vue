@@ -136,7 +136,7 @@
       </router-link>
     </div>
     <div class="grow"></div>
-    <div class="flex-glow-0 w-60 border-t border-gray-700">
+    <div class="flex-grow-0 w-60 border-t border-gray-700">
       <a
         @click="logout()"
         class="signout_block flex items-center cursor-pointer text-white"
