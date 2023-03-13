@@ -118,7 +118,7 @@
   </div>
 </template>
 
-<<script lang="ts" setup>
+<script lang="ts" setup>
 import { getCurrentInstance, ref, computed,onMounted, onUnmounted } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
