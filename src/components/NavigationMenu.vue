@@ -4,7 +4,7 @@
     @mouseover="hoverOverNavigation"
     @mouseout="hoverOutNavigation"
   >
-    <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
+    <div class="border-b border-gray-700 py-5 w-60 grow-0">
       <div>
         <div
           class="cursor-pointer link_block flex items-center justify-between"
@@ -42,7 +42,7 @@
       </div>
     </div>
 
-    <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
+    <div class="border-b border-gray-700 py-5 w-60 grow-0">
       <div class="my-3 px-10 3xl:px-10 text-gray-400 uppercase">
         {{ $t("general.createNew") }}
       </div>
@@ -93,7 +93,7 @@
         />{{ $t("general.account", 1) }}</router-link
       >
     </div>
-    <div class="border-b border-gray-700 py-5 w-60 flex-grow-0">
+    <div class="border-b border-gray-700 py-5 w-60 grow-0">
       <div class="my-3 px-10 3xl:px-10 text-gray-400 uppercase">
         {{ $t("home.navigate") }}
       </div>
@@ -135,7 +135,7 @@
         />Settings
       </router-link>
     </div>
-    <div class="flex-grow"></div>
+    <div class="grow"></div>
     <div class="flex-glow-0 w-60 border-t border-gray-700">
       <a
         @click="logout()"

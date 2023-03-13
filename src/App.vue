@@ -97,16 +97,16 @@
       <NavigationMenu v-if="login"
         class="lg:mt-16 flex-shrink-0 bg-navy-primary text-left text-xs bg-navi z-20 overflow-y-auto fixed inset-y-0 left-0 transform lg:-translate-x-0 transition duration-200 ease-in-out"
         :class="`${isShowNavi ? '-translate-x-0' : '-translate-x-full'}`"></NavigationMenu>
-      <div :class="`${login ? 'inline-block flex-grow overflow-hidden' : 'sm:w-full'}`">
+      <div :class="`${login ? 'inline-block grow overflow-hidden' : 'sm:w-full'}`">
         <div :class="`${login ? 'flex flex-col min-full-screen bg-white' : ''}`">
-          <router-view class="lg:ml-60 mt-12 lg:mt-16 flex-grow"
+          <router-view class="lg:ml-60 mt-12 lg:mt-16 grow"
             v-if="currentRouteName == 'ViewDashboard' || currentRouteName == 'ViewTransactionStatus'"></router-view>
-          <router-view class="mt-24 lg:mt-16 flex-grow" v-else-if="currentRouteName == 'ViewWallets'"></router-view>
-          <router-view class="lg:ml-60 mt-10 lg:mt-16 flex-grow px-5 pt-5" v-else-if="login"
+          <router-view class="mt-24 lg:mt-16 grow" v-else-if="currentRouteName == 'ViewWallets'"></router-view>
+          <router-view class="lg:ml-60 mt-10 lg:mt-16 grow px-5 pt-5" v-else-if="login"
             :key="$route.path"></router-view>
-          <router-view class="mt-12 sm:mt-0 flex-grow px-2 pt-5 sm:p-0" v-else></router-view>
+          <router-view class="mt-12 sm:mt-0 grow px-2 pt-5 sm:p-0" v-else></router-view>
           <footer
-            class="md:ml-60 md:h-9 mt-10 text-center sm:text-justify sm:flex text-txs md:text-xs sm:justify-between text-gray-700 px-10 flex-grow-0"
+            class="md:ml-60 md:h-9 mt-10 text-center sm:text-justify sm:flex text-txs md:text-xs sm:justify-between text-gray-700 px-10 grow-0"
             v-if="login">
             <div class="ml-2 sm:ml-0">{{ $t('home.copyright') }} <a href="https://t.me/proximaxhelpdesk" target=_new
                 class="text-blue-primary hover:underline">{{ $t('home.helpdesk') }}</a> </div>
