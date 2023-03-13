@@ -181,6 +181,7 @@ import { useToast } from 'primevue/usetoast';
 import { walletState } from "@/state/walletState";
 import type { SDA } from "../../model/transactions/sda";
 import type { ConfirmedTransferTransaction } from "../../model/transactions/transaction";
+import DecryptMessageModal from "../DecryptMessageModal.vue";
 
 defineProps({
   transactions:{

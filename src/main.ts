@@ -36,6 +36,7 @@ import 'primevue/resources/themes/saga-blue/theme.css'
 import 'primevue/resources/primevue.min.css'
 import 'primeicons/primeicons.css'
 import Sidebar from 'primevue/sidebar'
+import Dropdown from "primevue/dropdown";
 
 library.add(
   fas, faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
@@ -52,6 +53,7 @@ app.use(VueBlocksTree /* , {treeName:'blocks-tree'} */);
 
 app.component("Toast", Toast);
 app.component("Tree", Tree);
+app.component("Dropdown", Dropdown);
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.component('Sidebar', Sidebar);
 app.directive("tooltip", Tooltip);
