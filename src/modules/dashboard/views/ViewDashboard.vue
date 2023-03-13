@@ -238,7 +238,7 @@ let dashboardService = ref<DashboardService | null>(null)
 
 watch(selectedAccount, async (n) => {
   if (n && walletState.currentLoggedInWallet) {
-    addressQR.value = await QRCode.toString(n.address);
+    addressQR.value = await QRCode.toDataURL(n.address);
     dashboardService.value = new DashboardService(walletState.currentLoggedInWallet, n);
   }
 }, { immediate: true })
