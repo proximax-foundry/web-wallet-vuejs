@@ -53,7 +53,8 @@
           </div>
           <!-- Pop Up when select icon is clicked -->
           <Sidebar v-model:visible="toggleContact" :baseZIndex="10000" position="full">
-            <SelectAccountAndContact :contacts="contacts" :selectedNode="selectedNode" @node-select="onNodeSelect" />
+            <SelectAccountAndContact :contacts="contacts" :selectedNode="selectedNode"
+              @node-select="onNodeSelect($event)" />
           </Sidebar>
 
           <div v-for="(mosaic, index) in mosaicsCreated" :key="index">
@@ -115,10 +116,7 @@ import { computed, ref, getCurrentInstance, watch } from "vue";
 import PasswordInput from "@/components/PasswordInput.vue";
 import MosaicInput from "@/modules/transfer/components/MosaicInput.vue";
 import TransferTextareaInput from "@/modules/transfer/components/TransferTextareaInput.vue";
-import {
-  createTransaction,
-  makeTransaction,
-} from "@/util/transfer"; //getMosaicsAllAccounts
+
 import AddContactModal from "@/modules/transfer/components/AddContactModal.vue";
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
 import { useI18n } from 'vue-i18n'
@@ -141,6 +139,8 @@ import type { WalletAccount } from "@/models/walletAccount";
 import type { TreeNode } from "primevue/tree";
 import type { OtherAccount } from "@/models/otherAccount";
 import type { Asset } from "@/models/asset";
+import { TransferUtils } from "@/util/transferUtils"
+
 
 const router = useRouter()
 const currentNativeTokenName = computed(() => AppState.nativeToken.label);
@@ -160,12 +160,12 @@ const walletPassword = ref("");
 const err = ref("");
 const encryptedMsg = ref("");
 const togglaAddContact = ref(false);
-interface selectedMosaic{
-  id:number,
-  amount:string,
-  namespace:string
+interface selectedMosaic {
+  id: number,
+  amount: string,
+  namespace: string
 }
-const selectedMosaic = ref<{ id: string, amount: string , namespace: string }[]>([]);
+const selectedMosaic = ref<{ id: string, amount: string, namespace: string }[]>([]);
 const mosaicsCreated = ref<number[]>([]);
 const selectedMosaicAmount = ref([]);
 const mosaicSupplyDivisibility = ref<number[]>([]);
@@ -290,11 +290,11 @@ const isMultiSigBool = computed(() => {
 }
 )
 
-const effectiveFee = ref(isMultiSigBool.value ? makeTransaction.calculate_aggregate_fee(
+const effectiveFee = ref(isMultiSigBool.value ? TransferUtils.calculate_aggregate_fee(
   messageText.value,
   sendXPX.value,
   selectedMosaic.value as { id: string, amount: string }[]
-) : makeTransaction.calculate_fee(
+) : TransferUtils.calculate_fee(
   messageText.value,
   sendXPX.value,
   selectedMosaic.value as { id: string, amount: string }[]
@@ -346,7 +346,7 @@ const contacts = computed(() => {
     (account) => {
       return {
         name: account.name,
-        publicKey: account.publicKey,
+        address: account.address,
       }
     });
 
@@ -366,8 +366,8 @@ const contacts = computed(() => {
       {
         key: "0-" + indexNo.toString(),
         label: element.name,
-        data: element.publicKey,
-        selectable: false
+        data: element.address,
+        selectable: true
       }
     )
     indexNo++
@@ -390,7 +390,7 @@ const contacts = computed(() => {
           key: "1-" + indexNo.toString(),
           label: element.name,
           data: element.address,
-          selectable: false
+          selectable: true
         }
       )
       indexNo++
@@ -399,12 +399,12 @@ const contacts = computed(() => {
   return contacts
 });
 
-const onNodeSelect = (node: { key: string, label: string, data: string, selectable: boolean }) => {
+const onNodeSelect = (node: TreeNode) => {
   makeNodeSelectable()
   toggleContact.value = false
   recipientInput.value = node.data
   // this is too make it turn blue
-  selectedNode.value[node.key] = true
+  selectedNode.value[node.key as string] = true
   node.selectable = false
 }
 
@@ -456,7 +456,7 @@ const makeTransfer = async () => {
         }
       }
     }
-    let transferStatus = await createTransaction(
+    let transferStatus = await TransferUtils.createTransaction(
       recipientInput.value.toUpperCase(),
       sendXPX.value,
       messageText.value,
@@ -735,7 +735,6 @@ const checkRecipient = () => {
       });
     }
     catch (error) {
-      /* console.log(error); */
       showAddressError.value = true;
     }
   }
@@ -755,11 +754,11 @@ const checkNamespace = async (nsId: NamespaceId) => {
   return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
 }
 const updateFee = () => {
-  effectiveFee.value = isMultiSig(selectedAccAdd.value) ? makeTransaction.calculate_aggregate_fee(
+  effectiveFee.value = isMultiSig(selectedAccAdd.value) ? TransferUtils.calculate_aggregate_fee(
     messageText.value,
     sendXPX.value,
     selectedMosaic.value as { id: string, amount: string }[]
-  ) : makeTransaction.calculate_fee(
+  ) : TransferUtils.calculate_fee(
     messageText.value,
     sendXPX.value,
     selectedMosaic.value as { id: string, amount: string }[]
@@ -873,6 +872,12 @@ emitter.on("CONFIRM_PROCEED_SEND", (payload: boolean) => {
     makeTransfer();
   }
 });
+
+watch(AppState, n => {
+  if (n.buildTxn) {
+    updateFee()
+  }
+})
 
 
 </script>

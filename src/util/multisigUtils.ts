@@ -15,7 +15,6 @@ import { TransactionUtils } from "@/util/transactionUtils";
 import type { WalletAccount } from "@/models/walletAccount";
 import { AppState } from "@/state/appState";
 import type { OtherAccount } from "@/models/otherAccount";
-import { Helper } from "./typeHelper";
 
 export class MultisigUtils {
   static verifyContactPublicKey(

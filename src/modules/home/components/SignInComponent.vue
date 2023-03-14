@@ -161,7 +161,7 @@ const login = async () => {
     if (wallet) {
       wallet.fixNonManagableAccounts();
       walletState.wallets.saveMyWalletOnlytoLocalStorage(wallet);
-      WalletStateUtils.updateLoggedIn(wallet);
+      await WalletStateUtils.updateLoggedIn(wallet);
       NetworkStateUtils.updateLastAccessNetworkName(networkState.chainNetworkName);
       router.push({ name: "ViewDashboard" });
     }

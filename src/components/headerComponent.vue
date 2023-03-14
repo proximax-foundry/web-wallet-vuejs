@@ -221,7 +221,7 @@
             class="w-24 lg:w-40"
         /></router-link>
       </div>
-      <div class="flex-grow"></div>
+      <div class="grow"></div>
       <div class="flex-none self-center header-menu">
         <div class="w-20 inline-block ml-2 sm:ml-0" v-if="wideScreen">
           <router-link

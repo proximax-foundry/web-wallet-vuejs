@@ -1,15 +1,7 @@
 <template>
-  <Tree
-    :value="contacts"
-    selectionMode="single"
-    v-model:selectionKeys="selectedNode"
-    :expandedKeys="expandedKeys"
-    :filter="true"
-    filterMode="strict"
-    @node-select="onNodeSelect($event)"
-    @node-expand="expandTree($event)"
-    @node-collapse="collapseTree"
-  >
+  <Tree :value="contacts" selectionMode="single" v-on:update:selection-keys="selectedNode" :expandedKeys="expandedKeys"
+    :filter="true" filterMode="strict" v-on:node-select="onNodeSelect" @node-expand="expandTree"
+    @node-collapse="collapseTree">
   </Tree>
 </template>
 
@@ -20,12 +12,15 @@ import { defineComponent, ref, type PropType } from "vue";
 defineComponent({
   name: "SelectAccountAndContact",
 });
-const emits = defineEmits(["node-select"]);
+const emits = defineEmits([
+  'node-select'
+])
+
 interface contact {
   key: string;
   label: string;
   selectable: boolean;
-  children:{key:string,label:string,data:string}[];
+  children: { key: string, label: string, data: string }[];
 }
 
 defineProps({
@@ -46,10 +41,7 @@ const onNodeSelect = (node: TreeNode) => {
 };
 
 const expandTree = (expanded: TreeNode) => {
-  expandedKeys.value = {};
-  if (expanded.key) {
-    expandedKeys.value[expanded.key] = true;
-  }
+  expandedKeys.value[expanded.key as string] = true;
 };
 
 const collapseTree = () => {

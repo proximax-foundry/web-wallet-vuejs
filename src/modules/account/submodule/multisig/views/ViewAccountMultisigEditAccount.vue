@@ -668,10 +668,9 @@ const cosigners = computed(() => {
 
 // check if onPartial
 try {
-  if (!acc.value) {
-    return
+  if (acc.value) {
+    MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey, AppState.networkType)).then(onPartialBoolean => onPartial.value = onPartialBoolean)
   }
-  MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey, AppState.networkType)).then(onPartialBoolean => onPartial.value = onPartialBoolean)
 } catch (error) {
 
 }
