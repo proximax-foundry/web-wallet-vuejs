@@ -88,12 +88,15 @@ import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { networkState } from "@/state/networkState";
 
     const props = defineProps({
-        address: String
+        address: {
+          type: String,
+          required:true
+        }
     })
     let selectedTxnType = ref("all") 
     let transactionGroupType = Helper.getTransactionGroupType()
     let selectedTxnGroupType = transactionGroupType.CONFIRMED; 
-    const searchedTransactions = ref([]); 
+    const searchedTransactions = ref<any[]>([]); 
     let boolIsTxnFetched = ref(false);
     let allTxnQueryParams = Helper.createTransactionQueryParams();
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
@@ -111,54 +114,61 @@ import { networkState } from "@/state/networkState";
         return acc
     })
     const accAddress = computed(()=> acc.value?acc.value.address:'');
-    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, acc.value);
+    const dashboardService = ref<DashboardService | null>(null)
+    watch(acc, async (n) => {
+        if (n && walletState.currentLoggedInWallet) {
+            dashboardService.value = new DashboardService(walletState.currentLoggedInWallet, n);
+        }
+    }, { immediate: true })
     const formatConfirmedTransaction = async(transactions :Transaction[])=>{
-
+        if(!dashboardService.value){
+          return []
+        }
         let formattedTxns = [];
         allTxnQueryParams.embedded = true;
         switch(selectedTxnType.value){ 
         case TransactionFilterType.TRANSFER:
-            formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactions);
+            formattedTxns = await dashboardService.value.formatConfirmedMixedTxns(transactions);
             break;
         case TransactionFilterType.ACCOUNT:
-            formattedTxns = await dashboardService.formatConfirmedAccountTransaction(transactions);
+            formattedTxns = await dashboardService.value.formatConfirmedAccountTransaction(transactions);
             break;
         case TransactionFilterType.AGGREGATE:
-            formattedTxns = await dashboardService.formatConfirmedAggregateTransaction(transactions);
+            formattedTxns = await dashboardService.value.formatConfirmedAggregateTransaction(transactions);
             break;
         case TransactionFilterType.RESTRICTION:
-            formattedTxns = await dashboardService.formatConfirmedRestrictionTransaction(transactions);
+            formattedTxns = await dashboardService.value.formatConfirmedRestrictionTransaction(transactions);
             break;
         case TransactionFilterType.SECRET:
-            formattedTxns = await dashboardService.formatConfirmedSecretTransaction(transactions);
+            formattedTxns = await dashboardService.value.formatConfirmedSecretTransaction(transactions);
             break;
         case TransactionFilterType.ALIAS:
-            formattedTxns = await dashboardService.formatConfirmedAliasTransaction(transactions);
+            formattedTxns = await dashboardService.value.formatConfirmedAliasTransaction(transactions);
             break;
         case TransactionFilterType.ASSET:
-            formattedTxns = await dashboardService.formatConfirmedAssetTransaction(transactions);
+            formattedTxns = await dashboardService.value.formatConfirmedAssetTransaction(transactions);
             break;
         case TransactionFilterType.METADATA:
-            formattedTxns = await dashboardService.formatConfirmedMetadataTransaction(transactions);
+            formattedTxns = await dashboardService.value.formatConfirmedMetadataTransaction(transactions);
             break;
         case TransactionFilterType.CHAIN:
-            formattedTxns = await dashboardService.formatConfirmedChainTransaction(transactions);
+            formattedTxns = await dashboardService.value.formatConfirmedChainTransaction(transactions);
             break;
         case TransactionFilterType.EXCHANGE:
-            formattedTxns = await dashboardService.formatConfirmedExchangeTransaction(transactions);
+            formattedTxns = await dashboardService.value.formatConfirmedExchangeTransaction(transactions);
             break;
         case TransactionFilterType.LINK:
-            formattedTxns = await dashboardService.formatConfirmedLinkTransaction(transactions);
+            formattedTxns = await dashboardService.value.formatConfirmedLinkTransaction(transactions);
             break;
         case TransactionFilterType.LOCK:
-            formattedTxns = await dashboardService.formatConfirmedLockTransaction(transactions);
+            formattedTxns = await dashboardService.value.formatConfirmedLockTransaction(transactions);
             break;
         case TransactionFilterType.NAMESPACE:
-            formattedTxns = await dashboardService.formatConfirmedNamespaceTransaction(transactions);
+            formattedTxns = await dashboardService.value.formatConfirmedNamespaceTransaction(transactions);
             break;
         default:
             allTxnQueryParams.embedded = false;
-            formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactions);
+            formattedTxns = await dashboardService.value.formatConfirmedMixedTxns(transactions);
             break;
         }
 
@@ -230,11 +240,14 @@ import { networkState } from "@/state/networkState";
       }
 
     const searchTransaction = async() =>{
+      if(!dashboardService.value || !acc.value){
+        return
+      }
         allTxnQueryParams.pageSize = 10
         allTxnQueryParams.pageNumber = 1;
         allTxnQueryParams.publicKey = acc.value.publicKey;
         
-        let transactionSearchResult = await dashboardService.searchTxns(selectedTxnGroupType, allTxnQueryParams);
+        let transactionSearchResult = await dashboardService.value.searchTxns(selectedTxnGroupType, allTxnQueryParams);
         let formattedTxns = await formatConfirmedTransaction(transactionSearchResult.transactions);
         searchedTransactions.value = formattedTxns;
         boolIsTxnFetched.value = true;
