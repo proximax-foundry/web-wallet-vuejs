@@ -164,7 +164,7 @@
                 <div v-if="isInitiateSwap">
                   <div class="sm:flex justify-between">
                     <div class="w-full">
-                      <SelectInputAccount v-model="siriusAddressSelected" :placeholder="$t('swap.toSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet?.selectDefaultAccount()?.address as string" />
+                      <SelectInputAccount v-model="siriusAddressSelected" :placeholder="$t('swap.toSiriusAcc')" :selectDefault="siriusAddressSelected" />
                     </div>
                     <button :disabled="!siriusAddressSelected || !disableConfirmAddressSelection" @click="confirmAddress" class="sm:flex-none justify-start sm:justify-end bg-blue-primary h-15 w-40 rounded-3xl sm:ml-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-2 disabled:opacity-50 self-center" type="button">{{$t('general.confirm')}}</button>
                   </div>
@@ -351,8 +351,9 @@ import type { Account } from "@/models/account";
     const swapServerUrl = SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL, tokenName.value);
 
 
-    let provider;
+    let provider = new ethers.providers.Web3Provider(window.ethereum);
     let signer;
+    let ethereum = (window as any).ethereum
 
     if(window.ethereum){
       if(!window.ethereum.isMetaMask){
@@ -362,14 +363,13 @@ import type { Account } from "@/models/account";
 
     const initMetamask = ()=>{
        if (typeof window.ethereum !== 'undefined') {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
         signer = provider.getSigner();
         isInstallMetamask.value = true;
         isMetamaskConnected.value = ethereum.isConnected()?true:false;
         ethereum
           .request({ method: 'eth_accounts' })
           .then(fetchMetaAccount)
-          .catch((err) => {
+          .catch((err:any) => {
             console.error(err);
           });
         ethereum
@@ -377,7 +377,7 @@ import type { Account } from "@/models/account";
           .then((metaChainId:string) => {
             verifyChain(metaChainId);
           })
-          .catch((err) => {
+          .catch((err:any) => {
             console.error(err);
           });
         ethereum.on('accountsChanged', handleAccountsChanged);
@@ -391,7 +391,7 @@ import type { Account } from "@/models/account";
 
     initMetamask()
 
-    function fetchMetaAccount(accounts) {
+    function fetchMetaAccount(accounts:any) {
       if (accounts.length === 0) {
         // MetaMask is locked or the user has not connected any accounts
         // console.log('Please connect to MetaMask.');
@@ -403,7 +403,7 @@ import type { Account } from "@/models/account";
     }
 
     // For now, 'eth_accounts' will continue to always return an array
-    function handleAccountsChanged(accounts) {
+    function handleAccountsChanged(accounts:any) {
       if(window.ethereum.isMetaMask){
         if (accounts.length === 0) {
           // MetaMask is locked or the user has not connected any accounts
@@ -441,7 +441,7 @@ import type { Account } from "@/models/account";
         ethereum
         .request({ method: 'eth_requestAccounts' })
         .then(fetchMetaAccount)
-        .catch((err) => {
+        .catch((err:any) => {
           if (err.code === 4001) {
             // EIP-1193 userRejectedRequest error
             // If this happens, the user rejected the connection request.
@@ -523,7 +523,7 @@ import type { Account } from "@/models/account";
       try{
         let transactionReceipt = await provider.getTransactionReceipt(remoteTxnHash.value);
         let transactionStatus = await provider.getTransaction(remoteTxnHash.value);
-        if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
+        if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to?.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
           if(transactionStatus.confirmations < 12){
             return new Promise(function (resolve) {
               verifyingTxn = setInterval(async () => {
@@ -549,7 +549,7 @@ import type { Account } from "@/models/account";
           transactionNotFound.value = true;
           return false;
         }else{
-          if(transactionStatus && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaction is not confirmed
+          if(transactionStatus && transactionStatus.to?.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaction is not confirmed
             // perform confirmation loop here
             return new Promise(function (resolve) {
               verifyingTxn = setInterval(async()=>{
@@ -640,9 +640,15 @@ import type { Account } from "@/models/account";
     const isInitiateSwap = ref(false);
     const disableSiriusAddress = ref(false);
     const disableConfirmAddressSelection = ref(true);
-    const siriusAddressSelected = ref(walletState.currentLoggedInWallet?.selectDefaultAccount()?.address);
+    const defaultAcc = computed(()=>{
+  if(!walletState.currentLoggedInWallet){
+    return null
+  }
+  return walletState.currentLoggedInWallet.selectDefaultAccount() 
+})
+    const siriusAddressSelected = ref(defaultAcc.value ? defaultAcc.value.address : '');
 
-    const siriusAddressSelectedName = ref(walletState.currentLoggedInWallet?.selectDefaultAccount()?.name);
+    const siriusAddressSelectedName = ref(defaultAcc.value ? defaultAcc.value.name : '');
 
     watch(siriusAddressSelected, (newAddress) => {
       let accountSelected = walletState.currentLoggedInWallet?.accounts.find(account => account.address == newAddress) as Account;

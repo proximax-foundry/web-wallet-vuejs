@@ -16,9 +16,8 @@
         :maxHeight="maxHeight"
         :classes="{ options: 'text-left' }"
         @deselect="$emit('update:modelValue', selected)"
-        @select="makeSelection;$emit('update:modelValue', selected);$emit('show-selection', selected)"
+        @select="makeSelection();$emit('update:modelValue', selected);$emit('show-selection', selected)"
         @clear="$emit('clear-selection')"
-        ref="selectRef"
         :disabled="disabled"
       />
     </div>
@@ -74,27 +73,6 @@ import Multiselect from '@vueform/multiselect';
         clearSelection();
       }
     };
-
-
-    const clear = () => {
-      this.$refs.selectRef.clear();
-    }
-
-
-  mounted() {
-    if(this.selectDefault){
-      this.$refs.selectRef.select(this.selectDefault, this.options);
-    }
-  },
-
-  created() {
-    // eslint-disable-next-line no-unused-vars
-    this.emitter.on('CLEAR_SELECT', payload => {
-      if(!payload){
-        this.$refs.selectRef.clear();
-      }
-    });
-  }
 
 </script>
 

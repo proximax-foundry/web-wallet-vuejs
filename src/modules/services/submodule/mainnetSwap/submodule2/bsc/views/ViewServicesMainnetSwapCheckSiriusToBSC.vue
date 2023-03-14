@@ -240,19 +240,20 @@ import { useI18n } from 'vue-i18n';
     const bscScanUrl = swapData.BSCScanUrl;
     const remoteTxnLink = computed( () => bscScanUrl + remoteTxnHash.value);
 
-    let provider;
+    let provider = new ethers.providers.Web3Provider(window.ethereum);
     let signer;
+    let ethereum = (window as any).ethereum
+
 
     const initMetamask = ()=>{
        if (typeof window.ethereum !== 'undefined') {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
         signer = provider.getSigner();
         isInstallMetamask.value = true;
         isMetamaskConnected.value = ethereum.isConnected()?true:false;
         ethereum
           .request({ method: 'eth_accounts' })
           .then(fetchMetaAccount)
-          .catch((err) => {
+          .catch((err:any) => {
             console.error(err);
           });
         ethereum
@@ -260,7 +261,7 @@ import { useI18n } from 'vue-i18n';
           .then((metaChainId:string) => {
             verifyChain(metaChainId);
           })
-          .catch((err) => {
+          .catch((err:any) => {
             console.error(err);
           });
         ethereum.on('accountsChanged', handleAccountsChanged);
@@ -274,7 +275,7 @@ import { useI18n } from 'vue-i18n';
 
     initMetamask()
    
-    function fetchMetaAccount(accounts) {
+    function fetchMetaAccount(accounts:any) {
       if (accounts.length === 0) {
         // MetaMask is locked or the user has not connected any accounts
         currentAccount.value = null;
@@ -284,7 +285,7 @@ import { useI18n } from 'vue-i18n';
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
     // For now, 'eth_accounts' will continue to always return an array
-    function handleAccountsChanged(accounts) {
+    function handleAccountsChanged(accounts:any) {
       if(window.ethereum.isMetaMask){
         if (accounts.length === 0) {
           // MetaMask is locked or the user has not connected any accounts
@@ -312,7 +313,7 @@ import { useI18n } from 'vue-i18n';
         ethereum
         .request({ method: 'eth_requestAccounts' })
         .then(fetchMetaAccount)
-        .catch((err) => {
+        .catch((err:any) => {
           if (err.code === 4001) {
             // EIP-1193 userRejectedRequest error
             // If this happens, the user rejected the connection request.
@@ -371,7 +372,7 @@ import { useI18n } from 'vue-i18n';
     const transactionFailed = ref(false);
     const transactionNotFound = ref(false);
     const isInvalidRemoteTxnHash = ref(false);
-    const remoteTxnHash = ref(false);
+    const remoteTxnHash = ref("");
     const transactionPending = ref(false);
     const isDisabled = ref(true);
 
@@ -416,7 +417,7 @@ import { useI18n } from 'vue-i18n';
         let transactionStatus = await provider.getTransaction(remoteTxnHash.value);
 
         let isTxnPending = false;
-        provider.on("pending", (tx:boolean) => {
+        provider.on("pending", (tx:string) => {
           if(tx === remoteTxnHash.value){
             isTxnPending = true;
           }
@@ -425,7 +426,7 @@ import { useI18n } from 'vue-i18n';
         if(isTxnPending){
           transactionPending.value = true;
           return true;
-        }else if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
+        }else if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to?.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
           return true;
         }else if(!transactionReceipt && !transactionStatus){ // invalid transaction hash - transaction not found
           transactionNotFound.value = true;

@@ -28,10 +28,10 @@
         </select>
         <div class="text-sm my-5 font-bold">{{$t('general.transactionDetails')}}</div>
         <div class="error error_box mb-5" v-if="xpxFeeErr">{{$t('swap.failCoverTxFee')}}</div>
-        <SelectInputAccountOutgoingSwap :otherToken='selectedToken?.namespace' :otherTokenId='selectedToken?.assetId' :name='selectedToken?.name' v-model="siriusAddress" :placeholder="$t('swap.fromSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" :divisibility="tokenDivisibility"/>
+        <SelectInputAccountOutgoingSwap :otherToken='selectedToken.namespace as string' :otherTokenId='selectedToken.assetId' :name='selectedToken.name' v-model="siriusAddress" :placeholder="$t('swap.fromSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet?.selectDefaultAccount()?.address" :divisibility="tokenDivisibility"/>
         <div class="relative">
           <div class="opacity-90 w-full h-full absolute z-10 bg-white" v-if="!siriusAddress"></div>
-          <SwapInputClean class="mt-5" :disabled="disableAmount" :remarkOption="selectedToken?.name=='xpx'" v-model="amount" :balance="selectedAccountBalance" :placeholder="`${selectedToken?.name}` +' '+ $t('general.amount')" type="text" :showError="showAmountErr" :errorMessage="$t('general.insufficientBalance')" :emptyErrorMessage="$t('swap.amountEmpty')" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()"  :toolTip="$t('swap.bscAmountMsg',{token: selectedTokenName.toUpperCase()})" :decimal="tokenDivisibility"/>
+          <SwapInputClean class="mt-5" :disabled="disableAmount" :remarkOption="selectedToken.name=='xpx'" v-model="amount" :balance="selectedAccountBalance" :placeholder="`${selectedToken.name}` +' '+ $t('general.amount')" type="text" :showError="showAmountErr" :errorMessage="$t('general.insufficientBalance')" :emptyErrorMessage="$t('swap.amountEmpty')" :maxAmount="maxSwapAmount" :gasFee="gasPriceInXPX" :transactionFee="txFeeDisplay" @clickedMaxAvailable="updateAmountToMax()"  :toolTip="$t('swap.bscAmountMsg',{token: selectedTokenName.toUpperCase()})" :decimal="tokenDivisibility"/>
           <MetamaskAddressInput :placeholder="$t('swap.bscAddress')" :errorMessage="$t('swap.bscAddressErr')" class="mt-5" :showError="showAddressErr" v-model="bscAddress" />
           <div class="tex-center font-bold text-sm my-5">{{$t('general.transactionFee')}} ({{$t('swap.bsc')}} BEP20 {{$t('general.network')}}):</div>
           <div class="md:grid md:grid-cols-3 mb-4">
@@ -66,9 +66,9 @@
           <PasswordInputClean :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
           <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
           <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center uppercase">
-            {{ amount }} {{selectedToken?.name}} 
-            <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken?.name=='metx'" class="w-5 h-5 ml-4"> 
-            <img v-if="selectedToken?.name=='xpx'" src="@/modules/account/img/proximax-logo.svg" class='w-5 h-5 ml-4'>
+            {{ amount }} {{selectedToken.name}} 
+            <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken.name=='metx'" class="w-5 h-5 ml-4"> 
+            <img v-if="selectedToken.name=='xpx'" src="@/modules/account/img/proximax-logo.svg" class='w-5 h-5 ml-4'>
           </div>
           <div class="flex justify-center mt-3">
             <div class="text-xs text-gray-600 mt-2 max-w-screen-md">{{$t('swap.bscOutgoingMsg')}}</div>
@@ -95,15 +95,15 @@
           <div class="md:mx-20 lg:mx-10 xl:mx-40 border-2 border-gray-200 mt-4 p-5 text-xs font-bold filter shadow-lg">
             <div class="text-blue-primary mb-1">{{$t('general.from')}}: {{ selectedAccountName }}</div>
             <div class="break-all">{{ Helper.createAddress(selectedAccountAddress).pretty() }}</div>
-            <div class="mt-1 ">{{$t('swap.swapAmount')}} {{ amount }} {{selectedToken?.name.toUpperCase()}} 
-              <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken?.name=='metx'" class="w-3 h-3 ml-2 inline relative" style="top: -2px"> 
-              <img v-if="selectedToken?.name=='xpx'" src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
+            <div class="mt-1 ">{{$t('swap.swapAmount')}} {{ amount }} {{selectedToken.name.toUpperCase()}} 
+              <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken.name=='metx'" class="w-3 h-3 ml-2 inline relative" style="top: -2px"> 
+              <img v-if="selectedToken.name=='xpx'" src="@/modules/dashboard/img/icon-xpx.svg" class="w-3 h-3 ml-2 inline relative" style="top: -2px"></div>
             <div>
               <img src="@/modules/services/submodule/mainnetSwap/img/icon-dots.svg" class="inline-block h-8 my-2">
             </div>
             <div class="text-blue-primary mb-1">{{$t('general.to')}}: {{$t('swap.metamaskAcc')}}</div>
             <div>{{ bscAddress }}</div>
-            <div class="mt-1 ">{{$t('swap.equivalentTo')}} {{ amount }} BEP20 {{selectedToken?.name.toUpperCase()}}</div>
+            <div class="mt-1 ">{{$t('swap.equivalentTo')}} {{ amount }} BEP20 {{selectedToken.name.toUpperCase()}}</div>
           </div>
           <div class="my-5 sm:my-7 text-gray-500 text-xs md:mx-20 lg:mx-10 xl:mx-40">{{$t('swap.swapMsg3')}}</div>
           <label class="inline-flex items-center mb-5">
@@ -156,7 +156,7 @@ import type { Account } from "@/models/account";
     const timerInterval = setInterval(()=>{
       --timerSeconds.value;
     }, 1000);
-    const selectedToken = ref<{name:string, assetId:string, namespace:string}>()
+    const selectedToken = ref<{ name: string; assetId: string; contractAddress: string; namespace: string; }>({name: "", assetId: "", contractAddress: "", namespace: ""})
     const selectedTokenName = ref('');
     const timerStop = watch(()=> timerSeconds.value, (newValue)=>{
 
@@ -252,8 +252,8 @@ import type { Account } from "@/models/account";
         selectedAccountName.value = account.name;
         selectedAccountAddress.value = account.address;
         
-        if(selectedToken.value?.name.toUpperCase() !="XPX"){
-          let foundIndex = account.assets.findIndex(asset=>asset.idHex== selectedToken.value?.assetId);
+        if(selectedToken.value.name.toUpperCase() !="XPX"){
+          let foundIndex = account.assets.findIndex(asset=>asset.idHex== selectedToken.value.assetId);
           selectedAccountBalance.value = foundIndex > -1 ? account.assets[foundIndex].amount : 0;
           maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value , tokenDivisibility.value);
         }else{//if xpx
@@ -551,7 +551,7 @@ import type { Account } from "@/models/account";
     };
 
     watch(selectedTokenName,n=>{
-      selectedToken.value = tokenList.value.find(x => x.name === n);
+      selectedToken.value = tokenList.value.find(x => x.name === n) ?? { name: "", assetId: "", contractAddress: "", namespace: "", };
     });
 
     // watch(selectedToken,n=>{
@@ -636,7 +636,7 @@ import type { Account } from "@/models/account";
         if(!account){
           account = walletState.currentLoggedInWallet?.others.find(account => account.address == siriusAddress.value) as Account;
         }
-      if(selectedToken.value?.name!="xpx"){
+      if(selectedToken.value.name!="xpx"){
         maxSwapAmount.value = Helper.convertNumberMinimumFormat(selectedAccountBalance.value , tokenDivisibility.value);
         if(amount.value>maxSwapAmount.value){
           updateAmountToMax()
@@ -694,7 +694,7 @@ import type { Account } from "@/models/account";
           if(!selectedAccount.value){
             return
           }
-          if(selectedToken.value?.name=='xpx'){
+          if(selectedToken.value.name=='xpx'){
             if((amount.value + gasPriceInXPX.value + txFee.value) > selectedAccount.value.balance){
               addErrorToast(t('swap.insufficientAmount'), t('swap.swapInsufficientAmount'), 5000);
               return;
@@ -744,7 +744,7 @@ import type { Account } from "@/models/account";
       let stringifyData = JSON.stringify(data);
 
       try {
-        const response = await fetch(SwapUtils.getOutgoing_SwapTransfer_URL(swapServerUrl,selectedToken.value?.name), {
+        const response = await fetch(SwapUtils.getOutgoing_SwapTransfer_URL(swapServerUrl,selectedToken.value.name), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -826,7 +826,7 @@ import type { Account } from "@/models/account";
       }
     }
 
-    const addErrorToast = (summary:string, detail:string, life=undefined)=>{
+    const addErrorToast = (summary:string, detail:string, life:number | undefined=undefined)=>{
       toast.add({
           severity:'error',
           summary: summary,

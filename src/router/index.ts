@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import { HomeRoutes } from '@/modules/home/routingHome';
 import { WalletRoutes } from '@/modules/wallet/routingWallet';
+import { MainnetSwapRoutes }from '@/modules/services/submodule/mainnetSwap/routingMainnetSwap'
 import { AccountRoutes } from '@/modules/account/routingAccount';
 import { TransferRoutes } from '@/modules/transfer/routingTransfer';
 import { ServiceRoutes  } from '@/modules/services/routingService';
@@ -16,7 +17,8 @@ const router = createRouter({
     ...TransferRoutes,
     ...ServiceRoutes,
     ...DashboardRoutes,
-    ...MetadataTransactionRoutes
+    ...MetadataTransactionRoutes,
+    ...MainnetSwapRoutes
   ],
 });
 
