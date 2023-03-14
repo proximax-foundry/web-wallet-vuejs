@@ -109,7 +109,7 @@
           <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig="isMultisig" :is-cosigner="isCoSigner"
             :on-partial="onPartial" :transaction-fee="aggregateFee" :total-fee-formatted="totalFeeFormatted"
             :get-multi-sig-cosigner="walletCosignerList" :check-cosign-balance="checkCosignBalance"
-            :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="lockFundTxFee" :balance="accBalance"
+            :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="lockFundTxFee" :balance="accBalance.toString()"
             :selected-acc-add="selectedAccAdd" />
           <div class="mt-5" />
           <div class='font-semibold text-xs text-white mb-1.5'>{{ $t('general.enterPasswordContinue') }}</div>
@@ -181,7 +181,7 @@ const selectOtherCosign = ref([]);
 const contactName = ref<string[]>([])
 const defaultAcc = walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.selectDefaultAccount() : null
 const selectedAccAdd = ref(defaultAcc ? defaultAcc.address : '');
-const accBalance = ref(Helper.toCurrencyFormat(defaultAcc ? defaultAcc.balance : 0, AppState.nativeToken.divisibility));
+
 // current wallet
 const wallet = walletState.currentLoggedInWallet;
 // get account details initialization
@@ -195,7 +195,12 @@ const acc = computed(() => {
   }
   return acc
 })
-
+const accBalance = computed(()=>{
+  if(!acc.value){
+    return 0
+  }
+  return acc.value.balance
+})
 const lockFundCurrency = computed(() => {
   if (!networkState.currentNetworkProfileConfig || !networkState.currentNetworkProfileConfig.lockedFundsPerAggregate) {
     return 0
@@ -214,12 +219,10 @@ const lockFundTxFee = computed(() => {
 });
 const aggregateFee = ref(0)
 let updateAggregateFee = () => {
-  if (!acc.value) {
+  if (!acc.value || !networkState.currentNetworkProfileConfig || !AppState.chainAPI) {
     return
   }
-  MultisigUtils.getAggregateFee(acc.value.publicKey, coSign.value, numApproveTransaction.value, numDeleteUser.value, removeCosign.value).then(fee => {
-    aggregateFee.value = fee
-  })
+  aggregateFee.value = MultisigUtils.getAggregateFee(acc.value.publicKey, coSign.value, numApproveTransaction.value, numDeleteUser.value, removeCosign.value)
 }
 
 const cosignaturies = computed(() => {
@@ -232,8 +235,15 @@ const cosignaturies = computed(() => {
   })
   return cosignaturies
 })
-const numApproveTransaction = ref(acc.value ? (acc.value.multisigInfo.find(acc => acc.level == 0) as MultisigInfo).minApproval : 0);
-const numDeleteUser = ref(acc.value ? (acc.value.multisigInfo.find(acc => acc.level == 0) as MultisigInfo).minRemoval : 0);
+
+
+const numApproveTransaction = ref( 0);
+const numDeleteUser = ref( 0);
+
+
+
+
+
 const cosignerName = computed(() => {
   if (!wallet) {
     return []
@@ -255,10 +265,9 @@ const cosignerName = computed(() => {
   })
   return name
 })
-updateAggregateFee()
 
 const getCosignerList = () => {
-  if (!acc.value) {
+  if (!acc.value || !networkState.currentNetworkProfileConfig) {
     return { hasCosigner: false, cosignerList: [] }
   }
   return MultisigUtils.getCosignerInWallet(acc.value.publicKey)
@@ -325,6 +334,19 @@ const totalFee = computed(() => {
     return Math.round((aggregateFee.value + lockFundCurrency.value + lockFundTxFee.value) * Math.pow(10, tokenDivisibility)) / Math.pow(10, tokenDivisibility)
   }
 })
+
+watch(acc,n=>{
+  if(n){
+    fundStatus.value = n.balance < totalFee.value
+    const findAcc = n.multisigInfo.find(acc => acc.level == 0)
+    if(findAcc){
+      numApproveTransaction.value = findAcc.minApproval
+      numDeleteUser.value = findAcc.minRemoval
+      
+    }
+    
+  }
+},{immediate:true,deep:true})
 
 const clear = () => {
   coSign.value = [];
@@ -458,7 +480,7 @@ const contact = computed(() => {
         key: "0-" + indexNo.toString(),
         label: element.name,
         data: element.publicKey,
-        selectable: false
+        selectable: true
       }
     )
     indexNo++
@@ -481,7 +503,7 @@ const contact = computed(() => {
           key: "1-" + indexNo.toString(),
           label: element.name,
           data: element.address,
-          selectable: false
+          selectable: true
         }
       )
       indexNo++
@@ -666,14 +688,12 @@ const cosigners = computed(() => {
   return cosigner;
 });
 
-// check if onPartial
-try {
-  if (acc.value) {
+
+watch(networkState,n=>{
+  if(n.currentNetworkProfile && acc.value){
     MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey, AppState.networkType)).then(onPartialBoolean => onPartial.value = onPartialBoolean)
   }
-} catch (error) {
-
-}
+},{immediate:true})
 const findAccount = findAcc(selectedCosignPublicKey.value)
 if (findAccount) {
   if (findAccount.balance < totalFee.value) {

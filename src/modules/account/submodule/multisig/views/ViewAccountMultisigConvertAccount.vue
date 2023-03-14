@@ -75,7 +75,7 @@
           <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig-already="isMultisig" :on-partial="onPartial"
             :transaction-fee="aggregateFee" :total-fee-formatted="totalFeeFormatted"
             :lock-fund-currency-convert="lockFundCurrency" :lock-fund-tx-fee-convert="String(lockFundTxFee)"
-            :balance="accBalance" :selected-acc-add="selectedAccAdd" />
+            :balance="accBalance.toString()" :selected-acc-add="selectedAccAdd" />
           <div class="mt-5" />
           <div class='font-semibold text-xs text-white mb-1.5'>{{ $t('general.enterPasswordContinue') }}</div>
           <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"
@@ -114,6 +114,7 @@ import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { MultisigUtils } from '@/util/multisigUtils';
 import type { TreeNode } from 'primevue/tree';
+import { ValueRange } from '@js-joda/core';
 
 const p = defineProps({
   address: {
@@ -143,7 +144,6 @@ const toggleContact = ref<boolean[]>([])
 const onPartial = ref(false);
 const defaultAcc = walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.selectDefaultAccount() : null
 const selectedAccAdd = ref(defaultAcc ? defaultAcc.address : '');
-const accBalance = ref(Helper.toCurrencyFormat(defaultAcc ? defaultAcc.balance : 0, AppState.nativeToken.divisibility));
 const lockFundCurrency = computed(() => {
   if (!networkState.currentNetworkProfileConfig || !networkState.currentNetworkProfileConfig.lockedFundsPerAggregate) {
     return "0"
@@ -170,21 +170,29 @@ const acc = computed(() => {
   return walletState.currentLoggedInWallet.accounts.find(acc => acc.address === p.address)
 })
 
+const accBalance = computed(()=>{
+  if(!acc.value){
+    return 0
+  }
+  return acc.value.balance
+})
+
+
 let isMultisig = computed(() => {
   if (!acc.value) {
     return
   }
   return MultisigUtils.checkIsMultiSig(acc.value.address)
 })
-let updateAggregateFee = () => {
-  if (!acc.value) {
+let updateAggregateFee =() => {
+  if (!acc.value || !AppState.chainAPI) {
     return
   }
-  MultisigUtils.getAggregateFee(acc.value.publicKey, coSign.value, numApproveTransaction.value, numDeleteUser.value).then(fee => {
-    aggregateFee.value = fee
-  })
+  
+     
+  aggregateFee.value = MultisigUtils.getAggregateFee(acc.value.publicKey, coSign.value, numApproveTransaction.value, numDeleteUser.value)
+  
 }
-updateAggregateFee()
 const totalFee = computed(() => {
   let tokenDivisibility = AppState.nativeToken.divisibility
   if (tokenDivisibility == 0) {
@@ -228,7 +236,7 @@ const contact = computed(() => {
         key: "0-" + indexNo.toString(),
         label: element.name,
         data: element.publicKey,
-        selectable: false
+        selectable: true
       }
     )
     indexNo++
@@ -251,7 +259,7 @@ const contact = computed(() => {
           key: "1-" + indexNo.toString(),
           label: element.name,
           data: element.address,
-          selectable: false
+          selectable: true
         }
       )
       indexNo++
@@ -455,7 +463,7 @@ const validateDelete = (e: KeyboardEvent) => {
     e.preventDefault();
   }
 }
-watch(numDeleteUser, (n) => {
+watch(numDeleteUser, async(n) => {
   updateAggregateFee()
   if (maxNumDeleteUser.value == 0 && n > 1) {
     err.value = deleteUserErrorMsg;
@@ -474,29 +482,25 @@ watch(numDeleteUser, (n) => {
 });
 const disabledPassword = computed(() => (onPartial.value || isMultisig.value));
 
-// check if onPartial
-if (acc.value) {
-  MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey, AppState.networkType)).then(verify =>
-    onPartial.value = verify
-  )
-}
 
-if (acc.value) {
-  if (acc.value.balance < totalFee.value) {
-    fundStatus.value = true
-  }
-}
 
-watch(acc, (n) => {
-  if (!n) {
+watch(acc, async(n) => {
+  if (!n ) {
     return
+  }
+  const findAcc = n.multisigInfo.find((element) => element.level === 0)
+  if(findAcc){
+    updateAggregateFee()
+  }
+  if(networkState.currentNetworkProfile){
+    onPartial.value = await MultisigUtils.onPartial(PublicAccount.createFromPublicKey(n.publicKey, AppState.networkType))
   }
   if (n.balance < totalFee.value) {
     fundStatus.value = true
   } else {
     fundStatus.value = false
   }
-});
+},{immediate:true,deep:true});
 
 const totalFeeFormatted = computed(() => {
   return Helper.amountFormatterSimple(totalFee.value, 0);
