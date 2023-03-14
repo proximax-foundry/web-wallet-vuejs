@@ -31,7 +31,7 @@
                       :key="item">{{ cosigner.name }} ({{ $t('general.balance') }}: {{ cosigner.balance }} {{
                         currentNativeTokenName }})</option>
                   </select></span>
-                <div v-if="cosignerBalanceInsufficient" class="error">- {{ $t('general.insufficientBalance') }}</div>
+                <div v-if="cosignerBalanceInsufficient" class="error"> {{ $t('general.insufficientBalance') }}</div>
               </div>
             </div>
             <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace"
@@ -55,7 +55,7 @@
           </div>
         </div>
         <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
-          <TransactionFeeDisplay :namespace-rental-fee-currency="rentalFeeCurrency.toString()"
+          <TransactionFeeDisplay :namespace-rental-fee-currency="rentalFee.toString()"
             :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted"
             :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance.toString()"
             :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="lockFundTxFee" :balance="balance.toString()"
@@ -174,7 +174,6 @@ const rentalFee = computed(() => {
   }
 });
 
-const rentalFeeCurrency = computed(() => Helper.convertToExact(rentalFee.value, AppState.nativeToken.divisibility));
 
 const lockFund = computed(() => {
   if (networkState.currentNetworkProfileConfig && networkState.currentNetworkProfileConfig.lockedFundsPerAggregate) {
@@ -204,36 +203,30 @@ const disableCreate = computed(() => !(
   walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value) && !showNamespaceNameError.value && selectNamespace.value
 ));
 
-const defaultAcc = walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.selectDefaultAccount() : null
-const selectedAccName = ref(defaultAcc ? defaultAcc.name : '');
-const selectedAccAdd = ref(defaultAcc ? defaultAcc.address : '');
-const balance = ref(Helper.convertToExact(defaultAcc ? defaultAcc.balance : 0, AppState.nativeToken.divisibility));
-const balanceNumber = ref(defaultAcc ? defaultAcc.balance : 0);
+const defaultAcc = computed(()=>{
+  if(!walletState.currentLoggedInWallet){
+    return null
+  }
+  return walletState.currentLoggedInWallet.selectDefaultAccount() 
+})
+
+const selectedAccName = ref(defaultAcc.value ? defaultAcc.value.name : '');
+const selectedAccAdd = ref(defaultAcc.value ? defaultAcc.value.address : '');
+
+
 
 const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
 const showNoBalance = computed(() => {
   if (isNotCosigner.value) {
-    return balanceNumber.value < (rentalFee.value + transactionFee.value);
+    return balance.value < (rentalFee.value + transactionFee.value);
   } else {
-    return balanceNumber.value < (rentalFee.value + transactionFee.value + lockFundTotalFee.value);
+    return balance.value < (rentalFee.value + transactionFee.value + lockFundTotalFee.value);
   }
 });
 
 // validate enough fee to create namespace
-if (balance.value < rentalFee.value) {
-  disabledPassword.value = true;
-  disabledClear.value = true;
-  disabledDuration.value = true;
-  disableNamespaceName.value = true;
-  disableSelectNamespace.value = true;
-} else {
-  disabledPassword.value = false;
-  disabledClear.value = false;
-  disabledDuration.value = false;
-  disableNamespaceName.value = false;
-  disableSelectNamespace.value = false;
-}
+
 
 const accounts = computed(() => {
   if (walletState.currentLoggedInWallet) {
@@ -251,9 +244,36 @@ const accounts = computed(() => {
   }
 });
 
+const balance = computed(()=>{
+  const findAcc = accounts.value.find(acc=>acc.address == selectedAccAdd.value)
+  if(findAcc){
+    return findAcc.balance
+  }
+  return 0
+})
+
+watch(balance,n=>{
+  if (n < rentalFee.value) {
+  disabledPassword.value = true;
+  disabledClear.value = true;
+  disabledDuration.value = true;
+  disableNamespaceName.value = true;
+  disableSelectNamespace.value = true;
+} else {
+  disabledPassword.value = false;
+  disabledClear.value = false;
+  disabledDuration.value = false;
+  disableNamespaceName.value = false;
+  disableSelectNamespace.value = false;
+}
+},{immediate:true})
+
 const transactionFee = ref(0);
 
 const getMultiSigCosigner = computed(() => {
+  if(!networkState.currentNetworkProfileConfig){
+    return { hasCosigner: false, cosignerList: [] }
+  }
   const account = accounts.value.find(acc => acc.address == selectedAccAdd.value) as Account
   let cosigners = MultisigUtils.getCosignerInWallet(account.publicKey)
   let list: { hasCosigner: boolean, cosignerList: { publicKey: string, name: string, balance: number, address: string }[] } = { hasCosigner: cosigners.hasCosigner, cosignerList: [] }
@@ -276,10 +296,10 @@ const changeSelection = (address: string) => {
   selectNamespace.value = '';
   selectedAccName.value = account.name;
   selectedAccAdd.value = account.address;
-  balance.value = Helper.convertToExact(account.balance, AppState.nativeToken.divisibility);
-  balanceNumber.value = account.balance;
   currentSelectedName.value = account.name;
 }
+
+
 
 const updateNamespaceSelection = (namespaceNameSelected: string) => {
   let fee = 0;
@@ -482,11 +502,17 @@ watch(selectedAccAdd, (n) => {
     }
   }
 }, { immediate: true });
-watch(cosignerAddress, (n, o) => {
-  if (n != o) {
-    const findAcc =  accounts.value.find((element) => element.address == n)
+
+const cosignerBalance = computed(()=>{
+  const findAcc =  accounts.value.find((element) => element.address == cosignerAddress.value)
+  if(findAcc){
+    return findAcc.balance
+  }
+  return 0
+})
+watch(cosignerBalance, (n) => {
     if (
-      findAcc && findAcc.balance <
+      n <
       lockFundTotalFee.value
     ) {
       cosignerBalanceInsufficient.value = true;
@@ -502,9 +528,13 @@ watch(cosignerAddress, (n, o) => {
       disableSelectNamespace.value = false;
     }
 
-  }
 });
 const checkNamespace = async () => {
+  if (namespaceName.value.length == 0) {
+    showNamespaceNameError.value = true;
+    namespaceErrorMessage.value = t('namespace.validName');
+    return
+  }
   if (namespaceName.value.trim()) {
     if (isReservedRootNamespace()) {
       return;
@@ -542,12 +572,7 @@ const checkNamespace = async () => {
   }
 }
 
-watch(namespaceName, n => {
-  if (n.length == 0) {
-    showNamespaceNameError.value = true;
-    namespaceErrorMessage.value = t('namespace.validName');
-  }
-})
+
 
 
 </script>

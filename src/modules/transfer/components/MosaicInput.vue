@@ -8,7 +8,7 @@
     </div>
     <!-- for the dropdown -->
     <div class="select mb-3" style="position: relative;">
-      <Dropdown v-model="modelValue" :options="options" :style="{ 'width': '100%' }" :showClear="true" :filter="true"
+      <Dropdown @update:model-value="modelValue" :options="options" :style="{ 'width': '100%' }" :showClear="true" :filter="true"
          optionLabel="text" option-disabled="disableOptions" :placeholder="placeholder"
         @change="makeSelection($event.value)" :virtualScrollerOptions="{
           itemSize: 32,
@@ -68,7 +68,6 @@ const props = defineProps({
     required:true
   }
 })
-  const selectedMosaic = ref(props.modelValue)
 
   const emit = defineEmits([
     'update:modelValue', 'show-mosaic-selection', 'remove-mosaic-selected'

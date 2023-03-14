@@ -1,11 +1,11 @@
 <template>
   <div>
     <div
-      class="border border-gray-200 select selectPlugin py-1 relative rounded-md"
-      :class="`${!placeholder ? 'pt-2' : ''}`"
+      class="border border-gray-200 select selectPlugin relative rounded-md"
+      :class="`${placeholder ? 'pt-2' : ''}`"
     >
       <div
-        class="uppercase text-gray-400 font-light text-txs text-left mb-2 pl-2"
+        class="uppercase text-gray-400 font-light text-txs text-left pl-2"
         v-if="placeholder"
       >
         {{ placeholder }}
@@ -16,7 +16,6 @@
         style="top: 4px"
       />
       <Multiselect
-        class="border"
         :placeholder="placeholder"
         :options="options"
         mode="single"
@@ -76,19 +75,9 @@ const closeSelection = () => {
 @import "@/assets/scss/multiselect.scss";
 
 .selectPlugin::deep{
-  .multiselect-input {
-    min-height: 18px;
-  }
+ 
 
-  .multiselect-clear {
-    display: inline-block;
-    right: 7px;
-    top: 2px;
-  }
-
-  .multiselect-options {
-    margin-top: 4px;
-  }
+  
 
   > .border {
     border-width: 0px !important;

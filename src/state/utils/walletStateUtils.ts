@@ -6,8 +6,7 @@ import { SessionService } from "../../models/stores/sessionService";
 
 const sessionWalletKey = "loggedInWallet";
 const sessionNetworkNameKey = "networkName";
-
-import jwt from "jsonwebtoken";
+import * as jose from "jose"
 import { sha3_256, sha3_512 } from "js-sha3";
 import cryptoRandomString from "crypto-random-string";
 
@@ -16,10 +15,10 @@ export class WalletStateUtils {
     walletState.wallets = new Wallets();
   }
 
-  static updateLoggedIn(wallet: Wallet): void {
+  static async updateLoggedIn(wallet: Wallet):Promise<void> {
     walletState.currentLoggedInWallet = wallet;
     walletState.isLogin = true;
-    const walletToken = WalletSessionToken.create(
+    const walletToken = await WalletSessionToken.create(
       wallet.name,
       wallet.networkName
     );
@@ -34,17 +33,17 @@ export class WalletStateUtils {
     sessionStorage.removeItem("defaultAcc");
   }
 
-  static checkFromSession(): boolean {
+  static async checkFromSession(): Promise<boolean> {
     const sessionWalletToken = SessionService.getRaw(sessionWalletKey);
     const sessionNetworkName = SessionService.getRaw(sessionNetworkNameKey);
 
     if (sessionWalletToken && sessionNetworkName) {
-      const verifiableToken: jwt.JwtPayload | null | string =
+      const verifiableToken: jose.JWTPayload =
         WalletSessionToken.decode(sessionWalletToken);
       if (!verifiableToken || typeof verifiableToken == "string") {
         throw new Error("Service unavailable");
       }
-      const isValid = WalletSessionToken.verify(
+      const isValid = await WalletSessionToken.verify(
         sessionWalletToken,
         verifiableToken.name,
         sessionNetworkName,
@@ -95,18 +94,17 @@ export class WalletStateUtils {
 }
 
 class WalletSessionToken {
-  static decode(token: string): jwt.JwtPayload | string | null {
-    const decoded = jwt.decode(token);
+  static decode(token: string): jose.JWTPayload  {
+    return jose.decodeJwt(token)
 
-    return decoded;
   }
 
-  static verify(
+  static async verify(
     token: string,
-    walletName: string,
+    walletName: any,
     networkName: string,
-    salt: string
-  ) {
+    salt: any
+  ) :Promise<boolean> {
     //let verifiedData: VerifiableToken;
     const secret = WalletSessionToken.generateWalletSessionToken(
       walletName,
@@ -115,20 +113,22 @@ class WalletSessionToken {
     );
 
     try {
-      jwt.verify(token, secret, { algorithms: ["HS512"] });
+      const {protectedHeader} = await jose.jwtVerify(token, new TextEncoder().encode(secret) )
+      if(JSON.stringify(protectedHeader) == JSON.stringify({alg:"HS256"})){
+        return true
+      }
+      return false
     } catch (error: unknown) {
-      if (error instanceof Error) {
+      /* if (error instanceof Error) {
         if (error.name === "TokenExpiredError") {
           console.log("Login Expired");
         }
-      }
+      } */
       return false;
     }
-
-    return true;
   }
 
-  static create(walletName: string, networkName: string): string {
+  static async create(walletName: string, networkName: string): Promise<string> {
     const salt = WalletSessionToken.genToken(10);
 
     const verifiableToken = {
@@ -144,9 +144,9 @@ class WalletSessionToken {
       salt,
       networkName
     );
-
-    const token = jwt.sign(verifiableToken, secret, { algorithm: "HS512" });
-
+    const token = await new jose.SignJWT(verifiableToken)
+    .setProtectedHeader({alg:"HS256"})
+    .sign(new TextEncoder().encode(secret))
     return token;
   }
 

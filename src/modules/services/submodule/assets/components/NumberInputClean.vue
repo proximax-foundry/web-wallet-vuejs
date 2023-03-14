@@ -62,5 +62,5 @@ input[type=number] {
 }
 
 .number_input {
-  @apply w-full flex border-0 outline-none border-white drop-shadow-none filter focus: outline-none text-tsm text-gray-600 font-bold disabled:opacity-50;
+  @apply w-full flex border-0 outline-none border-white drop-shadow-none filter  text-tsm text-gray-600 font-bold disabled:opacity-50;
 }</style>

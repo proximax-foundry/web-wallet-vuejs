@@ -32,6 +32,11 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import ConfirmationService from 'primevue/confirmationservice';
 import VueBlocksTree from "vue3-blocks-tree";
+import 'primevue/resources/themes/saga-blue/theme.css'
+import 'primevue/resources/primevue.min.css'
+import 'primeicons/primeicons.css'
+import Sidebar from 'primevue/sidebar'
+import Dropdown from "primevue/dropdown";
 
 library.add(
   fas, faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
@@ -48,8 +53,9 @@ app.use(VueBlocksTree /* , {treeName:'blocks-tree'} */);
 
 app.component("Toast", Toast);
 app.component("Tree", Tree);
+app.component("Dropdown", Dropdown);
 app.component('font-awesome-icon', FontAwesomeIcon);
-
+app.component('Sidebar', Sidebar);
 app.directive("tooltip", Tooltip);
 app.directive("debounce", vue3Debounce({ lock: true }));
 app.directive("maska", vMaska);
@@ -273,7 +279,7 @@ if (!walletState.currentLoggedInWallet) {
   AppStateUtils.setStateReady('loadLoadedData');
 
   // check sessionStorage
-  if (!WalletStateUtils.checkFromSession()) {
+  if (!await WalletStateUtils.checkFromSession()) {
     NetworkStateUtils.checkSession();
     AppStateUtils.setStateReady('checkSession');
 
