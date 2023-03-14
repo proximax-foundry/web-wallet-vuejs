@@ -216,7 +216,7 @@ body{
 }
 
 .text-placeholder{
-  @apply flex-grow p-1 text-xs placeholder-gray-800 focus:outline-none;
+  @apply grow p-1 text-xs placeholder-gray-800 focus:outline-none;
 }
 
 .drop-shadow{

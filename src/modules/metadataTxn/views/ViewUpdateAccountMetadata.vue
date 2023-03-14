@@ -147,7 +147,9 @@ import { ThemeStyleConfig } from '@/models/stores';
 import { WalletUtils } from '@/util/walletUtils';
 import isValidUtf8 from 'utf-8-validate';
 import { useRouter } from 'vue-router';
+import { Buffer } from 'buffer';
 
+window.Buffer = Buffer;
 const props = defineProps({
   targetPublicKey: String,
   scopedMetadataKey: String,

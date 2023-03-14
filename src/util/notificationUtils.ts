@@ -9,9 +9,8 @@ import { SessionService } from "@/models/stores/sessionService";
 import { UnitConverter } from "./unitConverter";
 import { TimeUnit } from "../models/const/timeUnit";
 import type { Account as MyAccount } from "@/models/account";
-import i18n from "@/i18n";
 
-interface Notification {
+export interface Notification {
   id: string;
   type: string;
   label: string;

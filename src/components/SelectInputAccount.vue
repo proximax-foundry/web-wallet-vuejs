@@ -38,7 +38,7 @@
           <div class="flex">
             <div
               v-html="
-                convertImage(slotProps.options.value, 50, jdenticonConfig)
+                convertImage(slotProps.option.value, 50, jdenticonConfig)
               "
             />
             <div class="text-xs ml-2 font-semibold">
