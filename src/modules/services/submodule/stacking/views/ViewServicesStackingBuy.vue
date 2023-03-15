@@ -151,9 +151,9 @@ import { NamespaceUtils } from "@/util/namespaceUtils";
     const isLoaded = ref(false);
     const selectedFromTokenPrice = computed(()=>{
       priceUpdated.value; // just to trigger auto recompute
-      let checkTokenName = stableCoins.find(x => x.name === selectedFromToken.value)
-      if(checkTokenName){
-        return checkTokenName.price;
+      let checkCoins = stableCoins.find(x => x.name === selectedFromToken.value)
+      if(checkCoins){
+        return checkCoins.price;
       }
     });
 

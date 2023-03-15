@@ -4,7 +4,7 @@
     <div class="flex justify-between">
       <div class="flex items-center cursor-pointer" @click="isDisplayBuyTokenModal = true">
         <font-awesome-icon icon="caret-down" class="mr-1 text-gray-700" />
-        <img :src="require('@/modules/services/submodule/stacking/img/tokens/' + tokenImage)"
+        <img :src="'/src/modules/services/submodule/stacking/img/tokens/' + tokenImage"
           class="w-9 h-9 inline-block" />
         <div class="ml-1 text-tsm">{{ tokenName }} {{ tokenType }}</div>
       </div>
@@ -129,6 +129,6 @@ const options = {
 </script>
 <style lang="scss" scoped>
 .supply_input {
-  @apply flex border-0 border-white drop-shadow-none filter focus: outline-none text-sm text-gray-600 font-bold disabled:opacity-50 mb-1 text-right;
+  @apply flex border-0 border-white drop-shadow-none filter focus:outline-none text-sm text-gray-600 font-bold disabled:opacity-50 mb-1 text-right;
 }
 </style>
