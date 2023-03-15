@@ -108,16 +108,18 @@ const selectedAccount = computed(() => {
 });
 
 const selectedAddress = ref(p.selectDefault);
-const selectedAccountInfo = {
-  label: selectedAccount.value,
-  value: selectedAddress.value,
-};
+const selectedAccountInfo = computed(()=>{
+  return{
+    label: selectedAccount.value,
+    value: selectedAddress.value,
+  }
+})
 const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig.value));
 
 const selectAccount = (accountName: string, accountAddress: string) => {
   emitter.emit("select-account", accountAddress);
-  selectedAccount.value, (selectedAccountInfo.label = accountName);
-  selectedAddress.value, (selectedAccountInfo.value = accountAddress);
+  selectedAccount.value, (selectedAccountInfo.value.label = accountName);
+  selectedAddress.value, (selectedAccountInfo.value.value = accountAddress);
   selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig.value);
   toggleSelection.value = !toggleSelection.value;
 };

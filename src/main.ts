@@ -271,7 +271,6 @@ runWalletMigration();
 
 
 
-
 // check from session when page refreshed
 if (!walletState.currentLoggedInWallet) {
   // reload loaded data
@@ -279,13 +278,17 @@ if (!walletState.currentLoggedInWallet) {
   AppStateUtils.setStateReady('loadLoadedData');
 
   // check sessionStorage
-  if (!await WalletStateUtils.checkFromSession()) {
-    NetworkStateUtils.checkSession();
+ 
+  WalletStateUtils.checkFromSession().then(bool=>{
+    if(bool){
+      NetworkStateUtils.checkSession();
+      AppStateUtils.setStateReady('checkSession');
+  
+      router.push({ name: "Home" });
+    }
+  }).finally(()=>{
     AppStateUtils.setStateReady('checkSession');
+    AppStateUtils.setStateReady('loadLoadedData');
+  })
 
-    router.push({ name: "Home" });
-  }
-
-  AppStateUtils.setStateReady('checkSession');
-  AppStateUtils.setStateReady('loadLoadedData');
 }

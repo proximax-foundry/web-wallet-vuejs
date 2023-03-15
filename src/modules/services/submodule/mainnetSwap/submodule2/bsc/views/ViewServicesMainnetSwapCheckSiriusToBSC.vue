@@ -167,7 +167,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, ref, onBeforeUnmount } from "vue";
+import { computed, ref } from "vue";
 import TextInputClean from '@/components/TextInputClean.vue';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
@@ -175,12 +175,10 @@ import { ethers } from 'ethers';
 import { SwapUtils } from '@/util/swapUtils';
 import { networkState } from '@/state/networkState';
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
-import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 
 
     const {t} = useI18n()
-    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const serviceErr = ref('');
     const verifyMetaMaskPlugin = ref(true);
     if(window.ethereum){
