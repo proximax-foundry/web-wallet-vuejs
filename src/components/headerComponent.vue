@@ -292,6 +292,7 @@ import { UnitConverter } from "@/util/unitConverter";
 import { TimeUnit } from "@/models/const/timeUnit";
 import { AppStateUtils } from "@/state/utils/appStateUtils";
 import type { ToastMessageOptions } from "primevue/toast";
+import ding from "@/assets/audio/ding.ogg"
 
 const wideScreen = ref(false);
 const { t } = useI18n();
@@ -889,7 +890,7 @@ function beep() {
     /*volume = volume || 100;*/
 
     try {
-      let sound = new Audio(require("@/assets/audio/ding.ogg"));
+      let sound = new Audio(ding);
 
       // Set volume
       /*sound.volume = volume / 100;*/

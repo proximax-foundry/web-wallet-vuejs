@@ -16,7 +16,6 @@
 <script setup lang="ts">
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import { AppState } from "@/state/appState";
-import { networkState } from "@/state/networkState";
 import { walletState } from "@/state/walletState";
 import { Address } from "tsjs-xpx-chain-sdk";
 import { computed, getCurrentInstance, ref, watch } from "vue";

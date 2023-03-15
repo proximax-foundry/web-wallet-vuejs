@@ -264,19 +264,26 @@ if (AppState.nativeToken.label === "XPX") {
 
 
 const generateQR = async(url :string, size = 2, margin = 0) => {
-  return await qrcode.toString(url, { width: size, margin: margin });
+  return await qrcode.toDataURL(url, { width: size, margin: margin });
 }
 
-const saveWalletPaper = async(password :string) => {
+const saveWalletPaper = async(password:string) => {
   const doc = new jsPDF({
     unit: 'px'
   });
+  if(!acc.value){
+    return
+  }
   doc.addImage(pdfWalletPaperImg, 'JPEG', 120, 60, 205, 132);
 
   // QR Code Address
   const passwordInstance = WalletUtils.createPassword(password);
- 
-  doc.addImage(await generateQR(privateKey.value, 1, 0), "JPEG", 133, 120, 151.5, 105);
+  const privateKey = WalletUtils.decryptPrivateKey(
+      passwordInstance,
+      (acc.value as WalletAccount).encrypted,
+      (acc.value as WalletAccount).iv
+    );
+  doc.addImage(await generateQR(privateKey, 1, 0), "JPEG", 133, 120, 50, 40);
 
   // Addres number
   doc.setFontSize(8);

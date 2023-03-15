@@ -43,13 +43,13 @@ export class MultisigUtils {
     });
   }
 
-  static getAggregateFee = async (
+  static getAggregateFee = (
     publicKey: string,
     addedCosigners: string[],
     numApprove: number,
     numDelete: number,
     removeCosign?: string[]
-  ): Promise<number> => {
+  ): number=> {
     const wallet = walletState.currentLoggedInWallet;
 
     if (!AppState.chainAPI || !wallet) {
@@ -62,36 +62,13 @@ export class MultisigUtils {
       throw new Error("Account not found");
     }
     const multisigCosignatory: MultisigCosignatoryModification[] = [];
-    let cosignatory: PublicAccount | null = null;
     for (const cosignKey of addedCosigners) {
-      if (cosignKey.length == 64) {
-        cosignatory = PublicAccount.createFromPublicKey(
-          cosignKey,
-          AppState.networkType
-        );
-      } else if (cosignKey.length == 40 || cosignKey.length == 46) {
-        const address = Address.createFromRawAddress(cosignKey);
-
-        try {
-          const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(
-            address
-          );
-          cosignatory = PublicAccount.createFromPublicKey(
-            accInfo.publicKey,
-            AppState.networkType
-          );
-        } catch (error) {
-          console.log(error);
-        }
-      }
-      if (cosignatory) {
         multisigCosignatory.push(
           new MultisigCosignatoryModification(
             MultisigCosignatoryModificationType.Add,
-            cosignatory
+            PublicAccount.createFromPublicKey("0".repeat(64),AppState.networkType)
           )
         );
-      }
     }
     const cosignatories: PublicAccount[] = [];
     if (removeCosign) {
