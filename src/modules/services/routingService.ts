@@ -3,7 +3,7 @@ import { NamespaceRoutes } from '@/modules/services/submodule/namespaces/routing
 /* import { MainnetSwapRoutes } from '@/modules/services/submodule/mainnetSwap/routingMainnetSwap'; */
 import { SettingsRoutes } from '@/modules/services/submodule/settings/routingSettings';
 import { AssetsRoutes } from '@/modules/services/submodule/assets/routingAssets';
-/* import { StackingRoutes } from '@/modules/services/submodule/stacking/routingStacking'; */
+/* import { stakingRoutes } from '@/modules/services/submodule/staking/routingstaking'; */
 import type { RouteRecordRaw } from 'vue-router'
 
 export const ServiceRoutes: RouteRecordRaw[] = [

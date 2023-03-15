@@ -4,7 +4,7 @@
     <div class="flex justify-between">
       <div class="flex items-center cursor-pointer" @click="isDisplayBuyTokenModal = true">
         <font-awesome-icon icon="caret-down" class="mr-1 text-gray-700" />
-        <img :src="'/src/modules/services/submodule/stacking/img/tokens/' + tokenImage"
+        <img :src="'/src/modules/services/submodule/staking/img/tokens/' + tokenImage"
           class="w-9 h-9 inline-block" />
         <div class="ml-1 text-tsm">{{ tokenName }} {{ tokenType }}</div>
       </div>
@@ -31,8 +31,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { Helper } from '@/util/typeHelper';
-import SelectTokenModal from '@/modules/services/submodule/stacking/components/SelectTokenModal.vue';
-// import { availableTokens } from '@/modules/services/submodule/stacking/tokens';
+import SelectTokenModal from '@/modules/services/submodule/staking/components/SelectTokenModal.vue';
+// import { availableTokens } from '@/modules/services/submodule/staking/tokens';
 
   const props = defineProps({
     formLabel: String,

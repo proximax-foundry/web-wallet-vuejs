@@ -82,15 +82,14 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, shallowRef } from "vue";
-import { useRouter } from "vue-router";
 import { networkState } from "@/state/networkState";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { useI18n } from 'vue-i18n';
-import { availableTokens } from '@/modules/services/submodule/stacking/stableCoins';
-import { availableToTokens } from '@/modules/services/submodule/stacking/siriusTokens';
-import { bscStableCoins } from '@/modules/services/submodule/stacking/bscStableCoins';
-import { ethStableCoins } from '@/modules/services/submodule/stacking/ethStableCoins';
-import BuyFormInput from '@/modules/services/submodule/stacking/components/BuyFormInput.vue';
+import { availableTokens } from '@/modules/services/submodule/staking/stableCoins';
+import { availableToTokens } from '@/modules/services/submodule/staking/siriusTokens';
+import { bscStableCoins } from '@/modules/services/submodule/staking/bscStableCoins';
+import { ethStableCoins } from '@/modules/services/submodule/staking/ethStableCoins';
+import BuyFormInput from '@/modules/services/submodule/staking/components/BuyFormInput.vue';
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import Web3Modal from 'web3modal';
@@ -99,7 +98,7 @@ import { abi, SwapUtils } from '@/util/swapUtils';
 import { AppState } from "@/state/appState";
 import { walletState } from "@/state/walletState";
 import { Address, MosaicId, NamespaceId, NetworkType, UInt64 } from 'tsjs-xpx-chain-sdk';
-import toggleSwitch from '@/modules/services/submodule/stacking/components/toggleSwitch.vue';
+import toggleSwitch from '@/modules/services/submodule/staking/components/toggleSwitch.vue';
 import { getCurrentPriceUSD } from "@/util/functions";
 import { Utilities } from "@/util/utilities";
 import { Helper } from "@/util/typeHelper";
