@@ -38,7 +38,7 @@
           </div>
         </div>
       </div>
-      <div class="absolute flex invisible 2xl:visible pt-4 explicitLeft">
+      <div class="flex  2xl:visible pt-4 ">
         <div v-for="(label, index) in labels" :key="index">
           <div v-if="label.isLabeled" class="text-xs mr-3 border bg-gray-300 rounded-md p-1">{{ label.name }}</div>
         </div>

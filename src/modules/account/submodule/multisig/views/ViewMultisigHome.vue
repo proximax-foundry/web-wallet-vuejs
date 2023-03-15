@@ -74,7 +74,7 @@
 
 <script setup lang="ts">
 import { walletState } from '@/state/walletState';
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { Address, PublicAccount } from "tsjs-xpx-chain-sdk"
@@ -82,7 +82,6 @@ import { networkState } from '@/state/networkState';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { AppState } from '@/state/appState';
-import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { setDefaultAccInStorage } from '@/models/account';
 import { MultisigUtils } from '@/util/multisigUtils';
@@ -93,7 +92,6 @@ const p = defineProps({
     required: true
   }
 })
-const { t } = useI18n()
 const toast = useToast();
 const acc = computed(() => {
   if (!walletState.currentLoggedInWallet) {
@@ -174,11 +172,14 @@ let cosignerAccountsList = computed(() => {
 })
 
 //check if account is a cosigner
-let verifyHasMultisig = MultisigUtils.checkHasMultiSig(acc.value ? acc.value.address : '')
-isCosigner.value = verifyHasMultisig;
-//check if account is a multisig
-let verifyMultisig = MultisigUtils.checkIsMultiSig(acc.value ? acc.value.address : '')
-isMultisig.value = verifyMultisig;
+watch(acc,n=>{
+  if(n){
+    isCosigner.value = MultisigUtils.checkHasMultiSig(n.address)
+    isMultisig.value = MultisigUtils.checkIsMultiSig(n.address)
+
+  }
+},{immediate:true,deep:true})
+
 
 const copy = (id: string) => {
   let element = document.getElementById(id);
