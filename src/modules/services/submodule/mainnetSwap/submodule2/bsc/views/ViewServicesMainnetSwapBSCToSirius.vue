@@ -121,7 +121,6 @@
             :errorMessage="(!amount) ? 'Required Field' : Number(amount) >= minAmount ? $t('swap.insufficientTokenBalance') : `Min. amount is ${minAmount}(${feeAmount} ${selectedToken.name.toUpperCase()} will deducted for transaction fee)`"
             :divisibility="tokenDivisibility" />
           <div class="flex">
-          <button @click="consoleLog()">Test</button>
             <AddressInputClean :placeholder="$t('transfer.transferPlaceholder')" v-model="siriusAddress"
               v-debounce:1000="checkRecipient" :showError="showAddressError" />
             <div @click="toggleContact = !toggleContact"
@@ -767,10 +766,6 @@ const swapToken = ref('');
 const transactionHash = ref('');
 const swapQr = ref('');
 
-const saveCertificate = () => {
-  SwapUtils.generateIncomingPdfCert('BSC', swapTimestamp.value, siriusAddress.value, swapToken.value, transactionHash.value, swapQr.value);
-};
-
 const toast = useToast();
 const copy = (id: string) => {
   let stringToCopy = document.getElementById(id)?.getAttribute("copyValue");
@@ -1029,15 +1024,8 @@ const validated = () => {
 
 const savedCheck = ref(false);
 
-const consoleLog = () => {
-  console.log("123")
-  console.log(amount.value)
-  console.log(amount.value)
-  console.log(balance.value)
-  console.log(minAmount.value)
-  console.log(Number(amount.value) >= minAmount.value)
-  console.log(Number(amount.value) <= balance.value)
-  console.log(showAmountErr.value)
-}
+const saveCertificate = () => {
+  SwapUtils.generateIncomingPdfCert('BSC', swapTimestamp.value, siriusAddress.value, swapToken.value, transactionHash.value, swapQr.value);
+};
 
 </script>

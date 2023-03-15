@@ -651,7 +651,7 @@ export const abi = [
 
 export class SwapUtils {
   static generateQRCode = async (url: string): Promise<string> => {
-    return await QRCode.toString(url);
+    return await QRCode.toDataURL(url);
   };
 
   static generateIncomingPdfCert = (
