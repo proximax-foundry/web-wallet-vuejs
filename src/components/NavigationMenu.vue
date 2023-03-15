@@ -73,7 +73,7 @@
           class="h-3 w-3 inline-block relative mr-2"
         />{{ $t("general.asset") }}</router-link
       >
-      <!-- <router-link
+      <router-link
         :to="{ name: 'ViewServicesMainnetSwap' }"
         class="link_block flex items-center text-white"
         @click="closeNavi"
@@ -82,7 +82,7 @@
           src="@/assets/img/navi/icon-swap.svg"
           class="h-3 w-3 inline-block relative mr-2"
         />{{ $t("general.swap") }}</router-link
-      > -->
+      >
       <router-link
         :to="{ name: 'ViewAccountCreateSelectType' }"
         class="link_block flex items-center text-white"
