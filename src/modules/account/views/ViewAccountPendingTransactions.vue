@@ -144,7 +144,7 @@ const txnStates = [
 ]
 watch([...txnStates], () => {
     init()
-})
+},{deep:true})
 
 const aggregateBondedTxLength = computed(() => listenerState.aggregateBondedTxLength);
 watch(aggregateBondedTxLength, () => {

@@ -6,6 +6,7 @@ import { TransferRoutes } from '@/modules/transfer/routingTransfer';
 import { ServiceRoutes  } from '@/modules/services/routingService';
 import { DashboardRoutes } from '@/modules/dashboard/routingDashboard';
 import { MetadataTransactionRoutes  } from '@/modules/metadataTxn/routingMetadataTransaction';
+import { TransactionRoutes } from "@/modules/transaction/routingTransaction";
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -16,7 +17,8 @@ const router = createRouter({
     ...TransferRoutes,
     ...ServiceRoutes,
     ...DashboardRoutes,
-    ...MetadataTransactionRoutes
+    ...MetadataTransactionRoutes,
+    ...TransactionRoutes
   ],
 });
 
