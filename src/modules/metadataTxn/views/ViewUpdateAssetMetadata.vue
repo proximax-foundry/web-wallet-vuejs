@@ -187,13 +187,16 @@ const accountName = computed(() => {
 const existingScopedMetadataKeys = ref<{ value: string, type: number }[]>([])
 const defaultAcc = walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.selectDefaultAccount() : null
 const selectedAccAdd = ref(defaultAcc ? defaultAcc.address : '');
-const accBalance = computed(()=>{
-  const findAcc = accounts.value.find(acc=>acc.address == selectedAccAdd.value)
-  if(findAcc){
+const accBalance = computed(() => {
+  if (walletState.currentLoggedInWallet) {
+    const findAcc = accounts.value.find((element) => element.address === selectedAccAdd.value)
+    if (!findAcc) {
+      return 0
+    }
     return findAcc.balance
   }
-  return 0
-})
+  return 0;
+});
 const removeDoubleZero = (string: string) => {
   let isZero = string.endsWith('00')
   if (isZero) {
