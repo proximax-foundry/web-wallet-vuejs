@@ -64,7 +64,7 @@
           <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig="isMultisig" :is-cosigner="isCosigner"
             :on-partial="onPartial" :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted"
             :get-multi-sig-cosigner="walletCosignerList" :check-cosign-balance="checkCosignBalance"
-            :lock-fund-currency="lockFund" :lock-fund-tx-fee="lockFundTxFee" :balance="accBalance"
+            :lock-fund-currency="lockFund" :lock-fund-tx-fee="lockFundTxFee" :balance="accBalance.toString()"
             :selected-acc-add="selectedAccAdd" />
           <div class="mt-5" />
           <div class='font-semibold text-xs text-white mb-1.5'>{{ $t('general.enterPasswordContinue') }}</div>
@@ -128,7 +128,6 @@ const showPasswdError = ref(false);
 const err = ref("");
 const defaultAcc = walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.selectDefaultAccount() : null
 const selectedAccAdd = ref(defaultAcc ? defaultAcc.address : '');
-const accBalance = ref(Helper.toCurrencyFormat(defaultAcc ? defaultAcc.balance : 0, AppState.nativeToken.divisibility));
 const acc = computed(() => {
   if (!walletState.currentLoggedInWallet) {
     return null
@@ -138,6 +137,13 @@ const acc = computed(() => {
     return null
   }
   return acc
+})
+
+const accBalance = computed(()=>{
+  if(!acc.value){
+    return 0
+  }
+  return acc.value.balance
 })
 const getCosignerList = () => {
   if (!acc.value) {
