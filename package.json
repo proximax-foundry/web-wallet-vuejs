@@ -8,7 +8,7 @@
     "build-development": "cross-env NODE_ENV=development run-p type-check build-only",
     "build-staging": "cross-env NODE_ENV=staging run-p type-check build-only",
     "preview": "vite preview",
-    "build-only": "vite build node --max_old_space_size:16384",
+    "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },

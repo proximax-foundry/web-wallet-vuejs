@@ -7,13 +7,13 @@ export const stakingRoutes = [
       title: "Choose staking Option",
     }
   },
-  {
+ /*  {
     path: '/buy',
     name: 'ViewServicesStakingBuy',
     component: () => import('@/modules/services/submodule/staking/views/ViewServicesStakingBuy.vue'),
     meta: {
       title: "Buy",
     }
-  },
+  }, */
 ];
 

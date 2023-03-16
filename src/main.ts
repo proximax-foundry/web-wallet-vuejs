@@ -280,7 +280,7 @@ if (!walletState.currentLoggedInWallet) {
   // check sessionStorage
  
   WalletStateUtils.checkFromSession().then(bool=>{
-    if(bool){
+    if(!bool){
       NetworkStateUtils.checkSession();
       AppStateUtils.setStateReady('checkSession');
   
