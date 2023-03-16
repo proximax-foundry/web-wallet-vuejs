@@ -244,6 +244,7 @@ watch(selectedAccount, async (n) => {
   if (n && walletState.currentLoggedInWallet) {
     addressQR.value = await QRCode.toDataURL(n.address);
     dashboardService.value = new DashboardService(walletState.currentLoggedInWallet, n);
+    loadRecentTransactions()
   }
 }, { immediate: true })
 
@@ -430,6 +431,8 @@ let loadInQueueTransactions = () => {
   })
   inQueueTxns.value = txns
 }
+
+
 const init = async () => {
   updateAccountTransactionCount();
   loadRecentTransactions();
