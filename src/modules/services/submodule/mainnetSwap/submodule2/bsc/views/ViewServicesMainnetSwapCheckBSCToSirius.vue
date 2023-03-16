@@ -351,7 +351,7 @@ import type { Account } from "@/models/account";
     const swapServerUrl = SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL, tokenName.value);
 
 
-    let provider = new ethers.providers.Web3Provider(window.ethereum);
+    let provider: ethers.providers.Web3Provider;
     let signer;
     let ethereum = (window as any).ethereum
 
@@ -363,6 +363,7 @@ import type { Account } from "@/models/account";
 
     const initMetamask = ()=>{
        if (typeof window.ethereum !== 'undefined') {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
         signer = provider.getSigner();
         isInstallMetamask.value = true;
         isMetamaskConnected.value = ethereum.isConnected()?true:false;

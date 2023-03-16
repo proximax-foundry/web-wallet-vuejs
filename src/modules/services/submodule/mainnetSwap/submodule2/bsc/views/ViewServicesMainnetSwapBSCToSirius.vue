@@ -418,7 +418,7 @@ import { ChainUtils } from '@/util/chainUtils';
 import { Address, NamespaceId } from 'tsjs-xpx-chain-sdk';
 
 
-let verifyingTxn: string;
+let verifyingTxn: ReturnType<typeof setInterval> | undefined;
 const { t } = useI18n();
 const currentNativeTokenName = computed(() => AppState.nativeToken.label);
 const toggleContact = shallowRef(false)
@@ -604,12 +604,13 @@ watch(selectedToken, token => {
     }
   })
 })
-let provider = new ethers.providers.Web3Provider(window.ethereum);
+let provider: ethers.providers.Web3Provider;
 let signer;
 let ethereum = (window as any).ethereum
 
 const initMetamask = () => {
   if (typeof window.ethereum !== 'undefined') {
+    provider = new ethers.providers.Web3Provider(window.ethereum);
     signer = provider.getSigner();
     isInstallMetamask.value = true;
     isMetamaskConnected.value = ethereum.isConnected() ? true : false;
