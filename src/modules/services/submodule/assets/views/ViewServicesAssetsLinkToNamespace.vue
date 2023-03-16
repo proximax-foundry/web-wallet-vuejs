@@ -93,7 +93,7 @@
         <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
           <TransactionFeeDisplay :transaction-fee="Number(transactionFee)" :total-fee-formatted="totalFeeFormatted"
             :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance.toString()"
-            :lock-fund-currency="Number(lockFundCurrency)" :lock-fund-tx-fee="lockFundTxFee" :balance="balance"
+            :lock-fund-currency="Number(lockFundCurrency)" :lock-fund-tx-fee="lockFundTxFee" :balance="balance.toString()"
             :selected-acc-add="selectedAccAdd" />
           <div class='text-xs text-white mt-5 mb-1.5'>{{ $t('general.enterPasswordContinue') }}</div>
           <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')"
@@ -182,38 +182,46 @@ const disableCreate = computed(() => !(
   walletPassword.value.match(passwdPattern) && (selectNamespace.value != '')
 ));
 
-const selectedAccName = ref('');
-const selectedAccAdd = ref(Helper.createAddress(props.address).plain());
-const balance = ref('');
-const balanceNumber = ref(0);
+const balance = computed(()=>{
+  if(!account.value){
+    return 0
+  }
+  return account.value.balance
+})
+const selectedAccName= computed(()=>{
+  if(!account.value){
+    return ""
+  }
+  return account.value.name
+})
+
+const selectedAccAdd = computed(()=>{
+  if(!account.value){
+    return ""
+  }
+  return account.value.address
+})
 
 
 const showNoBalance = computed(() => {
   if (isNotCosigner.value) {
-    return balanceNumber.value < (transactionFeeExact.value);
+    return balance.value < (transactionFeeExact.value);
   } else {
-    return balanceNumber.value < (transactionFeeExact.value + lockFundTotalFee.value);
+    return balance.value < (transactionFeeExact.value + lockFundTotalFee.value);
   }
 });
 
 const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
 const supply = ref('0');
-
+const plainAddress = Helper.createAddress(props.address).plain()
 let account = computed(() => {
   if (walletState.currentLoggedInWallet) {
-    return walletState.currentLoggedInWallet.accounts.find(account => account.address == selectedAccAdd.value) || walletState.currentLoggedInWallet.others.find(account => account.address == selectedAccAdd.value);
+    return walletState.currentLoggedInWallet.accounts.find(account => account.address == plainAddress) || walletState.currentLoggedInWallet.others.find(account => account.address == plainAddress);
   } else {
     return null
   }
 })
-
-if (account.value) {
-  selectedAccName.value = account.value.name;
-  selectedAccAdd.value = account.value.address;
-  balance.value = Helper.toCurrencyFormat(account.value.balance, AppState.nativeToken.divisibility);
-  balanceNumber.value = account.value.balance;
-}
 
 let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
 themeConfig.init();

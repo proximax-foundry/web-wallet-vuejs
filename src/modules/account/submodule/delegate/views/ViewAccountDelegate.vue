@@ -64,7 +64,7 @@
           <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig="isMultisig" :is-cosigner="isCosigner"
             :on-partial="onPartial" :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted"
             :get-multi-sig-cosigner="walletCosignerList" :check-cosign-balance="checkCosignBalance"
-            :lock-fund-currency="lockFund" :lock-fund-tx-fee="lockFundTxFee" :balance="accBalance"
+            :lock-fund-currency="lockFund" :lock-fund-tx-fee="lockFundTxFee" :balance="accBalance.toString()"
             :selected-acc-add="selectedAccAdd" />
           <div class="mt-5" />
           <div class='font-semibold text-xs text-white mb-1.5'>{{ $t('general.enterPasswordContinue') }}</div>
@@ -128,7 +128,45 @@ const showPasswdError = ref(false);
 const err = ref("");
 const defaultAcc = walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.selectDefaultAccount() : null
 const selectedAccAdd = ref(defaultAcc ? defaultAcc.address : '');
-const accBalance = ref(Helper.toCurrencyFormat(defaultAcc ? defaultAcc.balance : 0, AppState.nativeToken.divisibility));
+const accBalance = computed(() => {
+  if (walletState.currentLoggedInWallet) {
+    const findAcc = accounts.value.find((element) => element.address === selectedAccAdd.value)
+    if (!findAcc) {
+      return 0
+    }
+    return findAcc.balance
+  }
+  return 0;
+});
+const accounts = computed(() => {
+  if (!walletState.currentLoggedInWallet) {
+    return [];
+  }
+  let accounts = walletState.currentLoggedInWallet.accounts.map(
+    (acc) => {
+      return {
+        name: acc.name,
+        balance: acc.balance,
+        address: acc.address,
+        publicKey: acc.publicKey,
+        isMultisig: acc.getDirectParentMultisig().length ? true : false
+      };
+    });
+
+
+  let otherAccounts = walletState.currentLoggedInWallet.others.filter((acc) => acc.type === "MULTISIG").map(
+    (acc) => {
+      return {
+        name: acc.name,
+        balance: acc.balance,
+        address: acc.address,
+        publicKey: acc.publicKey,
+        isMultisig: true
+      };
+    });
+  return accounts.concat(otherAccounts);
+
+});
 const acc = computed(() => {
   if (!walletState.currentLoggedInWallet) {
     return null
