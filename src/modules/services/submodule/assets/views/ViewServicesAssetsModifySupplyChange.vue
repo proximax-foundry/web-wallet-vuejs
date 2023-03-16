@@ -151,7 +151,7 @@ const props = defineProps({
     required: true
   },
   assetBalance: {
-    type: Number,
+    type: String,
     required: true
   }
 })

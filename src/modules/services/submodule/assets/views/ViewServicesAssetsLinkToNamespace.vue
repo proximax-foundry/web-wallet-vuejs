@@ -222,7 +222,7 @@ const svgString = ref(toSvg(props.address, 40, themeConfig.jdenticonConfig));
 
 const selectAsset = ref('');
 const assetDivisibility = ref(0);
-const assetSupply = ref(0);
+const assetSupply = ref("0");
 const assetTransferable = ref(false);
 const assetMutable = ref(false);
 const selectAction = ref('link');
@@ -235,7 +235,7 @@ if (account.value) {
     assetTransferable.value = asset.transferable ? asset.transferable : false;
     assetMutable.value = asset.supplyMutable ? asset.supplyMutable : false;
     assetDivisibility.value = asset.divisibility ? asset.divisibility : 0;
-    assetSupply.value = Number(Helper.convertToCurrency(asset.supply, asset.divisibility ? asset.divisibility : 0));
+    assetSupply.value = Helper.convertToCurrency(asset.supply, asset.divisibility ? asset.divisibility : 0);
   }
 }
 
