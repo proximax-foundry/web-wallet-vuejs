@@ -103,10 +103,10 @@
           </div>
           <MetadataInput class="mt-2" v-model="newValue" placeholder="New Value" />
         </div>
-        <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
+        <div class="bg-navy-primary py-6 px-12 xl:px-6 xl:col-span-1">
           <TransactionFeeDisplay :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted"
             :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance"
-            :lock-fund-currency="lockFund" :lock-fund-tx-fee="lockFundTxFee" :balance="accBalance"
+            :lock-fund-currency="lockFund" :lock-fund-tx-fee="lockFundTxFee" :balance="accBalance.toString()"
             :selected-acc-add="selectedAccAdd" />
           <div class='text-xs text-white my-5'>{{ $t('general.enterPasswordContinue') }}</div>
           <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"
@@ -188,7 +188,13 @@ const accountName = computed(() => {
 const existingScopedMetadataKeys = ref<{ value: string, type: number }[]>([])
 const defaultAcc = walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.selectDefaultAccount() : null
 const selectedAccAdd = ref(defaultAcc ? defaultAcc.address : '');
-const accBalance = ref(Helper.toCurrencyFormat(defaultAcc ? defaultAcc.balance : 0, AppState.nativeToken.divisibility));
+const accBalance = computed(()=>{
+  const findAcc = accounts.value.find(acc=>acc.address == selectedAccAdd.value)
+  if(findAcc){
+    return findAcc.balance
+  }
+  return 0
+})
 const removeDoubleZero = (string: string) => {
   let isZero = string.endsWith('00')
   if (isZero) {
