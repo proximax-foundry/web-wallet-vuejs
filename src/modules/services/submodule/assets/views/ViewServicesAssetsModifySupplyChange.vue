@@ -134,7 +134,6 @@ import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { toSvg } from "jdenticon";
 import { useI18n } from 'vue-i18n';
-import { useToast } from "primevue/usetoast";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { MultisigUtils } from '@/util/multisigUtils';
 import { AppState } from '@/state/appState';
