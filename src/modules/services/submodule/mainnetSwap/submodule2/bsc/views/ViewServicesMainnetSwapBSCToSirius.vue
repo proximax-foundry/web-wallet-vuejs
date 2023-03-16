@@ -609,7 +609,7 @@ let signer;
 let ethereum = (window as any).ethereum
 
 const initMetamask = () => {
-  if (typeof window.ethereum !== 'undefined') {
+  if (window.ethereum) {
     provider = new ethers.providers.Web3Provider(window.ethereum);
     signer = provider.getSigner();
     isInstallMetamask.value = true;
@@ -647,8 +647,9 @@ if (window.ethereum) {
 
 const recheckMetamask = () => {
   if (window.ethereum) {
+    ethereum = window.ethereum
     initMetamask()
-    if (!window.ethereum.isMetaMask) {
+    if (window.ethereum && !window.ethereum.isMetaMask) {
       verifyMetaMaskPlugin.value = false;
     }
   }
