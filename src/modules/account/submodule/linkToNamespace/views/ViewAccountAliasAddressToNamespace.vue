@@ -61,7 +61,7 @@
             </div>
           </div>
         </div>
-        <div class='bg-navy-primary py-6 px-12 lg:col-span-1'>
+        <div class='bg-navy-primary py-6 px-6 lg:col-span-1'>
           <TransactionFeeDisplay :transaction-fee="Number(trxFee)" :total-fee-formatted="totalFee.toString()"
             :get-multi-sig-cosigner="walletCosignerList" :check-cosign-balance="checkCosignBalance.toString()"
             :lock-fund-currency="lockFund" :lock-fund-tx-fee="lockFundTxFee" :balance="accountBalance.toString()"
