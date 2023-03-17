@@ -496,13 +496,13 @@ else {
   });
 }
 
-const signAggTxn = (pswd: string) => {
+const signAggTxn = async(pswd: string) => {
   if (aggregateTxn !== null && currentAccount.value && AppState.chainAPI) {
     let privateKey = WalletUtils.decryptPrivateKey(new Password(pswd), currentAccount.value.encrypted, currentAccount.value.iv);
     const account = Account.createFromPrivateKey(privateKey, AppState.networkType);
     let abt = TransactionUtils.castToAggregate(aggregateTxn)
     let signedTxn = TransactionUtils.cosignTransaction(abt, account);
-    AppState.chainAPI.transactionAPI.announceAggregateBondedCosignature(signedTxn);
+    await AppState.chainAPI.transactionAPI.announceAggregateBondedCosignature(signedTxn);
     router.push({ name: 'ViewAccountPendingTransactions', params: { address: currentAccount.value.address } });
   }
   else {

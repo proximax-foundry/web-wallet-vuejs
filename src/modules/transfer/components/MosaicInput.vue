@@ -36,7 +36,6 @@
 </template>
 
 <script lang=ts setup>
-import { ref } from 'vue';
 interface mosaicOption {
   val: string,
   balance: string,
@@ -77,6 +76,7 @@ const props = defineProps({
     emit("remove-mosaic-selected", { index: props.index })
   }
   const makeSelection = (value :mosaicOption | null) => {
+    console.log(value)
     // if the clear button is pressed
     if (value == null) {
       clearSelection()

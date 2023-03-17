@@ -116,7 +116,7 @@
             Update Namespace Metadata
           </button>
           <div class="text-center">
-            <router-link :to="{ name: 'ViewServicesNamespace' }"
+            <router-link :to="{ name: 'ViewDashboard' }"
               class='content-center text-xs text-white border-b-2 border-white'>{{ $t('general.cancel') }}</router-link>
           </div>
         </div>

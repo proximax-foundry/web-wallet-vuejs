@@ -7,6 +7,7 @@ import { TransferRoutes } from '@/modules/transfer/routingTransfer';
 import { ServiceRoutes  } from '@/modules/services/routingService';
 import { DashboardRoutes } from '@/modules/dashboard/routingDashboard';
 import { MetadataTransactionRoutes  } from '@/modules/metadataTxn/routingMetadataTransaction';
+import { stakingRoutes } from '@/modules/services/submodule/staking/routingStaking';
 import { TransactionRoutes } from "@/modules/transaction/routingTransaction";
 
 const router = createRouter({
@@ -19,6 +20,7 @@ const router = createRouter({
     ...ServiceRoutes,
     ...DashboardRoutes,
     ...MetadataTransactionRoutes,
+    ...stakingRoutes,
     ...MainnetSwapRoutes,
     ...TransactionRoutes
   ],

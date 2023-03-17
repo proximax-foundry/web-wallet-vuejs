@@ -44,7 +44,7 @@
                 </div><br>
                 <div class="text-xxs text-gray-400 inline-block uppercase">{{ $t('general.transfer') }}</div>
               </router-link>
-              <!-- <router-link :to="{ name: 'ViewServicesStackingBuy' }" class="inline-block text-center mx-2.5"
+              <!-- <router-link :to="{ name: 'ViewServicesStakingBuy' }" class="inline-block text-center mx-2.5"
                 v-if="isPublicNetwork">
                 <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
                   <div class="flex items-center justify-center h-full w-full">
@@ -53,7 +53,7 @@
                 </div><br>
                 <div class="text-xxs text-gray-400 inline-block uppercase">{{ $t('general.buy') }}</div>
               </router-link> -->
-              <!-- <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="inline-block text-center mx-3"
+              <router-link :to="{ name: 'ViewServicesMainnetSwap' }" class="inline-block text-center mx-3"
                 v-if="isPublicNetwork">
                 <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
                   <div class="h-full w-full flex items-center justify-center">
@@ -61,7 +61,7 @@
                   </div>
                 </div><br>
                 <div class="text-xxs text-gray-400 inline-block uppercase">{{ $t('general.swap') }}</div>
-              </router-link> -->
+              </router-link>
             </div>
           </div>
         </div>
@@ -133,6 +133,10 @@ const showAddressQRModal = ref(false);
 const showMessageModal = ref(false);
 const showDecryptMessageModal = ref(false)
 const showCosignModal = ref(false);
+
+const isPublicNetwork = computed(()=>{
+      return AppState.networkType == NetworkType.TEST_NET || AppState.networkType == NetworkType.MAIN_NET;
+    });
 
 if (props.type == 'transaction') {
   displayBoard.value = 'transaction';
@@ -240,6 +244,7 @@ watch(selectedAccount, async (n) => {
   if (n && walletState.currentLoggedInWallet) {
     addressQR.value = await QRCode.toDataURL(n.address);
     dashboardService.value = new DashboardService(walletState.currentLoggedInWallet, n);
+    loadRecentTransactions()
   }
 }, { immediate: true })
 
@@ -426,6 +431,8 @@ let loadInQueueTransactions = () => {
   })
   inQueueTxns.value = txns
 }
+
+
 const init = async () => {
   updateAccountTransactionCount();
   loadRecentTransactions();

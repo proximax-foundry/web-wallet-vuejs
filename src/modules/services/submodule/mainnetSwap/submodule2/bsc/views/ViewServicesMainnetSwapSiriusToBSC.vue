@@ -371,7 +371,7 @@ import type { Account } from "@/models/account";
         selectedToken.value = tokenList.value[0];
         selectedTokenName.value = tokenList.value[0].name;
         AppState.chainAPI?.assetAPI.getMosaic(new MosaicId(selectedToken.value.assetId)).then((mosaic)=>{
-          tokenDivisibility.value =  mosaic.properties.divisibility
+          tokenDivisibility.value =  mosaic.divisibility
         })
       }
     }

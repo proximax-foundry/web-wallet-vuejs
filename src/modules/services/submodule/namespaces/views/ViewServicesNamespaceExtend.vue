@@ -98,6 +98,7 @@ import { isMultiSig, TransactionUtils, findAcc, findAccWithAddress } from '@/uti
 import { WalletUtils } from '@/util/walletUtils';
 import { useI18n } from 'vue-i18n';
 import { MultisigUtils } from '@/util/multisigUtils';
+import { NamespaceId } from 'tsjs-xpx-chain-sdk';
 
 
 const props = defineProps({
@@ -120,7 +121,6 @@ const disabledPassword = ref(false);
 const disabledDuration = ref(false);
 const passwdPattern = "^[^ ]{8,}$";
 const showPasswdError = ref(false);
-const selectNamespace = ref('');
 const cosignerBalanceInsufficient = ref(false);
 const cosignerAddress = ref('');
 // const startBlock = ref(0);
@@ -190,11 +190,6 @@ const disableCreate = computed(() => !(
   walletPassword.value.match(passwdPattern)  && (!showNoBalance.value) && (!isNotCosigner.value)
 ));
 
-const selectedAccName = ref('');
-const selectedAccAdd = ref('');
-const balance = ref(0);
-const balanceNumber = ref(0);
-
 
 const plainAddress = Helper.createAddress(props.address).plain()
 let account = computed(() => {
@@ -202,36 +197,63 @@ let account = computed(() => {
     return walletState.currentLoggedInWallet.accounts.find(account => account.address == plainAddress) || walletState.currentLoggedInWallet.others.find(account => account.address == plainAddress);
   }
 })
+const balance = computed(()=>{
+  if(!account.value){
+    return 0
+  }
+  return account.value.balance
+})
 
-if (account.value) {
-  selectedAccName.value = account.value.name;
-  selectedAccAdd.value = account.value.address;
-  balance.value = Helper.convertToExact(account.value.balance, AppState.nativeToken.divisibility);
-  balanceNumber.value = account.value.balance;
-}
+const selectedAccAdd = computed(()=>{
+  if(!account.value){
+    return ""
+  }
+  return account.value.address
+})
+
+const selectedAccName= computed(()=>{
+  if(!account.value){
+    return ""
+  }
+  return account.value.name
+})
+
+
 
 let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
 themeConfig.init();
 
 const svgString = ref(toSvg(props.address, 40, themeConfig.jdenticonConfig));
 
-if (account.value) {
+
+const selectNamespace = computed(()=>{
+  if(!account.value){
+    return ""
+  }
   let namespace = account.value.namespaces.find(namespace => namespace.idHex === props.namespaceId);
-  if (namespace != undefined) {
+  if (namespace) {
     endBlock.value = namespace.endHeight as number
     const nsElement = namespace.name.split('.');
     if (nsElement.length > 1) {
-      selectNamespace.value = nsElement[0];
+      return nsElement[0];
     } else {
-      selectNamespace.value = namespace.name;
+      return namespace.name;
     }
   }
-}
+  return ""
+
+})
+
 
 const transactionFee = ref(0);
-try {
-  transactionFee.value = Helper.convertToExact(NamespaceUtils.getRootNamespaceTransactionFee(selectNamespace.value ), AppState.nativeToken.divisibility);
-} catch {( e :any )=> console.log(e) }
+watch(selectNamespace,n=>{
+  try {
+    transactionFee.value = Helper.convertToExact(NamespaceUtils.getRootNamespaceTransactionFee(n ), AppState.nativeToken.divisibility);
+    
+  } catch (error) {
+    
+  }
+},{immediate:true})
 
 
 let isMaxDuration = false;
@@ -309,7 +331,7 @@ const extendNamespace = () => {
 
 const getMultiSigCosigner = computed(() => {
   let list: { hasCosigner: boolean, cosignerList: { publicKey: string, name: string, balance: number, address: string }[] } = { hasCosigner: false, cosignerList: [] }
-  if (!account.value) {
+  if (!account.value || !networkState.currentNetworkProfileConfig) {
     return list
   }
   let cosigners = MultisigUtils.getCosignerInWallet(account.value.publicKey)
@@ -339,10 +361,10 @@ watch(getMultiSigCosigner, n => {
 
 const showNoBalance = computed(() => {
   if (isNotCosigner.value) {
-    return balanceNumber.value < (rentalFee.value + transactionFee.value);
+    return balance.value < (rentalFee.value + transactionFee.value);
   } else {
     // console.log(balanceNumber.value)
-    return balanceNumber.value < (rentalFee.value + transactionFee.value + lockFundTotalFee.value);
+    return balance.value < (rentalFee.value + transactionFee.value + lockFundTotalFee.value);
   }
 });
 
