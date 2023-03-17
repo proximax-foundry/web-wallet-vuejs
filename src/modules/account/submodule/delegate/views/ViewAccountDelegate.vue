@@ -128,45 +128,7 @@ const showPasswdError = ref(false);
 const err = ref("");
 const defaultAcc = walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.selectDefaultAccount() : null
 const selectedAccAdd = ref(defaultAcc ? defaultAcc.address : '');
-const accBalance = computed(() => {
-  if (walletState.currentLoggedInWallet) {
-    const findAcc = accounts.value.find((element) => element.address === selectedAccAdd.value)
-    if (!findAcc) {
-      return 0
-    }
-    return findAcc.balance
-  }
-  return 0;
-});
-const accounts = computed(() => {
-  if (!walletState.currentLoggedInWallet) {
-    return [];
-  }
-  let accounts = walletState.currentLoggedInWallet.accounts.map(
-    (acc) => {
-      return {
-        name: acc.name,
-        balance: acc.balance,
-        address: acc.address,
-        publicKey: acc.publicKey,
-        isMultisig: acc.getDirectParentMultisig().length ? true : false
-      };
-    });
 
-
-  let otherAccounts = walletState.currentLoggedInWallet.others.filter((acc) => acc.type === "MULTISIG").map(
-    (acc) => {
-      return {
-        name: acc.name,
-        balance: acc.balance,
-        address: acc.address,
-        publicKey: acc.publicKey,
-        isMultisig: true
-      };
-    });
-  return accounts.concat(otherAccounts);
-
-});
 const acc = computed(() => {
   if (!walletState.currentLoggedInWallet) {
     return null
@@ -177,7 +139,12 @@ const acc = computed(() => {
   }
   return acc
 })
-
+const accBalance = computed(()=>{
+  if(!acc.value){
+    return 0
+  }
+  return acc.value.balance
+})
 const getCosignerList = () => {
   if (!acc.value) {
     return {hasCosigner:false, cosignerList: []}
