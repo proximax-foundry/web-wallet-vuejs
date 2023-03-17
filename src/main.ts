@@ -37,6 +37,7 @@ import 'primevue/resources/primevue.min.css'
 import 'primeicons/primeicons.css'
 import Sidebar from 'primevue/sidebar'
 import Dropdown from "primevue/dropdown";
+import { Buffer } from 'buffer';
 
 library.add(
   fas, faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
@@ -65,6 +66,7 @@ app.use(router);
 app.use(i18n);
 app.mount("#app");
 
+window.Buffer = Buffer;
 AppStateUtils.addNewReadyStates('chainProfile');
 AppStateUtils.addNewReadyStates('theme');
 AppStateUtils.addNewReadyStates('checkSession');

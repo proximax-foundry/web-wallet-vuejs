@@ -35,6 +35,11 @@
             </div>
           </div>
           <div class="font-semibold mb-4">Update Account Metadata</div>
+          <div v-if="showBalanceErr" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+            <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon
+                icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div>
+            <div class="inline-block text-xs">{{ $t('general.insufficientBalance') }}</div>
+          </div>
           <div class="border border-blue-300 rounded-md p-3 mt-3 bg-blue-50">
             <div class="flex items-center gap-2">
               <div v-html="svgString" />
@@ -147,9 +152,7 @@ import { ThemeStyleConfig } from '@/models/stores';
 import { WalletUtils } from '@/util/walletUtils';
 import isValidUtf8 from 'utf-8-validate';
 import { useRouter } from 'vue-router';
-import { Buffer } from 'buffer';
 
-window.Buffer = Buffer;
 const props = defineProps({
   targetPublicKey: String,
   scopedMetadataKey: String,

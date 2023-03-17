@@ -177,6 +177,7 @@ const acc = computed(() => {
   }
   return acc
 })
+
 const getCosignerList = () => {
   if (!acc.value) {
     return {hasCosigner:false, cosignerList: []}

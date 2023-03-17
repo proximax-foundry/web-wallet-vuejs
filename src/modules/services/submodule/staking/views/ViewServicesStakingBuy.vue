@@ -249,7 +249,7 @@ import { NamespaceUtils } from "@/util/namespaceUtils";
       selectedStableCoins.value = [];
       updateBuyFromTokenBalance();
     }
-
+   
     const checkValidSelectedChainId = ()=>{
       if(selectedChainId.value === ethereumChainId || selectedChainId.value === bscChainId){
         isChainIdValid.value = true;
