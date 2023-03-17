@@ -128,6 +128,7 @@ const showPasswdError = ref(false);
 const err = ref("");
 const defaultAcc = walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.selectDefaultAccount() : null
 const selectedAccAdd = ref(defaultAcc ? defaultAcc.address : '');
+
 const acc = computed(() => {
   if (!walletState.currentLoggedInWallet) {
     return null
@@ -138,7 +139,6 @@ const acc = computed(() => {
   }
   return acc
 })
-
 const accBalance = computed(()=>{
   if(!acc.value){
     return 0

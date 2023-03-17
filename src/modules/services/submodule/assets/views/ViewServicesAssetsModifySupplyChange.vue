@@ -148,10 +148,6 @@ const props = defineProps({
   address: {
     type: String,
     required: true
-  },
-  assetBalance: {
-    type: Number,
-    required: true
   }
 })
 
@@ -464,6 +460,25 @@ watch(isNotCosigner, (n) => {
 const checkCosignBalance = computed(() => {
   let findAccount = findAccWithAddress(cosignerAddress.value)
   return findAccount ? findAccount.balance : 0;
+})
+
+const assetBalance = computed(() => {
+  if (!walletState.currentLoggedInWallet) {
+        return "";
+    }
+    const account = walletState.currentLoggedInWallet.accounts.find(
+        (element) => element.address == props.address
+    ) || walletState.currentLoggedInWallet.others.find(
+        (element) => element.address == props.address)
+    if (!account) {
+        return ""
+    }
+    let asset = account.assets.find((element) => element.idHex == props.assetId)
+    if(asset){
+    return Helper.toCurrencyFormat(asset.amount, asset.divisibility?asset.divisibility:0)
+    }else{
+      return ""
+    }
 })
 
 </script>

@@ -108,7 +108,7 @@
         <div class='bg-navy-primary p-6 lg:col-span-2'>
           <TransactionFeeDisplay :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted"
             :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance"
-            :lock-fund-currency="lockFund" :lock-fund-tx-fee="lockFundTxFee" :balance="accBalance"
+            :lock-fund-currency="lockFund" :lock-fund-tx-fee="lockFundTxFee" :balance="accBalance.toString()"
             :selected-acc-add="selectedAccAdd" />
           <div class='text-xs text-white my-5'>{{ $t('general.enterPasswordContinue') }}</div>
           <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"
@@ -185,7 +185,16 @@ const accountName = computed(() => {
 const existingScopedMetadataKeys = ref<{ value: string, type: number }[]>([])
 const defaultAcc = walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.selectDefaultAccount() : null
 const selectedAccAdd = ref(defaultAcc ? defaultAcc.address : '');
-const accBalance = ref(Helper.toCurrencyFormat(defaultAcc ? defaultAcc.balance : 0, AppState.nativeToken.divisibility));
+const accBalance = computed(() => {
+  if (walletState.currentLoggedInWallet) {
+    const findAcc = accounts.value.find((element) => element.address === selectedAccAdd.value)
+    if (!findAcc) {
+      return 0
+    }
+    return findAcc.balance
+  }
+  return 0;
+});
 const removeDoubleZero = (string: string) => {
   let isZero = string.endsWith('00')
   if (isZero) {

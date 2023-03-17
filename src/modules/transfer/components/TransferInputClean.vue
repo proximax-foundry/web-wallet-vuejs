@@ -8,7 +8,9 @@
           <input 
             :value="modelValue"
             class="supply_input" v-maska:[options] :data-maska="maskaFormat()"
-            data-maska-tokens="0:\d:multiple|9:\d:optional" :placeholder="placeholder" />
+            data-maska-tokens="0:\d:multiple|9:\d:optional" :placeholder="placeholder" 
+            @input="$emit('update:modelValue',parseFloat((<HTMLInputElement>$event.target).value.replace(/,/g, '')).toString() )"
+            />
         </div>
       </div>
     </div>
@@ -52,6 +54,10 @@ const props = defineProps({
     required: false
   }
 });
+
+defineEmits([
+    'update:modelValue', 'show-error'
+  ])
 
 const maskaFormat = () => {
   let maskaFormat = "0";
