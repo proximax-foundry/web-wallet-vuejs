@@ -151,9 +151,7 @@ import { ThemeStyleConfig } from '@/models/stores';
 import { toSvg } from 'jdenticon';
 import isValidUtf8 from 'utf-8-validate';
 import { useRouter } from 'vue-router';
-import { Buffer } from 'buffer';
 
-window.Buffer = Buffer;
 const props = defineProps({
   targetId: String,
   scopedMetadataKey: String,

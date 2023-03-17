@@ -26,9 +26,7 @@ import AccountComponent from "@/modules/account/components/AccountComponent.vue"
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import AccountMetadataDatatableVue from "../components/AccountMetadataDatatable.vue";
 import isValidUtf8 from 'utf-8-validate';
-import { Buffer } from 'buffer';
 
-window.Buffer = Buffer;
 const props = defineProps({
     address: {
         type: String,
