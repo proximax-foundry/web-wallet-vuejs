@@ -8,7 +8,7 @@
         <div class="text-left flex items-center">
           <div class="block">
             <div class="text-xxs uppercase text-blue-primary font-bold">{{$t('swap.toMetamaskAddress')}}</div>
-            <input :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', $event.target)" type="text" size="80" class="placeholder bg-white" :placeholder="placeholder">            
+            <input :disabled="disabled" :value="modelValue" @input="$emit('update:modelValue', (<HTMLInputElement>$event.target).value)" type="text" size="80" class="placeholder bg-white" :placeholder="placeholder">            
           </div>
         </div>
       </div>
