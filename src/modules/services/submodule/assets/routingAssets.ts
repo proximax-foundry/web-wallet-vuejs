@@ -8,7 +8,7 @@ export const AssetsRoutes = [
     }
   },
   {
-    path: '/asset-supply-change/:assetId/:address/:assetBalance',
+    path: '/asset-supply-change/:assetId/:address',
     name: 'ViewServicesAssetsModifySupplyChange',
     props: true,
     component: () => import('@/modules/services/submodule/assets/views/ViewServicesAssetsModifySupplyChange.vue'),
