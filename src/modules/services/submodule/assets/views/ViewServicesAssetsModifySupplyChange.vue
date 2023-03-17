@@ -476,7 +476,7 @@ const assetBalance = computed(() => {
     }
     let asset = account.assets.find((element) => element.idHex == props.assetId)
     if(asset){
-    return Helper.toCurrencyFormat(asset.amount,0)
+    return Helper.toCurrencyFormat(asset.amount, asset.divisibility?asset.divisibility:0)
     }else{
       return ""
     }
