@@ -40,6 +40,12 @@
       <div class="text-txs">{{ $t('multisig.alreadyMultisig') }}</div>
     </div>
   </div>
+  <div v-if="noNamespace" class="mt-2 bg-yellow-50 p-3 rounded-md mb-2">
+    <div class="flex items-center gap-2">
+      <img src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+      <div class="text-txs">{{ $t('namespace.noNamespace') }}</div>
+    </div>
+  </div>
   <div class='border-b-2 border-gray-600 mt-2' />
   <div v-if="sendXPX"
     class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-2">
@@ -121,13 +127,13 @@
       </div>
       <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-2">
         <div class="font-semibold lg:col-span-2 col-span-3">{{ $t('general.lockFund') }}</div>
-        <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(lockFundCurrency??0)"></div>
+        <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(lockFundCurrency ?? 0)"></div>
         <div class='ml-1 text-blue-400'>{{ currentNativeTokenName }}</div>
       </div>
       <div
         class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between border-gray-600 border-b items-center text-gray-200 text-xs py-2">
         <div class="font-semibold lg:col-span-2 col-span-3">{{ $t('general.lockFundTxFee') }}</div>
-        <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(lockFundTxFee??0)"></div>
+        <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(lockFundTxFee ?? 0)"></div>
         <div class='ml-1 text-blue-400'>{{ currentNativeTokenName }}</div>
       </div>
       <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between border-gray-600 text-white text-xs pt-3">
@@ -151,16 +157,16 @@ defineProps({
     type: Number,
     required: true
   },
-  lockFundCurrency:  {
+  lockFundCurrency: {
     type: Number,
     required: false
   },
-  lockFundTxFee:  {
-    type: Number ,
+  lockFundTxFee: {
+    type: Number,
     required: false
   },
   totalFeeFormatted: {
-    type: String ,
+    type: String,
     required: true
   },
   selectedAccAdd: {
@@ -168,12 +174,12 @@ defineProps({
     required: true
   },
   balance: {
-    type: String ,
+    type: String,
     required: true
   },
   sendXPX: String,
   getMultiSigCosigner: {
-    type: Object as PropType<{ hasCosigner: boolean, cosignerList: {publicKey: string, name: string, balance: number, address: string}[] }>,
+    type: Object as PropType<{ hasCosigner: boolean, cosignerList: { publicKey: string, name: string, balance: number, address: string }[] }>,
     required: false
   },
   checkCosignBalance: String,
@@ -188,6 +194,7 @@ defineProps({
   isMultisigAlready: Boolean,
   lockFundCurrencyConvert: String,
   lockFundTxFeeConvert: String,
+  noNamespace: Boolean,
 })
 const currentNativeTokenName = computed(() => AppState.nativeToken.label);
 const isMultiSig = (address: string) => {
