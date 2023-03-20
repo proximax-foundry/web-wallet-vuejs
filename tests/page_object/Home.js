@@ -18,8 +18,8 @@ const elements = {
     name_title: '.p-datatable-thead > tr:nth-child(1) > th:nth-child(2) > div:nth-child(1) > span:nth-child(1)',
     txhash_title: '.p-datatable-thead > tr:nth-child(1) > th:nth-child(2) > div:nth-child(1) > span:nth-child(1)',
     account_popup: '.popup-outer > div:nth-child(1)',
-    copy_address: '.mb-10 > img:nth-child(2)',
-    transfer_xpx: 'a[href="#/create-transfer"] > div:nth-child(2)',          
+    copy_address: 'div > img.w-4.ml-4.inline-block.cursor-pointer:nth-child(2)',
+    transfer_xpx: 'a[href="#/create-transfer"] > div:nth-child(3)',          
     copy_successfulpopup: 'div.p-toast:nth-child(12) > div:nth-child(1) > div:nth-child(1)',
     wallet_tab: 'a[href="#/wallets"]',
     wallet_close: 'div.flex.flex-col.justify-between > div > div.inline-block.flex-grow.overflow-hidden > div > div > div:nth-child(4) > div > div > div > div.ml-4.mt-5.mb-5.mr-5.text-txs.text-left > div.font-bold.text-blue-primary.flex.items-center > div > img',
@@ -37,7 +37,7 @@ const elements = {
     notification: 'a[href="#/notification"]',
     assetAns: 'div.grid:nth-child(2) > div:nth-child(2) > div.p-2:nth-child(2) > a',
     swap: 'a[href="#/swap"]',
-    scanQR: 'div.flex.justify-between.w-full:nth-child(3) > div.my-2.flex.items-center.cursor-pointer:nth-child(1)',
+    scanQR: 'div.flex.justify-center > div.my-2.flex.items-center.cursor-pointer:nth-child(3)',
     QR_popup: 'div.popup-outer-lang.fixed.flex.z-50 > div.modal-popup-box > div.flex.justify-center > img',
     closeQR: 'div.popup-outer-lang.fixed.flex.z-50 > div.modal-popup-box > div:nth-child(2)',
     converttomultisig_button: 'div.flex.justify-between.w-full:nth-child(3) > a.my-2.flex.items-center:nth-child(2)',
@@ -247,12 +247,6 @@ const commands = {
       this.assert.equal(result.value, true, 'When scan QR code is clicked, a QR code is shown')
     })
     .click('@closeQR')
-  },
-
-  navigation_multisig(browser){
-    return this
-    .click('@converttomultisig_button')
-    .assert.urlContains(browser + 'multisig-settings', 'User is navigated to multisig page')
   },
 
   navigation_accounts(browser){

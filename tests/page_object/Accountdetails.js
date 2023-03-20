@@ -42,7 +42,7 @@ const elements = {
     transfer_button: 'div.flex:nth-child(5) > a:nth-child(1) > div:nth-child(2)',
     view_privatekey: '.fa-eye > path:nth-child(2)',
     private_key: '#private',
-    linkaccount_icon: 'div.inline-block.flex-grow.overflow-hidden > div > div > div > div:nth-child(3) > div > div:nth-child(8) > div.flex.items-center > a > svg > path',
+    linkaccount_icon: 'div.inline-block.flex-grow.overflow-hidden > div > div > div > div:nth-child(3) > div:nth-child(8) > div.flex.items-center > a > svg > path',
     privatekey_warning: 'div.border-red-400',
     linkpasswordinput: 'input.w-full.text-placeholder.text-left.ml-2',
     delegate_button: 'button.w-full.blue-btn',
