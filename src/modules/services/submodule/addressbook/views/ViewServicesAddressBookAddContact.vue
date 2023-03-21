@@ -11,7 +11,7 @@
         <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
         <div class='mt-2 py-3 px-0 md:flex'>
           <TextInputClean :placeholder="$t('general.name')" :errorMessage="$t('general.nameRequired')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" class="w-full md:w-52 inline-block mr-2" />
-          <TextInputClean :placeholder="$t('general.address')" :errorMessage="addErr" v-model="address" icon="wallet" :showError="showAddErr" class="w-full md:w-96 inline-block mr-2" />
+          <TextInputClean :placeholder="$t('multisig.addressOrPk')" :errorMessage="addErr" v-model="addressOrPk" icon="wallet" :showError="showAddErr" class="w-full md:w-96 inline-block mr-2" />
           <SelectInputPluginClean v-model="selectContactGroups" :placeholder="$t('general.group')" :options="contactGroups" selectDefault="-none-" ref="selectGroupDropdown" class="w-full md:w-60 inline-block mr-2" />
           <button type="submit" class="mt-5 md:mt-0 default-btn py-1 disabled:opacity-50 h-12 flex items-center" :disabled="disableSave" @click="SaveContact()"><img src="@/modules/services/submodule/addressbook/img/icon-save.svg" class="inline-block mr-2"> {{$t('addressBook.saveAddress')}}</button>
         </div>
@@ -20,7 +20,7 @@
     <AddCustomGroupModal :toggleModal="isDisplayAddCustomPanel" :groups="contactGroups" />
   </div>
 </template>
-<script>
+<script lang="ts">
 import { Address } from "tsjs-xpx-chain-sdk";
 import { computed, ref, watch, getCurrentInstance } from 'vue';
 import TextInputClean from '@/components/TextInputClean.vue';
@@ -35,6 +35,8 @@ import { WalletStateUtils } from '@/state/utils/walletStateUtils';
 import {useI18n} from 'vue-i18n'
 import SelectInputPluginClean from "@/components/SelectInputPluginClean.vue";
 import AddCustomGroupModal from "@/modules/services/submodule/addressbook/components/AddCustomGroupModal.vue";
+import { WalletUtils } from "@/util/walletUtils";
+import { AppState } from "@/state/appState";
 export default {
   name: 'ViewServicesAddressBookAddContact',
   components: {
@@ -52,6 +54,8 @@ export default {
     const toast = useToast();
     const contactName = ref('');
     const address = ref('');
+    const addressOrPk = ref('');
+    const publicKey = ref('');
     const err = ref('');
     const verifyAdd = ref(false);
     const addMsg = ref('');
@@ -109,24 +113,31 @@ export default {
     );
 
     const showNameErr = computed(
-      () => address.value != '' && contactName.value == ''
+      () => (address.value != '' && contactName.value == '') || (addressOrPk.value != '' && contactName.value == '')
     );
 
     const addErr = computed(
       () => {
-        let addErrDefault = t('addressBook.addressRequired');
+        let addErrDefault = t('general.invalidInput');
         return addMsg.value?addMsg.value:addErrDefault;
       }
     );
 
-    watch(address, ()=>{
+    watch(addressOrPk, ()=>{
       if(!walletState.currentLoggedInWallet){
         return;
       }
-      const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
-      const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address.value);
-      verifyAdd.value = verifyContactAddress.isPassed;
-      addMsg.value = verifyContactAddress.errMessage;
+      if(addressOrPk.value.length <= 63 || addressOrPk.value.length >=65){
+        address.value = addressOrPk.value
+        const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
+        const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address.value);
+        verifyAdd.value = verifyContactAddress.isPassed;
+        addMsg.value = verifyContactAddress.errMessage;
+      }
+      else if(addressOrPk.value.length == 64){
+        verifyAdd.value = true
+        address.value = WalletUtils.createAddressFromPublicKey(addressOrPk.value, AppState.networkType).plain()
+      }
     });
 
     const isDisplayAddCustomPanel = ref(false);
@@ -136,14 +147,36 @@ export default {
       }
     });
 
-    const SaveContact = () => {
+    const getPublicKey = async(address) =>{
+      try{
+        let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
+        if(accInfo.publicKey == "0000000000000000000000000000000000000000000000000000000000000000"){
+          publicKey.value = null
+        }
+        else{
+          publicKey.value = accInfo.publicKey
+        }
+      }
+      catch{
+        publicKey.value = null
+      }
+    }
+
+    const SaveContact = async() => {
       if (contactName.value == ' ') {
           err.value = t('general.nameRequired');
           return
       }
+      if (addressOrPk.value.length == 64){
+        publicKey.value = addressOrPk.value
+      }
+      else{
+        await getPublicKey(address.value)
+      }
+      console.log(address.value)
       const rawAddress = Address.createFromRawAddress(address.value);
       // let addressBook = new AddressBook(contactName.value, rawAddress.address);
-      let addressBook = new AddressBook(contactName.value.trim(), rawAddress.plain(), selectContactGroups.value);
+      let addressBook = new AddressBook(contactName.value.trim(), rawAddress.plain(), selectContactGroups.value, publicKey.value);
       const wallet = walletState.currentLoggedInWallet;
 
       // check for existing account name in wallet
@@ -160,7 +193,7 @@ export default {
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         err.value = '';
         contactName.value = '';
-        address.value = '';
+        addressOrPk.value = '';
         toast.add({severity:'info', summary: t('general.addressBook'), detail: t('addressBook.newContactAdded'), group: 'br-custom', life: 5000});
         router.push({ name: 'ViewServicesAddressBook' });
       }
@@ -183,6 +216,7 @@ export default {
       addErr,
       contactName,
       address,
+      addressOrPk,
       disableSave,
       showAddErr,
       showNameErr,

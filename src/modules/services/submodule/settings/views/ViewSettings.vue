@@ -14,6 +14,10 @@
               <div class="text-left mb-3 text-gray-700">Sound Volume:</div>
               <selectSoundSetting />
             </div>
+            <div class="flex">
+              <div class="text-left mt-1 mb-3 text-gray-700">Change Password:</div>
+              <changeAccountPassword />
+            </div>
             <div class="text-left mb-3 text-gray-700">Nodes</div>
             <NodeComponent />
         </div>
@@ -27,7 +31,7 @@
 import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue';
 import NodeComponent from "@/modules/services/submodule/settings/components/NodeComponent.vue"
 import selectSoundSetting from '@/modules/services/submodule/settings/components/selectSoundSetting.vue'; 
-
+import changeAccountPassword from '@/modules/services/submodule/settings/components/changeAccountPassword.vue';
 </script>
 
 <style>

@@ -54,7 +54,7 @@
         </div>
       </div>
       <div class='bg-navy-primary p-6 lg:col-span-1'>
-        <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig-already="isMultisig" :on-partial="onPartial" :transaction-fee="aggregateFee" :total-fee-formatted="totalFeeFormatted" :lock-fund-currency-convert="lockFundCurrency" :lock-fund-tx-fee-convert="lockFundTxFee" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
+        <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig-already="isMultisig" :on-partial="onPartial" :transaction-fee="String(aggregateFee)" :total-fee-formatted="totalFeeFormatted" :lock-fund-currency-convert="lockFundCurrency" :lock-fund-tx-fee-convert="String(lockFundTxFee)" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
@@ -288,14 +288,6 @@ export default {
         }
       }
 
-     const splitBalance = computed(()=>{
-      let split = accountBalance.value.split(".")
-      if (split[1]!=undefined){
-        return {left:split[0],right:split[1]}
-      }else{
-        return {left:split[0], right:null}
-      }
-    })
     const disableSend = computed(() => !(
       !isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) && coSign.value.length > 0  &&  (err.value == '' || (err.value == t('general.walletpasswordInvalid',{name : walletState.currentLoggedInWallet.name}))) && (showAddressError.value.every(value => value == false)) == true && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
     ));
@@ -496,7 +488,6 @@ export default {
       contact,
       space,
       currentNativeTokenName,
-      splitBalance,
       contactName,
       err,
       disableSend,
@@ -535,7 +526,7 @@ export default {
   },
 }
 </script>
-<style scoped>
+<style scoped lang="scss">
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -546,4 +537,26 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+
+.p-tree::v-deep{
+  .p-tree-container .p-treenode .p-treenode-content{
+    padding-left:2px;
+    padding-top:2px
+  }
+  .p-link{
+  padding: 0;
+  margin: 0;
+  }
+  .p-inputtext{
+      font-size: 1rem;
+      text-align: left;
+      padding: 0.5rem;
+      border: 1px solid #ced4da;
+    }
+}
+  ::v-deep(.p-inputtext) {
+      font-size: 1rem;
+      text-align: left;
+      padding: 0.5rem;
+    }
 </style>

@@ -9,7 +9,7 @@ const elements = {
     input_supply: '.supply_input',
     input_divisibility: '.number_input',
     transferable: 'div.mb-5:nth-child(1) > div:nth-child(1) > div:nth-child(1)',
-    supply_mutable: 'div.mt-4 > div:nth-child(4) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1)',
+    supply_mutable: 'div.mt-4 > div:nth-child(3) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1)',
     createasset_button: '.mt-3',
     transaction_confirmpopup: 'div.p-toast:nth-child(12) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)',
     asset_id: '.p-datatable-tbody > tr:nth-child(2)',

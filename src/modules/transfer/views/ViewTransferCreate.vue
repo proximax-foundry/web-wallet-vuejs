@@ -66,7 +66,7 @@
         </div>
       </div>
       <div class='bg-navy-primary py-6 px-6 xl:col-span-1'>
-        <TransactionFeeDisplay :send-x-p-x="sendXPX" :selected-mosaic="selectedMosaic" :mosaics-created="mosaicsCreated" :transaction-fee="effectiveFee" :total-fee-formatted="totalFee" :get-multi-sig-cosigner="getWalletCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="lockFundTxFee" :balance="balance" :selected-acc-add="selectedAccAdd"/>
+        <TransactionFeeDisplay :send-x-p-x="sendXPX" :selected-mosaic="selectedMosaic" :mosaics-created="mosaicsCreated" :transaction-fee="effectiveFee" :total-fee-formatted="String(totalFee)" :get-multi-sig-cosigner="getWalletCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="String(balance)" :selected-acc-add="selectedAccAdd"/>
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3" :disabled="disablePassword"/>
@@ -102,7 +102,7 @@ import { multiSign } from "@/util/multiSignatory";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { accountUtils } from "@/util/accountUtils";
-import { TransactionUtils } from "@/util/transactionUtils";
+import { isMultiSig, TransactionUtils, findAccWithAddress, findAcc } from '@/util/transactionUtils';
 import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from '@/util/chainUtils';
 import { NamespaceUtils } from '@/util/namespaceUtils';
@@ -158,7 +158,7 @@ export default {
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
-    const isNotCosigner = ref(false);
+    const isNotCosigner = computed(() => getWalletCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
     const cosignAddress = ref("");
     
     const disableAllInput = ref(false);
@@ -218,16 +218,6 @@ export default {
     const selectedAccAdd = ref(
       walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount().address : ''
     );
-    const findAcc = (publicKey)=>{
-      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
-    }
-
-    const findAccWithAddress = address =>{
-      if(!walletState.currentLoggedInWallet){
-        return null
-      }
-      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)
-    }
     
     const accounts = computed(()=>{
       if(!walletState.currentLoggedInWallet){
@@ -273,17 +263,6 @@ export default {
       }
     })
     
-    const isMultiSig = (address) => {
-      const account = accounts.value.find(
-        (account) => account.address === address
-      );
-      let isMulti = false;
-     
-      if (account != undefined) {
-        isMulti = account.isMultisig;
-      }
-      return isMulti;
-    };
     const isMultiSigBool = computed(() => {
           return isMultiSig(selectedAccAdd.value)
       }
@@ -655,7 +634,6 @@ export default {
   };
   
   watch(selectedAccAdd, (n, o) => {
-    isNotCosigner.value = false
     showAssetBalanceErr.value = []
     for(let i=0;i<mosaics.value.length;i++){
       showAssetBalanceErr.value.push(false)
@@ -672,7 +650,6 @@ export default {
             disableAllInput.value = false;
           }
         } else {
-          isNotCosigner.value = true
           disableAllInput.value = true;
         }
     }
@@ -850,8 +827,6 @@ export default {
     mosaicSupplyDivisibility.value = [];
   });
   
-    
-  
   // confirm modal
   emitter.on("CLOSE_CONFIRM_SEND_MODAL", (payload) => {
     toggleConfirm.value = payload;
@@ -870,10 +845,9 @@ export default {
       let part2 = assetId.slice(-4)
       return part1 + "..." + part2
     }
-  console.log(typeof mosaics.value)
+
     return {
       showAssetBalanceErr,
-      findAcc,
       totalFee,
       contacts,
       onNodeSelect,
@@ -888,7 +862,6 @@ export default {
       balance,
       showBalanceErr,
       err,
-      /* contact, */
       recipientInput,
       namespace,
       sendXPX,
@@ -920,7 +893,6 @@ export default {
       currentlySelectedMosaic,
       removeMosaic,
       toggleConfirm,
-      isMultiSig,
       isMultiSigBool,
       effectiveFee,
       isNotCosigner,

@@ -92,7 +92,7 @@
                 <MetadataInput class="mt-2" v-model="newValue"  placeholder="New Value"/>
             </div>
             <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
-                <TransactionFeeDisplay :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="lockFundTxFee" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
+                <TransactionFeeDisplay :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
                 <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
                 <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="walletPassword" icon="lock" class="mt-5 mb-3" />
                 <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="updateMetadata()" :disabled="disableAddBtn">
@@ -114,7 +114,7 @@ import {useI18n} from 'vue-i18n'
 import { multiSign } from "@/util/multiSignatory";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
-import { TransactionUtils } from "@/util/transactionUtils";
+import { TransactionUtils, findAcc } from "@/util/transactionUtils";
 import { WalletUtils } from "@/util/walletUtils";
 import { AppState } from '@/state/appState';
 import MetadataInput from '@/modules/metadataTxn/components/MetadataInput.vue'
@@ -399,12 +399,6 @@ export default {
     const disableAddBtn = computed(()=>{
         return (showScopedKeyErr.value==true ||inputScopedMetadataKey.value==''||newValue.value==''||!walletPassword.value.match(passwdPattern)||showBalanceErr.value==true)
     })
-    const findAcc = (publicKey)=>{
-      if(!walletState.currentLoggedInWallet){
-        return
-      }
-      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
-    }
     
     const accounts = computed(()=>{
       if(!walletState.currentLoggedInWallet){
@@ -579,16 +573,6 @@ export default {
       }
     });
 
-    const splitBalance = computed(()=>{
-      let accBalance = Helper.toCurrencyFormat(balance.value, AppState.nativeToken.divisibility)
-      let split = accBalance.split(".")
-      if (split[1]!=undefined){
-        return {left:split[0],right:split[1]}
-      }else{
-        return {left:split[0], right:null}
-      }
-    })
-
     const transactionFee = computed(() => {
       return aggregateFee.value.toString()
     })
@@ -597,10 +581,6 @@ export default {
       return Helper.amountFormatterSimple(totalFee.value, 0);
     });
 
-    const fetchAccount = (publicKey) => {
-      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
-    };
-
     const getMultiSigCosigner = computed(() => {
       if(networkState.currentNetworkProfileConfig){
         let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
@@ -608,9 +588,9 @@ export default {
         cosigners.cosignerList.forEach( publicKey => {
           list.push({
             publicKey,
-            name: fetchAccount(publicKey).name,
-            balance: fetchAccount(publicKey).balance,
-            address: fetchAccount(publicKey).address
+            name: findAcc(publicKey).name,
+            balance: findAcc(publicKey).balance,
+            address: findAcc(publicKey).address
           });
         });
 
@@ -658,7 +638,6 @@ export default {
       lockFund,
       aggregateFee,
       lockFundTxFee,
-      splitBalance,
       walletName,
       currentNativeTokenName,
       oldValue,

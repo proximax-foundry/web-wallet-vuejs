@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, getCurrentInstance } from 'vue'
 import { 
   PublicAccount, NetworkType, MosaicId, Account,
   AccountHttp, MosaicHttp, Convert, Address
 } from 'tsjs-xpx-chain-sdk';
+
 import { SimpleSDA } from '@/models/sda'
-// import {parse} from 'csv-parse'
 import {sum} from 'mathjs'
 import {DistributeListInterface, Sirius} from "@/models/sirius"
 import { AppState } from '@/state/appState';
@@ -19,6 +19,10 @@ import { TransactionUtils } from '@/util/transactionUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import {useI18n} from 'vue-i18n'
 import PasswordInput from '@/components/PasswordInput.vue';
+import SelectInputAccount from "@/components/SelectInputAccount.vue";
+
+const internalInstance = getCurrentInstance();
+const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
 const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 const cosignerBalanceInsufficient = ref(false);
@@ -36,12 +40,9 @@ let api = "https://api-2.testnet2.xpxsirius.io";
 let explorerURL = "https://bctestnetexplorer.xpxsirius.io";
 let accountHttp = new AccountHttp(api);
 let mosaicHttp = new MosaicHttp(api);
-// let data = reactive<DataInterface>({
-//   assetList: []
-// });
 
 let assetList = ref<SimpleSDA[]>([]);
-let assetSelected = ref("");
+let assetSelected = ref(null);
 let aggregateNum = ref(10);
 let distributionList = ref<DistributeListInterface[]>([]);
 let totalRecipients = ref(0);
@@ -58,7 +59,6 @@ let sdaError = ref("");
 let recipientError = ref("");
 let distributionError = ref("");
 let distributing = ref(false);
-
 let knownToken = [{
     namespace: "prx.xpx",
     name: "XPX"
@@ -73,7 +73,7 @@ let knownToken = [{
 
 let scanDistributorAsset = async() =>{
   noAssetFound.value = false;
-  assetSelected.value = "";
+  assetSelected.value = null;
   let assets = await Sirius.scanAsset(selectedAccount.value.publicKey);
 
   assetList.value = assets;
@@ -82,6 +82,13 @@ let scanDistributorAsset = async() =>{
     noAssetFound.value = true;
   }
 }
+
+let aggregateOption = [
+  {label: "5", value: 5},
+  {label: "10", value: 10},
+  {label: "15", value: 15},
+  {label: "20", value: 20}
+]
 
 let distribute = async()=>{
   distributionError.value = "";
@@ -93,7 +100,7 @@ let distribute = async()=>{
   if(assetNotEnough.value || assetWrongDivisibility.value){
     return;
   }
-  else if(assetSelected.value === ""){
+  else if(assetSelected.value === null){
     sdaError.value = "Please select SDA";
     return;
   }
@@ -156,9 +163,7 @@ let distribute = async()=>{
   distributing.value = true;
   let allTxnsHash  = await Sirius.signAllAbtAndAnnounce(aggregateTxns, initiator);
   distributing.value = false;
-
   distributeDone.value = true;
-
   txnsHash.value = allTxnsHash;
 }
 
@@ -185,15 +190,6 @@ let loadCSV = (e: any)=>{
           amount: data[1]
         });
       }
-      // let distResultCsvData: any = await new Promise(function(resolve, reject) {
-      //   parse(fileData, {from_line: 2, columns: ["publicKey", "amount"]}, (err, rows)=>{
-      //       if(err){
-      //           reject(err);
-      //       }else{
-      //           resolve(rows);
-      //       }
-      //   });
-      // });
 
       let isInvalidData = false;
       distributionList.value = [];
@@ -209,7 +205,6 @@ let loadCSV = (e: any)=>{
           if(publicKeyOrAddress.length === 64){
             if(!Convert.isHexString(publicKeyOrAddress)){
               isInvalidData = true; 
-              console.log("Invalid recipient publicKey found");
               break;
             }
           }
@@ -217,13 +212,11 @@ let loadCSV = (e: any)=>{
             let tempAddress = Address.createFromRawAddress(publicKeyOrAddress);
             if(tempAddress.networkType !== AppState.networkType){
               isInvalidData = true;
-              console.log("Invalid recipient address found");
               break;
             }
           }
           else{
             isInvalidData = true;
-            console.log("Invalid recipient found");
             break;
           }
           
@@ -231,7 +224,6 @@ let loadCSV = (e: any)=>{
 
           if(isNaN(amount)){
             isInvalidData = true;
-            console.log("Invalid amount found");
             break;
           }
           else if(newAmountLength !== originAmount.length){
@@ -239,7 +231,7 @@ let loadCSV = (e: any)=>{
 
             if(amount.toString() + "0".repeat(strippedDecimal) !== originAmount){
               isInvalidData = true;
-              console.log("Invalid amount found");
+              // console.log("Invalid amount found");
               break;
             }
           }
@@ -290,7 +282,7 @@ let setActive = () =>{
 
 let checkDistributorAssetAmount = (selectedAssetId: string)=>{
   if(selectedAssetId){
-    let data = assetList.value.find(x => x.id === selectedAssetId);
+    let data = assetList.value.find(x => x.id === selectedAssetId.id);
 
     if(totalDistributeAmount.value > data!.amount){
       assetNotEnough.value = true;
@@ -306,7 +298,7 @@ let checkDistributorAssetAmount = (selectedAssetId: string)=>{
 
 let checkDistributorAssetAmountDecimal = (selectedAssetId: string)=>{
   if(selectedAssetId){
-    let data = assetList.value.find(x => x.id === selectedAssetId );
+    let data = assetList.value.find(x => x.id === selectedAssetId.id );
 
     let invalidDivisibility = distributionList.value.find(x =>{
       let bigNumberAmount = mathjs.bignumber(x.amount);
@@ -337,6 +329,7 @@ interface Account{
   isMultisig: boolean
 }
 const selectedAccount = ref<Account[]>([])
+
 const accounts = computed(
       () => {
         if(walletState.currentLoggedInWallet){
@@ -386,7 +379,11 @@ const accounts = computed(
       }
     );
 
-const isMultiSig = (address) => {
+  selectedAccount.value = accounts.value[0]
+  scanDistributorAsset()
+  const currentAccount = ref(selectedAccount.value.address)
+
+  const isMultiSig = (address) => {
   const account = accounts.value.find(
     (account) => account.address === address
   );
@@ -455,13 +452,8 @@ if (isMultiSigBool.value) {
   let cosigner = getWalletCosigner.value.cosignerList
   if (cosigner.length > 0) {
     cosignAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
-    // if (findAccWithAddress(cosignAddress.value).balance < lockFundTotalFee.value + Number(effectiveFee.value) ) {
-    //   disableAllInput.value = true;
-    //   cosignerBalanceInsufficient.value = true;
-    // } else {
       disableAllInput.value = false;
       cosignerBalanceInsufficient.value = false;
-    // }
   } else {
     disableAllInput.value = true;
   }
@@ -471,29 +463,33 @@ const clearInput = () => {
       walletPassword.value = "";
     };
 
-watch(assetSelected, (value) => {
-  checkDistributorAssetAmount(value);
-  checkDistributorAssetAmountDecimal(value);
-});
+  watch(assetSelected, (value) => {
+    checkDistributorAssetAmount(value);
+    checkDistributorAssetAmountDecimal(value);
+  });
 
-watch(totalDistributeAmount, (value) => {
-  checkDistributorAssetAmount(assetSelected.value);
-  checkDistributorAssetAmountDecimal(assetSelected.value);
-});
+  watch(totalDistributeAmount, (value) => {
+    checkDistributorAssetAmount(assetSelected.value);
+    checkDistributorAssetAmountDecimal(assetSelected.value);
+  });
 
+  // account is clicked
+  emitter.on("select-account", (address) => {
+    for (let i = 0; i < accounts.value.length; i++){
+      if (accounts.value[i].address == address){
+        selectedAccount.value = accounts.value[i]
+        scanDistributorAsset()
+        currentAccount.value = ref(selectedAccount.value.address)
+      }
+    }
+  })
 </script>
 
 <template>
   <div class="container">
     <div class="p-2">
       <div class="flex flex-col">
-        <label class="font-semibold">Distributor Account</label>
-        <Dropdown v-model="selectedAccount" :options="accounts" optionLabel="name" placeholder="Select an account" @change="scanDistributorAsset()"/>
-        <!-- <div class="mb-3 w-3/4 flex justify-between">
-          <input type="text" class="border border-gray-200 rounded-l-md w-3/4 px-2 py-1 font-sans" v-model="distributePublicKey" placeholder="Enter Distributor Account's Public Key" aria-label="Distributor Account's Public Key" 
-          aria-describedby="button-addon">
-          <button class="border rounded-r-md border-black w-1/4 px-2 py-1 hover:bg-gray-700 hover:text-white" @click="scanDistributorAsset()" type="button" id="button-addon">Scan SDAs</button>
-        </div> -->
+        <SelectInputAccount v-model="currentAccount" :selectDefault="currentAccount"/>
         <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4">
           <div v-if="getWalletCosigner.cosignerList.length > 0">
               <div class="text-tsm">
@@ -525,26 +521,43 @@ watch(totalDistributeAmount, (value) => {
     <div class="p-2">
       <div>
         <div class="flex flex-col-reverse">
+          <!-- Dropdown for select SDA -->
           <div class="error error_box" v-if="sdaError!=''">{{ sdaError }}</div>
-          <select class="w-3/4" v-model="assetSelected" aria-label="Floating label select example">
-            <option value="" selected>Select SDA to distribute</option>
-                      <option v-for='asset, index in assetList' :key='index' :value="asset.id">
-                        {{ asset.amount }} - {{ asset.label }}
-                      </option>
-          </select>
+            <Dropdown
+              v-model="assetSelected"
+              :options="assetList"
+              placeholder="Select SDA to distribute"
+              :style="{'width':'100%'}"
+              :filter="true"
+              :filterFields="['label']"
+              optionLabel="text"
+              option-disabled="disabled"
+              :showClear="true"
+            >
+              <template  #value="slotProps">
+                <div v-if="slotProps.value">
+                  <div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">{{slotProps.value.label}} <span class="text-tsm text-gray-400"> ({{Helper.toCurrencyFormat(slotProps.value.amount,slotProps.value.divisibility)}})</span></div>
+                </div>
+                <span v-else>
+                  {{slotProps.placeholder}}
+                </span>
+              </template>
+              <template #option="slotProps">
+                <div style="display: flex;justify-content: space-between;">
+                  <span class="text-sm">{{slotProps.option.label}}</span>
+                  <span class="text-tsm text-gray-500">Balance:{{Helper.toCurrencyFormat(slotProps.option.amount,slotProps.option.divisibility)}}</span>
+                </div>
+              </template>
+            </Dropdown>
           <label class="font-medium text-gray-400" for="floatingSelect">Sirius Digital Asset</label>
         </div>
       </div>
     </div>
     <div class="p-2">
       <div>
+        <!-- Dropdown for aggregate number -->
         <div class="flex flex-col-reverse">
-          <select class="w-3/4" v-model="aggregateNum" aria-label="Floating label select example">
-            <option value="5" >5</option>
-            <option value="10" >10</option>
-            <option value="15" >15</option>
-            <option value="20" >20</option>
-          </select>
+          <Dropdown v-model="aggregateNum" :options="aggregateOption" :style="{'width':'100%'}" optionLabel="label" optionValue="value" />
           <label class="font-medium text-gray-400" for="floatingSelect">Transactions per aggregate</label>
         </div>
       </div>

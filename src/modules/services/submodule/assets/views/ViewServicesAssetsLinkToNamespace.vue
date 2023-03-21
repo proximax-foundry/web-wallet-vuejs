@@ -64,7 +64,7 @@
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
-        <TransactionFeeDisplay :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="lockFundTxFee" :balance="balance" :selected-acc-add="selectedAccAdd"/>
+        <TransactionFeeDisplay :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="balance" :selected-acc-add="selectedAccAdd"/>
         <div class='text-xs text-white mt-5 mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="linkNamespace">{{ (selectAction=='link')?$t('general.linkToNamespace'):$t('namespace.unlinkNamespace') }}</button>
@@ -95,7 +95,7 @@ import Tooltip from 'primevue/tooltip';
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
-import { TransactionUtils } from '@/util/transactionUtils';
+import { isMultiSig, TransactionUtils, findAcc, findAccWithAddress } from '@/util/transactionUtils';
 
 export default {
   name: 'ViewServicesAssetsLinkToNamespace',
@@ -159,21 +159,6 @@ export default {
     const balance = ref('');
     const balanceNumber = ref(0);
 
-    const isMultiSig = (address) => {
-      if(walletState.currentLoggedInWallet){
-        const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address) || walletState.currentLoggedInWallet.others.find((account) => account.address == address);
-        if(account){
-          const isMulti = account.getDirectParentMultisig().length>0?true:false
-          return isMulti
-        }else{
-          return false
-        }
-      }else{
-        return false
-      }
-    };
-
-
     const isMultiSigBool = ref(isMultiSig(selectedAccAdd.value));
 
     const showNoBalance = computed(() => {
@@ -230,10 +215,6 @@ export default {
     const transactionFee = ref('0.000000');
     const transactionFeeExact = ref(0);
 
-    const fetchAccount = (publicKey) => {
-      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
-    };
-
     const getMultiSigCosigner = computed(()=>{
       if(!account.value){
         return {hasCosigner:false,cosignerList: []}
@@ -244,9 +225,9 @@ export default {
         cosigners.cosignerList.forEach( publicKey => {
           list.push({
             publicKey,
-            name: fetchAccount(publicKey).name,
-            balance: fetchAccount(publicKey).balance,
-            address: fetchAccount(publicKey).address
+            name: findAcc(publicKey).name,
+            balance: findAcc(publicKey).balance,
+            address: findAcc(publicKey).address
           });
         });
         cosigners.cosignerList = list;
@@ -262,7 +243,7 @@ export default {
         if(getMultiSigCosigner.value.cosignerList.length > 1){
           return cosignerAddress.value;
         }else{
-          return fetchAccount(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
+          return findAcc(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
         }
       }else{
         return '';
@@ -369,22 +350,6 @@ export default {
       }
     });
 
-    const splitCurrency = (amount) => {
-      let split = amount.toString().split(".")
-      if (split[1]!=undefined){
-        return '<span class="font-semibold text-sm">' + split[0] + '</span>.<span class="font-semibold text-xs">' + split[1] + ' ' + currentNativeTokenName.value + '</span>';
-      }else{
-        return '<span class="font-semibold text-sm">' + split[0] + '</span> <span class="font-semibold text-xs">' + currentNativeTokenName.value + '</span>';
-      }
-    };
-
-    const findAccWithAddress = address =>{
-      if(!walletState.currentLoggedInWallet){
-        return null
-      }
-      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==address)
-    }
-
     const checkCosignBalance = computed(() => {
       let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
       return Helper.toCurrencyFormat(cosignBalance);
@@ -408,7 +373,6 @@ export default {
       supply,
       disabledPassword,
       currencyName,
-      isMultiSig,
       isMultiSigBool,
       selectAsset,
       selectAction,
@@ -426,7 +390,6 @@ export default {
       cosigner,
       isNotCosigner,
       disabledSelectAction,
-      splitCurrency,
       Helper,
       svgString,
       checkCosignBalance,

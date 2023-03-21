@@ -93,7 +93,7 @@ import { Account } from "tsjs-xpx-chain-sdk";
 import { listenerState } from '@/state/listenerState';
 import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
-import { TransactionUtils } from '@/util/transactionUtils';
+import { TransactionUtils, findAcc } from '@/util/transactionUtils';
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 export default {
   name: 'ViewAccountDelegate',
@@ -133,12 +133,7 @@ export default {
       }
       return multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList;
     }
-    const findAcc = (publicKey)=>{
-      if(!walletState.currentLoggedInWallet){
-        return null
-      }
-      return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
-    }
+
     const walletCosignerList = computed(() =>{
       let cosigners= getCosignerList()
       let list =[]
@@ -397,10 +392,6 @@ export default {
       return Helper.amountFormatterSimple(totalFee.value, 0);
     });
 
-    const fetchAccount = (publicKey) => {
-      return walletState.currentLoggedInWallet.accounts.find(account => account.publicKey === publicKey);
-    };
-
     const getMultiSigCosigner = computed(() => {
       if(networkState.currentNetworkProfileConfig){
         let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
@@ -408,9 +399,9 @@ export default {
         cosigners.cosignerList.forEach( publicKey => {
           list.push({
             publicKey,
-            name: fetchAccount(publicKey).name,
-            balance: fetchAccount(publicKey).balance,
-            address: fetchAccount(publicKey).address
+            name: findAcc(publicKey).name,
+            balance: findAcc(publicKey).balance,
+            address: findAcc(publicKey).address
           });
         });
 
@@ -430,6 +421,7 @@ export default {
 
     return {
       showPrivateKeyError,
+      findAcc,
       privateKey,
       currentNativeTokenName,
       splitBalance,
@@ -456,7 +448,6 @@ export default {
       onPartial,
       walletCosignerList,
       selectedCosignPublicKey,
-      findAcc,
       fundStatus,
       generatePrivateKey,
       totalFeeFormatted,
