@@ -110,7 +110,7 @@
             <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken?selectedToken.name=='metx'?true:false:false" class=" w-5 h-5 ml-4"> 
             <img v-if="selectedToken?selectedToken.name=='xpx'?true:false:false" src="@/modules/dashboard/img/icon-xpx.svg" class=" w-5 h-5 ml-4">
           </div>
-          <div class="my-4 text-xs">Total Amount of {{selectedToken?selectedToken.name.toUpperCase():''}} received after deducting transaction fee</div>
+          <div class="my-4 text-xs">Estimated Total Amount of {{selectedToken?selectedToken.name.toUpperCase():''}} received after deducting transaction fee</div>
           <div class="mt-10 text-center">
             <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">{{$t('general.cancel')}}</button>
             <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="sendRequest()">{{$t('swap.sendRequest')}}</button>
@@ -283,7 +283,7 @@ import { computed, ref, watch, onBeforeUnmount, shallowRef } from "vue";
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
 import { walletState } from '@/state/walletState';
-import { copyToClipboard } from '@/util/functions';
+import { copyToClipboard, getCurrentPriceUSD } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import { ethers } from 'ethers';
@@ -307,6 +307,9 @@ export default {
   },
 
   setup() {
+    const BASE_BYTE_SIZE = 321;
+    const nativeFee = ref(0);
+
     let verifyingTxn;
     const {t} = useI18n();
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
@@ -477,14 +480,23 @@ export default {
     })
     
     watch(selectedToken,token=>{
-       SwapUtils.fetchTokenServiceInfo(swapData.swap_IN_SERVICE_URL,token.name).then(fetchService=>{
+       SwapUtils.fetchTokenServiceInfo(swapData.swap_IN_SERVICE_URL,token.name).then(async (fetchService)=>{
           if(fetchService.status==200){
             tokenAddress.value = fetchService.data.bscInfo.scAddress;
             custodian.value = fetchService.data.bscInfo.sinkAddress;
             serviceErr.value = '';
             tokenDivisibility.value = fetchService.data.siriusInfo.divisibility;
-            feeAmount.value = fetchService.data.siriusInfo.feeAmount/Math.pow(10,tokenDivisibility.value)
-            minAmount.value = fetchService.data.siriusInfo.minAmount/Math.pow(10,tokenDivisibility.value) 
+            nativeFee.value = Helper.safeMultiply(BASE_BYTE_SIZE + (fetchService.data.feeInfo.cosigners * 96), fetchService.data.feeInfo.feePerByte);
+            feeAmount.value = nativeFee.value;
+
+            if(token.name !== fetchService.data.feeInfo.tokenName.toLowerCase()){
+              let prices = await getCurrentPriceUSD(SwapUtils.checkSwapPrice(swapData.priceConsultURL));
+
+              let totalFeeInUSD = Helper.safeMultiply(prices[fetchService.data.feeInfo.tokenName.toLowerCase()], nativeFee.value);
+              feeAmount.value = Helper.safeDivideCeilDecimals(totalFeeInUSD, prices[token.name], tokenDivisibility.value);
+            }
+            
+            minAmount.value = Helper.safeMultiplyCeilDecimals(feeAmount.value, 1.2, fetchService.data.feeInfo.decimals);
           }else{
             serviceErr.value = t('swap.serviceDown');
           }
