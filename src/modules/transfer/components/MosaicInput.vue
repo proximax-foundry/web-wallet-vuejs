@@ -8,8 +8,8 @@
     </div>
     <!-- for the dropdown -->
     <div class="select mb-3" style="position: relative;">
-      <Dropdown @update:model-value="modelValue" :options="options" :style="{ 'width': '100%' }" :showClear="true" :filter="true"
-         optionLabel="text" option-disabled="disableOptions" :placeholder="placeholder"
+      <Dropdown v-model="selectedMosaic" :options="options" :style="{ 'width': '100%' }" :showClear="true" :filter="true"
+         optionLabel="text" option-disabled="disabled" :placeholder="placeholder"
         @change="makeSelection($event.value)" :virtualScrollerOptions="{
           itemSize: 32,
           scrollHeight: `flex`,
@@ -36,6 +36,8 @@
 </template>
 
 <script lang=ts setup>
+import { ref, watch } from 'vue';
+
 interface mosaicOption {
   val: string,
   balance: string,
@@ -43,51 +45,74 @@ interface mosaicOption {
   disabled: boolean
 }
 
-interface selectedMosaic{
-  id:string,
-  amount:string,
-  namespace:string
+interface selectedMosaic {
+  id: string,
+  amount: string,
+  namespace: string
 }
 const props = defineProps({
   placeholder: String,
   options: {
-    type:Array<mosaicOption>,
-    required:true
+    type: Array<mosaicOption>,
+    required: true
   },
   modelValue: {
-    type:String,
-    required:true
+    type: String,
+    required: true
   },
-  disableOptions:{
+  disableOptions: {
     type: Array<selectedMosaic>,
-    required:true
+    required: true
   },
-  index:{
-    type:Number,
-    required:true
+  index: {
+    type: Number,
+    required: true
   }
 })
 
-  const emit = defineEmits([
-    'update:modelValue', 'show-mosaic-selection', 'remove-mosaic-selected'
-  ])
+let selectedMosaic = ref()
 
-  const clearSelection = () => {
-    emit("remove-mosaic-selected", { index: props.index })
-  }
-  const makeSelection = (value :mosaicOption | null) => {
-    console.log(value)
-    // if the clear button is pressed
-    if (value == null) {
-      clearSelection()
-    }
-    // if dropdown is pressed
-    else {
-      emit('update:modelValue', value.val);
-      emit("show-mosaic-selection", { index: props.index });
-    }
-  }
+if (props.modelValue != '0') {
+  selectedMosaic.value = props.modelValue
+}
 
+const emit = defineEmits([
+  'update:modelValue', 'show-mosaic-selection', 'remove-mosaic-selected'
+])
+
+const clearSelection = () => {
+  emit("remove-mosaic-selected", { index: props.index })
+}
+const makeSelection = (value: mosaicOption | null) => {
+  console.log(value)
+  // if the clear button is pressed
+  if (value == null) {
+    clearSelection()
+  }
+  // if dropdown is pressed
+  else {
+    emit('update:modelValue', value.val);
+    emit("show-mosaic-selection", { index: props.index });
+  }
+}
+
+watch(props.disableOptions,(old_val, val) => {
+  // if the number of assets is reduced, need to update all value
+  if (old_val.length == val.length){
+    for (let i = 0; i < props.disableOptions.length; i++){
+      if (i == props.index){
+        // check if there is no value in the index
+        if (props.disableOptions[props.index].id == '0'){
+          selectedMosaic.value = 0
+        }
+        else{
+          const i = props.options.findIndex(item => item.val === props.disableOptions[props.index].id);
+          selectedMosaic.value = props.options[i]
+        }
+      }
+    }
+  }
+});
 
 
 </script>
