@@ -11,6 +11,7 @@
         data-maska-tokens="0:\d:multiple|9:\d:optional"
         :placeholder="placeholder"
         @keyup="checkBalance($event)"
+        @input="$emit('update:modelValue',parseFloat((<HTMLInputElement>$event.target).value.replace(/,/g, '')))"
       />
         <button :disabled="disabled == true" class="w-24 cursor-pointer focus:outline-none text-blue-primary text-xs font-bold" @click="showRemark();$emit('clickedMaxAvailable', true);clearAllError()">{{$t('swap.maxAmount')}}</button>
       </div>
@@ -76,7 +77,7 @@ const p = defineProps({
     const checkBalance = (evt:Event) => {
       const target = evt.target as HTMLInputElement
       target.value =  target.value? target.value : "0";
-      if(p.maxAmount < Number(target.value)){
+      if(p.maxAmount < Number(target.value.replace(/,/g, ''))){
         textErr.value = true;
       }else{
         textErr.value = false;
