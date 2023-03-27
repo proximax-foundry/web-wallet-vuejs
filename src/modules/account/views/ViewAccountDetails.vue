@@ -79,7 +79,7 @@
                 <a :href="explorerAccountLink(linkedAccountKey)" target="_blank" v-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" class="text-xs mt-1 font-semibold break-all text-black truncate md:text-clip md:w-auto">{{linkedAccountKey}}</a>
                 <div v-else class="text-xs ">No Linked Account</div>
               </div>
-              <router-link class="truncate" v-else-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" :to="{ name: 'ViewAccountDetails', params: { address: findAccountAddress(linkedAccountKey)}}">
+              <router-link class="truncate" v-else-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" :to="'/details-account/' + findAccountAddress(linkedAccountKey)">
                 <div class="text-xs mt-1 font-semibold break-all  truncate md:text-clip md:w-auto">{{linkedAccountKey}}</div>
               </router-link>
               <div v-else class="text-xs ">No Linked Account</div>
