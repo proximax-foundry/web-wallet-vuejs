@@ -187,6 +187,7 @@ import type { Transaction } from "tsjs-xpx-chain-sdk";
 import { FilterMatchMode } from "primevue/api";
 import { walletState } from "@/state/walletState";
 import type { SDA } from "../../model/transactions/sda";
+import { useI18n } from 'vue-i18n';
 
 defineProps({
   transactions: Array<Transaction>,
@@ -232,6 +233,7 @@ const filterAccount = ref({
   'global': { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
 const toast = useToast();
+const { t } = useI18n();
 const wideScreen = ref(false);
 const screenResizeHandler = () => {
   if (window.innerWidth < 1024) {
@@ -279,22 +281,13 @@ const convertLocalTime = (dateTimeInJSON: string) => {
   return Helper.convertDisplayDateTimeFormat24(dateTimeInJSON);
 };
 
-const copy = (id: string) => {
-  let element = document.getElementById(id);
-  if (element) {
-    let stringToCopy = element.getAttribute("copyValue");
-    let copySubject = element.getAttribute("copySubject");
-    if (stringToCopy) {
+const copy = (data:string) => {
+      let stringToCopy = data;
+      let copySubject = t('dashboard.txHash')
       copyToClipboard(stringToCopy);
-      toast.add({
-        severity: "info",
-        detail: copySubject + " copied",
-        group: "br-custom",
-        life: 3000,
-      });
-    }
-  }
-};
+
+      toast.add({ severity: 'info', detail: copySubject + ' ' + t('general.copied'), group: 'br-custom', life: 3000 });
+    };
 
 </script>
 

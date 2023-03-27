@@ -144,6 +144,7 @@ import { copyToClipboard } from '@/util/functions';
 import { useToast } from 'primevue/usetoast';
 import type { Transaction } from "tsjs-xpx-chain-sdk";
 import type { TxnExchangeOffer } from "../../model/transactions/exchangeOffer";
+import { useI18n } from 'vue-i18n';
 
 defineProps({
   transactions: Array<Transaction>,
@@ -152,6 +153,7 @@ defineProps({
 })
 
 const toast = useToast();
+const { t } = useI18n();
 const wideScreen = ref(false);
 const screenResizeHandler = () => {
   if (window.innerWidth < 1024) {
@@ -193,22 +195,13 @@ const convertLocalTime = (dateTimeInJSON: string) => {
   return Helper.convertDisplayDateTimeFormat24(dateTimeInJSON);
 };
 
-const copy = (id: string) => {
-  let element = document.getElementById(id);
-  if (element) {
-    let stringToCopy = element.getAttribute("copyValue");
-    let copySubject = element.getAttribute("copySubject");
-    if (stringToCopy) {
+const copy = (data:string) => {
+      let stringToCopy = data;
+      let copySubject = t('dashboard.txHash')
       copyToClipboard(stringToCopy);
-      toast.add({
-        severity: "info",
-        detail: copySubject + " copied",
-        group: "br-custom",
-        life: 3000,
-      });
-    }
-  }
-};
+
+      toast.add({ severity: 'info', detail: copySubject + ' ' + t('general.copied'), group: 'br-custom', life: 3000 });
+    };
 
 const displayExchangeSDA = (exchangeOffer: TxnExchangeOffer) => {
 
