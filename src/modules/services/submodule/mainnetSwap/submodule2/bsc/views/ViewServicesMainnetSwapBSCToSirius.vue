@@ -110,7 +110,7 @@
             <img src="@/modules/account/img/metx-logo.svg" v-if="selectedToken?selectedToken.name=='metx'?true:false:false" class=" w-5 h-5 ml-4"> 
             <img v-if="selectedToken?selectedToken.name=='xpx'?true:false:false" src="@/modules/dashboard/img/icon-xpx.svg" class=" w-5 h-5 ml-4">
           </div>
-          <div class="my-4 text-xs">Estimated Total Amount of {{selectedToken?selectedToken.name.toUpperCase():''}} received after deducting transaction fee</div>
+          <div class="my-4 text-xs">{{ selectedToken && selectedToken.name.toUpperCase() !== currentNativeTokenName ? "Estimated" : "" }} Total Amount of {{selectedToken?selectedToken.name.toUpperCase():''}} received after deducting transaction fee</div>
           <div class="mt-10 text-center">
             <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">{{$t('general.cancel')}}</button>
             <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledSwap" @click="sendRequest()">{{$t('swap.sendRequest')}}</button>
@@ -487,7 +487,8 @@ export default {
             serviceErr.value = '';
             tokenDivisibility.value = fetchService.data.siriusInfo.divisibility;
             nativeFee.value = Helper.safeMultiply(BASE_BYTE_SIZE + (fetchService.data.feeInfo.cosigners * 96), fetchService.data.feeInfo.feePerByte);
-            feeAmount.value = nativeFee.value;
+            feeAmount.value = fetchService.data.feeInfo.multiplier ?
+              Helper.safeMultiply(nativeFee.value, fetchService.data.feeInfo.multiplier) : nativeFee.value;
 
             if(token.name !== fetchService.data.feeInfo.tokenName.toLowerCase()){
               let prices = await getCurrentPriceUSD(SwapUtils.checkSwapPrice(swapData.priceConsultURL));

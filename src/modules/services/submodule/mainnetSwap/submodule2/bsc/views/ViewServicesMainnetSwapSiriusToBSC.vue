@@ -62,7 +62,7 @@
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
             <div class="inline-block mr-4 text-xs"><img src="@/assets/img/icon-prx-xpx-blue.svg" class="w-5 inline mr-1 text-gray-500">{{$t('general.transactionFee')}}: <span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName}}</div>
           </div>
-          <div class="mb-5">Total Transaction Fee: {{minBalanceAmount}} {{currentNativeTokenName}}</div>
+          <div class="mb-5">Total Transaction Fee: {{minNativeBalanceAmount}} {{currentNativeTokenName}}</div>
           <PasswordInputClean :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" icon="lock" v-model="walletPasswd" />
           <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
           <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center uppercase">
@@ -419,7 +419,7 @@ export default {
                         .build();
 
       txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(), AppState.nativeToken.divisibility);
-      minBalanceAmount.value = txFee.value
+      minNativeBalanceAmount.value = txFee.value
     }
 
     let txFee = ref(0);
@@ -538,12 +538,14 @@ export default {
 
     const currentXPX_USD = ref(0);
     const currentBSC_USD = ref(0);
+    const currentMETX_USD = ref(0);
 
     const getCurrentPrice = async ()=>{
 
       let prices = await getCurrentPriceUSD(SwapUtils.checkSwapPrice(swapData.priceConsultURL));
 
       currentXPX_USD.value = prices.xpx;
+      currentMETX_USD.value = prices.metx;
       currentBSC_USD.value = prices.bnb;
     };
 
@@ -579,11 +581,11 @@ export default {
     let gasPriceInXPX = ref(0);
 
     const maxSwapAmount = ref(0);
-    const minBalanceAmount = ref(0);
+    const minNativeBalanceAmount = ref(0);
    
     const xpxFeeErr = computed(()=>{
       if(selectedAccount.value){
-        if(selectedAccount.value.balance<minBalanceAmount.value){
+        if(selectedAccount.value.balance<minNativeBalanceAmount.value){
           return true
         }else{
           return false
@@ -615,23 +617,37 @@ export default {
       message2.gasPrice = selectedGasPriceInGwei.value;
       message2.gasLimit = selectedGasLimit.value;
 
-      minBalanceAmount.value = Helper.convertNumberMinimumFormat(txFee.value + gasPriceInXPX.value, AppState.nativeToken.divisibility);
+      minNativeBalanceAmount.value = Helper.convertNumberMinimumFormat(txFee.value + gasPriceInXPX.value, AppState.nativeToken.divisibility);
      
-
-      if(selectedAccount.value.balance <= minBalanceAmount.value){
-        amount.value = 0;
-      }
-
-      if(selectedAccount.value.balance <= minBalanceAmount.value){
-        disableAmount.value = true;
-        /* showAmountErr.value = true; */
-      }else{
-        disableAmount.value = false;
-        showAmountErr.value = false;
-      }
-
+      checkMinimumBalance();
       rebuildTranction();
     }
+
+    const checkMinimumBalance = async ()=>{
+
+      if(selectedToken.value.name.toUpperCase() !== "XPX"){
+        if(selectedAccount.value.balance < (gasPriceInXPX.value + txFee.value)){
+          showAmountErr.value = true;
+        }
+        else{
+          showAmountErr.value = false;
+        }
+      }
+      else{
+        if(selectedAccount.value.balance < minNativeBalanceAmount.value){
+          amount.value = 0;
+        }
+
+        if(selectedAccount.value.balance < minNativeBalanceAmount.value){
+          disableAmount.value = true;
+          /* showAmountErr.value = true; */
+        }else{
+          disableAmount.value = false;
+          showAmountErr.value = false;
+        }
+      }
+    }
+
      watch(gasPriceInXPX,price=>{
        let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == siriusAddress.value);
         if(!account){
@@ -652,7 +668,7 @@ export default {
     // watch to fix latency in updating gas price & xpx
     watch(standardGasLimit, () => {
       if(currentPage.value==2){
-        if(selectedAccount.value.balance <= minBalanceAmount.value){
+        if(selectedAccount.value.balance <= minNativeBalanceAmount.value){
           disableAmount.value = true;
           showAmountErr.value = true;
         }
@@ -664,10 +680,20 @@ export default {
     });
 
     watch([selectedAccountBalance, amount], () => {
-      if(selectedAccountBalance.value < (amount.value + minBalanceAmount.value)){
-        showAmountErr.value = true;
-      }else{
-        showAmountErr.value = false;
+      if(selectedToken.value.name.toUpperCase() !== "XPX"){
+        if(amount.value > maxSwapAmount.value){
+          showAmountErr.value = true;
+        }
+        else{
+          showAmountErr.value = false;
+        }
+      }
+      else{
+        if(selectedAccountBalance.value < (amount.value + minNativeBalanceAmount.value)){
+          showAmountErr.value = true;
+        }else{
+          showAmountErr.value = false;
+        }
       }
     })
 
@@ -844,7 +870,7 @@ export default {
 
     return {
       selectedAccountBalance,
-      minBalanceAmount,
+      minNativeBalanceAmount,
       includeMultisig,
       timerSecondsDisplay,
       timerMinutes,

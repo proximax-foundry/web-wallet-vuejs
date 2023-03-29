@@ -588,7 +588,7 @@ swap:
   transactionHash: '{network} Transaction Hash'
   transactionPending: '{network} transaction is still pending. Please wait a few more moment'
   tryAgain: Please try again later
-  txFailed: Transaction failed. Please try again with suggested gas price and gas limit.
+  txFailed: Transaction failed/invalid. Please try again with suggested gas price and gas limit.
   txFeeMsg: >-
     The fees for the transaction on Sirius Chain will be deducted from this
     amount, which is 50 {tokenName}
