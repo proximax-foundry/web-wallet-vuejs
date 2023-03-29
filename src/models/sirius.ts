@@ -26,7 +26,7 @@ export interface DistributeListInterface {
   amount: number;
 }
 
-const knownToken = [
+export const knownToken = [
   {
     namespace: "prx.xpx",
     name: "XPX",
