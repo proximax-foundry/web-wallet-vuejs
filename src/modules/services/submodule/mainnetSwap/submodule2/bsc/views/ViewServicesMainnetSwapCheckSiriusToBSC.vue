@@ -24,7 +24,7 @@
           <div class="error error_box mb-5" v-if="!isInstallMetamask">{{$t('swap.noMetamask')}}</div>
           <button @click="recheckMetamask()" v-if="!isInstallMetamask" class="text-xs blue-btn p-2 mb-3">Recheck MetaMask</button>
           <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">{{$t('swap.noOtherExtension')}} <b>{{$t('swap.metamask')}}</b>.<div class="my-2">{{$t('swap.referTo')}}<a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">{{$t('swap.walkthrough')}}<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a>{{$t('swap.forMoreDetails')}}</div>{{$t('swap.refreshMsg')}}</div>
-          <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
+          <div class="error error_box mb-5" v-if="serviceErr">{{ serviceErr }}</div>
           <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
           <p class="font-bold text-xs text-left mb-1">{{$t('dashboard.type')}}</p>
           <div class="mb-5 mt-3 text-left">
@@ -78,7 +78,7 @@
               </div>
             </div>
           </div>
-          <TextInputClean :placeholder="$t('swap.transactionHash',{network:'SIRIUS'})" :errorMessage="$t('swap.enterValidHash')" v-model="siriusTxnHash" :showError="showTxnHashError" class="w-full" />
+          <TextInputClean :placeholder="$t('swap.transactionHash',{network:'SIRIUS'})" :errorMessage="$t('swap.enterValidHash')" v-model="siriusTxnHash" v-bind:showError="showTxnHashError" class="w-full" />
           <div class="mt-10 text-center">
             <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">{{$t('general.cancel')}}</button>
             <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="sendRequest()">{{$t('swap.checkStatus')}}</button>
@@ -199,19 +199,14 @@ export default {
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
 
-    const custodian = ref('');
-    const tokenAddress = ref('');
+    const siriusTokens = ref([]);
+    const fromTokenName = ref("");
 
     (async() => {
       try {
-        const fetchService = await SwapUtils.fetchTokenServiceInfo(swapData.swap_IN_SERVICE_URL,'xpx');
-        if(fetchService.status==200){
-          tokenAddress.value = fetchService.data.bscInfo.scAddress;
-          custodian.value = fetchService.data.bscInfo.sinkAddress;
-          serviceErr.value = '';
-        }else{
-          serviceErr.value = t('swap.serviceDown');
-        }
+        siriusTokens.value = await SwapUtils.getSwapTokenList(swapData.swap_XPX_BSC_URL);
+        serviceErr.value = '';
+        
       } catch (error) {
         serviceErr.value = t('swap.serviceDown');
       }
@@ -236,14 +231,14 @@ export default {
     const showTxnHashError = computed(()=> !siriusTxnHash.value.match(siriusTxnHashPattern) && siriusTxnHash.value.length > 0);
 
     /* MetaMask integration */
-    let ethereumChainId = swapData.BSCChainId;
-    let ethereumNetworkName = swapData.BSCNetworkName;
+    let bscChainId = swapData.BSCChainId;
+    let bscNetworkName = swapData.BSCNetworkName;
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
     const currentNetwork = ref('');
 
-    const checkSwapStatusUrl = SwapUtils.getOutgoing_BSCCheckStatus_URL(swapData.swap_IN_SERVICE_URL);
+    const checkSwapStatusUrl = SwapUtils.getOutgoing_BSCCheckStatus_URL(swapData.swap_SERVICE_URL);
     const bscScanUrl = swapData.BSCScanUrl;
     const remoteTxnLink = computed( () => bscScanUrl + remoteTxnHash.value);
 
@@ -305,10 +300,10 @@ export default {
     }
     function verifyChain(chainId){
       currentNetwork.value = chainId;
-      if(ethereumChainId === parseInt(chainId)){
+      if(bscChainId === parseInt(chainId)){
         err.value = '';
       }else{
-        err.value = t('swap.selectNetworkToSwap',{network: ethereumNetworkName}) ;
+        err.value = t('swap.selectNetworkToSwap',{network: bscNetworkName}) ;
       }
     }
     const connectMetamask = () => {
@@ -397,12 +392,13 @@ export default {
         step2.value = true;
         if(response.status == 200){ // data.status == 'fulfilled'
           const data = await response.json();
-          remoteTxnHash.value = data.fulfillTransaction;
+          remoteTxnHash.value = data.fulfillTransaction ? data.fulfillTransaction : "";
+          fromTokenName.value = data.type;
           setTimeout( async() => {
             step3.value = true;
-            let remoteTxnStatus = await validateRemoteTxn();
-            if(!remoteTxnStatus){
-              isInvalidRemoteTxnHash.value = true;
+            // let remoteTxnStatus = await validateRemoteTxn();
+            if(!remoteTxnHash.value){
+              transactionPending.value = true;
             }
             setTimeout( async() => {
               setTimeout(() => step4.value = true, 1000);
@@ -417,36 +413,48 @@ export default {
       }
     };
 
-    const validateRemoteTxn = async () => {
-      try{
-        let transactionReceipt = await provider.getTransactionReceipt(remoteTxnHash.value);
-        let transactionStatus = await provider.getTransaction(remoteTxnHash.value);
+    // const validateRemoteTxn = async () => {
 
-        let isTxnPending = false;
-        provider.on("pending", (tx) => {
-          if(tx === remoteTxnHash.value){
-            isTxnPending = true;
-          }
-        });
+    //   if(!remoteTxnHash.value){
+    //     transactionNotFound.value = true;
+    //     return false;
+    //   }
 
-        if(isTxnPending){
-          transactionPending.value = true;
-          return true;
-        }else if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
-          return true;
-        }else if(!transactionReceipt && !transactionStatus){ // invalid transaction hash - transaction not found
-          transactionNotFound.value = true;
-          return false;
-        }else{
-          transactionFailed.value = true;
-          return false;
-        }
-      }catch(err){
-        // console.log(err);
-        transactionNotFound.value = true;
-        return false;
-      }
-    };
+    //   try{
+    //     let transactionReceipt = await provider.getTransactionReceipt(remoteTxnHash.value);
+    //     let transactionStatus = await provider.getTransaction(remoteTxnHash.value);
+
+    //     let isTxnPending = false;
+    //     provider.on("pending", (tx) => {
+    //       if(tx === remoteTxnHash.value){
+    //         isTxnPending = true;
+    //       }
+    //     });
+
+    //     let selectedToken = siriusTokens.find(x => x.name.toLowerCase() === fromTokenName.value.toLowerCase());
+
+    //     if(!selectedToken){
+    //       return false;
+    //     }
+
+    //     if(isTxnPending){
+    //       transactionPending.value = true;
+    //       return true;
+    //     }else if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to.toLowerCase() == siriusTokens.value.toLowerCase()){ // when transaciton is confirmed but status is 1
+    //       return true;
+    //     }else if(!transactionReceipt && !transactionStatus){ // invalid transaction hash - transaction not found
+    //       transactionNotFound.value = true;
+    //       return false;
+    //     }else{
+    //       transactionFailed.value = true;
+    //       return false;
+    //     }
+    //   }catch(err){
+    //     // console.log(err);
+    //     transactionNotFound.value = true;
+    //     return false;
+    //   }
+    // };
 
     const txtRemoteTxnSummary  = computed(() => {
       if(isInvalidRemoteTxnHash.value){

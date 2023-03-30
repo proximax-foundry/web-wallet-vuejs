@@ -825,8 +825,8 @@ export class SwapUtils {
     return `${baseUrl}/swap-status`;
   }
 
-  static getIncoming_BSCCheckStatus_URL(baseUrl: string){
-    return `${baseUrl}/swap-status`;
+  static getIncoming_BSCCheckStatus_URL(baseUrl: string, network: string, txnHash: string){
+    return `${baseUrl}/swap/${network}/${txnHash}`;
   }
 
   static getIncoming_OldETHCheckStatus_URL(baseUrl: string, tokenName: string){

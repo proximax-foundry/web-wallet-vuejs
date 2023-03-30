@@ -76,7 +76,7 @@
               </div>
             </div>
           </div>
-          <TextInputClean placeholder="ETH Transaction Hash" errorMessage="Please key in valid transaction hash" v-model="remoteTxnHash" :showError="showTxnHashError" class="w-full inline-block mr-2" />
+          <TextInputClean placeholder="ETH Transaction Hash" errorMessage="Please key in valid transaction hash" v-model="remoteTxnHash" v-bind:showError="showTxnHashError" class="w-full inline-block mr-2" />
           <div class="mt-10 text-center">
             <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">Cancel</button>
             <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="checkStatus">Check Status</button>

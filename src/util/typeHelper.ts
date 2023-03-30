@@ -30,6 +30,7 @@ import {
 } from "tsjs-xpx-chain-sdk";
 import Base64 from 'crypto-js/enc-base64';
 import { OtherAcountType } from "../models/const/otherAccountType";
+import * as math from "mathjs";
 
 export class Helper {
 
@@ -282,6 +283,26 @@ export class Helper {
 
     static toUppercase(value: string){
         return value.toUpperCase();
+    }
+
+    static safeMultiply(value1: number, value2: number): number{
+        return math.bignumber(math.multiply(math.bignumber(value1), math.bignumber(value2)).toString()).toNumber();
+    }
+
+    static safeMultiplyCeilDecimals(value1: number, value2: number, decimals: number): number{
+        return math.ceil(
+            math.bignumber(math.multiply(math.bignumber(value1), math.bignumber(value2)).toString())
+        , decimals).toNumber();
+    }
+
+    static safeDivideCeilDecimals(value1: number, value2: number, decimals: number): number{
+        return math.ceil(
+            math.bignumber(math.divide(math.bignumber(value1), math.bignumber(value2)).toString())
+        , decimals).toNumber();
+    }
+
+    static bigNumber(value: number): math.BigNumber{
+        return math.bignumber(value);
     }
 }
 
