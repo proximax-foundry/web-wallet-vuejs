@@ -360,7 +360,7 @@ export default {
     const checkSwapStatusUrl = computed(()=>{
       return SwapUtils.getIncoming_BSCCheckStatus_URL(swapData.swap_IN_SERVICE_URL, "bsc", remoteTxnHash.value);
     });
-    const siriusTokens = ["xpx", "metx"];
+    const siriusTokens = ["XPX", "METX"];
 
     const swapUrl = computed(()=>{ 
 
