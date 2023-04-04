@@ -2470,7 +2470,9 @@ export class WalletUtils {
         parentId: nativeAssetNamespaceInfo.isSubnamespace() ? nativeAssetNamespaceInfo.parentNamespaceId().toHex(): ""
       }
 
-      AppState.namespacesInfo.push(nativeTokenNamespace);
+      if(!AppState.namespacesInfo.find((x)=> x.name === nativeTokenNamespace.name)){
+        AppState.namespacesInfo.push(nativeTokenNamespace);
+      }
 
       for(let i = 0; i < loadedNamespaceInfoSettled.length; ++i){
 
@@ -2506,7 +2508,9 @@ export class WalletUtils {
           parentId: namespaceInfo.isSubnamespace() ? namespaceInfo.parentNamespaceId().toHex(): ""
         }
 
-        AppState.namespacesInfo.push(tokenNamespace);
+        if(!AppState.namespacesInfo.find((x)=> x.name === tokenNamespace.name)){
+          AppState.namespacesInfo.push(tokenNamespace);
+        }
       }
 
 
