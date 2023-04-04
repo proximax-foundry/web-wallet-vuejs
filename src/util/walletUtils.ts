@@ -2408,14 +2408,17 @@ export class WalletUtils {
 
       const extraNamespaceTokensToLoad = knownToken.map(x => x.namespace).filter(x => x !== networkProfile.network.currency.namespace);
 
-      const assetId = await AppState.chainAPI.namespaceAPI.getLinkedMosaicId(
-        Helper.createNamespaceId(networkProfile.network.currency.namespace)
-      );
-      const nativeAssetInfo = await AppState.chainAPI.assetAPI.getMosaic(
-        assetId
-      );
       const nativeAssetNamespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespace(
         Helper.createNamespaceId(networkProfile.network.currency.namespace)
+      );
+
+      const assetId = nativeAssetNamespaceInfo.alias.mosaicId!;
+
+      /*const assetId = await AppState.chainAPI.namespaceAPI.getLinkedMosaicId(
+        Helper.createNamespaceId(networkProfile.network.currency.namespace)
+      );*/
+      const nativeAssetInfo = await AppState.chainAPI.assetAPI.getMosaic(
+        assetId
       );
 
       AppState.readBlockHeight = chainHeight;
@@ -2437,7 +2440,7 @@ export class WalletUtils {
         );
       }
 
-      let loadedNamespaceInfo = await Promise.all(namespacePromises);
+      let loadedNamespaceInfoSettled = await Promise.allSettled(namespacePromises)
 
       const firstAssetInfo = new AssetInfo(
         assetId.toHex(),
@@ -2469,16 +2472,22 @@ export class WalletUtils {
 
       AppState.namespacesInfo.push(nativeTokenNamespace);
 
-      for(let i = 0; i < loadedNamespaceInfo.length; ++i){
+      for(let i = 0; i < loadedNamespaceInfoSettled.length; ++i){
 
         let linkedId: string;
 
-        switch(loadedNamespaceInfo[i].alias.type){
+        if(loadedNamespaceInfoSettled[i].status !== "fulfilled"){
+          continue;
+        }
+
+        let namespaceInfo = await namespacePromises[i];
+
+        switch(namespaceInfo.alias.type){
           case AliasType.Address:
-            linkedId = loadedNamespaceInfo[i].alias.address!.plain();
+            linkedId = namespaceInfo.alias.address!.plain();
             break;
           case AliasType.Mosaic:
-            linkedId = loadedNamespaceInfo[i].alias.mosaicId!.toHex();
+            linkedId = namespaceInfo.alias.mosaicId!.toHex();
             break;
           default:
             linkedId = "";
@@ -2486,19 +2495,20 @@ export class WalletUtils {
         }
 
         const tokenNamespace: Namespace = {
-          active: loadedNamespaceInfo[i].active,
-          startHeight: loadedNamespaceInfo[i].startHeight.compact(),
-          endHeight: bignumber("0x" + loadedNamespaceInfo[i].endHeight.toHex()).toString(),
-          idHex: loadedNamespaceInfo[i].id.toHex(),
+          active: namespaceInfo.active,
+          startHeight: namespaceInfo.startHeight.compact(),
+          endHeight: bignumber("0x" + namespaceInfo.endHeight.toHex()).toString(),
+          idHex: namespaceInfo.id.toHex(),
           linkedId: linkedId,
-          linkType: loadedNamespaceInfo[i].alias.type,
+          linkType: namespaceInfo.alias.type,
           name: extraNamespaceTokensToLoad[i],
-          owner: loadedNamespaceInfo[i].owner.publicKey,
-          parentId: loadedNamespaceInfo[i].isSubnamespace() ? loadedNamespaceInfo[i].parentNamespaceId().toHex(): ""
+          owner: namespaceInfo.owner.publicKey,
+          parentId: namespaceInfo.isSubnamespace() ? namespaceInfo.parentNamespaceId().toHex(): ""
         }
 
         AppState.namespacesInfo.push(tokenNamespace);
       }
+
 
       await WalletUtils.updateWalletMultisigInfo(wallet);
       WalletUtils.populateOtherAccountTypeMultisig(wallet);
