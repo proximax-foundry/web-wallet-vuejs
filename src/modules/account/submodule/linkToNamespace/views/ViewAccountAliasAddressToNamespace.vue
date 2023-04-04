@@ -65,7 +65,7 @@
           <TransactionFeeDisplay :transaction-fee="Number(trxFee)" :total-fee-formatted="totalFee.toString()"
             :get-multi-sig-cosigner="walletCosignerList" :check-cosign-balance="checkCosignBalance.toString()"
             :lock-fund-currency="lockFund" :lock-fund-tx-fee="lockFundTxFee" :balance="accountBalance.toString()"
-            :selected-acc-add="address" :no-namespace="noNamespace" :is-multisig-already="isMultiSig"
+            :selected-acc-add="address" :no-namespace="noNamespace"
             :on-partial="onPartial" :is-cosigner="isCosigner" :fund-status="fundStatus" />
           <div class='font-semibold text-xs text-white mb-1.5'>{{ $t('general.enterPasswordContinue') }}</div>
           <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"

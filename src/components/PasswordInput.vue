@@ -76,6 +76,9 @@ const hideShowPassword = () => {
 const blurInputPassword = () => {
   if (props.modelValue == "") {
     pswdErr.value = true;
+  }
+  else if (Object.keys(props.modelValue as string).length < 8){
+    pswdErr.value = true;
   } else {
     pswdErr.value = false;
   }

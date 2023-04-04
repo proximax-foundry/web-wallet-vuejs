@@ -74,9 +74,6 @@ const closeModel = () => {
 };
 
 const createInput = (file :Blob) => {
-  if(walletState.currentLoggedInWallet){
-    return
-  }
   let promise = new Promise<string>((resolve) => {
     var reader = new FileReader();
     reader.onload = () => {
@@ -96,7 +93,7 @@ const createInput = (file :Blob) => {
       let errContact:{label:string,address:string,group:string,publicKey:string|null}[] = [];
       array.shift();
       array.forEach(element => {
-        var label :string, address :string, group, publicKey;
+        var label :string, address :string, group :string, publicKey :string|null;
         var arr = element.split(',');
         if (arr.length > 4) {
           // merge all array as label except the last
