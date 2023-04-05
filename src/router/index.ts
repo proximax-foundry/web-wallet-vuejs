@@ -1,27 +1,29 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHashHistory } from "vue-router";
 import { HomeRoutes } from '@/modules/home/routingHome';
-import { DashboardRoutes } from '@/modules/dashboard/routingDashboard';
-import { TransferRoutes } from '@/modules/transfer/routingTransfer';
 import { WalletRoutes } from '@/modules/wallet/routingWallet';
+import { MainnetSwapRoutes }from '@/modules/services/submodule/mainnetSwap/routingMainnetSwap'
 import { AccountRoutes } from '@/modules/account/routingAccount';
+import { TransferRoutes } from '@/modules/transfer/routingTransfer';
 import { ServiceRoutes  } from '@/modules/services/routingService';
-import { TransactionRoutes  } from '@/modules/transaction/routingTransaction';
+import { DashboardRoutes } from '@/modules/dashboard/routingDashboard';
 import { MetadataTransactionRoutes  } from '@/modules/metadataTxn/routingMetadataTransaction';
-
-const routes: RouteRecordRaw[] = [
-  ...HomeRoutes,
-  ...WalletRoutes,
-  ...DashboardRoutes,
-  ...TransferRoutes,
-  ...AccountRoutes,
-  ...ServiceRoutes,
-  ...TransactionRoutes,
-  ...MetadataTransactionRoutes
-]
+import { stakingRoutes } from '@/modules/services/submodule/staking/routingStaking';
+import { TransactionRoutes } from "@/modules/transaction/routingTransaction";
 
 const router = createRouter({
-  history: createWebHashHistory(process.env.BASE_URL),
-  routes
-})
+  history: createWebHashHistory(import.meta.env.BASE_URL),
+  routes: [
+    ...HomeRoutes,
+    ...WalletRoutes,
+    ...AccountRoutes,
+    ...TransferRoutes,
+    ...ServiceRoutes,
+    ...DashboardRoutes,
+    ...MetadataTransactionRoutes,
+    ...stakingRoutes,
+    ...MainnetSwapRoutes,
+    ...TransactionRoutes
+  ],
+});
 
-export default router
+export default router;

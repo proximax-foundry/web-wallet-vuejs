@@ -50,25 +50,22 @@
 </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { SwapUtils } from "@/util/swapUtils";
 import { networkState } from "@/state/networkState";
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { useI18n } from 'vue-i18n';
-export default {
-    name: "ViewServicesMainnetSwap",
 
-    setup(){
       const {t} = useI18n();
-      const open = ref([]);
-      open.value['nis1', 'eth', 'bsc'] = false;
-      let type = ['nis1', 'eth', 'bsc'];
-      const openMenu = (remoteNetworkType) => {
-        if(remoteNetworkType == 'nis1' && !isOutgoingOptionDisabled.value['nis1']){
-          open.value['nis1'] = !open.value['nis1'];
-        }else if(remoteNetworkType == 'eth' && !isOutgoingOptionDisabled.value['eth']){
+      const open = ref<Record<string,boolean>>({});
+      open.value.bsc=false
+      open.value.eth=false
+      open.value.nis1=false
+      const isOutgoingOptionDisabled = ref<Record<string,boolean>>({});
+      const openMenu = (remoteNetworkType:string) => {
+        if(remoteNetworkType == 'eth' && !isOutgoingOptionDisabled.value['eth']){
           open.value['eth'] = !open.value['eth'];
         }else if(remoteNetworkType == 'bsc' && !isOutgoingOptionDisabled.value['bsc']){
           open.value['bsc'] = !open.value['bsc'];
@@ -77,7 +74,7 @@ export default {
 
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
-    const getBaseURL = remoteNetwork =>{
+    const getBaseURL = (remoteNetwork:string) =>{
       if(remoteNetwork=='bsc'){
         return swapData.swap_XPX_BSC_URL;
       }else if(remoteNetwork=='eth'){
@@ -88,27 +85,20 @@ export default {
     }
     const priceURL = swapData.priceConsultURL;
     const router = useRouter();
-    const isOutgoingOptionDisabled = ref([]);
-    isOutgoingOptionDisabled.value['nis1', 'eth', 'bsc'] = false;
-    const displayWaitMessage = ref([]);
-    displayWaitMessage.value['nis1', 'eth', 'bsc'] = false;
-    const displayConnectionMessage = ref([]);
-    displayConnectionMessage.value['nis1', 'eth', 'bsc'] = false;
-    const displayErrorMessage = ref([]);
-    displayErrorMessage.value['nis1', 'eth', 'bsc'] = false;
-    const isChecking = ref([]);
-    isChecking.value['nis1', 'eth', 'bsc'] = false;
-
-    const displayOutgoingNIS1SwapLabel = computed(() => {
-      let label = 'Sirius Chain to NIS1';
-      if(displayConnectionMessage.value['nis1']){
-        return t('swap.failConnect');
-      }else if(displayErrorMessage.value['nis1']){
-        return t('swap.serviceUnavailable');
-      }else{
-        return label;
-      }
-    });
+    isOutgoingOptionDisabled.value.bsc = false
+    isOutgoingOptionDisabled.value.eth = false
+    const displayWaitMessage = ref<Record<string,boolean>>({});
+    displayWaitMessage.value.bsc=false
+    displayWaitMessage.value.eth=false
+    const displayConnectionMessage = ref<Record<string,boolean>>({});
+    displayConnectionMessage.value.bsc=false
+    displayConnectionMessage.value.eth=false
+    const displayErrorMessage = ref<Record<string,boolean>>({});
+    displayErrorMessage.value.bsc=false
+    displayErrorMessage.value.eth=false
+    const isChecking = ref<Record<string,boolean>>({});
+    isChecking.value.bsc = false
+    isChecking.value.eth = false
 
     const displayOutgoingETHSwapLabel = computed(() => {
       let label = t('swap.siriusToEth');
@@ -132,7 +122,7 @@ export default {
       }
     });
 
-    const gotoOutgoingPage = async(remoteNetwork)=> {
+    const gotoOutgoingPage = async(remoteNetwork:string)=> {
 
       if(isChecking.value[remoteNetwork]){
         return;
@@ -177,7 +167,7 @@ export default {
         }else{
           displayWaitMessage.value[remoteNetwork] = false;
           displayErrorMessage.value[remoteNetwork] = true;
-          isOutgoingOptionDisabled.value = false;
+          isOutgoingOptionDisabled.value[remoteNetwork] = false;
         }
       } catch (error) {
         displayWaitMessage.value[remoteNetwork] = false;
@@ -188,19 +178,4 @@ export default {
       }
     }
 
-    return {
-      open,
-      openMenu,
-      isChecking,
-      displayWaitMessage,
-      displayErrorMessage,
-      displayConnectionMessage,
-      isOutgoingOptionDisabled,
-      gotoOutgoingPage,
-      displayOutgoingETHSwapLabel,
-      displayOutgoingBSCSwapLabel,
-      displayOutgoingNIS1SwapLabel,
-    }
-  }
-}
 </script>

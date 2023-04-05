@@ -1,5 +1,5 @@
-export interface TxnList{
-    type: number;
-    name: string;
-    total: number; 
+export interface TxnList {
+  type: number;
+  name: string;
+  total: number;
 }

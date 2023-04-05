@@ -1,28 +1,28 @@
+import { createApp } from "vue";
+import App from "./App.vue";
+import router from "./router";
 import "./assets/scss/main.scss";
-import { createApp } from 'vue';
-import App from './App.vue';
-import router from './router';
-import 'animate.css';
-import vueDebounce from 'vue-debounce'
-import { VuePassword } from 'vue-password';
-import mitt from 'mitt';
-import PrimeVue from 'primevue/config';
+import { vMaska } from "maska";
+import Tooltip from "primevue/tooltip";
+import Toast from "primevue/toast";
+import PrimeVue from "primevue/config";
 import "primeicons/primeicons.css";
+import ToastService from "primevue/toastservice";
+import mitt from "mitt";
+import { vue3Debounce } from "vue-debounce";
+import Tree from "primevue/tree";
+import { AppStateUtils } from "./state/utils/appStateUtils";
 import { appSetting } from '@/config/appSetting';
-// import "primevue/resources/primevue.min.css";
-// import "primevue/resources/themes/saga-blue/theme.css";
-import ConfirmationService from 'primevue/confirmationservice';
-import ToastService from 'primevue/toastservice';
-import { walletState } from './state/walletState';
-import { WalletStateUtils } from './state/utils/walletStateUtils';
-import { NetworkStateUtils } from './state/utils/networkStateUtils';
-import { ChainUtils } from './util/chainUtils';
-import { ChainAPICall } from './models/REST/chainAPICall';
-import { AppStateUtils } from './state/utils/appStateUtils';
-import { WalletMigration } from './models/walletMigration';
-import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig, ThemeStyleConfig, ChainProfileName } from "./models/stores/"
-
-// Import Font Awesome Icons
+import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig, ThemeStyleConfig, type ChainProfileName } from "./models/stores";
+import { ChainUtils } from "./util/chainUtils";
+import { RequestOptions } from "tsjs-xpx-chain-sdk";
+import { ChainAPICall } from "./models/REST/chainAPICall";
+import { NetworkStateUtils } from "./state/utils/networkStateUtils";
+import { WalletMigration } from "./models/walletMigration";
+import { walletState } from "./state/walletState";
+import { WalletStateUtils } from "./state/utils/walletStateUtils";
+import type { ChainProfileKey, ChainSwapKey } from "./models/appSetting";
+import i18n from "./i18n";
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
   fas, faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
@@ -30,54 +30,48 @@ import {
   faExternalLinkAlt, faHashtag, faShoppingBag
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import ConfirmDialog from 'primevue/confirmdialog';
-import Toast from 'primevue/toast';
-import i18n from './i18n';
-import VWave from 'v-wave';
-import VueBlocksTree from 'vue3-blocks-tree';
-import 'vue3-blocks-tree/dist/vue3-blocks-tree.css';
-import { RequestOptions } from "tsjs-xpx-chain-sdk";
+import ConfirmationService from 'primevue/confirmationservice';
+import VueBlocksTree from "vue3-blocks-tree";
 import 'primevue/resources/themes/saga-blue/theme.css'
 import 'primevue/resources/primevue.min.css'
 import 'primeicons/primeicons.css'
-
-// Import dialog from PrimeVue
-import Dropdown from 'primevue/dropdown';
 import Sidebar from 'primevue/sidebar'
-import Tree from 'primevue/tree'
+import Dropdown from "primevue/dropdown";
+import { Buffer } from 'buffer';
 
 library.add(
   fas, faTimes, faEye, faEyeSlash, faLock, faWallet, faKey, faCheck, faExclamation, faBars, faCopy, faSignOutAlt, faCaretDown, faEdit, faTimesCircle, faCheckCircle, faTrashAlt, faIdCardAlt, faDownload,
   faCoins, faComment, faBell, faCircle, faChevronUp, faChevronDown, faTrashRestore, faFileExport, faFileImport, faArrowRight, faArrowCircleRight, faAngleRight, faAt, faEquals, faNotEqual, faLink, faUnlink, faExternalLinkAlt, faHashtag, faShoppingBag
 );
+
 const app = createApp(App);
 const emitter = mitt();
-let defaultoptions = { treeName: 'blocks-tree' }
 app.config.globalProperties.emitter = emitter;
-app.use(router)
-app.use(PrimeVue);
-app.use(ConfirmationService);
-app.use(ToastService);
-app.use(i18n);
-app.use(VWave);
-app.use(vueDebounce);
-app.use(VueBlocksTree, defaultoptions)
-app.mount('#app');
-// Use Components
-app.component('ConfirmDialog', ConfirmDialog);
-app.component('Toast', Toast);
-app.component('font-awesome-icon', FontAwesomeIcon);
-app.component(VuePassword);
-app.component('Dropdown', Dropdown);
-app.component('Sidebar', Sidebar);
-app.component('Tree',Tree);
 
+app.use(PrimeVue);
+app.use(ToastService);
+app.use(VueBlocksTree /* , {treeName:'blocks-tree'} */);
+
+app.component("Toast", Toast);
+app.component("Tree", Tree);
+app.component("Dropdown", Dropdown);
+app.component('font-awesome-icon', FontAwesomeIcon);
+app.component('Sidebar', Sidebar);
+app.directive("tooltip", Tooltip);
+app.directive("debounce", vue3Debounce({ lock: true }));
+app.directive("maska", vMaska);
+
+app.use(ConfirmationService);
+app.use(router);
+app.use(i18n);
+app.mount("#app");
+
+window.Buffer = Buffer;
 AppStateUtils.addNewReadyStates('chainProfile');
 AppStateUtils.addNewReadyStates('theme');
 AppStateUtils.addNewReadyStates('checkSession');
 AppStateUtils.addNewReadyStates('walletMigration');
 AppStateUtils.addNewReadyStates('loadLoadedData');
-
 const loadThemeConfig = async () => {
   try {
     let config: any;
@@ -105,7 +99,7 @@ const loadThemeConfig = async () => {
 
 const chainProfileIntegration = async () => {
   try {
-    let networksInfo: ChainProfile[];
+    let networksInfo: ChainProfileKey;
     let isLocalAccess = false;
 
     if (location.protocol === "file:") {
@@ -153,7 +147,6 @@ const chainProfileIntegration = async () => {
     chainProfileNamesStore.names = chainNameArray;
 
     chainProfileNamesStore.saveToLocalStorage();
-
     for (const chainProfileName of chainProfileNames) {
       const chainProfileStore = new ChainProfile(chainProfileName);
 
@@ -170,39 +163,39 @@ const chainProfileIntegration = async () => {
         chainProfileStore.httpPort = chainProfileData['httpPort'];
         chainProfileStore.network = chainProfileData['network'];
 
-        if(isLocalAccess){
-          if(chainProfileData['apikey']){
+        if (isLocalAccess) {
+          if (chainProfileData['apikey']) {
             chainProfileStore.apikey = chainProfileData['apikey'];
           }
-          else{
+          else {
             chainProfileStore.apikey = "";
           }
         }
 
         chainProfileStore.saveToLocalStorage();
 
-        if(!chainProfileStore.secured || (chainProfileStore.apikey && chainProfileStore.secured)){
+        if (!chainProfileStore.secured || (chainProfileStore.apikey && chainProfileStore.secured)) {
           const endpoint = ChainUtils.buildAPIEndpoint(chainProfileStore.apiNodes[0], chainProfileStore.httpPort);
 
           const chainAPICall = new ChainAPICall(endpoint);
 
           try {
-            let requestOptions: RequestOptions | undefined = undefined; 
-            
-            if(chainProfileStore.apikey){
-              requestOptions = new RequestOptions({apikey: chainProfileStore.apikey});
+            let requestOptions: RequestOptions | undefined = undefined;
+
+            if (chainProfileStore.apikey) {
+              requestOptions = new RequestOptions({ apikey: chainProfileStore.apikey });
               chainAPICall.chainAPI.requestOptions = requestOptions;
               chainAPICall.chainConfigAPI.requestOptions = requestOptions;
             }
-            
+
             const chainHeight = await chainAPICall.chainAPI.getBlockchainHeight();
-  
+
             const config = await ChainUtils.getChainConfig(chainHeight, chainAPICall.chainConfigAPI)
-  
+
             const chainProfileConfigStore = new ChainProfileConfig(chainProfileName);
-  
+
             chainProfileConfigStore.init()
-  
+
             if (typeof config !== "string") {
               config.chainHeight = chainHeight;
               chainProfileConfigStore.updateConfig(config);
@@ -211,7 +204,7 @@ const chainProfileIntegration = async () => {
             else {
               console.error(config);
             }
-  
+
           } catch (error) {
             console.log(error);
           }
@@ -232,7 +225,7 @@ const chainProfileIntegration = async () => {
 
 const chainSwapIntegration = async () => {
   try {
-    let swapInfo: ChainSwapConfig[];
+    let swapInfo: ChainSwapKey;
 
     if (location.protocol === "file:") {
       swapInfo = appSetting.chainSwap;
@@ -251,10 +244,9 @@ const chainSwapIntegration = async () => {
 
     for (const chainSwapProfileName of chainSwapProfileNames) {
       const chainSwapProfileData = chainSwapProfilesData[chainSwapProfileName];
-
-      if (chainSwapProfileData['swapData']) {
+      if (chainSwapProfileData) {
         let chainSwapConfig = new ChainSwapConfig(chainSwapProfileName);
-        chainSwapConfig.updateConfig(chainSwapProfileData['swapData']);
+        chainSwapConfig.updateConfig(chainSwapProfileData);
 
         chainSwapConfig.saveToLocalStorage();
       }
@@ -281,7 +273,6 @@ runWalletMigration();
 
 
 
-
 // check from session when page refreshed
 if (!walletState.currentLoggedInWallet) {
   // reload loaded data
@@ -289,16 +280,17 @@ if (!walletState.currentLoggedInWallet) {
   AppStateUtils.setStateReady('loadLoadedData');
 
   // check sessionStorage
-  if (!WalletStateUtils.checkFromSession()) {
-    NetworkStateUtils.checkSession();
+ 
+  WalletStateUtils.checkFromSession().then(bool=>{
+    if(!bool){
+      NetworkStateUtils.checkSession();
+      AppStateUtils.setStateReady('checkSession');
+  
+      router.push({ name: "Home" });
+    }
+  }).finally(()=>{
     AppStateUtils.setStateReady('checkSession');
+    AppStateUtils.setStateReady('loadLoadedData');
+  })
 
-    router.push({ name: "Home" });
-  }
-
-  AppStateUtils.setStateReady('checkSession');
-  AppStateUtils.setStateReady('loadLoadedData');
 }
-
-// NetworkStateUtils.checkDefaultNetwork();
-

@@ -114,163 +114,76 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import { getCurrentInstance, ref, computed, watch, onMounted, onUnmounted } from "vue";
+<script lang="ts" setup>
+import { getCurrentInstance, ref, computed,onMounted, onUnmounted } from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import {FilterMatchMode} from 'primevue/api';
 import { networkState } from "@/state/networkState";
-import Tooltip from 'primevue/tooltip';
-import { ChainUtils } from "@/util/chainUtils";
-import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { Helper } from "@/util/typeHelper";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from 'primevue/usetoast';
+import type { Transaction } from "tsjs-xpx-chain-sdk";
 import { useI18n } from 'vue-i18n';
-// import SplitButton from 'primevue/splitbutton';
 
-export default defineComponent({
-  components: {
-    DataTable,
-    Column,
-    // SplitButton
-  },
-  name: 'RestrictionTxnDataTable',
-  props: {
-    transactions: Array,
-    selectedGroupType: String,
-    currentAddress: String
-  },
-  emits: ['openMessage', 'openDecryptMsg'],
-  directives: {
-    'tooltip': Tooltip
-  },
-  setup(p, context){
-    const toast = useToast();
-    const {t} = useI18n();
-    const wideScreen = ref(false);
-    const screenResizeHandler = () => {
-      if(window.innerWidth < 1024){
-        wideScreen.value = false;
-      }else{
-        wideScreen.value = true;
-      }
-    };
-    screenResizeHandler();
+defineProps({
+  transactions: Array<Transaction>,
+  selectedGroupType: String,
+  currentAddress: String
+})
 
-    onUnmounted(() => {
-      window.removeEventListener("resize", screenResizeHandler);
-    });
+const toast = useToast();
+const { t } = useI18n();
+const wideScreen = ref(false);
+const screenResizeHandler = () => {
+  if (window.innerWidth < 1024) {
+    wideScreen.value = false;
+  } else {
+    wideScreen.value = true;
+  }
+};
+screenResizeHandler();
 
-    onMounted(() => {
-      window.addEventListener("resize", screenResizeHandler);
-    });
+onUnmounted(() => {
+  window.removeEventListener("resize", screenResizeHandler);
+});
 
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const borderColor = ref('border border-gray-400');
-    const showTransactionModel = ref(false);
-    const transactionGroupType = Helper.getTransactionGroupType();
-    
-    const nativeTokenName = computed(()=> networkState.currentNetworkProfile?.network.currency.name);
-    
-    const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
-    const blockExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.blockRoute);
-    const publicKeyExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.publicKeyRoute);
-    const addressExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.addressRoute);
-    const hashExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.hashRoute);
-    const namespaceExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.namespaceInfoRoute);
-    const assetExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.assetInfoRoute);
+onMounted(() => {
+  window.addEventListener("resize", screenResizeHandler);
+});
 
-    const dynamicModelComponentDisplay = ref('TransferTransactionModal');
+const internalInstance = getCurrentInstance();
+const emitter = internalInstance?.appContext.config.globalProperties.emitter;
+const showTransactionModel = ref(false);
+const transactionGroupType = Helper.getTransactionGroupType();
 
-    const clickInputText = () => {
-      borderColor.value = 'border border-white-100 drop-shadow';
-    };
+const nativeTokenName = computed(() => networkState.currentNetworkProfile?.network.currency.name);
 
-    const blurInputText = () => {
-      borderColor.value = 'border border-gray-400';
-    };
+const explorerBaseURL = computed(() => networkState.currentNetworkProfile ? networkState.currentNetworkProfile.chainExplorer.url : "");
 
-    emitter.on("CLOSE_MODAL", payload => {
-      showTransactionModel.value = payload;
-    });
+const hashExplorerURL = computed(() => networkState.currentNetworkProfile ? networkState.currentNetworkProfile.chainExplorer.hashRoute : "");
 
-    const getPublicKeyExplorerUrl = (publicKey) =>{
+emitter.on("CLOSE_MODAL", (payload: boolean) => {
+  showTransactionModel.value = payload;
+});
 
-      return explorerBaseURL.value + publicKeyExplorerURL.value + "/" + publicKey
-    }
+const gotoHashExplorer = (hash: string) => {
+  window.open(explorerBaseURL.value + hashExplorerURL.value + "/" + hash, "_blank");
+}
 
-    const getNamespaceExplorerUrl = (namespaceIdHex) =>{
+const convertLocalTime = (dateTimeInJSON :string) => {
+  return Helper.convertDisplayDateTimeFormat24(dateTimeInJSON);
+};
 
-      return explorerBaseURL.value + namespaceExplorerURL.value + "/" + namespaceIdHex
-    }
-
-    const getAssetExplorerUrl = (assetIdHex) =>{
-
-      return explorerBaseURL.value + assetExplorerURL.value + "/" + assetIdHex
-    }
-
-    const getAddressExplorerUrl = (address) =>{
-
-      return explorerBaseURL.value + addressExplorerURL.value + "/" + address
-    }
-
-    const getHashExplorerUrl = (hash) =>{
-
-      return explorerBaseURL.value + hashExplorerURL.value + "/" + hash
-    }
-
-    const gotoHashExplorer = (hash)=>{
-      window.open(explorerBaseURL.value + hashExplorerURL.value + "/" + hash, "_blank");
-    }
-
-    const constructSDA = (assetId, amount, namespaceName) => {
-      return namespaceName ? amount + ' ' + namespaceName : assetId + ' - ' + amount;
-    }
-
-    const convertLocalTime = (dateTimeInJSON)=>{
-      return Helper.convertDisplayDateTimeFormat24(dateTimeInJSON);
-    };
-
-    const copy = (data) =>{
+const copy = (data:string) => {
       let stringToCopy = data;
       let copySubject = t('dashboard.txHash')
       copyToClipboard(stringToCopy);
 
-      toast.add({severity:'info', detail: copySubject +' ' + t('general.copied'), group: 'br-custom', life: 3000});
+      toast.add({ severity: 'info', detail: copySubject + ' ' + t('general.copied'), group: 'br-custom', life: 3000 });
     };
 
-    return {
-      borderColor,
-      clickInputText,
-      blurInputText,
-      showTransactionModel,
-      dynamicModelComponentDisplay,
-      blockExplorerURL,
-      addressExplorerURL,
-      assetExplorerURL,
-      namespaceExplorerURL,
-      hashExplorerURL,
-      publicKeyExplorerURL,
-      explorerBaseURL,
-      getPublicKeyExplorerUrl,
-      getNamespaceExplorerUrl,
-      getAssetExplorerUrl,
-      getAddressExplorerUrl,
-      getHashExplorerUrl,
-      gotoHashExplorer,
-      nativeTokenName,
-      convertLocalTime,
-      transactionGroupType,
-      constructSDA,
-      wideScreen,
-      copy
-    }
-  }
-})
 </script>
+
 
 <style lang="scss" scoped>
 @import "@/assets/scss/transactions-data-table.scss";

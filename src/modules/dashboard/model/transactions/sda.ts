@@ -1,11 +1,11 @@
-import {AliasNamespace} from "./aliasNamespace";
+import type { AliasNamespace } from "./aliasNamespace";
 
-export interface SDA{
-    id: string;
-    sendWithAlias?: AliasNamespace;
-    currentAlias?: AliasNamespace[];
-    amount: number;
-    divisibility: number;
-    amountIsRaw: boolean;
-    sendWithNamespace: boolean;
+export interface SDA {
+  id: string;
+  sendWithAlias?: AliasNamespace;
+  currentAlias?: AliasNamespace[];
+  amount: number;
+  divisibility: number;
+  amountIsRaw: boolean;
+  sendWithNamespace: boolean;
 }

@@ -1,35 +1,50 @@
 <template>
-    <Tree :value="contacts" selectionMode="single" v-model:selectionKeys="selectedNode" :expandedKeys="expandedKeys" :filter="true" filterMode="strict" @node-select="onNodeSelect" @node-expand="expandTree" @node-collapse="collapseTree" >
-    </Tree>
+  <Tree :value="contacts" selectionMode="single" v-on:update:selection-keys="selectedNode" :expandedKeys="expandedKeys"
+    :filter="true" filterMode="strict" v-on:node-select="onNodeSelect" @node-expand="expandTree"
+    @node-collapse="collapseTree">
+  </Tree>
 </template>
 
 <script setup lang="ts">
-    import {defineComponent, ref} from 'vue';
+import type { TreeExpandedKeys, TreeNode } from "primevue/tree";
+import { defineComponent, ref, type PropType } from "vue";
 
-    defineComponent({
-        name: 'SelectAccountAndContact'
-    })
-    const emits = defineEmits([
-        'node-select'
-    ])
-    const props = defineProps({
-        contacts : {},
-        selectedNode : {}
-    })
+defineComponent({
+  name: "SelectAccountAndContact",
+});
+const emits = defineEmits([
+  'node-select'
+])
 
-    const expandedKeys = ref({})
+interface contact {
+  key: string;
+  label: string;
+  selectable: boolean;
+  children: { key: string, label: string, data: string }[];
+}
 
-    function onNodeSelect(node){
-        emits("node-select", node)
-    }
+defineProps({
+  contacts: {
+    type: Array<contact>,
+    required: true,
+  },
+  selectedNode: {
+    type: Object as PropType<TreeNode>,
+    required: true,
+  },
+});
 
-    function expandTree(expanded){
-        expandedKeys.value = {}
-        expandedKeys.value[expanded.key] = true
-    }
+const expandedKeys = ref<TreeExpandedKeys>({});
 
-    function collapseTree(){
-        expandedKeys.value = {}
-    }
-    
+const onNodeSelect = (node: TreeNode) => {
+  emits("node-select", node);
+};
+
+const expandTree = (expanded: TreeNode) => {
+  expandedKeys.value[expanded.key as string] = true;
+};
+
+const collapseTree = () => {
+  expandedKeys.value = {};
+};
 </script>

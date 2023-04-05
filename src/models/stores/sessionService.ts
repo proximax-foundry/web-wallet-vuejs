@@ -1,38 +1,35 @@
-export class SessionService{
+export class SessionService {
+  static getRaw(key: string): string | null {
+    return sessionStorage.getItem(key);
+  }
 
-    static getRaw(key: string): string | null{
-        return sessionStorage.getItem(key);
+  static getJSONParse(key: string): any {
+    try {
+      const value = sessionStorage.getItem(key);
+
+      if (value) {
+        return JSON.parse(value);
+      } else {
+        return null;
+      }
+    } catch (error) {
+      return null;
     }
+  }
 
-    static getJSONParse(key: string): any{
+  static getNumber(key: string): number {
+    return Number(sessionStorage.getItem(key));
+  }
 
-        try {
-            const value = sessionStorage.getItem(key);
+  static setRaw(key: string, value: string): void {
+    sessionStorage.setItem(key, value);
+  }
 
-            if(value){
-                return JSON.parse(value)
-            }
-            else{
-                return null;
-            }
-        } catch (error) {
-            return null;
-        }
-    }
+  static setObject(key: string, value: any): void {
+    sessionStorage.setItem(key, JSON.stringify(value));
+  }
 
-    static getNumber(key: string): number{
-        return Number(sessionStorage.getItem(key));
-    }
-
-    static setRaw(key: string, value: string): void{
-        sessionStorage.setItem(key, value);
-    }
-
-    static setObject(key: string, value: any): void{
-        sessionStorage.setItem(key, JSON.stringify(value));
-    }
-
-    static setNumber(key: string, value:number): void{
-        sessionStorage.setItem(key, value.toString());
-    }
+  static setNumber(key: string, value: number): void {
+    sessionStorage.setItem(key, value.toString());
+  }
 }

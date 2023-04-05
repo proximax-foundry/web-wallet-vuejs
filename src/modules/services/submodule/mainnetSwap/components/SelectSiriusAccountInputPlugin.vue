@@ -16,9 +16,8 @@
         :maxHeight="maxHeight"
         :classes="{ options: 'text-left' }"
         @deselect="$emit('update:modelValue', selected)"
-        @select="makeSelection;$emit('update:modelValue', selected);$emit('show-selection', selected)"
+        @select="makeSelection();$emit('update:modelValue', selected);$emit('show-selection', selected)"
         @clear="$emit('clear-selection')"
-        ref="selectRef"
         :disabled="disabled"
       />
     </div>
@@ -26,12 +25,12 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { defineComponent, ref } from 'vue';
 import Multiselect from '@vueform/multiselect';
 
-export default defineComponent({
-  props: [
+
+  const p = defineProps([
     'placeholder',
     'errorMessage',
     'options',
@@ -40,13 +39,13 @@ export default defineComponent({
     'selectDefault',
     'disabled',
     'noOptionsText',
-  ],
-  emits:[
+  ])
+  defineEmits([
     'update:modelValue', 'show-selection', 'clear-selection'
-  ],
-  name: 'SelectInputPlugin',
+  ])
 
-  setup(p){
+
+
     const showSelectTitle = ref(false);
     const selectErr = ref(false);
     const selectModel = ref(0);
@@ -75,44 +74,6 @@ export default defineComponent({
       }
     };
 
-    return {
-      showSelectTitle,
-      selectErr,
-      selectModel,
-      selected,
-      clearSelection,
-      makeSelection,
-      closeSelection,
-      maxHeight,
-      canDeselect,
-    };
-  },
-
-  components: {
-    Multiselect,
-  },
-
-  methods: {
-    clear: function() {
-      this.$refs.selectRef.clear();
-    }
-  },
-
-  mounted() {
-    if(this.selectDefault){
-      this.$refs.selectRef.select(this.selectDefault, this.options);
-    }
-  },
-
-  created() {
-    // eslint-disable-next-line no-unused-vars
-    this.emitter.on('CLEAR_SELECT', payload => {
-      if(!payload){
-        this.$refs.selectRef.clear();
-      }
-    });
-  }
-});
 </script>
 
 <style lang="scss" scoped>

@@ -1,42 +1,41 @@
 import { AppState } from "../appState";
 
-export class AppStateUtils{
-
-  static setStateReady(stateName: string){
+export class AppStateUtils {
+  static setStateReady(stateName: string) {
     AppState.readyStates.set(stateName, true);
 
     AppStateUtils.checkIsReady();
   }
 
-  static addNewReadyStates(stateName: string){
+  static addNewReadyStates(stateName: string) {
     AppState.readyStates.set(stateName, false);
     AppState.isReady = false;
   }
 
-  static checkIsReady(){
-    let totalNum = AppState.readyStates.size;
+  static checkIsReady() {
+    const totalNum = AppState.readyStates.size;
     let totalReady = 0;
 
-    AppState.readyStates.forEach((value, key)=>{
-      if(value){
+    AppState.readyStates.forEach((value) => {
+      if (value) {
         totalReady++;
       }
-    })
+    });
 
-    if(totalReady === totalNum){
+    if (totalReady === totalNum) {
       AppState.isReady = true;
     }
   }
 
-  static updateActivityLogNum(){
+  static updateActivityLogNum() {
     AppState.txnActivityLogNum = AppState.txnActivityLog.length;
   }
 
-  static addCosignLogNum(){
+  static addCosignLogNum() {
     AppState.txnCosignLogNum = AppState.txnCosignLogNum + 1;
   }
 
-  static doLogout(){
+  static doLogout() {
     AppState.pendingAssetsInfo = [];
     AppState.pendingNamespacesName = [];
     AppState.readBlockHeight = 0;

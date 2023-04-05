@@ -1,14 +1,13 @@
 import { ConfirmedTransaction } from "./confirmedTransaction";
 
-export class ConfirmedChainTransaction extends ConfirmedTransaction{
+export class ConfirmedChainTransaction extends ConfirmedTransaction {
+  applyHeightDelta: number | null = null;
+  networkConfig: string | null = null; // not assigning for dashboard
+  supportedEntityVersions: string | null = null; // not assigning for dashboard
+  newVersion: string | null = null;
+  upgradePeriod: number | null = null;
 
-  applyHeightDelta: number = null;
-  networkConfig: string = null; // not assigning for dashboard
-  supportedEntityVersions: string = null; // not assigning for dashboard
-  newVersion: string = null;
-  upgradePeriod: number = null;
-
-  constructor(txnHash: string){
+  constructor(txnHash: string) {
     super(txnHash);
   }
 }

@@ -1,11 +1,10 @@
 import { PartialTransaction } from "./partialTransaction";
 
-export class PartialLinkTransaction extends PartialTransaction{
+export class PartialLinkTransaction extends PartialTransaction {
+  remotePublicKey: string = "";
+  action: string = "";
 
-    remotePublicKey: string = "";
-    action: string = "";
-  
-    constructor(txnHash: string){
-      super(txnHash);
-    }
+  constructor(txnHash: string) {
+    super(txnHash);
+  }
 }

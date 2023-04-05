@@ -18,12 +18,7 @@
   </div>
 </div>
 </template>
-<script>
 
-export default {
-  name: 'ViewAccountCreateSelectType',
-}
-</script>
 <style lang="scss">
 .buttons_outer{
   width: 550px;

@@ -46,15 +46,15 @@
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 
-const props = defineProps({
-  accMetadata: Array,
+defineProps({
+  accMetadata: Array<{ scopedMetadataKeyUtf8: string | null, scopedMetadataKeyHex: string, value: string }>,
   publicKey: String
 })
 </script>
 
 <style lang="scss" scoped>
 
-::v-deep(.p-paginator) {
+::deep(.p-paginator) {
     .p-paginator-current {
         
         padding: 1rem;

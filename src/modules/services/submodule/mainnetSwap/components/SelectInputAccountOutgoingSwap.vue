@@ -37,7 +37,7 @@
   <div v-if='toggleSelection' class='absolute border border-t-0 w-full z-50 bg-white max-h-40 overflow-auto px-3 filter drop-shodow-xl uppercase'>
     <div v-if='accounts.length>0' class="pl-2 pt-4 text-xxs text-gray-400 text-left">{{$t('general.selectAccount')}}</div>
     <div v-else class='text-xxs pt-2 pl-2 pb-2' >{{$t('general.listEmpty')}}</div>
-    <div v-for='(items,index) in accounts' :key="items" class="px-2 py-3 flex cursor-pointer items-center" @click="selectAccount(items.label, items.value);$emit('update:modelValue', selectedAddress);$emit('select-account', selectedAddress);" :class='`${(index != accounts.length - 1)?"border-b border-gray-200":""}`'>
+    <div v-for='(items,index) in accounts' :key="index" class="px-2 py-3 flex cursor-pointer items-center" @click="selectAccount(items.label, items.value);$emit('update:modelValue', selectedAddress);$emit('select-account', selectedAddress);" :class='`${(index != accounts.length - 1)?"border-b border-gray-200":""}`'>
       <div v-html="toSvg(items.value, 20, jdenticonConfig)"></div>
       <div class='text-xs ml-2 font-semibold'>{{items.label}}</div>
       <div v-if='items.label!=selectedAccount' class='cursor-pointer text-blue-primary text-xxs mt-0.5 ml-auto font-semibold uppercase'>{{$t('general.select')}}</div>
@@ -47,7 +47,7 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { networkState } from '@/state/networkState';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';
 import { walletState } from '@/state/walletState';
@@ -56,23 +56,26 @@ import { toSvg } from "jdenticon";
 import { Helper } from "@/util/typeHelper";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { AppState } from '@/state/appState';
+import type { Account } from '@/models/account';
+import { string } from 'mathjs';
 
-export default defineComponent({
-  emits:[
+
+  defineEmits([
     'select-account','update:modelValue',
-  ],
-  name: 'SelectInputAccountOutgoingSwap',
-  props: [
-    'modelValue',
-    'selectDefault',
-    'placeholder',
-    'otherToken',
-    'otherTokenId',
-    'name',
-    'divisibility'
-  ],
+  ])
 
-  setup(p){
+  const p = defineProps({
+    modelValue: String,
+    selectDefault: String,
+    placeholder: String,
+    otherToken:{
+      type: String,
+      required:true
+    },
+    otherTokenId: String,
+    name: String,
+    divisibility: Number
+  })
 
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
   
@@ -84,15 +87,21 @@ export default defineComponent({
     const includeMultisig = ref(false);
 
     const accounts = computed(() =>{
-      var accountList = [];
+      var accountList:{value:string, label:string}[] = [];
       let accounts;
       if(includeMultisig.value){
-        accounts = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+        if(!walletState.currentLoggedInWallet){
+          return []
+        }
+        const acc = walletState.currentLoggedInWallet.accounts.map((x) => x as Account);
+        const otherAcc = walletState.currentLoggedInWallet.others.map((x) => x as Account);
+        if (walletState.currentLoggedInWallet.others) {
+          const accounts = acc.concat(otherAcc)
+        } 
       }else{
-        accounts = walletState.currentLoggedInWallet.accounts.filter(acc=>acc.getDirectParentMultisig().length==0)
+        accounts = walletState.currentLoggedInWallet?.accounts.filter(acc=>acc.getDirectParentMultisig().length==0)
       }
-
-      accounts.forEach(account => {
+      accounts?.forEach(account => {
         accountList.push({
           value: account.address,
           label: account.name,
@@ -106,34 +115,49 @@ export default defineComponent({
     const otherTokenBalance = ref(0);
     const nativeTokenBalance = ref(0)
     const selectedImg = ref('');
-    const selectAccount = (accountName, accountAddress) => {
+    const selectAccount = (accountName:string, accountAddress:string) => {
       selectedAccount.value = accountName;
       selectedAddress.value = accountAddress;
       let accounts;
       if(includeMultisig.value){
-        accounts = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
+        if(!walletState.currentLoggedInWallet){
+          return []
+        }
+        const acc = walletState.currentLoggedInWallet.accounts.map((x) => x as Account);
+        const otherAcc = walletState.currentLoggedInWallet.others.map((x) => x as Account);
+        if (walletState.currentLoggedInWallet.others) {
+          const accounts = acc.concat(otherAcc)
+          return accounts;
+        } 
       }else{
-        accounts = walletState.currentLoggedInWallet.accounts;
+        accounts = walletState.currentLoggedInWallet?.accounts.map((x) => x);
+      }
+      
+      if(!accounts || !otherToken){
+        return
       }
       let acc = accounts.find(account => account.address == accountAddress)
+      const accAsset = acc?.assets.find(asset=>asset.idHex==otherTokenId?.value)
       otherTokenBalance.value = otherToken.value!='prx.xpx'? //if otherToken
-      acc.assets.find(asset=>asset.idHex==otherTokenId.value)? //check if found otherToken
-      acc.assets.find(asset=>asset.idHex==otherTokenId.value).amount : 0 //0 if not found
+      accAsset? //check if found otherToken
+      accAsset.amount : 0 //0 if not found
       :0 //if xpx(doesnt matter, wont display)
-
-      nativeTokenBalance.value = accounts.find(account => account.address == accountAddress).balance
+      let account = accounts.find(account => account.address == accountAddress)
+      nativeTokenBalance.value = account?account.balance:0
       selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
       toggleSelection.value = !toggleSelection.value;
     };
-    watch(otherToken,n=>{
-      let accounts = walletState.currentLoggedInWallet.accounts;
-      let acc = accounts.find(account => account.address == selectedAddress.value)
+    watch(otherToken,(n:string)=>{
+      let accounts = walletState.currentLoggedInWallet?.accounts;
+      let acc = accounts?.find(account => account.address == selectedAddress.value)
       if(acc){
+        const accAsset = acc?.assets.find(asset=>asset.idHex==otherTokenId?.value)
         otherTokenBalance.value = n!='prx.xpx'? 
-        acc.assets.find(asset=>asset.idHex==otherTokenId.value)? 
-        acc.assets.find(asset=>asset.idHex==otherTokenId.value).amount : 0 
+        accAsset? 
+        accAsset.amount : 0 
         :0 //if xpx
-        nativeTokenBalance.value = accounts.find(account => account.address == selectedAddress.value).balance
+        let account = accounts?.find(account => account.address == selectedAddress.value)
+        nativeTokenBalance.value = account?account.balance:0
       }
       
     })
@@ -147,22 +171,5 @@ export default defineComponent({
       let balance = Helper.convertToCurrency(nativeTokenBalance.value, 0).split('.');
       return '<span class="font-bold text-xs">' + balance[0] + '</span>' + (balance[1]?'.<span class="text-xxs">' + balance[1] + '</span>':'');
     });
-    return {
-      currentNativeTokenName,
-      selectAccount,
-      selectedAddress,
-      otherTokenBalanceFormatted,
-      otherTokenBalance,
-      selectedImg,
-      accounts,
-      toggleSelection,
-      selectedAccount,
-      jdenticonConfig,
-      toSvg,
-      nativeTokenBalance,
-      nativeTokenBalanceFormatted
-    };
-  }
-})
 </script>
 

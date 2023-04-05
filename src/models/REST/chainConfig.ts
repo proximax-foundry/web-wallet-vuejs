@@ -1,20 +1,22 @@
-import { 
-    ChainConfigHttp, ChainConfig, RequestOptions
+import {
+  ChainConfigHttp,
+  ChainConfig,
+  RequestOptions,
 } from "tsjs-xpx-chain-sdk";
-import {RequestAuth} from './auth';
+import { RequestAuth } from "./auth";
 
 export class ChainConfigAPI {
+  chainConfigHttp: ChainConfigHttp;
+  requestOptions: RequestOptions | undefined = undefined;
 
-    chainConfigHttp: ChainConfigHttp;
-    requestOptions: RequestOptions | undefined = undefined;
+  constructor(endpoint: string) {
+    this.chainConfigHttp = new ChainConfigHttp(endpoint);
+  }
 
-    constructor(endpoint: string){
-        this.chainConfigHttp = new ChainConfigHttp(endpoint);
-    }
-
-    getChainConfig(height: number): Promise<ChainConfig>{
-        let authHeader = this.requestOptions ? this.requestOptions : RequestAuth.getAuthHeader();
-        return this.chainConfigHttp.getChainConfig(height, authHeader).toPromise();
-    }
-
+  getChainConfig(height: number): Promise<ChainConfig> {
+    const authHeader = this.requestOptions
+      ? this.requestOptions
+      : RequestAuth.getAuthHeader();
+    return this.chainConfigHttp.getChainConfig(height, authHeader).toPromise();
+  }
 }

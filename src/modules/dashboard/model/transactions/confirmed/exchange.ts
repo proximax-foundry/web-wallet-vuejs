@@ -1,12 +1,11 @@
 import { ConfirmedTransaction } from "./confirmedTransaction";
-import { TxnExchangeOffer } from "../exchangeOffer";
+import type { TxnExchangeOffer } from "../exchangeOffer";
 
-export class ConfirmedExchangeTransaction extends ConfirmedTransaction{
-
+export class ConfirmedExchangeTransaction extends ConfirmedTransaction {
   exchangeOffers: TxnExchangeOffer[] = [];
   isTakingOffer: boolean = false;
 
-  constructor(txnHash: string){
+  constructor(txnHash: string) {
     super(txnHash);
   }
 }

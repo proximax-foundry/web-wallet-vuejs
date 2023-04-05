@@ -1,13 +1,12 @@
 import { UnconfirmedTransaction } from "./unconfirmedTransaction";
-import { RestrictionModification } from "../restrictionModification";
+import type { RestrictionModification } from "../restrictionModification";
 
-export class UnconfirmedRestrictionTransaction extends UnconfirmedTransaction{
+export class UnconfirmedRestrictionTransaction extends UnconfirmedTransaction {
+  restrictionTypeOutput: string = ""; // Allow / Block
+  restrictionType: number = 0;
+  modification: RestrictionModification[] = [];
 
-    restrictionTypeOutput: string = ""; // Allow / Block
-    restrictionType: number = 0;
-    modification: RestrictionModification[] = [];
-  
-    constructor(txnHash: string){
-      super(txnHash);
-    }
+  constructor(txnHash: string) {
+    super(txnHash);
+  }
 }

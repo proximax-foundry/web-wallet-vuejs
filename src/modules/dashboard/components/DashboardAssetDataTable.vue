@@ -31,11 +31,11 @@
 <script lang="ts" setup>
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import Tooltip from 'primevue/tooltip';
 import {Helper} from '@/util/typeHelper';
+import type { Asset } from '@/models/asset';
 
 defineProps({
-  assets: Array
+  assets: Array<Asset>
 })
 </script>
 
@@ -56,7 +56,7 @@ defineProps({
   z-index: 2;
 }
 
-::v-deep(.p-paginator) {
+::deep(.p-paginator) {
     .p-paginator-current {
         
         padding: 1rem;

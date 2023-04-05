@@ -1,7 +1,7 @@
 import { DelegateRoutes } from '@/modules/account/submodule/delegate/routingDelegate';
 import { LinkToNamespaceRoutes } from '@/modules/account/submodule/linkToNamespace/routingLinkToNamespace';
 import { MultisigRoutes } from '@/modules/account/submodule/multisig/routingMultisig';
-import { RouteRecordRaw } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router';
 
 export const AccountRoutes: RouteRecordRaw[] = [
   {

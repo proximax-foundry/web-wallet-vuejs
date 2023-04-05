@@ -1,13 +1,12 @@
 import { PartialTransaction } from "./partialTransaction";
-import { RestrictionModification } from "../restrictionModification";
+import type { RestrictionModification } from "../restrictionModification";
 
-export class PartialRestrictionTransaction extends PartialTransaction{
+export class PartialRestrictionTransaction extends PartialTransaction {
+  restrictionTypeOutput: string = ""; // Allow / Block
+  restrictionType: number = 0;
+  modification: RestrictionModification[] = [];
 
-    restrictionTypeOutput: string = ""; // Allow / Block
-    restrictionType: number = 0;
-    modification: RestrictionModification[] = [];
-  
-    constructor(txnHash: string){
-      super(txnHash);
-    }
+  constructor(txnHash: string) {
+    super(txnHash);
+  }
 }
