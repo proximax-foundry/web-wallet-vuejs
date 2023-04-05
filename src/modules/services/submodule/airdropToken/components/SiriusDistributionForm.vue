@@ -81,7 +81,6 @@
         <div v-if="fileError" class="error error_box" role="alert">
           Invalid file
         </div>
-
         <div v-if="assetNotEnough" class="error error_box" role="alert">
           Total distribution amount exceed selected asset amount (need {{ totalDistributeAmount }})
         </div>
@@ -154,7 +153,6 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import {
@@ -178,7 +176,6 @@ import { useI18n } from 'vue-i18n'
 import PasswordInput from '@/components/PasswordInput.vue';
 import type { Account } from '@/models/account';
 import type { WalletAccount } from '@/models/walletAccount';
-
 const currentNativeTokenName = computed(() => AppState.nativeToken.label);
 const cosignerBalanceInsufficient = ref(false);
 const disableAllInput = ref(false);
@@ -188,19 +185,16 @@ const disablePassword = computed(() => disableAllInput.value);
 const walletPassword = ref("");
 const { t } = useI18n();
 const err = ref('');
-
 // let data = reactive<DataInterface>({
 //   assetList: []
 // });
-
 let assetList = ref<SimpleSDA[]>([]);
-let assetSelected = ref(null);
+let assetSelected = ref("");
 let aggregateNum = ref(10);
 let distributionList = ref<DistributeListInterface[]>([]);
 let totalRecipients = ref(0);
 let totalDistributeAmount = ref(0);
 let txnsHash = ref<string[]>([]);
-
 // all status flags
 let noAssetFound = ref(false);
 let fileError = ref(false);
@@ -211,26 +205,21 @@ let sdaError = ref("");
 let recipientError = ref("");
 let distributionError = ref("");
 let distributing = ref(false);
-
 let scanDistributorAsset = async () => {
   noAssetFound.value = false;
   assetSelected.value = "";
   let assets = await Sirius.scanAsset(selectedAccount.value ? selectedAccount.value.publicKey : "");
-
   assetList.value = assets;
-
   if (assets.length === 0) {
     noAssetFound.value = true;
   }
 }
-
-let distribute = async()=>{
+let distribute = async () => {
   distributionError.value = "";
   distributeDone.value = false;
   if (distributing.value) {
     return;
   }
-
   if (assetNotEnough.value || assetWrongDivisibility.value) {
     return;
   }
@@ -252,12 +241,9 @@ let distribute = async()=>{
       return
     }
   }
-
   let totalLockHashTxn = Math.ceil(totalRecipients.value / aggregateNum.value);
-
   let totalLockHashFee = totalLockHashTxn * Sirius.getLockFundTransactionFee();
   let totalLockHashToken = totalLockHashTxn * networkState.currentNetworkProfileConfig!.lockedFundsPerAggregate!;
-
   let selectedSda = assetList.value.find(x => x.id === assetSelected.value);
   let aggregateTxns = Sirius.createDistributeAggregateTransactions(selectedAccount.value ? selectedAccount.value.publicKey : '', distributionList.value, aggregateNum.value, selectedSda!);
   let totalAggregateTxnsFee = sum(aggregateTxns.map(x => x.maxFee.compact()));
@@ -283,9 +269,7 @@ let distribute = async()=>{
     let privateKey = walletPrivateKey.toUpperCase();
     let initiator = Sirius.createAccount(privateKey);
     let initiatorSda = await Sirius.scanAsset(initiator.publicKey);
-
     let initiatorXPX = initiatorSda.find(x => x.namespaceName === AppState.nativeToken.fullNamespace.trim());
-
     if (initiatorXPX) {
       if (xpxNeeded > initiatorXPX.amount) {
         distributionError.value = `Initiator do not have enough XPX (${initiatorXPX.amount}), need ${xpxNeeded}`;
@@ -296,29 +280,22 @@ let distribute = async()=>{
       distributionError.value = "Initiator do not have any XPX";
       return;
     }
-
     distributing.value = true;
     let allTxnsHash = await Sirius.signAllAbtAndAnnounce(aggregateTxns, initiator);
     distributing.value = false;
-
     distributeDone.value = true;
-
     txnsHash.value = allTxnsHash;
   }
 }
-
 let loadCSV = (e: any) => {
   fileError.value = false;
   const file = e.target.files[0];
   const reader = new FileReader();
   reader.onload = async (e: any) => {
     const fileData = e.target.result;
-
     try {
       let distResultCsvData: any[] = [];
-
       let totalLine = fileData.split(/\r?\n/);
-
       for (let i = 1; i < totalLine.length; i++) {
         let lineData = totalLine[i].trim();
         if (lineData === "") {
@@ -330,18 +307,23 @@ let loadCSV = (e: any) => {
           amount: data[1]
         });
       }
-
+      // let distResultCsvData: any = await new Promise(function(resolve, reject) {
+      //   parse(fileData, {from_line: 2, columns: ["publicKey", "amount"]}, (err, rows)=>{
+      //       if(err){
+      //           reject(err);
+      //       }else{
+      //           resolve(rows);
+      //       }
+      //   });
+      // });
       let isInvalidData = false;
       distributionList.value = [];
       let tempData: DistributeListInterface[] = [];
-
       if (distResultCsvData && distResultCsvData.length) {
-
         for (let i = 0; i < distResultCsvData.length; ++i) {
           let publicKeyOrAddress = distResultCsvData[i].publicKeyOrAddress.trim().replaceAll("-", "");
           let originAmount = distResultCsvData[i].amount.trim();
           let amount = parseFloat(distResultCsvData[i].amount.trim());
-
           if (publicKeyOrAddress.length === 64) {
             if (!Convert.isHexString(publicKeyOrAddress)) {
               isInvalidData = true;
@@ -353,39 +335,36 @@ let loadCSV = (e: any) => {
             let tempAddress = Address.createFromRawAddress(publicKeyOrAddress);
             if (tempAddress.networkType !== AppState.networkType) {
               isInvalidData = true;
+              console.log("Invalid recipient address found");
               break;
             }
           }
           else {
             isInvalidData = true;
+            console.log("Invalid recipient found");
             break;
           }
-
           let newAmountLength = amount.toString().length;
-
           if (isNaN(amount)) {
             isInvalidData = true;
+            console.log("Invalid amount found");
             break;
           }
           else if (newAmountLength !== originAmount.length) {
             let strippedDecimal = originAmount.length - newAmountLength;
-
             if (amount.toString() + "0".repeat(strippedDecimal) !== originAmount) {
               isInvalidData = true;
-              // console.log("Invalid amount found");
+              console.log("Invalid amount found");
               break;
             }
           }
-
           let newData: DistributeListInterface = {
             publicKeyOrAddress: publicKeyOrAddress,
             amount: amount
           };
-
           tempData.push(newData);
         }
       }
-
       if (!isInvalidData) {
         totalRecipients.value = distResultCsvData.length;
         totalDistributeAmount.value = sum(tempData.map((x) => x.amount));
@@ -397,24 +376,19 @@ let loadCSV = (e: any) => {
         totalRecipients.value = 0;
         totalDistributeAmount.value = 0;
       }
-
     } catch (error) {
       fileError.value = true;
     }
-
   }
   reader.readAsText(file);
 }
-
 let createTxnExplorerLink = (txnHash: string) => {
   let explorerRoute = networkState.currentNetworkProfile!.chainExplorer;
   return explorerRoute.url + "/" + explorerRoute.hashRoute + "/" + txnHash
 }
-
 let checkDistributorAssetAmount = (selectedAssetId: string) => {
   if (selectedAssetId) {
     let data = assetList.value.find(x => x.id === selectedAssetId);
-
     if (totalDistributeAmount.value > data!.amount) {
       assetNotEnough.value = true;
     }
@@ -426,18 +400,15 @@ let checkDistributorAssetAmount = (selectedAssetId: string) => {
     assetNotEnough.value = false;
   }
 }
-
 let checkDistributorAssetAmountDecimal = (selectedAssetId: string) => {
   if (selectedAssetId) {
     let data = assetList.value.find(x => x.id === selectedAssetId);
-
     let invalidDivisibility = distributionList.value.find(x => {
       let bigNumberAmount = mathjs.bignumber(x.amount);
       let atomicAmount = mathjs.multiply(bigNumberAmount, Math.pow(10, data!.divisibility));
       let atomic = Number(atomicAmount.toString());
       return Math.trunc(atomic) !== atomic
     });
-
     if (invalidDivisibility) {
       assetWrongDivisibility.value = "Invalid distribution amount, maximum decimal place is " + data!.divisibility;
     }
@@ -449,7 +420,6 @@ let checkDistributorAssetAmountDecimal = (selectedAssetId: string) => {
     assetWrongDivisibility.value = "";
   }
 }
-
 const selectedAccount = ref<Account>()
 const accounts = computed(
   () => {
@@ -467,31 +437,13 @@ const accounts = computed(
     }
   }
 );
-
-  selectedAccount.value = accounts.value[0]
-  scanDistributorAsset()
-  const currentAccount = ref(selectedAccount.value.address)
-
-  const isMultiSig = (address) => {
-  const account = accounts.value.find(
-    (account) => account.address === address
-  );
-  let isMulti = false;
-     
-  if (account != undefined) {
-    isMulti = account.isMultisig;
-  }
-  return isMulti;
-};
 const isMultiSigBool = computed(() => {
   return isMultiSig(selectedAccount.value ? selectedAccount.value.address : "")
 }
 )
-
 const findAcc = (publicKey: string) => {
   return walletState.currentLoggedInWallet?.accounts.find(acc => acc.publicKey == publicKey)
 }
-
 const getWalletCosigner = computed(() => {
   const account = accounts.value.find((acc: Account) => acc.address == selectedAccount.value?.address) as Account
   let cosigners = MultisigUtils.getCosignerInWallet(account.publicKey)
@@ -503,9 +455,7 @@ const getWalletCosigner = computed(() => {
     }
   })
   return list
-
 });
-
 const lockFund = computed(() =>
   Helper.convertToExact(
     networkState.currentNetworkProfileConfig?.lockedFundsPerAggregate as number,
@@ -518,7 +468,6 @@ const lockFundCurrency = computed(() =>
     AppState.nativeToken.divisibility
   )
 );
-
 const lockFundTxFee = computed(() => {
   if (networkState.currentNetworkProfile) {
     return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
@@ -528,50 +477,38 @@ const lockFundTxFee = computed(() => {
 const lockFundTotalFee = computed(
   () => lockFund.value + lockFundTxFee.value
 );
-
 if (isMultiSigBool.value) {
   let cosigner = getWalletCosigner.value.cosignerList
   if (cosigner.length > 0) {
     let findAccount = walletState.currentLoggedInWallet?.accounts.find(acc => acc.publicKey == cosigner[0].publicKey)
     cosignAddress.value = findAccount ? findAccount.address : ""
+    // if (findAccWithAddress(cosignAddress.value).balance < lockFundTotalFee.value + Number(effectiveFee.value) ) {
+    //   disableAllInput.value = true;
+    //   cosignerBalanceInsufficient.value = true;
+    // } else {
     disableAllInput.value = false;
     cosignerBalanceInsufficient.value = false;
+    // }
   } else {
     disableAllInput.value = true;
   }
 }
-
-  watch(assetSelected, (value) => {
-    checkDistributorAssetAmount(value);
-    checkDistributorAssetAmountDecimal(value);
-  });
-
-  watch(totalDistributeAmount, (value) => {
-    checkDistributorAssetAmount(assetSelected.value);
-    checkDistributorAssetAmountDecimal(assetSelected.value);
-  });
-
-  // account is clicked
-  emitter.on("select-account", (address) => {
-    for (let i = 0; i < accounts.value.length; i++){
-      if (accounts.value[i].address == address){
-        selectedAccount.value = accounts.value[i]
-        scanDistributorAsset()
-        currentAccount.value = ref(selectedAccount.value.address)
-      }
-    }
-  })
+watch(assetSelected, (value) => {
+  checkDistributorAssetAmount(value);
+  checkDistributorAssetAmountDecimal(value);
+});
+watch(totalDistributeAmount, (value) => {
+  checkDistributorAssetAmount(assetSelected.value);
+  checkDistributorAssetAmountDecimal(assetSelected.value);
+});
 </script>
-
 <style scoped>
 a {
   color: #42b983;
 }
-
 label {
   font-weight: bold;
 }
-
 code {
   background-color: #eee;
   padding: 2px 4px;
