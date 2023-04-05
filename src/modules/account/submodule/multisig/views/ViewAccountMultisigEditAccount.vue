@@ -28,7 +28,6 @@
             <div class=" error error_box mb-5" v-if="err != ''">{{ err }}</div>
           </div>
           <div class="mt-4"></div>
-
           <div class="flex flex-col gap-2">
             <div v-for="(publicKey, index) in cosignaturies" :key="index">
               <div class="flex">
@@ -43,7 +42,6 @@
               </div>
             </div>
           </div>
-
           <div class="flex flex-col gap-2 mt-2">
             <div v-for="(coSignAddress, index) in coSign" :key="index">
               <div class="flex">
@@ -152,8 +150,6 @@ import type { MultisigInfo } from '@/models/multisigInfo';
 import type { WalletAccount } from '@/models/walletAccount';
 import type { OtherAccount } from '@/models/otherAccount';
 import type { TreeNode } from 'primevue/tree';
-
-
 const p = defineProps({
   address: {
     type: String,
@@ -164,11 +160,9 @@ const { t } = useI18n();
 const router = useRouter();
 const err = ref('');
 const fundStatus = ref(false);
-
 const passwd = ref('');
 const passwdPattern = "^[^ ]{8,}$";
 const publicKeyPattern = "^[0-9A-Fa-f]{64}$";
-
 const coSign = ref<string[]>([]);
 const removeCosign = ref<string[]>([]);
 const selectedAddresses = ref([]);
@@ -181,7 +175,6 @@ const selectOtherCosign = ref([]);
 const contactName = ref<string[]>([])
 const defaultAcc = walletState.currentLoggedInWallet ? walletState.currentLoggedInWallet.selectDefaultAccount() : null
 const selectedAccAdd = ref(defaultAcc ? defaultAcc.address : '');
-
 // current wallet
 const wallet = walletState.currentLoggedInWallet;
 // get account details initialization
@@ -210,7 +203,6 @@ const lockFundCurrency = computed(() => {
     AppState.nativeToken.divisibility
   )
 });
-
 const lockFundTxFee = computed(() => {
   if (networkState.currentNetworkProfile) {
     return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
@@ -224,7 +216,6 @@ let updateAggregateFee = () => {
   }
   aggregateFee.value = MultisigUtils.getAggregateFee(acc.value.publicKey, coSign.value, numApproveTransaction.value, numDeleteUser.value, removeCosign.value)
 }
-
 const cosignaturies = computed(() => {
   if (!acc.value) {
     return []
@@ -235,15 +226,8 @@ const cosignaturies = computed(() => {
   })
   return cosignaturies
 })
-
-
 const numApproveTransaction = ref( 0);
 const numDeleteUser = ref( 0);
-
-
-
-
-
 const cosignerName = computed(() => {
   if (!wallet) {
     return []
@@ -265,15 +249,12 @@ const cosignerName = computed(() => {
   })
   return name
 })
-
 const getCosignerList = () => {
   if (!acc.value || !networkState.currentNetworkProfileConfig) {
     return { hasCosigner: false, cosignerList: [] }
   }
   return MultisigUtils.getCosignerInWallet(acc.value.publicKey)
 }
-
-
 const walletCosignerList = computed(() => {
   let cosigners = getCosignerList()
   let list: { hasCosigner: boolean, cosignerList: { publicKey: string, name: string, balance: number, address: string }[] } = { hasCosigner: cosigners.hasCosigner, cosignerList: [] }
@@ -285,15 +266,12 @@ const walletCosignerList = computed(() => {
   })
   return list
 })
-
 const selectedCosignPublicKey = ref(walletCosignerList.value.cosignerList[0] ? walletCosignerList.value.cosignerList[0].publicKey : '')
-
 watch(walletCosignerList, n => {
   if (n.cosignerList.length) {
     selectedCosignPublicKey.value = n.cosignerList[0] ? n.cosignerList[0].publicKey : ''
   }
 }, { deep: true })
-
 const isMultisig = computed(() => {
   if (!acc.value) {
     return false
@@ -307,7 +285,6 @@ const disabledPassword = computed(() => !(!onPartial.value && isMultisig.value &
 const isCoSigner = computed(() => {
   return getCosignerList().hasCosigner;
 })
-
 const addCoSigButton = computed(() => {
   var status = false;
   if (accountBalance.value >= totalFee.value && isCoSigner.value) {
@@ -325,7 +302,6 @@ const addCoSigButton = computed(() => {
   }
   return status;
 });
-
 const totalFee = computed(() => {
   let tokenDivisibility = AppState.nativeToken.divisibility
   if (tokenDivisibility == 0) {
@@ -334,7 +310,6 @@ const totalFee = computed(() => {
     return Math.round((aggregateFee.value + lockFundCurrency.value + lockFundTxFee.value) * Math.pow(10, tokenDivisibility)) / Math.pow(10, tokenDivisibility)
   }
 })
-
 watch(acc,n=>{
   if(n){
     fundStatus.value = n.balance < totalFee.value
@@ -347,7 +322,6 @@ watch(acc,n=>{
     
   }
 },{immediate:true,deep:true})
-
 const clear = () => {
   coSign.value = [];
   contactName.value = [];
@@ -361,10 +335,8 @@ const clear = () => {
   selectOtherCosign.value = [];
   err.value = '';
 };
-
 const modifyAccount = async () => {
   let signer: { address: string }[] = [];
-
   cosigners.value.cosignerList.forEach((publicKey: string) => {
     if (!walletState.currentLoggedInWallet) {
       return
@@ -387,7 +359,6 @@ const modifyAccount = async () => {
     router.push({ name: "ViewAccountPendingTransactions", params: { address: p.address } })
   }
 };
-
 watch(() => [...coSign.value], (n) => {
   if (!acc.value) {
     return
@@ -440,13 +411,10 @@ watch(() => [...showAddressError.value], (n) => {
   if (n.every(value => value == false)) {
     updateAggregateFee()
   }
-
 }, { deep: true });
-
 watch(() => [removeCosign.value], (n) => {
   updateAggregateFee()
 }, { deep: true });
-
 const contact = computed(() => {
   if (!acc.value) {
     return []
@@ -462,11 +430,9 @@ const contact = computed(() => {
         publicKey: account.publicKey,
       }
     });
-
   let addressBook = wallet.contacts
   var contacts: { key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string, selectable: boolean }[] }[] = [];
   var indexNo = 0
-
   contacts.push({
     key: "0",
     label: t('general.ownerAcc'),
@@ -485,7 +451,6 @@ const contact = computed(() => {
     )
     indexNo++
   })
-
   indexNo = 0
   // getting address book contacts
   contacts.push({
@@ -495,7 +460,6 @@ const contact = computed(() => {
     children: []
   }
   )
-
   if (addressBook != undefined) {
     addressBook.forEach((element) => {
       contacts[1].children.push(
@@ -511,7 +475,6 @@ const contact = computed(() => {
   }
   return contacts
 });
-
 const onNodeSelect = (node: { key: string, label: string, data: string, selectable: boolean }, index: number) => {
   makeNodeSelectable(index)
   if (node.label) {
@@ -530,7 +493,6 @@ const onNodeSelect = (node: { key: string, label: string, data: string, selectab
   selectedNode.value[index][node.key] = true
   node.selectable = false
 }
-
 const changeToPublicKey = (address: string, index: number) => {
   try {
     MultisigUtils.verifyContactPublicKey(address).then(result => {
@@ -545,7 +507,6 @@ const changeToPublicKey = (address: string, index: number) => {
     err.value = t('multisig.noPublicKey')
   }
 }
-
 const makeNodeSelectable = (index: number) => {
   // if there is previously unselectable value make it selectable
   if (Object.keys(selectedNode.value[index]).length !== 0) {
@@ -554,14 +515,12 @@ const makeNodeSelectable = (index: number) => {
     selectedNode.value[index] = {}
   }
 }
-
 const accountBalance = computed(() => {
   if (!acc.value) {
     return 0
   }
   return acc.value.balance
 })
-
 const addCoSig = () => {
   coSign.value.push('');
   selectedNode.value.push({})
@@ -600,7 +559,6 @@ const restoreFromRemovalList = (publicKey: string) => {
     removeCosign.value.splice(index, 1);
   }
 }
-
 const maxNumApproveTransaction = computed(() => {
   return getCosigns() - removeCosign.value.length + coSign.value.length;
 });
@@ -614,7 +572,6 @@ const getCosigns = () => {
     return 0
   }
 }
-
 // refecth min number for both scheme if there is changes in max num for both approval and deletion
 watch(maxNumApproveTransaction, (n, o) => {
   if (n < o) {
@@ -687,8 +644,6 @@ const cosigners = computed(() => {
   let cosigner = getCosignerList();
   return cosigner;
 });
-
-
 watch(networkState,n=>{
   if(n.currentNetworkProfile && acc.value){
     MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey, AppState.networkType)).then(onPartialBoolean => onPartial.value = onPartialBoolean)
@@ -700,7 +655,6 @@ if (findAccount) {
     fundStatus.value = true
   }
 }
-
 watch(selectedCosignPublicKey, (n) => {
   const findAccount = findAcc(n)
   if (!findAccount) {
@@ -712,19 +666,14 @@ watch(selectedCosignPublicKey, (n) => {
     fundStatus.value = false
   }
 });
-
 const totalFeeFormatted = computed(() => {
   return Helper.amountFormatterSimple(totalFee.value, 0);
 });
-
-
 const checkCosignBalance = computed(() => {
   const findAccount = findAcc(selectedCosignPublicKey.value)
   let cosignBalance = findAccount ? findAccount.balance : 0;
   return Helper.toCurrencyFormat(cosignBalance, 3);
 })
-
-
 </script>
 <style scoped lang="scss">
 .slide-enter-active {
@@ -737,7 +686,6 @@ const checkCosignBalance = computed(() => {
   -o-transition-timing-function: ease-in-out;
   transition-timing-function: ease-in-out;
 }
-
 .slide-leave-active {
   -moz-transition-duration: 1s;
   -webkit-transition-duration: 1s;
@@ -748,54 +696,27 @@ const checkCosignBalance = computed(() => {
   -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
   transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
 }
-
 .slide-enter-to,
 .slide-leave-from {
   max-height: 1000px;
   overflow: hidden;
 }
-
 .slide-enter-from,
 .slide-leave-to {
   overflow: hidden;
   max-height: 0;
 }
-
 select {
   min-width: 150px;
   padding: 5px;
 }
-
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-
 /* Firefox */
 input[type=number] {
   -moz-appearance: textfield;
-}
-.p-tree::v-deep{
-  .p-tree-container .p-treenode .p-treenode-content{
-    padding-left:2px;
-    padding-top:2px
-  }
-  .p-link{
-  padding: 0;
-  margin: 0;
-  }
-  .p-inputtext{
-      font-size: 1rem;
-      text-align: left;
-      padding: 0.5rem;
-      border: 1px solid #ced4da;
-    }
-}
-  ::v-deep(.p-inputtext) {
-      font-size: 1rem;
-      text-align: left;
-      padding: 0.5rem;
-    }
-</style>
+}</style>
