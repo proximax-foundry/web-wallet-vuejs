@@ -1,3 +1,4 @@
+test: Test
 account:
   accDeletion: Account Deletion
   accountCreated: Your account has been successfully created.

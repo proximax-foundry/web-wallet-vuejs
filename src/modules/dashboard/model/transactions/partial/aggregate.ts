@@ -1,13 +1,12 @@
 import { PartialTransaction } from "./partialTransaction";
-import { TxnList } from "../txnList";
+import type { TxnList } from "../txnList";
 
-export class PartialAggregateTransaction extends PartialTransaction{
+export class PartialAggregateTransaction extends PartialTransaction {
+  aggregateLength?: number = 0;
+  txnList: TxnList[] = [];
+  cosigners: string[] = [];
 
-    aggregateLength?: number = 0;
-    txnList: TxnList[] = [];
-    cosigners: string[] = [];
-  
-    constructor(txnHash: string){
-      super(txnHash);
-    }
+  constructor(txnHash: string) {
+    super(txnHash);
+  }
 }

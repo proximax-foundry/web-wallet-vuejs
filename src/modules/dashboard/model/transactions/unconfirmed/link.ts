@@ -1,11 +1,10 @@
 import { UnconfirmedTransaction } from "./unconfirmedTransaction";
 
-export class UnconfirmedLinkTransaction extends UnconfirmedTransaction{
+export class UnconfirmedLinkTransaction extends UnconfirmedTransaction {
+  remotePublicKey: string = "";
+  action: string = "";
 
-    remotePublicKey: string = "";
-    action: string = "";
-  
-    constructor(txnHash: string){
-      super(txnHash);
-    }
+  constructor(txnHash: string) {
+    super(txnHash);
+  }
 }

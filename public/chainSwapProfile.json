@@ -1,6 +1,5 @@
 {
     "Sirius Mainnet": {
-      "swapData":{
         "swap_XPX_ETH_URL": "https://swap-gateway.xpxsirius.io/eth",
         "swap_XPX_BSC_URL": "https://swap-gateway.xpxsirius.io/bsc",
         "swap_IN_SERVICE_URL": "https://swap-gateway.xpxsirius.io/sirius",
@@ -27,12 +26,10 @@
             { "namespaceId": "prx", "name": "xpx", "divisibility": 6 }
           ]
         }
-      }
     },
     "Sirius Testnet 1": {
     },
     "Sirius Testnet 2": {
-      "swapData":{
         "swap_XPX_ETH_URL": "https://bctestnet-swap-gateway.xpxsirius.io/eth",
         "swap_XPX_BSC_URL": "https://bctestnet-swap-gateway.xpxsirius.io/bsc",
         "swap_IN_SERVICE_URL": "https://bctestnet-swap-gateway.xpxsirius.io/sirius",
@@ -59,6 +56,5 @@
             { "namespaceId": "prx", "name": "xpx", "divisibility": 6 }
           ]
         }
-      }
     }
 }

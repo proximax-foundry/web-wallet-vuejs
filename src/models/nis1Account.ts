@@ -3,16 +3,14 @@
 //     xpx: number;
 // }
 
-export class nis1Account{
+export class nis1Account {
+  address: string;
+  publicKey: string;
+  balance: any;
 
-    address: string;
-    publicKey: string;
-    balance: any;
-
-    constructor(address: string, publicKey: string, balance?: any){
-        this.address = address;
-        this.publicKey = publicKey;
-        this.balance = [];
-    }
-
+  constructor(address: string, publicKey: string) {
+    this.address = address;
+    this.publicKey = publicKey;
+    this.balance = [];
+  }
 }

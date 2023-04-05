@@ -1,4 +1,4 @@
-import { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 export const MainnetSwapRoutes: RouteRecordRaw[] = [
   {
     path: '/swap',
@@ -6,22 +6,6 @@ export const MainnetSwapRoutes: RouteRecordRaw[] = [
     component: () => import('@/modules/services/submodule/mainnetSwap/views/ViewServicesMainnetSwap.vue'),
     meta: {
       title: "Swap",
-    }
-  },
-  {
-    path: '/swap-sirius-eth',
-    name: 'ViewServicesMainnetSwapSiriusToETH',
-    component: () => import('@/modules/services/submodule/mainnetSwap/submodule2/eth/views/ViewServicesMainnetSwapSiriusToETH.vue'),
-    meta: {
-      title: "Swap Sirius to ETH",
-    }
-  },
-  {
-    path: '/swap-eth-sirius',
-    name: 'ViewServicesMainnetSwapETHToSirius',
-    component: () => import('@/modules/services/submodule/mainnetSwap/submodule2/eth/views/ViewServicesMainnetSwapETHToSirius.vue'),
-    meta: {
-      title: "Swap ETH to Sirius",
     }
   },
   {
@@ -40,31 +24,12 @@ export const MainnetSwapRoutes: RouteRecordRaw[] = [
       title: "Swap BSC to Sirius",
     }
   },
-
-  {
-    path: '/check-swap-eth-sirius',
-    name: 'ViewServicesMainnetSwapCheckETHToSirius',
-    component: () => import('@/modules/services/submodule/mainnetSwap/submodule2/eth/views/ViewServicesMainnetSwapCheckETHToSirius.vue'),
-    meta: {
-      title: "Check Swap ETH to Sirius",
-    }
-  },
-
   {
     path: '/check-swap-bsc-sirius',
     name: 'ViewServicesMainnetSwapCheckBSCToSirius',
     component: () => import('@/modules/services/submodule/mainnetSwap/submodule2/bsc/views/ViewServicesMainnetSwapCheckBSCToSirius.vue'),
     meta: {
       title: "Check Swap BSC to Sirius",
-    }
-  },
-
-  {
-    path: '/check-swap-sirius-eth',
-    name: 'ViewServicesMainnetSwapCheckSiriusToETH',
-    component: () => import('@/modules/services/submodule/mainnetSwap/submodule2/eth/views/ViewServicesMainnetSwapCheckSiriusToETH.vue'),
-    meta: {
-      title: "Check Swap Sirius to ETH",
     }
   },
   {

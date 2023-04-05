@@ -1,10 +1,21 @@
 <template>
   <div>
-    <div class="border border-gray-200 select selectPlugin py-1 relative rounded-md" :class="`${ !placeholder?'pt-2':'' }`">
-      <div class="uppercase text-gray-400 font-light text-txs text-left mb-2 pl-2" v-if="placeholder">{{ placeholder }}</div>
-      <img src="@/assets/img/icon-arrow-down.svg" class="inline-block float-right absolute right-0" style="top: 4px;">
+    <div
+      class="border border-gray-200 select selectPlugin py-1 relative rounded-md"
+      :class="`${placeholder ? 'pt-2' : ''}`"
+    >
+      <div
+        class="uppercase text-gray-400 font-light text-txs text-left mb-2 pl-2"
+        v-if="placeholder"
+      >
+        {{ placeholder }}
+      </div>
+      <img
+        src="@/assets/img/icon-arrow-down.svg"
+        class="inline-block float-right absolute right-0"
+        style="top: 4px"
+      />
       <Multiselect
-        class = 'border'
         :placeholder="placeholder"
         :options="options"
         mode="single"
@@ -14,100 +25,74 @@
         @close="closeSelection"
         :maxHeight="maxHeight"
         @deselect="$emit('update:modelValue', selected)"
-        @select="$emit('update:modelValue', selected);$emit('show-selection', selected)"
+        @select="
+          $emit('update:modelValue', selected);
+          $emit('show-selection', selected);
+        "
         @clear="$emit('clear-selection')"
-        ref="selectRef"
         :disabled="disabled"
+         ref="selectRef"
       />
     </div>
   </div>
 </template>
 
-<script>
-import { defineComponent, ref } from 'vue';
-import Multiselect from '@vueform/multiselect';
+<script setup lang="ts">
+import { ref, onMounted, getCurrentInstance } from "vue";
+import Multiselect from "@vueform/multiselect";
 
-export default defineComponent({
-  props: [
-    'placeholder',
-    'errorMessage',
-    'options',
-    'modelValue',
-    'selectDefault',
-    'disabled',
-    'noOptionsText',
-  ],
-  emits:[
-    'update:modelValue', 'show-selection', 'clear-selection'
-  ],
-  name: 'SelectInputPluginClean',
-
-  setup(p){
-    const selectModel = ref(0);
-    const selected = ref([]);
-    const maxHeight = ref(300);
-    const canDeselect = ref(false);
-
-    const clearSelection = () => {
-      selectModel.value = 0;
-    };
-
-    const closeSelection =() => {
-      if(!selected.value){
-        clearSelection();
-      }
-    };
-
-    return {
-      selectModel,
-      selected,
-      clearSelection,
-      closeSelection,
-      maxHeight,
-      canDeselect,
-    };
+const props = defineProps({
+  placeholder: String,
+  errorMessage: String,
+  options: Array,
+  modelValue: {
+    type:String ,
+    required:true
   },
+  selectDefault: String,
+  disabled: Boolean,
+  noOptionsText: String,
+  ref: {
+    type: null
+  }
+});
 
-  components: {
-    Multiselect,
-  },
+defineEmits(["update:modelValue", "show-selection", "clear-selection"]);
 
-  methods: {
-    clear: function() {
-      if(this.$refs.selectRef){
-        this.$refs.selectRef.clear();
-      }
-    },
-    select: function(group) {
-      this.$refs.selectRef.select(group, this.options);
-    }
-  },
+const internalInstance = getCurrentInstance();
+const emitter = internalInstance?.appContext.config.globalProperties.emitter;
 
-  mounted() {
-    if(this.selectDefault){
-      this.$refs.selectRef.select(this.selectDefault, this.options);
-    }
+const maxHeight = ref(300);
+const canDeselect = ref(false);
+const selectModel = ref(0);
+const selected = ref([]);
+const selectRef = ref(props.ref);
+const clearSelection = () => {
+  selectModel.value = 0;
+};
 
-    this.emitter.on('CLEAR_SELECT', this.clear)
-  },
+const closeSelection = () => {
+  if (!selected.value) {
+    clearSelection();
+  }
+};
 
-  beforeUnmount(){
-    this.emitter.off('CLEAR_SELECT', this.clear)
-  },
-  created() {
-    // eslint-disable-next-line no-unused-vars
-    // console.log(this.$refs);
-    // this.emitter.on('CLEAR_SELECT', payload => {
-    //   if(!payload){
-    //     this.$refs.selectRef.clear();
-    //   }
-    // });
+onMounted(() => {
+  if(props.selectDefault){
+    selectRef.value.select(props.selectDefault, props.options);
+  }
+})
+
+emitter.on('ADD_CUSTOM_GROUP', (customGroup :string) => {
+  if(selectRef.value){
+    selectRef.value.select(customGroup);
   }
 });
 </script>
 
 <style lang="scss" scoped>
 @import "@/assets/scss/multiselect.scss";
+
 .selectPlugin::v-deep{
   .multiselect-input{
     min-height: 18px;

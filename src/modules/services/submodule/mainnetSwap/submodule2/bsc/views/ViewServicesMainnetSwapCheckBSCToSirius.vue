@@ -164,7 +164,7 @@
                 <div v-if="isInitiateSwap">
                   <div class="sm:flex justify-between">
                     <div class="w-full">
-                      <SelectInputAccount v-model="siriusAddressSelected" :placeholder="$t('swap.toSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
+                      <SelectInputAccount v-model="siriusAddressSelected" :placeholder="$t('swap.toSiriusAcc')" :selectDefault="siriusAddressSelected" />
                     </div>
                     <button :disabled="!siriusAddressSelected || !disableConfirmAddressSelection" @click="confirmAddress" class="sm:flex-none justify-start sm:justify-end bg-blue-primary h-15 w-40 rounded-3xl sm:ml-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-2 disabled:opacity-50 self-center" type="button">{{$t('general.confirm')}}</button>
                   </div>
@@ -271,7 +271,7 @@
     </div>
   </div>
 </template>
-<script>
+<script setup lang="ts">
 import { computed, ref, watch, onBeforeUnmount } from "vue";
 import TextInputClean from '@/components/TextInputClean.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
@@ -286,21 +286,12 @@ import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
+import type { Account } from "@/models/account";
 
-export default {
-  name: 'ViewServicesMainnetSwapCheckBSCToSirius',
-
-  components: {
-    TextInputClean,
-    SwapCertificateComponent,
-    SelectInputAccount,
-  },
-
-  setup() {
-    let verifyingTxn;
+    let verifyingTxn: ReturnType<typeof setInterval> | undefined;
     const {t} = useI18n();
     const verifyMetaMaskPlugin = ref(true);
-
+    const serviceErr = ref('');
     onBeforeUnmount(() => {
        if(verifyingTxn){
          clearInterval(verifyingTxn);
@@ -356,12 +347,13 @@ export default {
     // const transactionSuccess = ref(false);
 
     const bscScanUrl = swapData.BSCScanUrl;
-    const checkSwapStatusUrl = SwapUtils.getIncoming_BSCCheckStatus_URL(swapData.swap_IN_SERVICE_URL, tokenName.value);
-    const swapServerUrl = SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL);
+    const checkSwapStatusUrl = SwapUtils.getIncoming_BSCCheckStatus_URL(swapData.swap_IN_SERVICE_URL);
+    const swapServerUrl = SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL, tokenName.value);
 
 
-    let provider;
+    let provider: ethers.providers.Web3Provider;
     let signer;
+    let ethereum = (window as any).ethereum
 
     if(window.ethereum){
       if(!window.ethereum.isMetaMask){
@@ -378,19 +370,19 @@ export default {
         ethereum
           .request({ method: 'eth_accounts' })
           .then(fetchMetaAccount)
-          .catch((err) => {
+          .catch((err:any) => {
             console.error(err);
           });
         ethereum
           .request({ method: 'eth_chainId' })
-          .then((metaChainId) => {
+          .then((metaChainId:string) => {
             verifyChain(metaChainId);
           })
-          .catch((err) => {
+          .catch((err:any) => {
             console.error(err);
           });
         ethereum.on('accountsChanged', handleAccountsChanged);
-        ethereum.on('chainChanged', (metaChainId) => {
+        ethereum.on('chainChanged', (metaChainId:string) => {
           verifyChain(metaChainId);
         });
       }else{
@@ -400,11 +392,11 @@ export default {
 
     initMetamask()
 
-    function fetchMetaAccount(accounts) {
+    function fetchMetaAccount(accounts:any) {
       if (accounts.length === 0) {
         // MetaMask is locked or the user has not connected any accounts
         // console.log('Please connect to MetaMask.');
-        currentAccount.value = '';
+        currentAccount.value = null;
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
       }
@@ -412,11 +404,11 @@ export default {
     }
 
     // For now, 'eth_accounts' will continue to always return an array
-    function handleAccountsChanged(accounts) {
+    function handleAccountsChanged(accounts:any) {
       if(window.ethereum.isMetaMask){
         if (accounts.length === 0) {
           // MetaMask is locked or the user has not connected any accounts
-          currentAccount.value = '';
+          currentAccount.value = null;
         } else if (accounts[0] !== currentAccount.value) {
           currentAccount.value = accounts[0];
           serviceErr.value = '';
@@ -425,7 +417,7 @@ export default {
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
 
-    function verifyChain(chainId){
+    function verifyChain(chainId:string){
       currentNetwork.value = chainId;
       if(ethereumChainId === parseInt(chainId)){
         err.value = '';
@@ -450,7 +442,7 @@ export default {
         ethereum
         .request({ method: 'eth_requestAccounts' })
         .then(fetchMetaAccount)
-        .catch((err) => {
+        .catch((err:any) => {
           if (err.code === 4001) {
             // EIP-1193 userRejectedRequest error
             // If this happens, the user rejected the connection request.
@@ -483,10 +475,10 @@ export default {
     };
 
     const toast = useToast();
-    const copy = (id) =>{
-      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
-      let copySubject = document.getElementById(id).getAttribute("copySubject");
-      copyToClipboard(stringToCopy);
+    const copy = (id:string) =>{
+      let stringToCopy = document.getElementById(id)?.getAttribute("copyValue");
+      let copySubject = document.getElementById(id)?.getAttribute("copySubject");
+      copyToClipboard(stringToCopy as string);
       toast.add({severity:'info', summary: copySubject + ' ' + t('general.copied'), detail: stringToCopy , group: 'br-custom', life: 3000});
     };
 
@@ -496,7 +488,7 @@ export default {
 
     const siriusAddress = ref('');
     const err = ref('');
-    const serviceErr = ref('');
+  
     const isDisabledCheck = computed(() =>
       // verify it has been connected to MetaMask too
       !(!err.value && !(showTxnHashError.value && remoteTxnHash.value.length > 0) && remoteTxnHash.value.length > 0)
@@ -532,7 +524,7 @@ export default {
       try{
         let transactionReceipt = await provider.getTransactionReceipt(remoteTxnHash.value);
         let transactionStatus = await provider.getTransaction(remoteTxnHash.value);
-        if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
+        if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to?.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
           if(transactionStatus.confirmations < 12){
             return new Promise(function (resolve) {
               verifyingTxn = setInterval(async () => {
@@ -558,7 +550,7 @@ export default {
           transactionNotFound.value = true;
           return false;
         }else{
-          if(transactionStatus && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaction is not confirmed
+          if(transactionStatus && transactionStatus.to?.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaction is not confirmed
             // perform confirmation loop here
             return new Promise(function (resolve) {
               verifyingTxn = setInterval(async()=>{
@@ -600,7 +592,7 @@ export default {
     });
 
     const siriusTxnHash = ref('');
-    let xpxExplorerUrl = networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.hashRoute + '/';
+    let xpxExplorerUrl = networkState.currentNetworkProfile?.chainExplorer.url + '/' + networkState.currentNetworkProfile?.chainExplorer.hashRoute + '/';
     const siriusTxnLink = computed(() => xpxExplorerUrl + siriusTxnHash.value);
 
     const checkSiriusTxn = async () => {
@@ -625,7 +617,9 @@ export default {
           transactionHash.value = data.remoteTxnHash;
           swapTimestamp.value = data.timestamp;
           swapId.value = data.ctxId;
-          swapQr.value = SwapUtils.generateQRCode(remoteTxnLink.value);
+          SwapUtils.generateQRCode(remoteTxnLink.value).then((x)=>{
+          swapQr.value = x
+        });;
           isInvalidSwapCheck.value = false;
           setTimeout( ()=> isDisabledValidate.value = false, 1000);
         }else if(response.status == 404){
@@ -647,16 +641,22 @@ export default {
     const isInitiateSwap = ref(false);
     const disableSiriusAddress = ref(false);
     const disableConfirmAddressSelection = ref(true);
-    const siriusAddressSelected = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
+    const defaultAcc = computed(()=>{
+  if(!walletState.currentLoggedInWallet){
+    return null
+  }
+  return walletState.currentLoggedInWallet.selectDefaultAccount() 
+})
+    const siriusAddressSelected = ref(defaultAcc.value ? defaultAcc.value.address : '');
 
-    const siriusAddressSelectedName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
+    const siriusAddressSelectedName = ref(defaultAcc.value ? defaultAcc.value.name : '');
 
     watch(siriusAddressSelected, (newAddress) => {
-      let accountSelected = walletState.currentLoggedInWallet.accounts.find(account => account.address == newAddress);
+      let accountSelected = walletState.currentLoggedInWallet?.accounts.find(account => account.address == newAddress) as Account;
       if(!accountSelected){
-        accountSelected = walletState.currentLoggedInWallet.others.find(account => account.address == newAddress);
+        accountSelected = walletState.currentLoggedInWallet?.others.find(account => account.address == newAddress) as Account;
       }
-      siriusAddressSelectedName.value = accountSelected.name;
+      siriusAddressSelectedName.value = accountSelected?.name;
     });
 
     const displayInitiateSwapPanel = () => {
@@ -664,7 +664,7 @@ export default {
     }
 
     const siriusAddressOption = computed(() => {
-      let siriusAddress = [];
+      let siriusAddress:{label:string, value:string}[] = [];
       if(walletState.currentLoggedInWallet){
         walletState.currentLoggedInWallet.accounts.forEach((account) => {
           siriusAddress.push({
@@ -703,7 +703,7 @@ export default {
     const amount = ref(0);
     const amountReceived = ref(0);
 
-    const swapServiceParam = ref('');
+    const swapServiceParam = ref<{ recipient: string | undefined; signature: any; txnInfo: { network: string; txnHash: string; }; }>();
 
     const getSigned = async () => {
       try{
@@ -748,13 +748,15 @@ export default {
           const data = await response.json();
           isInvalidSwapService.value = false;
           siriusTxnHash.value = data.siriusSwapInfo.status.hash;
-          amount.value = Helper.convertToCurrency(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility);
-          amountReceived.value = Helper.amountFormatterSimple(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility) - 50;
+          amount.value = Number(Helper.convertToCurrency(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility));
+          amountReceived.value = Number(Helper.amountFormatterSimple(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility)) - 50;
           siriusAddress.value = data.siriusSwapInfo.recipient;
           transactionHash.value = data.remoteTxnHash;
           swapTimestamp.value = data.timestamp;
           swapId.value = data.ctxId;
-          swapQr.value = SwapUtils.generateQRCode(remoteTxnLink.value);
+          SwapUtils.generateQRCode(remoteTxnLink.value).then((x)=>{
+          swapQr.value = x
+        });;
           setTimeout( ()=> isDisabledValidate.value = false, 1000);
           swapServerErrIndex.value = 0;
         }else if(response.status == 208){
@@ -781,74 +783,4 @@ export default {
 
     const savedCheck = ref(false);
 
-    return {
-      recheckMetamask,
-      err,
-      isInstallMetamask,
-      connectMetamask,
-      isMetamaskConnected,
-      currentAccount,
-      copy,
-      currentPage,
-      isDisabledValidate,
-      siriusAddress,
-      checkStatus,
-      validated,
-      isDisabledCheck,
-      step1,
-      step2,
-      step3,
-      step4,
-      remoteTxnLink,
-      messageHash,
-      transactionHash,
-      swapTimestamp,
-      swapId,
-      swapQr,
-      saveCertificate,
-      isInvalidRemoteTxnHash,
-      isPendingRemoteTxnHash,
-      serviceErr,
-      verifyMetaMaskPlugin,
-      showTxnHashError,
-      remoteTxnHash,
-      isInvalidSwapCheck,
-      siriusTxnHash,
-      siriusTxnLink,
-      displayInitiateSwapPanel,
-      isInitiateSwap,
-      siriusAddressOption,
-      disableSiriusAddress,
-      disableConfirmAddressSelection,
-      siriusAddressSelected,
-      siriusAddressSelectedName,
-      clearSiriusAddress,
-      step5,
-      step6,
-      step7,
-      step8,
-      isInvalidSignedMeta,
-      isInvalidSwapService,
-      disableRetrySwap,
-      retrySwapButtonText,
-      getSigned,
-      signatureMessage,
-      afterSigned,
-      swapServerErrIndex,
-      confirmAddress,
-      swapStatus208,
-      savedCheck,
-      numConfirmation,
-      transactionPending,
-      transactionNotFound,
-      txtRemoteTransactionErrorMsg,
-      isCheckSwapStatusNotFound,
-      walletState,
-      currentNativeTokenName,
-      Helper,
-      amount,
-      amountReceived,
-    };
-  },
-}
 </script>

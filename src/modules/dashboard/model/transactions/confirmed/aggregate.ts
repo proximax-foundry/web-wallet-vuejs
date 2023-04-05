@@ -1,13 +1,12 @@
 import { ConfirmedTransaction } from "./confirmedTransaction";
-import { TxnList } from "../txnList";
+import type { TxnList } from "../txnList";
 
-export class ConfirmedAggregateTransaction extends ConfirmedTransaction{
+export class ConfirmedAggregateTransaction extends ConfirmedTransaction {
+  aggregateLength?: number = 0;
+  txnList: TxnList[] = [];
+  cosigners: string[] = [];
 
-    aggregateLength?: number = 0;
-    txnList: TxnList[] = [];
-    cosigners: string[] = [];
-  
-    constructor(txnHash: string){
-      super(txnHash);
-    }
+  constructor(txnHash: string) {
+    super(txnHash);
+  }
 }

@@ -1,12 +1,11 @@
 import { UnconfirmedTransaction } from "./unconfirmedTransaction";
-import { TxnExchangeOffer } from "../exchangeOffer";
+import type { TxnExchangeOffer } from "../exchangeOffer";
 
-export class UnconfirmedExchangeTransaction extends UnconfirmedTransaction{
-
+export class UnconfirmedExchangeTransaction extends UnconfirmedTransaction {
   exchangeOffers: TxnExchangeOffer[] = [];
   isTakingOffer: boolean = false;
 
-  constructor(txnHash: string){
+  constructor(txnHash: string) {
     super(txnHash);
   }
 }

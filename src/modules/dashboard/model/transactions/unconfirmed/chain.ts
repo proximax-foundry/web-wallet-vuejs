@@ -1,14 +1,13 @@
 import { UnconfirmedTransaction } from "./unconfirmedTransaction";
 
-export class UnconfirmedChainTransaction extends UnconfirmedTransaction{
+export class UnconfirmedChainTransaction extends UnconfirmedTransaction {
+  applyHeightDelta: number | null = null;
+  networkConfig: string | null = null; // not assigning for dashboard
+  supportedEntityVersions: string | null = null; // not assigning for dashboard
+  newVersion: string | null = null;
+  upgradePeriod: number | null = null;
 
-  applyHeightDelta: number = null;
-  networkConfig: string = null; // not assigning for dashboard
-  supportedEntityVersions: string = null; // not assigning for dashboard
-  newVersion: string = null;
-  upgradePeriod: number = null;
-
-  constructor(txnHash: string){
+  constructor(txnHash: string) {
     super(txnHash);
   }
 }

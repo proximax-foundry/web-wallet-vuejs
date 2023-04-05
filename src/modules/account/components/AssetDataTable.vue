@@ -54,7 +54,7 @@
             <img  src="@/modules/dashboard/img/icon-more-options.svg" class="w-4 h-4 cursor-pointer ml-2 mt-0.5" @click="showMenu(data.i)"  @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
             <div v-if="isMenuShow[data.i]" class="mt-5  w-36 absolute rounded-sm shadow-lg bg-white focus:outline-none z-10 text-left " >
                 <div class="my-2" >
-                    <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.id, address: address, assetBalance: data.balance} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
+                    <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
                     <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.linkToNamespace')}}</router-link>
                     <router-link :to="{ name: 'ViewAssetMetadata', params: {assetId: data.id, address: address} }">
                         <div class="block hover:bg-gray-100 transition duration-200 p-2 z-20 cursor-pointer">View Metadata</div>
@@ -140,11 +140,12 @@ onUnmounted(() => {
 onMounted(() => {
     window.addEventListener("resize", screenResizeHandler);
 });
-const props = defineProps({
+
+defineProps({
     assets: Array,
     address: String
 })
-const explorerLink = assetId=>{  
+const explorerLink = (assetId :string)=>{  
     if(!networkState.currentNetworkProfile){
         return ''
     }
@@ -161,15 +162,15 @@ const displayTokenName = (name :string) =>{
         return {name:name,registered:false}
     }
 }
-const isMenuShow = ref([]);
+const isMenuShow = ref<boolean[]>([]);
 
 const currentMenu = ref(0); 
-const showMenu = (i) => {
+const showMenu = (i :number)  => {
     currentMenu.value = i;
     isMenuShow.value[i] = !isMenuShow.value[i];
 } 
 const internalInstance = getCurrentInstance(); 
-const emitter = internalInstance.appContext.config.globalProperties.emitter; 
+const emitter = internalInstance?.appContext.config.globalProperties.emitter; 
     // emitted from App.vue when click on any part of the page
 emitter.on('PAGE_CLICK', () => {
     var k = 0;
@@ -181,7 +182,7 @@ emitter.on('PAGE_CLICK', () => {
     }
 });
 
-const hoverOverMenu = (i) => {
+const hoverOverMenu = (i :number) => {
     currentMenu.value = i;
 };
 
@@ -192,7 +193,7 @@ const hoverOutMenu = () => {
 </script>
 
 <style lang="scss" scoped>
-::v-deep(.p-paginator) {
+::deep(.p-paginator) {
     .p-paginator-current {
         
         padding: 1rem;

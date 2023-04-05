@@ -1,5 +1,5 @@
-export interface AliasNamespace{
-    id: number[];
-    idHex: string;
-    name?: string;
+export interface AliasNamespace {
+  id: number[];
+  idHex: string;
+  name?: string;
 }

@@ -1,127 +1,96 @@
 <template>
-  <div :class="disabled?'opacity-50':''">
+  <div :class="disabled ? 'opacity-50' : ''">
     <div class="border border-gray-200 px-2 py-1  rounded-md">
-        <div class="flex flex-col">
-            <div class="uppercase font-light text-gray-500 text-txs text-left mb-2">{{ placeholder }}</div>
-            <div class="flex w-full">
-                <img v-if="logo" src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
-               <AutoNumericVue 
-                :value="modelValue"
-                :disabled ='disabled'
-                class="supply_input"  
-                :options="{
-                  showWarnings : false,
-                  digitGroupSeparator: ',',
-                  decimalCharacter: '.',
-                  currencySymbol: '',
-                  emptyInputBehavior: 'zero',
-                  allowDecimalPadding: false,
-                  decimalPlaces: decimal,
-                  roundingMethod: 'U',
-                  minimumValue: '0'
-                }"
-                @input="$emit('update:modelValue',parseFloat($event.target.value.replace(/,/g, '')).toString() )"
-                @keyup="checkBalance($event)"
-                @focus="$event.target.select()" 
-                @blur="blurInputText()"
-               ></AutoNumericVue>
-            </div>
+      <div class="flex flex-col">
+        <div class="uppercase font-light text-gray-500 text-txs text-left mb-2">{{ placeholder }}</div>
+        <div class="flex w-full">
+          <img v-if="logo" src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
+          <input 
+            :value="modelValue"
+            class="supply_input" v-maska:[options] :data-maska="maskaFormat()"
+            data-maska-tokens="0:\d:multiple|9:\d:optional" :placeholder="placeholder" 
+            @input="$emit('update:modelValue',parseFloat((<HTMLInputElement>$event.target).value.replace(/,/g, '')).toString() )"
+            />
         </div>
+      </div>
     </div>
   </div>
 </template>
 
-<script>
-import { ref } from 'vue';
-import { maska } from 'maska';
-import Tooltip from 'primevue/tooltip';
-import AutoNumericVue from 'autonumeric-vue/src/components/AutoNumericVue';
-export default{
-  name:"TransferInputClean",
-  directives: { maska, 'tooltip': Tooltip },
-  props: {
-    placeholder: String,
-    logo: Boolean,
-    icon: String,
-    showError: Boolean,
-    modelValue: String,
-    title: String,
-    disabled: Boolean,
-    decimal: Number,
-    balance: Number,
-    toolTip: String,
+<script setup lang=ts>
+
+const props = defineProps({
+  modelValue: {
+    type: String,
+    required: true,
   },
-  components:{
-    AutoNumericVue
+  decimal: {
+    type: Number,
+    required: true,
   },
-  setup (props) {
-    const formatMask = ref("'#*." + ('#')^props.decimal + "'");
-    return {
-      formatMask,
-    }
+  placeholder: {
+    type: String,
+    required: true,
+  },
+  toolTip: {
+    type: String,
+    required: false,
+  },
+  disabled: {
+    type: Boolean,
+    required: false,
+  },
+  showError: {
+    type: Boolean,
+    required: false,
   },
 
-  emits:[
+  logo: {
+    type: Boolean,
+    required: false
+  },
+  balance: {
+    type: Number,
+    required: false
+  }
+});
+
+defineEmits([
     'update:modelValue', 'show-error'
-  ],
+  ])
 
-  name: 'SupplyInput',
+const maskaFormat = () => {
+  let maskaFormat = "0";
+  if (props.decimal > 0) {
+    maskaFormat = maskaFormat + "." + "9".repeat(props.decimal);
+  }
+  return maskaFormat;
+};
 
-  data() {
-    return {
-      inputText: "",
-      textErr: false,
-    };
+const options = {
+  preProcess: (val: string) => {
+    return val.replace(/,/g, "");
   },
-
-  methods: {
-
-    blurInputText: function() {
-      if(!this.disabled){
-        if(this.modelValue == '' || this.modelValue > this.balance){
-          this.textErr = true;
-        }else{
-          this.textErr = false;
-        }
-      }
-    },
-
-    checkBalance: function(evt){
-      evt.target.value =  evt.target.value||0;
-      if(this.balance < evt.target.value){
-        this.textErr = true;
-        this.$emit('show-error', true);
-      }else{
-        this.textErr = false;
-        this.$emit('show-error', false);
-      }
-    },
-  },
-
-  watch:{
-    showError: function(val){
-      if(val){
-        this.textErr = true;
-      }else{
-        this.textErr = false;
-      }
+  postProcess: (val: string) => {
+    if (!val) return "";
+    let sub = 0;
+    if (props.decimal > 0) {
+      sub =
+        1 +
+        props.decimal -
+        (val.includes(".") ? val.length - val.indexOf(".") : 0);
     }
+    return Intl.NumberFormat("en-US", {
+      minimumFractionDigits: props.decimal,
+    })
+      .format(parseFloat(val))
+      .slice(0, sub ? -sub : undefined);
   },
+};
 
-  mounted() {
-    this.emitter.on("CLEAR_TEXT", payload => {
-      this.inputText = payload;
-      this.textErr = false;
-    });
 
-    this.emitter.on("CLOSE_MOSAIC_INSUFFICIENT_ERR", payload => {
-      this.textErr = payload;
-    });
-  },
-}
 </script>
 <style lang="scss" scoped>
-
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -134,7 +103,7 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
-.supply_input{
-  @apply w-full flex border-0 outline-none border-white drop-shadow-none filter focus:outline-none text-sm text-gray-600 font-bold disabled:opacity-50;
+.supply_input {
+  @apply w-full flex border-0 outline-none border-white drop-shadow-none filter  text-sm text-gray-600 font-bold disabled:opacity-50;
 }
 </style>

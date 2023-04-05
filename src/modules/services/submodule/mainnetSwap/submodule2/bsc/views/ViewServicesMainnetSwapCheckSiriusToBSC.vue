@@ -166,8 +166,8 @@
     </div>
   </div>
 </template>
-<script>
-import { computed, ref, onBeforeUnmount } from "vue";
+<script setup lang="ts">
+import { computed, ref } from "vue";
 import TextInputClean from '@/components/TextInputClean.vue';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
@@ -175,20 +175,11 @@ import { ethers } from 'ethers';
 import { SwapUtils } from '@/util/swapUtils';
 import { networkState } from '@/state/networkState';
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
-import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 
-export default {
-  name: 'ViewServicesMainnetSwapCheckSiriusToBSC',
 
-  components: {
-    TextInputClean,
-  },
-
-  setup() {
     const {t} = useI18n()
-    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
-
+    const serviceErr = ref('');
     const verifyMetaMaskPlugin = ref(true);
     if(window.ethereum){
       if(!window.ethereum.isMetaMask){
@@ -247,31 +238,32 @@ export default {
     const bscScanUrl = swapData.BSCScanUrl;
     const remoteTxnLink = computed( () => bscScanUrl + remoteTxnHash.value);
 
-    let provider;
+    let provider = new ethers.providers.Web3Provider(window.ethereum);
     let signer;
+    let ethereum = (window as any).ethereum
+
 
     const initMetamask = ()=>{
        if (typeof window.ethereum !== 'undefined') {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
         signer = provider.getSigner();
         isInstallMetamask.value = true;
         isMetamaskConnected.value = ethereum.isConnected()?true:false;
         ethereum
           .request({ method: 'eth_accounts' })
           .then(fetchMetaAccount)
-          .catch((err) => {
+          .catch((err:any) => {
             console.error(err);
           });
         ethereum
           .request({ method: 'eth_chainId' })
-          .then((metaChainId) => {
+          .then((metaChainId:string) => {
             verifyChain(metaChainId);
           })
-          .catch((err) => {
+          .catch((err:any) => {
             console.error(err);
           });
         ethereum.on('accountsChanged', handleAccountsChanged);
-        ethereum.on('chainChanged', (metaChainId) => {
+        ethereum.on('chainChanged', (metaChainId:string) => {
           verifyChain(metaChainId);
         });
       }else{
@@ -281,21 +273,21 @@ export default {
 
     initMetamask()
    
-    function fetchMetaAccount(accounts) {
+    function fetchMetaAccount(accounts:any) {
       if (accounts.length === 0) {
         // MetaMask is locked or the user has not connected any accounts
-        currentAccount.value = '';
+        currentAccount.value = null;
       } else if (accounts[0] !== currentAccount.value) {
         currentAccount.value = accounts[0];
       }
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
     // For now, 'eth_accounts' will continue to always return an array
-    function handleAccountsChanged(accounts) {
+    function handleAccountsChanged(accounts:any) {
       if(window.ethereum.isMetaMask){
         if (accounts.length === 0) {
           // MetaMask is locked or the user has not connected any accounts
-          currentAccount.value = '';
+          currentAccount.value = null;
         } else if (accounts[0] !== currentAccount.value) {
           currentAccount.value = accounts[0];
           serviceErr.value = '';
@@ -303,7 +295,7 @@ export default {
       }
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
-    function verifyChain(chainId){
+    function verifyChain(chainId:string){
       currentNetwork.value = chainId;
       if(ethereumChainId === parseInt(chainId)){
         err.value = '';
@@ -319,7 +311,7 @@ export default {
         ethereum
         .request({ method: 'eth_requestAccounts' })
         .then(fetchMetaAccount)
-        .catch((err) => {
+        .catch((err:any) => {
           if (err.code === 4001) {
             // EIP-1193 userRejectedRequest error
             // If this happens, the user rejected the connection request.
@@ -342,10 +334,10 @@ export default {
     const step7 = ref(false);
 
     const toast = useToast();
-    const copy = (id) =>{
-      let stringToCopy = document.getElementById(id).getAttribute("copyValue");
-      let copySubject = document.getElementById(id).getAttribute("copySubject");
-      copyToClipboard(stringToCopy);
+    const copy = (id:string) =>{
+      let stringToCopy = document.getElementById(id)?.getAttribute("copyValue");
+      let copySubject = document.getElementById(id)?.getAttribute("copySubject");
+      copyToClipboard(stringToCopy as string);
       toast.add({severity:'info', summary: copySubject + ' '+t('general.copied'), detail: stringToCopy , group: 'br-custom', life: 3000});
     };
 
@@ -355,7 +347,7 @@ export default {
     const isDisabledValidate = ref(true);
     const siriusAddress = ref('');
     const err = ref('');
-    const serviceErr = ref('');
+  
     const isDisabledCheck = computed(() =>
       // verify it has been connected to MetaMask too
       !(!err.value && !(showTxnHashError.value && siriusTxnHash.value.length > 0) && siriusTxnHash.value.length > 0)
@@ -372,13 +364,13 @@ export default {
       }, 2000);
     };
 
-    let xpxExplorerUrl = networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.hashRoute + '/';
+    let xpxExplorerUrl = networkState.currentNetworkProfile?.chainExplorer.url + '/' + networkState.currentNetworkProfile?.chainExplorer.hashRoute + '/';
     const siriusTxnLink = computed(() => xpxExplorerUrl + siriusTxnHash.value);
 
     const transactionFailed = ref(false);
     const transactionNotFound = ref(false);
     const isInvalidRemoteTxnHash = ref(false);
-    const remoteTxnHash = ref(false);
+    const remoteTxnHash = ref("");
     const transactionPending = ref(false);
     const isDisabled = ref(true);
 
@@ -423,7 +415,7 @@ export default {
         let transactionStatus = await provider.getTransaction(remoteTxnHash.value);
 
         let isTxnPending = false;
-        provider.on("pending", (tx) => {
+        provider.on("pending", (tx:string) => {
           if(tx === remoteTxnHash.value){
             isTxnPending = true;
           }
@@ -432,7 +424,7 @@ export default {
         if(isTxnPending){
           transactionPending.value = true;
           return true;
-        }else if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
+        }else if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to?.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
           return true;
         }else if(!transactionReceipt && !transactionStatus){ // invalid transaction hash - transaction not found
           transactionNotFound.value = true;
@@ -464,41 +456,4 @@ export default {
       }
     });
 
-    return {
-      recheckMetamask,
-      err,
-      isInstallMetamask,
-      connectMetamask,
-      isMetamaskConnected,
-      currentAccount,
-      copy,
-      currentPage,
-      isDisabledValidate,
-      siriusAddress,
-      showSiriusAddressErr,
-      disableSiriusAddress,
-      sendRequest,
-      isDisabledCheck,
-      step1,
-      step2,
-      step3,
-      step4,
-      step5,
-      step6,
-      step7,
-      siriusTxnLink,
-      serviceErr,
-      verifyMetaMaskPlugin,
-      showTxnHashError,
-      siriusTxnHash,
-      isInvalidSiriusTxnHash,
-      isInvalidRemoteTxnHash,
-      remoteTxnLink,
-      remoteTxnHash,
-      txtRemoteTxnSummary,
-      isDisabled,
-      currentNativeTokenName,
-    };
-  },
-}
 </script>

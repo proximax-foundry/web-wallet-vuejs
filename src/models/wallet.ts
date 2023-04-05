@@ -1,162 +1,202 @@
-import { WalletAccount } from './walletAccount';
-import { AddressBook } from './addressBook';
-import { OtherAccount } from './otherAccount';
-import { Address } from 'tsjs-xpx-chain-sdk';
-import { Helper } from '@/util/typeHelper';
-import {Label} from './label'
-import { SimpleWallet } from './simpleWallet';
-import { SimpleAccount } from './simpleAccount';
+import type { WalletAccount } from "./walletAccount";
+import type { AddressBook } from "./addressBook";
+import type { OtherAccount } from "./otherAccount";
+import { Address } from "tsjs-xpx-chain-sdk";
+import type { Label } from "./label";
+import { SimpleWallet } from "./simpleWallet";
+import type { SimpleAccount } from "./simpleAccount";
 
-export class Wallet{
+export class Wallet {
+  name: string;
+  networkName: string;
+  accounts: WalletAccount[];
+  others: OtherAccount[] = [];
+  contacts: AddressBook[] = [];
+  isReady: boolean = false;
+  labels: Label[] = [];
 
-    name: string;
-    networkName: string;
-    accounts: WalletAccount[];
-    others: OtherAccount[] = [];
-    contacts: AddressBook[] = [];
-    isReady: boolean = false;
-    labels: Label[] = [];
+  constructor(name: string, networkName: string, accounts: WalletAccount[]) {
+    this.name = name;
+    this.networkName = networkName;
+    this.accounts = accounts;
+  }
 
-    constructor(name: string, networkName: string, accounts: WalletAccount[]){
-        this.name = name;
-        this.networkName = networkName;
-        this.accounts = accounts;
+  updateAccount(index: number, WalletAccount: WalletAccount): void {
+    this.accounts[index] = WalletAccount;
+  }
+
+  removeAccount(accountName: string): void {
+    const index = this.accounts.findIndex(
+      (account) => account.name == accountName
+    );
+
+    if (index > -1) {
+      this.accounts.splice(index, 1);
     }
+  }
 
-    updateAccount(index: number, WalletAccount: WalletAccount): void{
-        this.accounts[index] = WalletAccount;
+  removeOtherAccount(pubKey: string): void {
+    const index = this.others.findIndex(
+      (account) => account.publicKey == pubKey
+    );
+
+    if (index > -1) {
+      this.others.splice(index, 1);
     }
+  }
 
-    removeAccount(accountName: string): void{
-        const index = this.accounts.findIndex((account)=> account.name == accountName);
+  convertAddressToName(
+    address: string,
+    includeOthers: boolean = false
+  ): string {
+    let aliasName: string = "";
 
-        if(index > -1){
-            this.accounts.splice(index, 1);
+    const addressBook = this.contacts.find(
+      (addressBook) => addressBook.address === address
+    );
+
+    if (addressBook) {
+      aliasName = addressBook.name;
+    } else {
+      const walletAccount = this.accounts.find(
+        (walletAccount) => walletAccount.address === address
+      );
+
+      if (walletAccount) {
+        aliasName = walletAccount.name;
+      }
+
+      if (includeOthers) {
+        const othersAccount = this.others.find(
+          (otherAccount) => otherAccount.address === address
+        );
+
+        if (othersAccount) {
+          aliasName = othersAccount.name;
         }
+      }
     }
 
-    removeOtherAccount(pubKey: string): void{
-        const index = this.others.findIndex((account)=> account.publicKey == pubKey);
+    return aliasName ? aliasName : address;
+  }
 
-        if(index > -1){
-            this.others.splice(index, 1);
+  convertAddressToNamePretty(
+    address: string,
+    includeOthers: boolean = false
+  ): string {
+    let aliasName: string = "";
+
+    const addressBook = this.contacts.find(
+      (addressBook) => addressBook.address === address
+    );
+
+    if (addressBook) {
+      aliasName = addressBook.name;
+    } else {
+      const walletAccount = this.accounts.find(
+        (walletAccount) => walletAccount.address === address
+      );
+
+      if (walletAccount) {
+        aliasName = walletAccount.name;
+      }
+
+      if (includeOthers) {
+        const othersAccount = this.others.find(
+          (otherAccount) => otherAccount.address === address
+        );
+
+        if (othersAccount) {
+          aliasName = othersAccount.name;
         }
+      }
     }
 
-    convertAddressToName(address: string, includeOthers: boolean = false): string{
+    return aliasName
+      ? aliasName
+      : Address.createFromRawAddress(address).pretty();
+  }
 
-        let aliasName :string = "";
+  addAddressBook(addressBook: AddressBook): void {
+    this.contacts.push(addressBook);
+  }
 
-        const addressBook = this.contacts.find((addressBook)=> addressBook.address === address);
+  removeAddressBook(index: number): void {
+    this.contacts.splice(index, 1);
+  }
 
-        if(addressBook){
-            aliasName = addressBook.name;
-        }else{
-            const walletAccount = this.accounts.find((walletAccount)=> walletAccount.address === address);
+  addLabel(label: Label): void {
+    this.labels.push(label);
+  }
 
-            if(walletAccount){
-                aliasName = walletAccount.name;
-            }
+  removeLabel(index: number): void {
+    this.labels.splice(index, 1);
+  }
 
-            if(includeOthers){
-                const othersAccount = this.others.find((otherAccount)=> otherAccount.address === address);
+  updateAddressBook(index: number, addressBook: AddressBook): void {
+    this.contacts[index] = addressBook;
+  }
 
-                if(othersAccount){
-                    aliasName = othersAccount.name;
-                }
-            }
-        }
+  selectDefaultAccount(): WalletAccount | null {
+    const defaultAcc = this.accounts.find(
+      (walletAccount) => walletAccount.default === true
+    );
+    if (!defaultAcc) {
+      return null;
+    }
+    return defaultAcc;
+  }
 
-        return aliasName ? aliasName : address;
+  setDefaultAccountByAddress(address: string): void {
+    const accounts: WalletAccount[] = this.accounts.filter(
+      (account) => account.default === true
+    );
+
+    for (let i = 0; i < accounts.length; ++i) {
+      accounts[i].default = false;
     }
 
-    convertAddressToNamePretty(address: string, includeOthers: boolean = false): string{
-        let aliasName :string = "";
+    const account = this.accounts.find(
+      (account) => account.address === address
+    );
+    if (account) {
+      account.default = true;
+    }
+  }
 
-        const addressBook = this.contacts.find((addressBook)=> addressBook.address === address);
+  setDefaultAccountByName(name: string): void {
+    const accounts: WalletAccount[] = this.accounts.filter(
+      (account) => account.default === true
+    );
 
-        if(addressBook){
-            aliasName = addressBook.name;
-        }else{
-            const walletAccount = this.accounts.find((walletAccount)=> walletAccount.address === address);
-
-            if(walletAccount){
-                aliasName = walletAccount.name;
-            }
-
-            if(includeOthers){
-                const othersAccount = this.others.find((otherAccount)=> otherAccount.address === address);
-
-                if(othersAccount){
-                    aliasName = othersAccount.name;
-                }
-            }
-        }
-
-        return aliasName ? aliasName : Address.createFromRawAddress(address).pretty();
+    for (let i = 0; i < accounts.length; ++i) {
+      accounts[i].default = false;
     }
 
-    addAddressBook(addressBook: AddressBook): void{
-        this.contacts.push(addressBook);
+    const account = this.accounts.find((account) => account.name === name);
+
+    if (account) {
+      account.default = true;
     }
+  }
 
-    removeAddressBook(index: number): void{
-        this.contacts.splice(index, 1);
-    }
+  fixNonManagableAccounts() {
+    this.accounts = this.accounts.filter((acc) => acc.encrypted);
+  }
 
-    addLabel(label: Label): void{
-        this.labels.push(label);
-    }
+  convertToSimpleWallet(): SimpleWallet {
+    const simpleAccounts: SimpleAccount[] = this.accounts.map((x) => {
+      return x.convertToSimpleAccount();
+    });
 
-    removeLabel(index: number): void{
-        this.labels.splice(index, 1);
-    }
+    const newSimpleWallet = new SimpleWallet(
+      this.name,
+      this.networkName,
+      simpleAccounts
+    );
+    newSimpleWallet.contacts = this.contacts;
+    newSimpleWallet.labels = this.labels;
 
-    updateAddressBook(index: number, addressBook: AddressBook): void{
-        this.contacts[index] = addressBook;
-    }
-
-    selectDefaultAccount(): WalletAccount{
-        return this.accounts.find((walletAccount)=> walletAccount.default === true);
-    }
-
-    setDefaultAccountByAddress(address: string): void{
-        let accounts: WalletAccount[] = this.accounts.filter((account)=> account.default === true);
-
-        for(let i = 0; i < accounts.length; ++i){
-            accounts[i].default = false;
-        }
-
-        let account: WalletAccount = this.accounts.find((account)=> account.address === address);
-
-        account.default = true;
-    }
-
-    setDefaultAccountByName(name: string): void{
-        let accounts: WalletAccount[] = this.accounts.filter((account)=> account.default === true);
-
-        for(let i = 0; i < accounts.length; ++i){
-            accounts[i].default = false;
-        }
-
-        let account: WalletAccount = this.accounts.find((account)=> account.name === name);
-
-        account.default = true;
-    }
-
-    fixNonManagableAccounts(){
-        this.accounts = this.accounts.filter(acc => acc.encrypted);
-    }
-
-    convertToSimpleWallet(): SimpleWallet{
-        let simpleAccounts: SimpleAccount[] = this.accounts.map(x =>{
-            return x.convertToSimpleAccount();
-        });
-
-        let newSimpleWallet = new SimpleWallet(this.name, this.networkName, simpleAccounts);
-        newSimpleWallet.contacts = this.contacts;
-        newSimpleWallet.labels = this.labels;
-
-        return newSimpleWallet;
-    }
+    return newSimpleWallet;
+  }
 }

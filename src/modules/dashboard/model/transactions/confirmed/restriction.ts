@@ -1,14 +1,12 @@
 import { ConfirmedTransaction } from "./confirmedTransaction";
-import { RestrictionModification } from "../restrictionModification";
+import type { RestrictionModification } from "../restrictionModification";
 
-export class ConfirmedRestrictionTransaction extends ConfirmedTransaction{
+export class ConfirmedRestrictionTransaction extends ConfirmedTransaction {
+  restrictionTypeOutput: string = ""; // Allow / Block
+  restrictionType: number = 0;
+  modification: RestrictionModification[] = [];
 
-    restrictionTypeOutput: string = ""; // Allow / Block
-    restrictionType: number = 0;
-    modification: RestrictionModification[] = [];
-  
-    constructor(txnHash: string){
-      super(txnHash);
-    }
+  constructor(txnHash: string) {
+    super(txnHash);
+  }
 }
-

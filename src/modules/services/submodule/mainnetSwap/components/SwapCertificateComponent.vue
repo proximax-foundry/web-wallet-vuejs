@@ -49,11 +49,9 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 
-export default{
-  name: 'SwapCertificateComponent',
-  props: {
+  defineProps({
     networkTerm: String,
     swapType: String,
     swapToken: String,
@@ -66,8 +64,8 @@ export default{
     xpxExplorer: String,
     siriusName: String,
     swappedAmount: Number
-  }
-}
+  })
+
 </script>
 <style lang="scss" scoped>
 

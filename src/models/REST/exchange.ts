@@ -1,30 +1,43 @@
-import { 
-    ExchangeHttp, NetworkHttp,
-    Address, PublicAccount, MosaicId,
-    ExchangeOfferType, MosaicExchange, AccountExchanges
+import {
+  ExchangeHttp,
+  NetworkHttp,
+  Address,
+  PublicAccount,
+  MosaicId,
+  ExchangeOfferType,
+  MosaicExchange,
+  AccountExchanges,
 } from "tsjs-xpx-chain-sdk";
-import {RequestAuth} from './auth';
+import { RequestAuth } from "./auth";
 
 export class ExchangeAPI {
+  exchangeHttp: ExchangeHttp;
 
-    exchangeHttp: ExchangeHttp;
+  constructor(endpoint: string, networkHttp?: NetworkHttp) {
+    this.exchangeHttp = new ExchangeHttp(endpoint, networkHttp);
+  }
 
-    constructor(endpoint: string, networkHttp?: NetworkHttp){
-        this.exchangeHttp = new ExchangeHttp(endpoint, networkHttp);
-    }
+  getAccountExchanges(
+    accountId: Address | PublicAccount
+  ): Promise<AccountExchanges | undefined> {
+    const authHeader = RequestAuth.getAuthHeader();
+    return this.exchangeHttp
+      .getAccountExchanges(accountId, authHeader)
+      .toPromise();
+  }
 
-    getAccountExchanges(accountId: Address | PublicAccount): Promise<AccountExchanges>{
-        let authHeader = RequestAuth.getAuthHeader();
-        return this.exchangeHttp.getAccountExchanges(accountId, authHeader).toPromise();
-    }
+  getExchangeOffers(
+    offerType: ExchangeOfferType,
+    mosaicId: MosaicId
+  ): Promise<MosaicExchange[]> {
+    const authHeader = RequestAuth.getAuthHeader();
+    return this.exchangeHttp
+      .getExchangeOffers(offerType, mosaicId, authHeader)
+      .toPromise();
+  }
 
-    getExchangeOffers(offerType: ExchangeOfferType, mosaicId: MosaicId): Promise<MosaicExchange[]>{
-        let authHeader = RequestAuth.getAuthHeader();
-        return this.exchangeHttp.getExchangeOffers(offerType, mosaicId, authHeader).toPromise();
-    }
-
-    getExchangeList(): Promise<MosaicId[]>{
-        let authHeader = RequestAuth.getAuthHeader();
-        return this.exchangeHttp.getOfferList(authHeader).toPromise();
-    }
+  getExchangeList(): Promise<MosaicId[]> {
+    const authHeader = RequestAuth.getAuthHeader();
+    return this.exchangeHttp.getOfferList(authHeader).toPromise();
+  }
 }

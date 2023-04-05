@@ -1,75 +1,84 @@
-export class BlockExtendedInfo{
+export class BlockExtendedInfo {
+  block: number;
+  feeMultiplier?: number;
+  receipts?: any[] = [];
+  addressResolutions: Resolution[] = [];
+  assetResolutions: Resolution[] = [];
 
-    block: number;
-    feeMultiplier?: number;
-    receipts?: any[] = [];
-    addressResolutions: Resolution[] = [];
-    assetResolutions: Resolution[] = [];
+  constructor(blockNum: number) {
+    this.block = blockNum;
+  }
 
-    constructor(blockNum: number){
-        this.block = blockNum;
-    }
+  searchNamespaceResolution(namespaceIdHex: string): ResolutionSearch | null {
+    const foundAddress = this.addressResolutions.find(
+      (resolution) =>
+        resolution.unresolved.toUpperCase() === namespaceIdHex.toUpperCase()
+    );
+    let type: ResolutionType;
+    let resolved: string = "";
 
-    searchNamespaceResolution(namespaceIdHex: string): ResolutionSearch | null{
-
-        let foundAddress = this.addressResolutions.find((resolution)=> resolution.unresolved.toUpperCase() === namespaceIdHex.toUpperCase());
-        let type: ResolutionType;
-        let resolved: string = "";
-
-        if(foundAddress){
-            type = ResolutionType.ADDRESS;
-            resolved = foundAddress.resolved
-        }
-        else{
-            let foundAsset = this.assetResolutions.find((resolution)=> resolution.unresolved.toUpperCase() === namespaceIdHex.toUpperCase());
-            
-            if(foundAsset){
-                type = ResolutionType.ASSET;
-                resolved = foundAsset.resolved
-            }
-        }
-
-        if(resolved){
-            return <ResolutionSearch>{
-                type: type,
-                value: resolved
-            }
-        }
-
-        return null;
-    }
-
-    serialize(){
-        return {
-            block: this.block,
-            feeMultiplier: this.feeMultiplier ? this.feeMultiplier : null,
-            receipt: [],
-            addressResolution: this.addressResolutions.map((resolution)=> resolution.serialize()),
-            assetResolutions: this.assetResolutions.map((resolution)=> resolution.serialize()),
+    if (foundAddress) {
+      type = ResolutionType.ADDRESS;
+      resolved = foundAddress.resolved;
+      if (resolved) {
+        return <ResolutionSearch>{
+          type: type,
+          value: resolved,
         };
-    }
-}
+      }
+    } else {
+      const foundAsset = this.assetResolutions.find(
+        (resolution) =>
+          resolution.unresolved.toUpperCase() === namespaceIdHex.toUpperCase()
+      );
 
-export class Resolution{
-
-    constructor(public unresolved: string, public resolved: string){
-
-    }
-
-    serialize(){
-        return {
-            unresolved: this.unresolved,
-            resolved: this.resolved
+      if (foundAsset) {
+        type = ResolutionType.ASSET;
+        resolved = foundAsset.resolved;
+        if (resolved) {
+          return <ResolutionSearch>{
+            type: type,
+            value: resolved,
+          };
         }
+      }
     }
+
+    return null;
+  }
+
+  serialize() {
+    return {
+      block: this.block,
+      feeMultiplier: this.feeMultiplier ? this.feeMultiplier : null,
+      receipt: [],
+      addressResolution: this.addressResolutions.map((resolution) =>
+        resolution.serialize()
+      ),
+      assetResolutions: this.assetResolutions.map((resolution) =>
+        resolution.serialize()
+      ),
+    };
+  }
 }
 
-interface ResolutionSearch{
-    type: ResolutionType;
-    value: string;
+export class Resolution {
+  constructor(public unresolved: string, public resolved: string) {}
+
+  serialize() {
+    return {
+      unresolved: this.unresolved,
+      resolved: this.resolved,
+    };
+  }
 }
 
-enum ResolutionType{
-    ADDRESS = 1,
-    ASSET = 2
+interface ResolutionSearch {
+  type: ResolutionType;
+  value: string;
+}
+
+enum ResolutionType {
+  ADDRESS = 1,
+  ASSET = 2,
 }
