@@ -81,7 +81,6 @@
         <div v-if="fileError" class="error error_box" role="alert">
           Invalid file
         </div>
-
         <div v-if="assetNotEnough" class="error error_box" role="alert">
           Total distribution amount exceed selected asset amount (need {{ totalDistributeAmount }})
         </div>
@@ -154,7 +153,6 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import {
@@ -192,7 +190,6 @@ const err = ref('');
 // let data = reactive<DataInterface>({
 //   assetList: []
 // });
-
 let assetList = ref<SimpleSDA[]>([]);
 let assetSelected = ref("");
 let aggregateNum = ref(10);
@@ -200,7 +197,6 @@ let distributionList = ref<DistributeListInterface[]>([]);
 let totalRecipients = ref(0);
 let totalDistributeAmount = ref(0);
 let txnsHash = ref<string[]>([]);
-
 // all status flags
 let noAssetFound = ref(false);
 let fileError = ref(false);
@@ -216,9 +212,7 @@ let scanDistributorAsset = async () => {
   noAssetFound.value = false;
   assetSelected.value = "";
   let assets = await Sirius.scanAsset(selectedAccount.value ? selectedAccount.value.publicKey : "");
-
   assetList.value = assets;
-
   if (assets.length === 0) {
     noAssetFound.value = true;
   }
@@ -252,12 +246,9 @@ let distribute = async () => {
       return
     }
   }
-
   let totalLockHashTxn = Math.ceil(totalRecipients.value / aggregateNum.value);
-
   let totalLockHashFee = totalLockHashTxn * Sirius.getLockFundTransactionFee();
   let totalLockHashToken = totalLockHashTxn * networkState.currentNetworkProfileConfig!.lockedFundsPerAggregate!;
-
   let selectedSda = assetList.value.find(x => x.id === assetSelected.value);
   let aggregateTxns = Sirius.createDistributeAggregateTransactions(selectedAccount.value ? selectedAccount.value.publicKey : '', distributionList.value, aggregateNum.value, selectedSda!);
   let totalAggregateTxnsFee = sum(aggregateTxns.map(x => x.maxFee.compact()));
@@ -283,9 +274,7 @@ let distribute = async () => {
     let privateKey = walletPrivateKey.toUpperCase();
     let initiator = Sirius.createAccount(privateKey);
     let initiatorSda = await Sirius.scanAsset(initiator.publicKey);
-
     let initiatorXPX = initiatorSda.find(x => x.namespaceName === AppState.nativeToken.fullNamespace.trim());
-
     if (initiatorXPX) {
       if (xpxNeeded > initiatorXPX.amount) {
         distributionError.value = `Initiator do not have enough XPX (${initiatorXPX.amount}), need ${xpxNeeded}`;
@@ -296,13 +285,10 @@ let distribute = async () => {
       distributionError.value = "Initiator do not have any XPX";
       return;
     }
-
     distributing.value = true;
     let allTxnsHash = await Sirius.signAllAbtAndAnnounce(aggregateTxns, initiator);
     distributing.value = false;
-
     distributeDone.value = true;
-
     txnsHash.value = allTxnsHash;
   }
 }
@@ -313,12 +299,9 @@ let loadCSV = (e: any) => {
   const reader = new FileReader();
   reader.onload = async (e: any) => {
     const fileData = e.target.result;
-
     try {
       let distResultCsvData: any[] = [];
-
       let totalLine = fileData.split(/\r?\n/);
-
       for (let i = 1; i < totalLine.length; i++) {
         let lineData = totalLine[i].trim();
         if (lineData === "") {
@@ -339,18 +322,14 @@ let loadCSV = (e: any) => {
       //       }
       //   });
       // });
-
       let isInvalidData = false;
       distributionList.value = [];
       let tempData: DistributeListInterface[] = [];
-
       if (distResultCsvData && distResultCsvData.length) {
-
         for (let i = 0; i < distResultCsvData.length; ++i) {
           let publicKeyOrAddress = distResultCsvData[i].publicKeyOrAddress.trim().replaceAll("-", "");
           let originAmount = distResultCsvData[i].amount.trim();
           let amount = parseFloat(distResultCsvData[i].amount.trim());
-
           if (publicKeyOrAddress.length === 64) {
             if (!Convert.isHexString(publicKeyOrAddress)) {
               isInvalidData = true;
@@ -371,9 +350,7 @@ let loadCSV = (e: any) => {
             console.log("Invalid recipient found");
             break;
           }
-
           let newAmountLength = amount.toString().length;
-
           if (isNaN(amount)) {
             isInvalidData = true;
             console.log("Invalid amount found");
@@ -381,23 +358,19 @@ let loadCSV = (e: any) => {
           }
           else if (newAmountLength !== originAmount.length) {
             let strippedDecimal = originAmount.length - newAmountLength;
-
             if (amount.toString() + "0".repeat(strippedDecimal) !== originAmount) {
               isInvalidData = true;
               console.log("Invalid amount found");
               break;
             }
           }
-
           let newData: DistributeListInterface = {
             publicKeyOrAddress: publicKeyOrAddress,
             amount: amount
           };
-
           tempData.push(newData);
         }
       }
-
       if (!isInvalidData) {
         totalRecipients.value = distResultCsvData.length;
         totalDistributeAmount.value = sum(tempData.map((x) => x.amount));
@@ -409,24 +382,19 @@ let loadCSV = (e: any) => {
         totalRecipients.value = 0;
         totalDistributeAmount.value = 0;
       }
-
     } catch (error) {
       fileError.value = true;
     }
-
   }
   reader.readAsText(file);
 }
-
 let createTxnExplorerLink = (txnHash: string) => {
   let explorerRoute = networkState.currentNetworkProfile!.chainExplorer;
   return explorerRoute.url + "/" + explorerRoute.hashRoute + "/" + txnHash
 }
-
 let checkDistributorAssetAmount = (selectedAssetId: string) => {
   if (selectedAssetId) {
     let data = assetList.value.find(x => x.id === selectedAssetId);
-
     if (totalDistributeAmount.value > data!.amount) {
       assetNotEnough.value = true;
     }
@@ -438,18 +406,15 @@ let checkDistributorAssetAmount = (selectedAssetId: string) => {
     assetNotEnough.value = false;
   }
 }
-
 let checkDistributorAssetAmountDecimal = (selectedAssetId: string) => {
   if (selectedAssetId) {
     let data = assetList.value.find(x => x.id === selectedAssetId);
-
     let invalidDivisibility = distributionList.value.find(x => {
       let bigNumberAmount = mathjs.bignumber(x.amount);
       let atomicAmount = mathjs.multiply(bigNumberAmount, Math.pow(10, data!.divisibility));
       let atomic = Number(atomicAmount.toString());
       return Math.trunc(atomic) !== atomic
     });
-
     if (invalidDivisibility) {
       assetWrongDivisibility.value = "Invalid distribution amount, maximum decimal place is " + data!.divisibility;
     }
@@ -461,7 +426,6 @@ let checkDistributorAssetAmountDecimal = (selectedAssetId: string) => {
     assetWrongDivisibility.value = "";
   }
 }
-
 const selectedAccount = ref<Account>()
 const accounts = computed(
   () => {
@@ -479,7 +443,6 @@ const accounts = computed(
     }
   }
 );
-
 const isMultiSigBool = computed(() => {
   return isMultiSig(selectedAccount.value ? selectedAccount.value.address : "")
 }
@@ -500,7 +463,6 @@ const getWalletCosigner = computed(() => {
     }
   })
   return list
-
 });
 
 const lockFund = computed(() =>
@@ -525,7 +487,6 @@ const lockFundTxFee = computed(() => {
 const lockFundTotalFee = computed(
   () => lockFund.value + lockFundTxFee.value
 );
-
 if (isMultiSigBool.value) {
   let cosigner = getWalletCosigner.value.cosignerList
   if (cosigner.length > 0) {
@@ -547,26 +508,24 @@ watch(assetSelected, (value) => {
   checkDistributorAssetAmount(value);
   checkDistributorAssetAmountDecimal(value);
 });
-
 watch(totalDistributeAmount, (value) => {
   checkDistributorAssetAmount(assetSelected.value);
   checkDistributorAssetAmountDecimal(assetSelected.value);
 });
-
 </script>
 
 <style scoped>
 a {
   color: #42b983;
 }
-
 label {
   font-weight: bold;
 }
-
 code {
   background-color: #eee;
   padding: 2px 4px;
   border-radius: 4px;
   color: #304455;
-}</style>
+}
+</style>
+

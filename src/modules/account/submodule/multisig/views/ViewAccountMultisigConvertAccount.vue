@@ -507,7 +507,7 @@ const totalFeeFormatted = computed(() => {
 });
 
 </script>
-<style scoped>
+<style scoped lang="scss">
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -519,4 +519,26 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+
+.p-tree::v-deep{
+  .p-tree-container .p-treenode .p-treenode-content{
+    padding-left:2px;
+    padding-top:2px
+  }
+  .p-link{
+  padding: 0;
+  margin: 0;
+  }
+  .p-inputtext{
+      font-size: 1rem;
+      text-align: left;
+      padding: 0.5rem;
+      border: 1px solid #ced4da;
+    }
+}
+  ::v-deep(.p-inputtext) {
+      font-size: 1rem;
+      text-align: left;
+      padding: 0.5rem;
+    }
 </style>
