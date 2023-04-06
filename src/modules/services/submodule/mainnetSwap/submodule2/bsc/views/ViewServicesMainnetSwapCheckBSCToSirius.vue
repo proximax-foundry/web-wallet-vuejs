@@ -364,7 +364,7 @@ export default {
 
     const swapUrl = computed(()=>{ 
 
-      if(siriusTokens.includes(fromTokenName.value.toLowerCase())){
+      if(siriusTokens.includes(fromTokenName.value.toUpperCase())){
         return SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL, fromTokenName.value.toLowerCase());
       }
       else{
@@ -493,7 +493,7 @@ export default {
     const swapToken = ref('');
 
     const saveCertificate = () => {
-      SwapUtils.generateIncomingPdfCert('BSC', swapTimestamp.value, siriusAddressSelected.value, swapId.value, transactionHash.value, swapQr.value);
+      SwapUtils.generateIncomingPdfCert('BSC', swapTimestamp.value, siriusAddressSelected.value, swapToken.value, transactionHash.value, swapQr.value);
     };
 
     const toast = useToast();
@@ -786,21 +786,38 @@ export default {
           },
           body: stringifyData, // body data type must match "Content-Type" header
         });
+
         if(response.status == 200 || response.status == 201){
           const data = await response.json();
           isInvalidSwapService.value = false;
           siriusTxnHash.value = typeof data.siriusSwapInfo.status !== "string" ? data.siriusSwapInfo.status.hash: "";
-          swapStatus.value = typeof data.siriusSwapInfo.status === "string" ? data.siriusSwapInfo.status: data.siriusSwapInfo.status.status;
+          // swapStatus.value = typeof data.siriusSwapInfo.status === "string" ? data.siriusSwapInfo.status: data.siriusSwapInfo.status.status;
           amount.value = Helper.convertToCurrency(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility);
           amountReceived.value = Helper.amountFormatterSimple(data.siriusSwapInfo.receiveAmount, AppState.nativeToken.divisibility);
           siriusAddress.value = data.siriusSwapInfo.recipient;
           transactionHash.value = data.transactionId;
           swapTimestamp.value = data.timestamp;
-          swapToken.value = data.fromToken.toUpperCase();
+          swapToken.value = fromTokenName.value.toUpperCase();
           swapQr.value = SwapUtils.generateQRCode(remoteTxnLink.value);
           setTimeout( ()=> isDisabledValidate.value = false, 1000);
           swapServerErrIndex.value = 0;
-        }else if(response.status == 208){
+        }
+        else if(response.status == 202){
+          const data = await response.json();
+          isInvalidSwapService.value = false;
+          siriusTxnHash.value = typeof data.siriusSwapInfo.status !== "string" ? data.siriusSwapInfo.status.hash: "";
+          // swapStatus.value = typeof data.siriusSwapInfo.status === "string" ? data.siriusSwapInfo.status: data.siriusSwapInfo.status.status;
+          amount.value = Helper.convertToCurrency(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility);
+          amountReceived.value = Helper.amountFormatterSimple(data.siriusSwapInfo.receiveAmount, AppState.nativeToken.divisibility);
+          siriusAddress.value = data.siriusSwapInfo.recipient;
+          transactionHash.value = data.transactionId;
+          swapTimestamp.value = data.timestamp;
+          swapToken.value = fromTokenName.value.toUpperCase();
+          swapQr.value = SwapUtils.generateQRCode(remoteTxnLink.value);
+          setTimeout( ()=> isDisabledValidate.value = false, 1000);
+          swapServerErrIndex.value = 0;
+        }
+        else if(response.status == 208){
           // console.log('208');
           swapStatus208.value = true;
           setTimeout( ()=> isDisabledValidate.value = false, 1000);
@@ -811,6 +828,7 @@ export default {
           disableRetrySwap.value = false;
         }
       } catch (error) {
+        console.log(error);
         isInvalidSwapService.value = true;
         ++swapServerErrIndex.value;
         retrySwapButtonText.value = t('swap.retry');
@@ -891,6 +909,7 @@ export default {
       Helper,
       amount,
       amountReceived,
+      swapToken
     };
   },
 }
