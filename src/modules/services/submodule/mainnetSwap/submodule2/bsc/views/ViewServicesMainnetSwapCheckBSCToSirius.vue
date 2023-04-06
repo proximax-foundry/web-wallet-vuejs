@@ -77,7 +77,7 @@
               </div>
             </div>
           </div>
-          <TextInputClean :placeholder="'BSC '+ $t('swap.transactionHash')" :errorMessage="$t('swap.enterValidHash')" :showError="showTxnHashError" v-model="remoteTxnHash" class="w-full" />
+          <TextInputClean :placeholder="'BSC '+ $t('swap.transactionHash')" :errorMessage="$t('swap.enterValidHash')" v-bind:showError="showTxnHashError" v-model="remoteTxnHash" class="w-full" />
           <div class="mt-10 text-center">
             <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-5 focus:outline-none disabled:opacity-50">{{$t('general.cancel')}}</button>
             <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledCheck" @click="checkStatus">{{$t('swap.checkStatus')}}</button>
@@ -240,7 +240,7 @@
           <div>
             <h1 class="default-title font-bold mt-5 mb-2">{{$t('general.congratz')}}</h1>
             <div class="text-tsm mb-7">{{$t('swap.swapStarted')}}</div>
-            <swap-certificate-component :networkTerm="$t('swap.bsc')" swapType="In" :swapId="swapId" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusName="siriusAddressSelectedName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(siriusAddressSelected).pretty()" :swapQr="swapQr" :swapLink="remoteTxnLink" />
+            <swap-certificate-component :networkTerm="$t('swap.bsc')" swapType="In" :swapToken="swapToken" :swapTimestamp="swapTimestamp" :transactionHash="transactionHash" :siriusName="siriusAddressSelectedName" :swappedAmount="amount" :siriusAddress="Helper.createAddress(siriusAddressSelected).pretty()" :swapQr="swapQr" :swapLink="remoteTxnLink" />
             <button type="button" class="w-40 hover:shadow-lg bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-4 py-3 border border-blue-primary outline-none mr-4 mt-6" @click="saveCertificate">{{$t('general.downloadCertificate')}}</button>
             <div class="mt-3">
               <a :href="remoteTxnLink" target=_new class="underline self-center text-xs font-bold text-blue-primary">{{$t('swap.viewTxInExplorer')}}<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a>
@@ -311,15 +311,15 @@ export default {
     swapData.init();
 
     // const defaultXPXTxFee = ref(0);
-    const custodian = ref('');
-    const tokenAddress = ref('');
+    const sinkAddress = ref('');
+    const bscTokensInfo = ref([]);
 
     (async() => {
       try {
-        const fetchService = await SwapUtils.fetchTokenServiceInfo(swapData.swap_IN_SERVICE_URL,'xpx');
+        const fetchService = await SwapUtils.fetchAllSwapServiceInfo(swapData.swap_IN_SERVICE_URL);
         if(fetchService.status==200){
-          tokenAddress.value = fetchService.data.bscInfo.scAddress;
-          custodian.value = fetchService.data.bscInfo.sinkAddress;
+          bscTokensInfo.value = fetchService.data.bscScAddressInfo;
+          sinkAddress.value = fetchService.data.bscInfo.sinkAddress;
           // defaultXPXTxFee.value = parseInt(fetchService.data.siriusInfo.feeAmount);
           serviceErr.value = '';
         }else{
@@ -335,8 +335,8 @@ export default {
     const showTxnHashError = computed(()=> !remoteTxnHash.value.match(txnHashPattern) && remoteTxnHash.value.length > 0);
 
     /* MetaMask integration */
-    let ethereumChainId = swapData.BSCChainId;
-    let ethereumNetworkName = swapData.BSCNetworkName;
+    let bscChainId = swapData.BSCChainId;
+    let bscNetworkName = swapData.BSCNetworkName;
     const isInstallMetamask = ref(false);
     const isMetamaskConnected = ref(false);
     const currentAccount = ref(null);
@@ -352,12 +352,25 @@ export default {
     const transactionNotFound = ref(false);
     const transactionFailed = ref(false);
     const transactionPending = ref(false);
-    const tokenName = ref('xpx');
+    const fromTokenName = ref('xpx');
+    const toTokenName = ref('xpx');
     // const transactionSuccess = ref(false);
 
     const bscScanUrl = swapData.BSCScanUrl;
-    const checkSwapStatusUrl = SwapUtils.getIncoming_BSCCheckStatus_URL(swapData.swap_IN_SERVICE_URL, tokenName.value);
-    const swapServerUrl = SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL);
+    const checkSwapStatusUrl = computed(()=>{
+      return SwapUtils.getIncoming_BSCCheckStatus_URL(swapData.swap_IN_SERVICE_URL, "bsc", remoteTxnHash.value);
+    });
+    const siriusTokens = ["XPX", "METX"];
+
+    const swapUrl = computed(()=>{ 
+
+      if(siriusTokens.includes(fromTokenName.value.toLowerCase())){
+        return SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL, fromTokenName.value.toLowerCase());
+      }
+      else{
+        return SwapUtils.getIncoming_SwapTransfer_URL(swapData.swap_IN_SERVICE_URL);
+      }
+    });
 
 
     let provider;
@@ -427,10 +440,10 @@ export default {
 
     function verifyChain(chainId){
       currentNetwork.value = chainId;
-      if(ethereumChainId === parseInt(chainId)){
+      if(bscChainId === parseInt(chainId)){
         err.value = '';
       }else{
-        err.value = t('swap.selectNetworkToSwap',{name: ethereumNetworkName});
+        err.value = t('swap.selectNetworkToSwap',{network: bscNetworkName});
       }
     }
     const recheckMetamask = () =>{
@@ -477,6 +490,7 @@ export default {
     const swapId = ref('');
     const transactionHash = ref('');
     const swapQr = ref('');
+    const swapToken = ref('');
 
     const saveCertificate = () => {
       SwapUtils.generateIncomingPdfCert('BSC', swapTimestamp.value, siriusAddressSelected.value, swapId.value, transactionHash.value, swapQr.value);
@@ -514,7 +528,7 @@ export default {
             setTimeout( () => {
               step3.value = true;
               setTimeout( async() => {
-                await checkSiriusTxn();
+                await checkSwapTxn();
                 setTimeout(() => step4.value = true, 1000);
               }, 3000);
             }, 1000);
@@ -531,9 +545,42 @@ export default {
     const verifyTransaction = async () => {
       try{
         let transactionReceipt = await provider.getTransactionReceipt(remoteTxnHash.value);
+        let tokenContractAddress = "";
+
+        if(transactionReceipt){
+
+          let bscCoin = bscTokensInfo.value.find(x => x.contractAddress.toLowerCase() == transactionReceipt.to.toLowerCase()); 
+
+          if(bscCoin){
+            fromTokenName.value = bscCoin.name;
+            tokenContractAddress = bscCoin.contractAddress;
+
+            // comment out if wanted to support other token beside XPX and METX
+            if(!siriusTokens.includes(fromTokenName.value)){
+              return false;
+            }
+
+          }
+          else{
+            return false;
+          }
+        }
+        else{
+          return false;
+        }
+
         let transactionStatus = await provider.getTransaction(remoteTxnHash.value);
-        if(transactionReceipt && transactionReceipt.status === 1 && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaciton is confirmed but status is 1
-          if(transactionStatus.confirmations < 12){
+        
+        if(transactionReceipt && transactionReceipt.status === 1){ // when transaciton is confirmed but status is 1
+
+            if(transactionStatus.to.toLowerCase() !== tokenContractAddress.toLowerCase() 
+              || transactionReceipt.logs.length !== 1 || 
+              transactionReceipt.logs[0].topics[0] !== "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+              || transactionReceipt.logs[0].topics[2] !== "0x" + "0".repeat(66 - sinkAddress.value.length) + sinkAddress.value.substring(2).toLowerCase()){
+                return false;
+            }
+          
+            if(transactionStatus.confirmations < 12){
             return new Promise(function (resolve) {
               verifyingTxn = setInterval(async () => {
                 let transactionStatusLoop = await provider.getTransaction(remoteTxnHash.value);
@@ -558,7 +605,7 @@ export default {
           transactionNotFound.value = true;
           return false;
         }else{
-          if(transactionStatus && transactionStatus.to.toLowerCase() == tokenAddress.value.toLowerCase()){ // when transaction is not confirmed
+          if(transactionStatus && transactionStatus.to.toLowerCase() == sinkAddress.value.toLowerCase()){ // when transaction is not confirmed
             // perform confirmation loop here
             return new Promise(function (resolve) {
               verifyingTxn = setInterval(async()=>{
@@ -580,6 +627,7 @@ export default {
           }
         }
       }catch(err){
+        console.log(err);
         transactionNotFound.value = true;
         return false;
       }
@@ -603,28 +651,21 @@ export default {
     let xpxExplorerUrl = networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.hashRoute + '/';
     const siriusTxnLink = computed(() => xpxExplorerUrl + siriusTxnHash.value);
 
-    const checkSiriusTxn = async () => {
-      const data = {
-        network: 'bsc',
-        txnHash: remoteTxnHash.value,
-      };
+    const checkSwapTxn = async () => {
       try {
-        let stringifyData = JSON.stringify(data);
-        const response = await fetch(checkSwapStatusUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: stringifyData,
+        const response = await fetch(checkSwapStatusUrl.value, {
+          method: 'GET'
         });
 
         if(response.status == 200){
           const data = await response.json();
-          siriusTxnHash.value = data.siriusSwapInfo.status.hash;
-          siriusAddress.value = data.siriusSwapInfo.recipient;
+          siriusTxnHash.value = data.siriusTxnHash ? data.siriusTxnHash : "";
+          siriusAddress.value = data.siriusAddress;
           transactionHash.value = data.remoteTxnHash;
-          swapTimestamp.value = data.timestamp;
-          swapId.value = data.ctxId;
+          fromTokenName.value = data.fromToken;
+          toTokenName.value = data.toToken;
+          swapTimestamp.value = Helper.IsoTimeRemoveFormat(new Date(data.timeStamp).toISOString());
+          swapToken.value = Helper.toUppercase(fromTokenName.value);
           swapQr.value = SwapUtils.generateQRCode(remoteTxnLink.value);
           isInvalidSwapCheck.value = false;
           setTimeout( ()=> isDisabledValidate.value = false, 1000);
@@ -710,10 +751,11 @@ export default {
         isInvalidSignedMeta.value = false;
         provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
         signer = provider.getSigner();
-        const messageSignature = await signer.signMessage(siriusAddressSelected.value);
+        let addressPretty = Helper.createAddress(siriusAddressSelected.value).pretty();
+        const messageSignature = await signer.signMessage(addressPretty);
         messageHash.value = messageSignature;
         const data = {
-          recipient: siriusAddressSelected.value,
+          recipient: addressPretty,
           signature: messageSignature,
           txnInfo: {
             network: "BSC",
@@ -737,7 +779,7 @@ export default {
       disableRetrySwap.value = true;
       let stringifyData = JSON.stringify(swapServiceParam.value);
       try {
-        const response = await fetch(swapServerUrl, {
+        const response = await fetch(swapUrl.value, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -747,13 +789,14 @@ export default {
         if(response.status == 200 || response.status == 201){
           const data = await response.json();
           isInvalidSwapService.value = false;
-          siriusTxnHash.value = data.siriusSwapInfo.status.hash;
+          siriusTxnHash.value = typeof data.siriusSwapInfo.status !== "string" ? data.siriusSwapInfo.status.hash: "";
+          swapStatus.value = typeof data.siriusSwapInfo.status === "string" ? data.siriusSwapInfo.status: data.siriusSwapInfo.status.status;
           amount.value = Helper.convertToCurrency(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility);
-          amountReceived.value = Helper.amountFormatterSimple(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility) - 50;
+          amountReceived.value = Helper.amountFormatterSimple(data.siriusSwapInfo.receiveAmount, AppState.nativeToken.divisibility);
           siriusAddress.value = data.siriusSwapInfo.recipient;
-          transactionHash.value = data.remoteTxnHash;
+          transactionHash.value = data.transactionId;
           swapTimestamp.value = data.timestamp;
-          swapId.value = data.ctxId;
+          swapToken.value = data.fromToken.toUpperCase();
           swapQr.value = SwapUtils.generateQRCode(remoteTxnLink.value);
           setTimeout( ()=> isDisabledValidate.value = false, 1000);
           swapServerErrIndex.value = 0;
