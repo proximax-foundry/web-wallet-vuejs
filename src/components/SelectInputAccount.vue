@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-full">
       <Dropdown
         v-model= selectedAccountInfo
         :style="{'width':'100%'}"
@@ -7,7 +7,8 @@
         :filter="true"
         optionLabel="label"
         emptyFilterMessage=" "
-        @change="selectAccount($event.value.label, $event.value.value);$emit('update:modelValue', $event.value.value);$emit('select-account', $event.value.value);"
+        @change="selectAccount($event.value.label, $event.value.value);$emit('update:modelValue', $event.value.value);$emit('select-account', $event.value.value);placeholder = false"
+        class="h-16 mt-0"
       >
         <!-- For the display of the main transfer account information -->
         <template #value="slotProps">
@@ -15,8 +16,9 @@
               <div class='flex'>
                 <div v-html="selectedImg"/>
                 <div class='flex flex-col ml-2 text-left'>
-                  <div class='text-blue-primary font-semibold text-xxs uppercase'  style="line-height: 9px;">{{$t('transfer.transferFrom')}}</div>
-                  <div class='mt-1 text-tsm font-bold'>{{slotProps.value.label}}</div>
+                  <div class='text-blue-primary font-semibold text-xxs uppercase'  style="line-height: 9px;">{{$t('transfer.transferFrom')}}/{{ $t('general.initiateBy') }}</div>
+                  <div v-if="placeholder" class="mt-2 text-base">{{ $t("general.selectAccount") }}</div>
+                  <div class='mt-2 text-base font-bold'>{{slotProps.value.label}}</div>
                 </div>
               </div>
           </div>
@@ -26,7 +28,7 @@
           <div class="account-item">
             <div class='flex'>
               <div v-html="toSvg(slotProps.option.value, 20, jdenticonConfig)" />
-                <div class='text-xs ml-2 font-semibold'>{{ slotProps.option.label }}</div>
+                <div class='text-base ml-2 font-semibold'>{{ slotProps.option.label }}</div>
             </div>
           </div>
         </template>
@@ -58,24 +60,26 @@ setup(p){
     const accounts = computed(() =>{
       if(walletState.currentLoggedInWallet){
         var accountList = [];
-        const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
-        concatOther.forEach(account => {
+        const accounts = walletState.currentLoggedInWallet.accounts
+        accounts.forEach(account => {
           accountList.push({
             value: account.address,
-            label: walletState.currentLoggedInWallet.convertAddressToName(account.address,true)
+            label: walletState.currentLoggedInWallet.convertAddressToName(account.address,true),
+            isMultiSig: account.getDirectParentMultisig().length ? true : false,
           });
         });
         
-        return accountList;
+        return accountList.filter(acc => acc.isMultiSig == false);
       }else{
         return []
       }
       
     });
-    const selectedAccount = ref(accounts.value.length?accounts.value.find(acc => acc.value == p.selectDefault).label:'');
-    const selectedAddress = ref(p.selectDefault);
+    const placeholder = ref(true)
+    const selectedAccount = ref("")
+    const selectedAddress = ref("");
     const selectedAccountInfo = {label : selectedAccount.value, value: selectedAddress.value}
-    const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig));
+    const selectedImg = ref(toSvg(selectedAddress, 25, jdenticonConfig));
     const selectAccount = (accountName, accountAddress) => {
       emitter.emit("select-account",accountAddress)
       selectedAccount.value,selectedAccountInfo.label = accountName;
@@ -105,7 +109,8 @@ setup(p){
       jdenticonConfig,
       toSvg,
       filterQuery,
-      filteredAccounts
+      filteredAccounts,
+      placeholder
     };
 }
 })
