@@ -336,7 +336,7 @@ export default {
       }
       return contact
     });
-
+    console.log(walletState.currentLoggedInWallet.contacts)
     const selectableMultisig = computed(() => {
       const wallet = walletState.currentLoggedInWallet;
       if(!wallet){
@@ -350,7 +350,7 @@ export default {
         (info, index) => {
           return {
             key: index.toString(),
-            label: "MULTISIG-" + WalletUtils.createAddressFromPublicKey(info.publicKey,AppState.networkType).plain().slice(-4),
+            label: wallet.contacts.find((contacts) => contacts.address == WalletUtils.createAddressFromPublicKey(info.publicKey,AppState.networkType).plain())?wallet.contacts.find((contacts) => contacts.address == WalletUtils.createAddressFromPublicKey(info.publicKey,AppState.networkType).plain()).name:wallet.accounts.find((acc) => acc.publicKey == info.publicKey)?wallet.accounts.find((acc) => acc.publicKey == info.publicKey).name:"MULTISIG-" + WalletUtils.createAddressFromPublicKey(info.publicKey,AppState.networkType).plain().slice(-4),
             data: info.publicKey,
             selectable: true
           }
