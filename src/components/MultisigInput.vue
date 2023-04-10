@@ -13,13 +13,17 @@
                 {{ selectDefaultName }}
               </div>
             </div>
+            <div class="ml-auto mt-auto mb-auto mr-6">
+              <font-awesome-icon icon="times" class="delete-icon-style" @click="closeMultisig()">
+              </font-awesome-icon>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { toSvg } from "jdenticon";
-import { ref, computed } from "vue";
+import { ref, computed, getCurrentInstance } from "vue";
 import { ThemeStyleConfig } from "@/models/stores/themeStyleConfig";
 const p = defineProps({
   selectDefaultAddress: {
@@ -31,10 +35,16 @@ const p = defineProps({
     required: true,
   }
 });
+const internalInstance = getCurrentInstance();
+const emitter = internalInstance.appContext.config.globalProperties.emitter;
 let themeConfig = new ThemeStyleConfig("ThemeStyleConfig");
 themeConfig.init();
 let jdenticonConfig = ref(themeConfig.jdenticonConfig);
 const selectedImg = computed(() => {
     return toSvg(p.selectDefaultAddress, 25, jdenticonConfig.value)
 });
+
+const closeMultisig = () => {
+  emitter.emit("CLOSE_MULTISIG")
+}
 </script>

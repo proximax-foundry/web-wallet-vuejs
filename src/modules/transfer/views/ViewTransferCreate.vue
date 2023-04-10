@@ -336,7 +336,7 @@ export default {
       }
       return contact
     });
-    console.log(walletState.currentLoggedInWallet.contacts)
+
     const selectableMultisig = computed(() => {
       const wallet = walletState.currentLoggedInWallet;
       if(!wallet){
@@ -818,7 +818,11 @@ export default {
       }
     }, {deep:true});
     
-
+  // Cancel transfer from multisig
+  emitter.on("CLOSE_MULTISIG", () =>{
+    selectedMultisigAdd.value = ""
+    selectedMultisigName.value = ""
+  })
   emitter.on("CLOSE_CONTACT_MODAL", (payload) => {
     togglaAddContact.value = payload;
     router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
