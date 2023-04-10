@@ -350,6 +350,15 @@ import type { Account } from "@/models/account";
     const checkSwapStatusUrl = SwapUtils.getIncoming_BSCCheckStatus_URL(swapData.swap_IN_SERVICE_URL);
     const swapServerUrl = SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL, tokenName.value);
 
+    const swapUrl = computed(()=>{ 
+
+      if(siriusTokens.includes(fromTokenName.value.toUpperCase())){
+        return SwapUtils.getIncoming_BSCSwapTransfer_URL(swapData.swap_IN_SERVICE_URL, fromTokenName.value.toLowerCase());
+      }
+      else{
+        return SwapUtils.getIncoming_SwapTransfer_URL(swapData.swap_IN_SERVICE_URL);
+      }
+    });
 
     let provider: ethers.providers.Web3Provider;
     let signer;
@@ -471,7 +480,7 @@ import type { Account } from "@/models/account";
     const swapQr = ref('');
 
     const saveCertificate = () => {
-      SwapUtils.generateIncomingPdfCert('BSC', swapTimestamp.value, siriusAddressSelected.value, swapId.value, transactionHash.value, swapQr.value);
+      SwapUtils.generateIncomingPdfCert('BSC', swapTimestamp.value, siriusAddressSelected.value, swapToken.value, transactionHash.value, swapQr.value);
     };
 
     const toast = useToast();
@@ -744,22 +753,38 @@ import type { Account } from "@/models/account";
           },
           body: stringifyData, // body data type must match "Content-Type" header
         });
+
         if(response.status == 200 || response.status == 201){
           const data = await response.json();
           isInvalidSwapService.value = false;
-          siriusTxnHash.value = data.siriusSwapInfo.status.hash;
-          amount.value = Number(Helper.convertToCurrency(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility));
-          amountReceived.value = Number(Helper.amountFormatterSimple(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility)) - 50;
+          siriusTxnHash.value = typeof data.siriusSwapInfo.status !== "string" ? data.siriusSwapInfo.status.hash: "";
+          // swapStatus.value = typeof data.siriusSwapInfo.status === "string" ? data.siriusSwapInfo.status: data.siriusSwapInfo.status.status;
+          amount.value = Helper.convertToCurrency(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility);
+          amountReceived.value = Helper.amountFormatterSimple(data.siriusSwapInfo.receiveAmount, AppState.nativeToken.divisibility);
+          siriusAddress.value = data.siriusSwapInfo.recipient;
+          transactionHash.value = data.transactionId;
+          swapTimestamp.value = data.timestamp;
+          swapToken.value = fromTokenName.value.toUpperCase();
+          swapQr.value = SwapUtils.generateQRCode(remoteTxnLink.value);
+          setTimeout( ()=> isDisabledValidate.value = false, 1000);
+          swapServerErrIndex.value = 0;
+        }
+        else if(response.status == 202){
+          const data = await response.json();
+          isInvalidSwapService.value = false;
+          siriusTxnHash.value = typeof data.siriusSwapInfo.status !== "string" ? data.siriusSwapInfo.status.hash: "";
+          // swapStatus.value = typeof data.siriusSwapInfo.status === "string" ? data.siriusSwapInfo.status: data.siriusSwapInfo.status.status;
+          amount.value = Helper.convertToCurrency(data.siriusSwapInfo.amount, AppState.nativeToken.divisibility);
+          amountReceived.value = Helper.amountFormatterSimple(data.siriusSwapInfo.receiveAmount, AppState.nativeToken.divisibility);
           siriusAddress.value = data.siriusSwapInfo.recipient;
           transactionHash.value = data.remoteTxnHash;
           swapTimestamp.value = data.timestamp;
-          swapId.value = data.ctxId;
-          SwapUtils.generateQRCode(remoteTxnLink.value).then((x)=>{
-          swapQr.value = x
-        });;
+          swapToken.value = fromTokenName.value.toUpperCase();
+          swapQr.value = SwapUtils.generateQRCode(remoteTxnLink.value);
           setTimeout( ()=> isDisabledValidate.value = false, 1000);
           swapServerErrIndex.value = 0;
-        }else if(response.status == 208){
+        }
+        else if(response.status == 208){
           // console.log('208');
           swapStatus208.value = true;
           setTimeout( ()=> isDisabledValidate.value = false, 1000);
@@ -770,6 +795,7 @@ import type { Account } from "@/models/account";
           disableRetrySwap.value = false;
         }
       } catch (error) {
+        console.log(error);
         isInvalidSwapService.value = true;
         ++swapServerErrIndex.value;
         retrySwapButtonText.value = t('swap.retry');
@@ -782,5 +808,4 @@ import type { Account } from "@/models/account";
     };
 
     const savedCheck = ref(false);
-
 </script>
