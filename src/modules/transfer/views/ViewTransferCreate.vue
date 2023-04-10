@@ -12,7 +12,7 @@
         </div>
         <div class="mt-4"/>
         <div class="flex gap-1">
-          <SelectInputAccount v-model="selectedAccAdd"/>
+          <SelectInputAccountTransfer v-model="selectedAccAdd" :initiateBy="initiateBy"/>
           <div v-if="haveSelectableMultisig" @click="toggleMultisig = !toggleMultisig"
               class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 h-16 w-18'>
               <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
@@ -108,7 +108,7 @@ import { isMultiSig, TransactionUtils, findAccWithAddress, findAcc } from '@/uti
 import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from '@/util/chainUtils';
 import { NamespaceUtils } from '@/util/namespaceUtils';
-import SelectInputAccount from "@/components/SelectInputAccount.vue";
+import SelectInputAccountTransfer from "@/components/SelectInputAccountTransfer.vue";
 import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
@@ -124,7 +124,7 @@ export default {
   name: "ViewTransferCreate",
   components: {
     AddressInputClean,
-    SelectInputAccount,
+    SelectInputAccountTransfer,
     SelectAccountAndContact,
     TransferInputClean,
     TransferTextareaInput,
@@ -227,6 +227,13 @@ export default {
     const selectedMultisigName = ref("")
     const selectedMultisigAdd = ref("")
     const selectedMultisigPublicKey = ref("")
+    const initiateBy = computed(() => {
+      if(selectedMultisigAdd.value.length>0){
+        return true
+      } else {
+        return false
+      }
+    })
     const mosaicOption = ref([])
     
     const accounts = computed(()=>{
@@ -923,7 +930,8 @@ export default {
       selectableMultisig,
       onNodeSelectMultisig,
       scanDistributorAsset,
-      haveSelectableMultisig
+      haveSelectableMultisig,
+      initiateBy
     };
   },
 };

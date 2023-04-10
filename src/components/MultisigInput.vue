@@ -7,7 +7,7 @@
                 class="text-blue-primary font-semibold text-xxs uppercase"
                 style="line-height: 9px"
               >
-                {{ $t("general.multisig") }}
+              {{$t('transfer.transferFrom')}} {{ $t("general.multisig") }}
               </div>
               <div class="mt-2 text-base font-bold ">
                 {{ selectDefaultName }}
