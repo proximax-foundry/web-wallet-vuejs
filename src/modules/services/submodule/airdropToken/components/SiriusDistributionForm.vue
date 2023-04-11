@@ -121,7 +121,7 @@ let distribute = async()=>{
   let totalLockHashFee = totalLockHashTxn * Sirius.getLockFundTransactionFee();
   let totalLockHashToken = totalLockHashTxn * networkState.currentNetworkProfileConfig!.lockedFundsPerAggregate!;
 
-  let selectedSda = assetList.value.find(x => x.id === assetSelected.value);
+  let selectedSda = assetList.value.find(x => x.id === assetSelected.value.id);
   let aggregateTxns = Sirius.createDistributeAggregateTransactions(selectedAccount.value.publicKey, distributionList.value, aggregateNum.value, selectedSda!);
   let totalAggregateTxnsFee = sum(aggregateTxns.map(x=> x.maxFee.compact()));
   let totalInitiatorFee = sum(totalLockHashFee, totalLockHashToken, totalAggregateTxnsFee);
