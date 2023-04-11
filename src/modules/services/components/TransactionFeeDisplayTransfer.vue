@@ -92,7 +92,7 @@
         <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(totalFeeFormatted)"></div>
         <div class='ml-1 mt-0.5 text-blue-400'>{{ currentNativeTokenName }}</div>
       </div>
-      <div v-if="selectedMosaic" class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white text-xs"
+      <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white text-xs"
         v-for="(mosaic, index) in mosaicsCreated" :key="index">
         <div v-if="isNaN(parseFloat(selectedMosaic[index].amount))" class="lg:col-span-4 col-span-6 ml-auto">0</div>
         <div v-else class="lg:col-span-4 col-span-6 ml-auto">{{ selectedMosaic[index].amount }}</div>
@@ -138,10 +138,8 @@
   </template>
   
   <script setup lang='ts'>
-  import { computed, type PropType } from 'vue';
+  import { computed } from 'vue';
   import { AppState } from '@/state/appState';
-  import { walletState } from '@/state/walletState';
-  import { Helper } from "@/util/typeHelper";
   import { networkState } from "@/state/networkState";
   
   defineProps({
@@ -189,16 +187,6 @@
     noNamespace: Boolean,
   })
   const currentNativeTokenName = computed(() => AppState.nativeToken.label);
-  const isMultiSig = (address: string) => {
-    if (walletState.currentLoggedInWallet) {
-      const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address == address) || walletState.currentLoggedInWallet.others.find((account) => account.address == address);
-      if (!account) {
-        return false
-      }
-      return account.getDirectParentMultisig().length > 0
-    }
-    return false
-  };
   const splitCurrency = (amount: string | number) => {
     let split = amount.toString().split(".")
     if (split[1] != undefined) {
