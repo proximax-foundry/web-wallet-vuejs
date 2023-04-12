@@ -113,7 +113,7 @@ import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
 import { AppState } from '@/state/appState';
-import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
+import { MosaicId } from "tsjs-xpx-chain-sdk";
 import { Address } from 'tsjs-xpx-chain-sdk';
 import { useRouter } from 'vue-router';
 import { Sirius } from "@/models/sirius";
@@ -227,6 +227,7 @@ export default {
     const selectedMultisigName = ref("")
     const selectedMultisigAdd = ref("")
     const selectedMultisigPublicKey = ref("")
+    const mosaicName = ref("")
     const initiateBy = computed(() => {
       if(selectedMultisigAdd.value.length>0){
         return true
@@ -409,6 +410,7 @@ export default {
           balance: Helper.toCurrencyFormat(asset.amount, asset.divisibility),
           label: asset.label,
           id: index + 1,
+          divisibility: asset.divisibility,
           disabled: false
         }
       })
@@ -569,13 +571,15 @@ export default {
     mosaicsCreated.value.push(0);
     selectedMosaic.value.push({ id: 0, amount: "0" , namespace: ""});
   };
+
+  const getAssetNamespace = async(id) =>{
+    let mosaicNames = await AppState.chainAPI.assetAPI.getMosaicsNames([new MosaicId(id)])
+    mosaicName.value = mosaicNames[0].names[0]? mosaicNames[0].names[0].name : undefined
+  }
+
   // update mosaic
   const updateMosaic = (e) => {
-    // get mosaic info and format divisibility in supply input
-    const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === selectedAccAdd.value) || walletState.currentLoggedInWallet.others.find((account) => account.address === selectedAccAdd.value)
-    let mosaic = account.assets.find(
-      (asset) => asset.idHex == selectedMosaic.value[e.index].id
-    );
+    let mosaic = mosaics.value.find((asset) => asset.val == selectedMosaic.value[e.index].id)
     // enable back the option
     for (let i in mosaics.value){
       mosaics.value[i].disabled = false
@@ -586,14 +590,8 @@ export default {
         o1.disabled = true;
       }
     }));
-
-    // check is namespace is link to asset
-    if (mosaic.namespaceNames.length >= 1){
-      selectedMosaic.value[e.index].namespace = mosaic.namespaceNames[0]
-    }
-    else{
-      selectedMosaic.value[e.index].namespace = mosaic.idHex
-    }
+    getAssetNamespace(mosaic.val)
+    selectedMosaic.value[e.index].namespace = mosaicName.value?mosaicName.value:mosaic.val
     selectedMosaic.value[e.index].amount = "0";
     mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
     emitter.emit("CLOSE_MOSAIC_INSUFFICIENT_ERR", false);
@@ -775,9 +773,8 @@ export default {
     }
   });
   const getMosaicBalanceById = (id) =>{
-    let accAddress = selectedAccAdd.value
-    let acc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==accAddress)? walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==accAddress):walletState.currentLoggedInWallet.others.find(acc=>acc.address==accAddress)
-    return acc.getAssetBalance(id)
+    let mosaic = mosaics.value.find((asset) => asset.val == id)
+    return mosaic?parseFloat(mosaic.balance.replace(/,/g, '')):0
   }
   
   watch(encryptedMsgDisable, (n) => {
