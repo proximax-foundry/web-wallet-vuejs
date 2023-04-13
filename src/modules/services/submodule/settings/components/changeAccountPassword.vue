@@ -77,7 +77,7 @@
 
       const disableShow = computed(() => !(walletPasswd.value.match(passwdPattern)));
 
-      const disableCreate = computed(() => !(walletPasswd.value.match(passwdPattern) && confirmPasswd.value === walletPasswd.value));
+      const disableCreate = computed(() => (walletPasswd.value.match(passwdPattern) === null || confirmPasswd.value !== walletPasswd.value));
 
       const showConfirmPasswdError = computed(
         () => (confirmPasswd.value != walletPasswd.value && confirmPasswd.value != '')
