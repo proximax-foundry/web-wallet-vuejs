@@ -26,7 +26,7 @@ async function getAccInfo(address :string) :Promise<PublicAccount> {
 }
 
 
-export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[], walletPassword :string, senderAccAddress :string, selectedCosigner :string, encryptedMsg :string) : Promise<boolean>  => {
+export const createTransaction = async (recipient :string, sendXPX :string, messageText :string, mosaicsSent :{amount: number ,id :string}[], mosaicDivisibility :number[], walletPassword :string, senderAccPublicKey :string, selectedCosigner :string, encryptedMsg :string) : Promise<boolean>  => {
   // verify password
   let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword)
   
@@ -63,13 +63,11 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
   let senderAcc :WalletAccount | OtherAccount
   let senderPublicAccount :PublicAccount;
   if (!selectedCosigner) { 
-    initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === senderAccAddress);
+    initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.publicKey === senderAccPublicKey);
   } else {
     // initiator acc details
     initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedCosigner);
-    //sender acc details
-    senderAcc =  walletState.currentLoggedInWallet.others.find((element) => element.address=== senderAccAddress) || walletState.currentLoggedInWallet.accounts.find((element) => element.address=== senderAccAddress) 
-    let publicKey =senderAcc.publicKey
+    let publicKey = senderAccPublicKey
     senderPublicAccount = PublicAccount.createFromPublicKey(publicKey, networkType);
   }
 

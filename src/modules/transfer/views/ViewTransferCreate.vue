@@ -7,39 +7,36 @@
       <div class="xl:col-span-2 p-12">
         <div class="text-sm font-semibold ">{{$t('transfer.newTransfer')}}</div>
         <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
-        <div v-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
-          <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.noCosigner')}}</div>
-        </div>
-        <div v-else-if="showBalanceErr" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+        <div v-if="showBalanceErr" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
           <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
         </div>
         <div class="mt-4"/>
-        <SelectInputAccount v-model="selectedAccAdd" :selectDefault="selectedAccAdd"/>
-        <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4"> 
-            <div v-if="getWalletCosigner.cosignerList.length > 0">
-              <div class="text-tsm">
-                {{$t('general.initiateBy')}}:
-                <span class="font-bold" v-if="getWalletCosigner.cosignerList.length == 1"> 
-                  {{ getWalletCosigner.cosignerList[0].name }} ({{$t('general.balance')}}:{{  getWalletCosigner.cosignerList[0].balance }} {{ currentNativeTokenName }})
-                </span>
-                <span class="font-bold" v-else>
-                  <select class="" v-model="cosignAddress">
-                    <option v-for="(element, item) in  getWalletCosigner.cosignerList" :value="findAcc(element.publicKey).address" :key="item">
-                      {{ element.name }} ({{$t('general.balance')}}: {{ element.balance }} {{ currentNativeTokenName }})
-                    </option>
-                  </select>
-                </span>
-                <div v-if="cosignerBalanceInsufficient" class="error">
-                  {{$t('general.insufficientBalance')}}
-                </div>
-              </div>
+        <div class="flex gap-1">
+          <SelectInputAccountTransfer v-model="selectedAccAdd" :initiateBy="initiateBy"/>
+          <div v-if="haveSelectableMultisig" @click="toggleMultisig = !toggleMultisig"
+              class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 h-16 w-18'>
+              <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
+              <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.select') }}</div>
+              <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.multisig') }}</div>
             </div>
+          </div>
+          <!-- Pop Up when select icon is clicked -->
+          <Sidebar v-model:visible="toggleMultisig" :baseZIndex="10000" position="full">
+            <SelectMultisigInput :account="selectableMultisig" :selectedNode="selectedNodeMultisig"
+              @node-select="onNodeSelectMultisig($event)" />
+          </Sidebar>         
+          <div v-if="cosignerBalanceInsufficient" class="error text-tsm text-left mt-2 mb-5 ml-4">
+            {{ $t('general.insufficientBalance') }}
+          </div>
+          <div v-if="selectedMultisigAdd" class="mt-3">
+            <MultisigInput :select-default-address="selectedMultisigAdd" :select-default-name="selectedMultisigName"/>
           </div>
         <div class="flex mt-3 gap-1">
           <AddressInputClean :placeholder="$t('transfer.transferPlaceholder')" v-model="recipientInput" v-debounce:1000="checkRecipient" :showError="showAddressError" :disabled="disableRecipient"/>
-          <div @click="toggleContact=!toggleContact" class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 ' >
+          <div @click="toggleContact=!toggleContact" class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 h-16 w-18' >
             <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
-            <div class='text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.select')}}</div>
+            <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.select') }}</div>
+            <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.contact') }}</div>
           </div>
         </div>
         <!-- Pop Up when select icon is clicked -->
@@ -66,7 +63,11 @@
         </div>
       </div>
       <div class='bg-navy-primary py-6 px-6 xl:col-span-1'>
-        <TransactionFeeDisplay :send-x-p-x="sendXPX" :selected-mosaic="selectedMosaic" :mosaics-created="mosaicsCreated" :transaction-fee="effectiveFee" :total-fee-formatted="String(totalFee)" :get-multi-sig-cosigner="getWalletCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="String(balance)" :selected-acc-add="selectedAccAdd"/>
+        <TransactionFeeDisplayTransfer :send-x-p-x="sendXPX" :selected-mosaic="selectedMosaic" :mosaics-created="mosaicsCreated"
+            :transaction-fee="effectiveFee" :total-fee-formatted="String(totalFee)"
+            :selected-multisig-add="selectedMultisigAdd" :check-cosign-balance="checkCosignBalance"
+            :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="lockFundTxFee" :balance="String(balance)"
+            :selected-acc-add="selectedAccAdd" />
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3" :disabled="disablePassword"/>
@@ -89,6 +90,7 @@ import PasswordInput from "@/components/PasswordInput.vue";
 import SelectInputPlugin from "@/components/SelectInputPlugin.vue";
 import MosaicInput from "@/modules/transfer/components/MosaicInput.vue";
 import SupplyInput from "@/components/SupplyInput.vue";
+import SelectMultisigInput from "@/components/SelectMultisigInput.vue"
 import TransferTextareaInput from "@/modules/transfer/components/TransferTextareaInput.vue";
 import {
   createTransaction,
@@ -106,19 +108,23 @@ import { isMultiSig, TransactionUtils, findAccWithAddress, findAcc } from '@/uti
 import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from '@/util/chainUtils';
 import { NamespaceUtils } from '@/util/namespaceUtils';
-import SelectInputAccount from "@/components/SelectInputAccount.vue";
+import SelectInputAccountTransfer from "@/components/SelectInputAccountTransfer.vue";
 import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
 import { AppState } from '@/state/appState';
-import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
+import { MosaicId } from "tsjs-xpx-chain-sdk";
 import { Address } from 'tsjs-xpx-chain-sdk';
 import { useRouter } from 'vue-router';
+import { Sirius } from "@/models/sirius";
+import MultisigInput from "@/components/MultisigInput.vue"
+import TransactionFeeDisplayTransfer from "@/modules/services/components/TransactionFeeDisplayTransfer.vue";
+
 export default { 
   name: "ViewTransferCreate",
   components: {
     AddressInputClean,
-    SelectInputAccount,
+    SelectInputAccountTransfer,
     SelectAccountAndContact,
     TransferInputClean,
     TransferTextareaInput,
@@ -126,12 +132,15 @@ export default {
     AddContactModal,
     ConfirmSendModal,
     MosaicInput,
-    TransactionFeeDisplay,
+    TransactionFeeDisplayTransfer,
+    SelectMultisigInput,
+    MultisigInput,
   },
   setup() {
     const router = useRouter()
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const toggleContact = ref(false)
+    const toggleMultisig = ref(false)
     const {t} = useI18n();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -140,6 +149,7 @@ export default {
     const selectContact = ref("0");
     const recipientInput = ref("");
     const selectedNode = ref({})
+    const selectedNodeMultisig = ref({})
     const selectedNodeIndex = ref()
     const msgOption = ref("regular");
     const messageText = ref("");
@@ -158,9 +168,8 @@ export default {
     const encryptedMsgDisable = ref(true);
     const toggleConfirm = ref(false);
     const forceSend = ref(false);
-    const isNotCosigner = computed(() => getWalletCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
     const cosignAddress = ref("");
-    
+    const wallet = walletState.currentLoggedInWallet
     const disableAllInput = ref(false);
     const disableRecipient = computed(() => disableAllInput.value);
     const disableSupply = computed(() => disableAllInput.value);
@@ -212,12 +221,21 @@ export default {
     const showLimitErr = ref(false);
     
     
-    const selectedAccName = ref(
-      walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount().name : ''
-    );
-    const selectedAccAdd = ref(
-      walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount().address : ''
-    );
+    const selectedAccName = ref("")
+    const selectedAccAdd = ref("")
+    const selectedAccPublicKey = ref("")
+    const selectedMultisigName = ref("")
+    const selectedMultisigAdd = ref("")
+    const selectedMultisigPublicKey = ref("")
+    const mosaicName = ref("")
+    const initiateBy = computed(() => {
+      if(selectedMultisigAdd.value){
+        return true
+      } else {
+        return false
+      }
+    })
+    const mosaicOption = ref([])
     
     const accounts = computed(()=>{
       if(!walletState.currentLoggedInWallet){
@@ -248,27 +266,8 @@ export default {
         return accounts.concat(otherAccounts);
       
     });
-     const getWalletCosigner = computed(() =>{
-      if(networkState.currentNetworkProfileConfig){
-      let cosigners= multiSign.getCosignerInWallet(accounts.value.find(acc=>acc.address==selectedAccAdd.value)?accounts.value.find(acc => acc.address == selectedAccAdd.value).publicKey:'')
-      let list =[]
-      
-      cosigners.cosignerList.forEach(publicKey=>{
-        list.push({publicKey:publicKey,name:findAcc(publicKey).name,balance:findAcc(publicKey).balance })
-      })
-      cosigners.cosignerList = list
-      return cosigners
-      }else{
-        return {hasCosigner:false,cosignerList:[]}
-      }
-    })
-    
-    const isMultiSigBool = computed(() => {
-          return isMultiSig(selectedAccAdd.value)
-      }
-    )
 
-    const effectiveFee = ref(isMultiSigBool.value?makeTransaction.calculate_aggregate_fee(
+    const effectiveFee = ref(selectedMultisigAdd.value?makeTransaction.calculate_aggregate_fee(
       messageText.value,
       sendXPX.value,
       selectedMosaic.value
@@ -277,47 +276,13 @@ export default {
       sendXPX.value,
       selectedMosaic.value
     ))
-    if (isMultiSigBool.value) {
-      let cosigner = getWalletCosigner.value.cosignerList
-      if (cosigner.length > 0) {
-        cosignAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
-        if (findAccWithAddress(cosignAddress.value).balance < lockFundTotalFee.value + Number(effectiveFee.value) ) {
-          disableAllInput.value = true;
-          cosignerBalanceInsufficient.value = true;
-        } else {
-          disableAllInput.value = false;
-          cosignerBalanceInsufficient.value = false;
-        }
-      } else {
-        disableAllInput.value = true;
-      }
-    }
     
     const checkCosignBalance = computed(() => {
       let cosignBalance = findAccWithAddress(cosignAddress.value)?findAccWithAddress(cosignAddress.value).balance:0;
       return Helper.toCurrencyFormat(cosignBalance);
     })
 
-    const balance = computed(() => {
-        if (walletState.currentLoggedInWallet) {
-          if (accounts.value.find((element) => element.address === selectedAccAdd.value) == undefined){
-            return 0 
-          }else{
-            return accounts.value.find((element) => element.address === selectedAccAdd.value).balance
-          }
-        } else {
-          return 0;
-        }
-      });
-    const splitBalance = computed(()=>{
-      let accBalance = Helper.toCurrencyFormat(balance.value, AppState.nativeToken.divisibility)
-      let split = accBalance.split(".")
-      if (split[1]!=undefined){
-        return {left:split[0],right:split[1]}
-      }else{
-        return {left:split[0], right:null}
-      }
-    })
+    const balance = ref(0)
    
    
     const moreThanOneAccount = computed(() => {
@@ -373,6 +338,36 @@ export default {
       return contact
     });
 
+    const selectableMultisig = computed(() => {
+      const wallet = walletState.currentLoggedInWallet;
+      if(!wallet){
+        return []
+      }
+      let account = wallet.accounts.find(acc => acc.address == selectedAccAdd.value)
+      if(!account){
+        return []
+      }
+      let accountMultisigs = account.multisigInfo.filter((info) => info.level < 0).map(
+        (info, index) => {
+          return {
+            key: index.toString(),
+            label: wallet.contacts.find((contacts) => contacts.address == WalletUtils.createAddressFromPublicKey(info.publicKey,AppState.networkType).plain())?wallet.contacts.find((contacts) => contacts.address == WalletUtils.createAddressFromPublicKey(info.publicKey,AppState.networkType).plain()).name:wallet.accounts.find((acc) => acc.publicKey == info.publicKey)?wallet.accounts.find((acc) => acc.publicKey == info.publicKey).name:"MULTISIG-" + WalletUtils.createAddressFromPublicKey(info.publicKey,AppState.networkType).plain().slice(-4),
+            data: info.publicKey,
+            selectable: true
+          }
+        }
+      )
+      var selectableMultisig = accountMultisigs
+      return selectableMultisig
+    })
+    const haveSelectableMultisig = computed(() => {
+      if(!selectableMultisig.value){
+        return false
+      } else {
+        return true
+      }
+    })
+
     const onNodeSelect = (node) => {
       makeNodeSelectable()
       toggleContact.value = false
@@ -380,6 +375,16 @@ export default {
       // this is too make it turn blue
       selectedNode.value[node.key] = true
       node.selectable = false
+    }
+
+    const onNodeSelectMultisig = (node) => {
+      toggleMultisig.value = false
+      selectedMultisigAdd.value = WalletUtils.createAddressFromPublicKey(node.data,AppState.networkType).plain()
+      selectedMultisigName.value = node.label
+      selectedMultisigPublicKey.value = node.data
+      cosignAddress.value = selectedAccAdd.value
+      // this is too make it turn blue
+      selectedNodeMultisig.value[node.key] = true
     }
 
     const makeNodeSelectable = () => {
@@ -390,6 +395,27 @@ export default {
         selectedNode.value = {}
       }
     }
+
+    let scanDistributorAsset = async () => {
+      let assets = await Sirius.scanAsset(selectedAccPublicKey.value);
+      if(assets.length>0){
+        balance.value = assets[0].amount
+      } else {
+        balance.value = 0
+      }
+      let assetList = assets.slice(1)
+      mosaicOption.value = assetList.map((asset,index) => {
+        return {
+          val: asset.id,
+          balance: Helper.toCurrencyFormat(asset.amount, asset.divisibility),
+          label: asset.label,
+          id: index + 1,
+          divisibility: asset.divisibility,
+          disabled: false
+        }
+      })
+    }
+
 
     const clearInput = () => {
       selectContact.value = "0";
@@ -419,14 +445,8 @@ export default {
     } else {
       
       let selectedCosign;
-      if (isMultiSigBool.value) {
-        
-        let selectedCosignList = getWalletCosigner.value.cosignerList;
-        if (selectedCosignList.length > 1) {
-          selectedCosign = cosignAddress.value;
-        } else {
-          selectedCosign = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==selectedCosignList[0].publicKey).address
-        }
+      if (selectedMultisigAdd.value) {
+        selectedCosign = cosignAddress.value;
       }
       let transferStatus = await createTransaction(
         recipientInput.value.toUpperCase(),
@@ -435,7 +455,7 @@ export default {
         selectedMosaic.value,
         mosaicSupplyDivisibility.value,
         walletPassword.value,
-        selectedAccAdd.value,
+        selectedAccPublicKey.value,
         selectedCosign,
         encryptedMsg.value
       );
@@ -495,7 +515,7 @@ export default {
   }
   const totalFee = computed(()=>{
     let tokenDivisibility = AppState.nativeToken.divisibility
-    if(!isMultiSig(selectedAccAdd.value) ){
+    if(!selectedMultisigAdd.value){
       if(tokenDivisibility==0){
         return Math.trunc(checkIsNaN(parseFloat(sendXPX.value.replace(/,/g, ''))) + parseFloat(effectiveFee.value))
       }else{
@@ -511,7 +531,10 @@ export default {
   })
 
   const showBalanceErr = computed(()=>{
-    if(isMultiSigBool.value){
+    if(!selectedAccAdd.value){
+      return false
+    }
+    else if (selectedMultisigAdd.value) {
       if (sendXPX.value>balance.value || !(showAssetBalanceErr.value.every(value => value == false))){
         return true
       }else{
@@ -538,35 +561,7 @@ export default {
     });
 
   const mosaics = computed(() => {
-    var mosaicOption = [];
-    if(!walletState.currentLoggedInWallet){
-      return mosaicOption;
-    }
-    const account = walletState.currentLoggedInWallet.accounts.find(
-      (element) => element.name == selectedAccName.value
-    ) ||  walletState.currentLoggedInWallet.others.find(
-      (element) => element.name == selectedAccName.value)
-    if (account.assets.length > 0) {
-      let index = 0;
-      for(let asset of account.assets){
-
-        if(asset.rawAmount === 0){
-          continue;
-        }
-
-        if(!asset.namespaceNames.includes(AppState.nativeToken.fullNamespace)){
-          mosaicOption.push({
-            val: asset.idHex,
-            balance: t('general.balance')+":"+Helper.toCurrencyFormat(asset.amount,asset.divisibility),
-            label: (asset.namespaceNames.length>0?asset.namespaceNames[0]:asset.idHex),
-            id: index + 1,
-            disabled: false
-          });
-          index += 1;
-        }
-      }
-    }
-    return mosaicOption;
+    return mosaicOption.value;
   });
   for(let i=0;i<mosaics.value.length;i++){
     showAssetBalanceErr.value.push(false)
@@ -576,13 +571,15 @@ export default {
     mosaicsCreated.value.push(0);
     selectedMosaic.value.push({ id: 0, amount: "0" , namespace: ""});
   };
+
+  const getAssetNamespace = async(id) =>{
+    let mosaicNames = await AppState.chainAPI.assetAPI.getMosaicsNames([new MosaicId(id)])
+    mosaicName.value = mosaicNames[0].names[0]? mosaicNames[0].names[0].name : undefined
+  }
+
   // update mosaic
   const updateMosaic = (e) => {
-    // get mosaic info and format divisibility in supply input
-    const account = walletState.currentLoggedInWallet.accounts.find((account) => account.address === selectedAccAdd.value) || walletState.currentLoggedInWallet.others.find((account) => account.address === selectedAccAdd.value)
-    let mosaic = account.assets.find(
-      (asset) => asset.idHex == selectedMosaic.value[e.index].id
-    );
+    let mosaic = mosaics.value.find((asset) => asset.val == selectedMosaic.value[e.index].id)
     // enable back the option
     for (let i in mosaics.value){
       mosaics.value[i].disabled = false
@@ -593,14 +590,8 @@ export default {
         o1.disabled = true;
       }
     }));
-
-    // check is namespace is link to asset
-    if (mosaic.namespaceNames.length >= 1){
-      selectedMosaic.value[e.index].namespace = mosaic.namespaceNames[0]
-    }
-    else{
-      selectedMosaic.value[e.index].namespace = mosaic.idHex
-    }
+    getAssetNamespace(mosaic.val)
+    selectedMosaic.value[e.index].namespace = mosaicName.value?mosaicName.value:mosaic.val
     selectedMosaic.value[e.index].amount = "0";
     mosaicSupplyDivisibility.value[e.index] = mosaic.divisibility;
     emitter.emit("CLOSE_MOSAIC_INSUFFICIENT_ERR", false);
@@ -632,30 +623,43 @@ export default {
       return 0;
     }
   };
-  
-  watch(selectedAccAdd, (n, o) => {
+
+  watch(selectedAccAdd, () =>{
+    selectedMultisigAdd.value = ""
+    selectedMultisigName.value = ""
+  })
+
+  watch([selectedAccAdd,selectedMultisigAdd], () => {
+    const findAccount = findAccWithAddress(selectedAccAdd.value)
+    if(selectedMultisigAdd.value){
+      selectedAccPublicKey.value = selectedMultisigPublicKey.value
+    } else{
+      selectedAccPublicKey.value = findAccount?findAccount.publicKey:""
+    }
+    scanDistributorAsset()
+    updateFee()
     showAssetBalanceErr.value = []
     for(let i=0;i<mosaics.value.length;i++){
       showAssetBalanceErr.value.push(false)
     }
-    isMultiSigBool.value = isMultiSig(n);
-    if (isMultiSigBool.value) {
-      
-        let cosigner = getWalletCosigner.value.cosignerList
-        if (cosigner.length > 0) {
-          cosignAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey== cosigner[0].publicKey).address;
-          if (cosigner[0].balance < lockFundTotalFee.value) {
-            disableAllInput.value = true;
-          } else {
-            disableAllInput.value = false;
-          }
-        } else {
-          disableAllInput.value = true;
-        }
+    if (selectedMultisigAdd.value) {
+      const findAcc = wallet.accounts.find(acc => acc.address == selectedAccAdd.value)
+      if (findAcc) {
+        cosignAddress.value = findAcc.address;
+      }
+      if (parseFloat(checkCosignBalance.value) < lockFundTotalFee.value) {
+        disableAllInput.value = true;
+      } else {
+        disableAllInput.value = false;
+      }
     }
     else {
       disableAllInput.value = false;
-    }   
+    }
+  })
+
+  watch(selectedMultisigPublicKey, () =>{
+    selectedAccPublicKey.value = selectedMultisigPublicKey.value
   })
   
   watch(cosignAddress, (n, o) => {
@@ -729,7 +733,7 @@ export default {
     return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
   }
   const updateFee = ()=>{
-     effectiveFee.value = isMultiSig(selectedAccAdd.value)? makeTransaction.calculate_aggregate_fee(
+     effectiveFee.value = selectedMultisigAdd.value? makeTransaction.calculate_aggregate_fee(
         messageText.value,
         sendXPX.value,
         selectedMosaic.value
@@ -769,9 +773,8 @@ export default {
     }
   });
   const getMosaicBalanceById = (id) =>{
-    let accAddress = selectedAccAdd.value
-    let acc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==accAddress)? walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==accAddress):walletState.currentLoggedInWallet.others.find(acc=>acc.address==accAddress)
-    return acc.getAssetBalance(id)
+    let mosaic = mosaics.value.find((asset) => asset.val == id)
+    return mosaic?parseFloat(mosaic.balance.replace(/,/g, '')):0
   }
   
   watch(encryptedMsgDisable, (n) => {
@@ -812,7 +815,11 @@ export default {
       }
     }, {deep:true});
     
-
+  // Cancel transfer from multisig
+  emitter.on("CLOSE_MULTISIG", () =>{
+    selectedMultisigAdd.value = ""
+    selectedMultisigName.value = ""
+  })
   emitter.on("CLOSE_CONTACT_MODAL", (payload) => {
     togglaAddContact.value = payload;
     router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
@@ -853,7 +860,6 @@ export default {
       onNodeSelect,
       selectedNode,
       toggleContact,
-      splitBalance,
       moreThanOneAccount,
       showMenu,
       selectedAccName,
@@ -893,11 +899,8 @@ export default {
       currentlySelectedMosaic,
       removeMosaic,
       toggleConfirm,
-      isMultiSigBool,
       effectiveFee,
-      isNotCosigner,
       cosignAddress,
-      getWalletCosigner,
       disableRecipient,
       checkRecipient,
       disableSupply,
@@ -918,7 +921,18 @@ export default {
       currentNativeTokenName,
       showLimitErr,
       checkCosignBalance,
-      displayAssetId
+      displayAssetId,
+      toggleMultisig,
+      selectedNodeMultisig,
+      selectedAccPublicKey,
+      selectedMultisigName,
+      selectedMultisigAdd,
+      selectedMultisigPublicKey,
+      selectableMultisig,
+      onNodeSelectMultisig,
+      scanDistributorAsset,
+      haveSelectableMultisig,
+      initiateBy
     };
   },
 };

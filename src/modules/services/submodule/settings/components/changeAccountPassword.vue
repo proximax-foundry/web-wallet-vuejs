@@ -34,7 +34,7 @@
             <div class= 'text-center mt-2 text-xs font-semibold'>Enter New Password</div>
             <PasswordInput class="mt-3" :placeholder="$t('wallet.enterPassword')" :errorMessage="$t('wallet.passwordErrMsg')" :showError="showPasswdError" icon="lock" v-model="walletPasswd"  />
             <PasswordInput  class="mt-3" :placeholder="$t('wallet.confirmPassword')" :errorMessage="$t('wallet.confirmPasswordErrMsg')" :showError="showConfirmPasswdError" icon="lock" v-model="confirmPasswd"  />
-            <div @click="changeWalletPasswd(), toggleModal = !toggleModal;walletPasswd='', toggleChangePasswrd = false"  class = 'blue-btn font-semibold py-2 mt-3 cursor-pointer text-center ml-auto mr-auto w-7/12 disabled:opacity-50 disabled:cursor-auto' :disabled="disableShow">{{$t('general.confirm')}}</div>
+            <button  @click="changeWalletPasswd(), toggleModal = !toggleModal;walletPasswd='', toggleChangePasswrd = false"  class = 'blue-btn font-semibold py-2 mt-3 cursor-pointer text-center ml-auto mr-auto w-7/12 disabled:opacity-50 disabled:cursor-auto' :disabled="disableCreate">{{$t('general.confirm')}}</button >
             <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-2' @click="toggleModal = !toggleModal;walletPasswd='', toggleChangePasswrd = false">{{$t('general.cancel')}}</div>
           </div>
         </div>
@@ -76,6 +76,8 @@
       const confirmPasswd = ref("");
 
       const disableShow = computed(() => !(walletPasswd.value.match(passwdPattern)));
+
+      const disableCreate = computed(() => (walletPasswd.value.match(passwdPattern) === null || confirmPasswd.value !== walletPasswd.value));
 
       const showConfirmPasswdError = computed(
         () => (confirmPasswd.value != walletPasswd.value && confirmPasswd.value != '')
@@ -134,6 +136,7 @@
         showConfirmPasswdError,
         changeWalletPasswd,
         disableShow,
+        disableCreate,
       };
     },
   };
