@@ -28,7 +28,7 @@
           <div v-if="cosignerBalanceInsufficient" class="error text-tsm text-left mt-2 mb-5 ml-4">
             {{ $t('general.insufficientBalance') }}
           </div>
-          <div v-if="selectedMultisigAdd.length > 0" class="mt-3">
+          <div v-if="selectedMultisigAdd" class="mt-3">
             <MultisigInput :select-default-address="selectedMultisigAdd" :select-default-name="selectedMultisigName"/>
           </div>
         <div class="flex mt-3 gap-1">
@@ -229,7 +229,7 @@ export default {
     const selectedMultisigPublicKey = ref("")
     const mosaicName = ref("")
     const initiateBy = computed(() => {
-      if(selectedMultisigAdd.value.length>0){
+      if(selectedMultisigAdd.value){
         return true
       } else {
         return false
@@ -267,7 +267,7 @@ export default {
       
     });
 
-    const effectiveFee = ref(selectedMultisigAdd.value.length>0?makeTransaction.calculate_aggregate_fee(
+    const effectiveFee = ref(selectedMultisigAdd.value?makeTransaction.calculate_aggregate_fee(
       messageText.value,
       sendXPX.value,
       selectedMosaic.value
@@ -361,7 +361,7 @@ export default {
       return selectableMultisig
     })
     const haveSelectableMultisig = computed(() => {
-      if(selectableMultisig.value.length==0){
+      if(!selectableMultisig.value){
         return false
       } else {
         return true
@@ -445,7 +445,7 @@ export default {
     } else {
       
       let selectedCosign;
-      if (selectedMultisigAdd.value.length>0) {
+      if (selectedMultisigAdd.value) {
         selectedCosign = cosignAddress.value;
       }
       let transferStatus = await createTransaction(
@@ -515,7 +515,7 @@ export default {
   }
   const totalFee = computed(()=>{
     let tokenDivisibility = AppState.nativeToken.divisibility
-    if(selectedMultisigAdd.value.length==0){
+    if(!selectedMultisigAdd.value){
       if(tokenDivisibility==0){
         return Math.trunc(checkIsNaN(parseFloat(sendXPX.value.replace(/,/g, ''))) + parseFloat(effectiveFee.value))
       }else{
@@ -531,10 +531,10 @@ export default {
   })
 
   const showBalanceErr = computed(()=>{
-    if(selectedAccAdd.value.length == 0){
+    if(!selectedAccAdd.value){
       return false
     }
-    else if (selectedMultisigAdd.value.length>0) {
+    else if (selectedMultisigAdd.value) {
       if (sendXPX.value>balance.value || !(showAssetBalanceErr.value.every(value => value == false))){
         return true
       }else{
@@ -631,7 +631,7 @@ export default {
 
   watch([selectedAccAdd,selectedMultisigAdd], () => {
     const findAccount = findAccWithAddress(selectedAccAdd.value)
-    if(selectedMultisigAdd.value.length>0){
+    if(selectedMultisigAdd.value){
       selectedAccPublicKey.value = selectedMultisigPublicKey.value
     } else{
       selectedAccPublicKey.value = findAccount?findAccount.publicKey:""
@@ -642,7 +642,7 @@ export default {
     for(let i=0;i<mosaics.value.length;i++){
       showAssetBalanceErr.value.push(false)
     }
-    if (selectedMultisigAdd.value.length>0) {
+    if (selectedMultisigAdd.value) {
       const findAcc = wallet.accounts.find(acc => acc.address == selectedAccAdd.value)
       if (findAcc) {
         cosignAddress.value = findAcc.address;
@@ -733,7 +733,7 @@ export default {
     return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
   }
   const updateFee = ()=>{
-     effectiveFee.value = selectedMultisigAdd.value.length>0? makeTransaction.calculate_aggregate_fee(
+     effectiveFee.value = selectedMultisigAdd.value? makeTransaction.calculate_aggregate_fee(
         messageText.value,
         sendXPX.value,
         selectedMosaic.value
