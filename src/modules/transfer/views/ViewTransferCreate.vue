@@ -515,7 +515,7 @@ export default {
   }
   const totalFee = computed(()=>{
     let tokenDivisibility = AppState.nativeToken.divisibility
-    if(selectedMultisigAdd.value.length==0){
+    if(!selectedMultisigAdd.value){
       if(tokenDivisibility==0){
         return Math.trunc(checkIsNaN(parseFloat(sendXPX.value.replace(/,/g, ''))) + parseFloat(effectiveFee.value))
       }else{
@@ -531,7 +531,7 @@ export default {
   })
 
   const showBalanceErr = computed(()=>{
-    if(selectedAccAdd.value.length == 0){
+    if(!selectedAccAdd.value){
       return false
     }
     else if (selectedMultisigAdd.value.length>0) {
