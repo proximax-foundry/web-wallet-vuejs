@@ -7,7 +7,8 @@
         <div class="flex my-2  gap-5 flex-none text-xs md:text-sm">
             <div class="border rounded-md text-white py-2 px-4" style="background: #007CFF">Confirmed</div>
             <router-link :to="{name:'ViewAccountPendingTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer  rounded-md text-white py-2 px-5" style="background: #f3a91d">Pending</router-link>
-        </div>
+            <router-link :to="{name:'ViewAccountFailedTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer  rounded-md text-white py-2 px-5" style="background: #DC143C">Failed</router-link>
+          </div>
         <div class="bg-white px-2 " >
             <div class="flex flex-col gap-3 mt-3">
                
