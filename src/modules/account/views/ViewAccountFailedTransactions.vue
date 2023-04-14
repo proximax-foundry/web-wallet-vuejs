@@ -54,13 +54,10 @@ const checkTxnStatus = async () => {
 
     let activityFailedTxn = AppState.txnActivityLog
         .filter((x) => x.status === "failed" && x.accPubKey === currentAccountPubKey)
-        .map((x) => x);
     let cosignFailedTxn = AppState.txnCosignLog
         .filter((x) => x.status === "failed" && x.accPubKey.includes(currentAccountPubKey))
-        .map((x) => x);
     let swapFailedTxn = AppState.txnSwapLog
         .filter((x) =>  x.status === "failed" && x.accPubKey === currentAccountPubKey)
-        .map((x) => x);
 
     let allTxnStatus = []
 
