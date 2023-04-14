@@ -10,7 +10,7 @@
               <div class="uppercase text-xxs font-bold mb-1">{{ $t('dashboard.txHash') }}</div>
               <div class="flex items-center">
                 <div class="uppercase cursor-pointer font-bold text-txs">
-                    <span class="text-txs" v-tooltip.right="data.hash">{{ data.hash.substring(0, 20) }}...</span></div>
+                    <span class="text-txs" v-tooltip.right="data.txnHash">{{ data.txnHash.substring(0, 20) }}...</span></div>
               </div>
             </div>
           </template>
@@ -20,7 +20,7 @@
             <div>
               <div class="uppercase text-xxs font-bold mb-1"> Status </div>
               <div class="flex items-center">
-                <span class="text-txs">{{ data.status }}</span>
+                <span class="text-txs">{{ data.statusMsg }}</span>
               </div>
             </div>
           </template>
@@ -28,18 +28,13 @@
         <Column field="hash" :header="$t('dashboard.txHash')" headerStyle="width:100px" v-if="wideScreen">
           <template #body="{ data }">
             <div class="flex items-center">
-              <span class="text-txs cursor-pointer" v-tooltip.bottom="data.hash">{{ data.hash.substring(0, 20) }}...</span>
+              <span class="text-txs cursor-pointer" v-tooltip.bottom="data.txnHash">{{ data.txnHash.substring(0, 20) }}...</span>
             </div>
-          </template>
-        </Column>
-        <Column field="formattedDeadline" :header="$t('general.deadline')" headerStyle="width:110px" v-if="wideScreen">
-          <template #body="{ data }">
-            <span class="text-txs">{{ convertLocalTime(subtractHours(data.deadline.value, 2)) }}</span>
           </template>
         </Column>
         <Column field="status" :header="'Status'" headerStyle="width:110px" v-if="wideScreen">
           <template #body="{ data }">
-            <span class="text-txs">{{ data.status }}</span>
+            <span class="text-txs">{{ data.statusMsg }}</span>
           </template>
         </Column>
         <template #empty>
@@ -65,7 +60,6 @@
   import { getCurrentInstance, ref, onMounted, onUnmounted } from "vue";
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
-  import { Helper } from "@/util/typeHelper";
 
   defineProps({
     transactions: Array
@@ -93,15 +87,6 @@
     showTransactionModel.value = payload;
   });
 
-  const convertLocalTime = (dateTimeInJSON: string) => {
-    return Helper.convertDisplayDateTimeFormat24(dateTimeInJSON);
-  };
-  function subtractHours(value: string, hours: number) {
-    const date = new Date(value);
-    date.setHours(date.getHours() - hours);
-    value = date.toString()
-    return value;
-  }
 
   </script>
   

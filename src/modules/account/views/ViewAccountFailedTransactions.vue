@@ -39,6 +39,7 @@ const txnFailed = computed(() => {
     txns = txnStatus.value
     return txns
 })
+
 const checkTxnStatus = async () => {
     if (!AppState.chainAPI) {
         return;
@@ -51,97 +52,31 @@ const checkTxnStatus = async () => {
 
     const currentAccountPubKey = currentAccount? currentAccount.publicKey: ""
 
-    let endStatuses = ["failed", currentAccountPubKey];
+    let activityFailedTxn = AppState.txnActivityLog
+        .filter((x) => x.status === "failed" && x.accPubKey === currentAccountPubKey)
+        .map((x) => x);
+    let cosignFailedTxn = AppState.txnCosignLog
+        .filter((x) => x.status === "failed" && x.accPubKey.includes(currentAccountPubKey))
+        .map((x) => x);
+    let swapFailedTxn = AppState.txnSwapLog
+        .filter((x) =>  x.status === "failed" && x.accPubKey === currentAccountPubKey)
+        .map((x) => x);
 
-    let txnsHash1 = AppState.txnActivityLog
-        .filter((x) => endStatuses.includes(x.status) && endStatuses.includes(x.accPubKey))
-        .map((x) => x.txnHash);
-    let txnsHash2 = AppState.txnCosignLog
-        .filter((x) => endStatuses.includes(x.status) && x.accPubKey.includes(currentAccountPubKey))
-        .map((x) => x.txnHash);
-    let txnsHash3 = AppState.txnSwapLog
-        .filter((x) => endStatuses.includes(x.status) && endStatuses.includes(x.accPubKey))
-        .map((x) => x.txnHash);
-    let allTransasctionHash = txnsHash1.concat(txnsHash2, txnsHash3);
-    if (allTransasctionHash.length === 0) {
-        txnStatus.value = []
-        return;
+    let allTxnStatus = []
+
+    if(activityFailedTxn.length>0){
+        allTxnStatus.push(activityFailedTxn);
     }
-    let dataPerRequest = 50;
-    let numOfRequest = Math.ceil(allTransasctionHash.length / dataPerRequest);
-    let requests = [];
-    for (let i = 0; i < numOfRequest; ++i) {
-        let startIndex = i * dataPerRequest;
-        let endIndex = (i + 1) * dataPerRequest;
-        let requestData = allTransasctionHash.slice(startIndex, endIndex);
-        try {
-            requests.push(
-                AppState.chainAPI.transactionAPI.getTransactionsStatuses(requestData)
-            );
-        } catch (error) {
-            continue;
-        }
+    if(cosignFailedTxn.length>0){
+        allTxnStatus.push(cosignFailedTxn);
     }
-    let tempTransactionStatuses = await Promise.all(requests);
-    let transactionStatuses = tempTransactionStatuses.flat();
-    let txnsHashFound: string[] = [];
-    for (let i = 0; i < transactionStatuses.length; ++i) {
-        const transactionStatus = transactionStatuses[i];
-        if (!transactionStatus.hash) {
-            continue;
-        }
-        txnsHashFound.push(transactionStatus.hash);
-        if (txnsHash1.includes(transactionStatus.hash)) {
-            let txnActivity = AppState.txnActivityLog.find(
-                (x) => x.txnHash === transactionStatus.hash
-            );
-            if (!txnActivity) {
-                continue;
-            }
-            if (
-                txnActivity.status === transactionStatus.group
-            ) {
-                txnActivity.status = transactionStatus.group;
-                if (txnActivity.status === "failed") {
-                    txnActivity.statusMsg = transactionStatus.status;
-                    txnStatus.value.push(transactionStatus)
-                }
-            }
-        } else if (txnsHash2.includes(transactionStatus.hash)) {
-            let txnCosign = AppState.txnCosignLog.find(
-                (x) => x.txnHash === transactionStatus.hash
-            );
-            if (!txnCosign) {
-                continue;
-            }
-            if (
-                txnCosign.status === transactionStatus.group
-            ) {
-                txnCosign.status = transactionStatus.group;
-                if (txnCosign.status === "failed") {
-                    txnCosign.statusMsg = transactionStatus.status;
-                    txnStatus.value.push(transactionStatus)
-                }
-            }
-        } else {
-            let txnSwap = AppState.txnSwapLog.find(
-                (x) => x.txnHash === transactionStatus.hash
-            );
-            if (!txnSwap) {
-                continue;
-            }
-            if (
-                txnSwap.status === transactionStatus.group
-            ) {
-                txnSwap.status = transactionStatus.group;
-                if (txnSwap.status === "failed") {
-                    txnSwap.statusMsg = transactionStatus.status;
-                    txnStatus.value.push(transactionStatus)
-                }
-            }
-        }
+    if(swapFailedTxn.length>0){
+        allTxnStatus.push(swapFailedTxn);
     }
+
+    txnStatus.value = allTxnStatus.flat()
 };
+
 const init = async () => {
     await checkTxnStatus()
 }
