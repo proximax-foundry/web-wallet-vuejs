@@ -339,9 +339,6 @@ export default {
     if(!walletState.currentLoggedInWallet){
         return;
     }
-    console.log(siriusAddressInput.value.length)
-    console.log(siriusAddress.value)
-    console.log(typeof siriusAddress.value)
     if(siriusAddress.value.length == 46){
       try {
         let recipientAddress = Helper.createAddress(siriusAddress.value);
