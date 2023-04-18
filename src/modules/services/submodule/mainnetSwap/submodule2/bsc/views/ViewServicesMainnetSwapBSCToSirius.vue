@@ -315,7 +315,7 @@ export default {
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const toggleContact = shallowRef(false)
     const verifyMetaMaskPlugin = ref(true);
-    const siriusAddress = ref('')
+    const siriusAddress = ref('');
     const showAddressError = shallowRef(true); 
      const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
     watch(siriusAddress,n=>{
