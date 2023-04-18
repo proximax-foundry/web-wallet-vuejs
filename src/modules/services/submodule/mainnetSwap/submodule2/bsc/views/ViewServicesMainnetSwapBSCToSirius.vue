@@ -88,7 +88,7 @@
           </div>
           <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'BEP20 ' + `${selectedToken?selectedToken.name:''}`" type="text" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':amount>=minAmount?$t('swap.insufficientTokenBalance'):`Min. amount is ${minAmount}(${feeAmount} ${selectedToken.name.toUpperCase()} will deducted for transaction fee)`" :decimal="tokenDivisibility"  />
           <div class="flex">
-            <AddressInputClean :placeholder="$t('transfer.transferPlaceholder')" v-model="siriusAddress" v-debounce:1000="checkRecipient" :showError="showAddressError" />
+            <AddressInputClean :placeholder="$t('transfer.transferPlaceholder')" v-model="siriusAddressInput" v-debounce:1000="checkRecipient" :showError="showAddressError" />
             <div @click="toggleContact=!toggleContact" class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 ' >
               <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
               <div class='text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.select')}}</div>
@@ -314,8 +314,15 @@ export default {
     const {t} = useI18n();
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const toggleContact = shallowRef(false)
-    const verifyMetaMaskPlugin = ref(true); 
-    const siriusAddress = ref('');
+    const verifyMetaMaskPlugin = ref(true);
+    const siriusAddressInput = ref('')
+    const siriusAddress = computed(() => {
+      if(siriusAddressInput.value.length == 40 || siriusAddressInput.value.length == 46){
+        return Helper.createAddress(siriusAddressInput.value).pretty()
+      }else{
+        return ''
+      }
+    })
     const showAddressError = shallowRef(true); 
      const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
     watch(siriusAddress,n=>{
@@ -332,28 +339,35 @@ export default {
     if(!walletState.currentLoggedInWallet){
         return;
     }
-    try {
-      let recipientAddress = Helper.createAddress(siriusAddress.value);
-      let networkOk = Helper.checkAddressNetwork(recipientAddress, AppState.networkType);
-      if(!networkOk){
-        showAddressError.value = true;
-      }
-      else{
-        showAddressError.value = false;
-      }
-    } catch (error) {
-      try{
-        let namespaceId = Helper.createNamespaceId(siriusAddress.value);
-        checkNamespace(namespaceId).then((address)=>{
-          siriusAddress.value = address.plain();
-          showAddressError.value = false;
-        }).catch((error)=>{
+    console.log(siriusAddressInput.value.length)
+    console.log(siriusAddress.value)
+    console.log(typeof siriusAddress.value)
+    if(siriusAddress.value.length == 46){
+      try {
+        let recipientAddress = Helper.createAddress(siriusAddress.value);
+        let networkOk = Helper.checkAddressNetwork(recipientAddress, AppState.networkType);
+        if(!networkOk){
           showAddressError.value = true;
-        });
+        }
+        else{
+          showAddressError.value = false;
+        }
+      } catch (error) {
+        try{
+          let namespaceId = Helper.createNamespaceId(siriusAddress.value);
+          checkNamespace(namespaceId).then((address)=>{
+            siriusAddress.value = address.plain();
+            showAddressError.value = false;
+          }).catch((error)=>{
+            showAddressError.value = true;
+          });
+        }
+        catch(error){
+          showAddressError.value = true;
+        }
       }
-      catch(error){
-        showAddressError.value = true;
-      }
+    }else{
+      showAddressError.value = true;
     }
   }
 
@@ -930,6 +944,7 @@ export default {
       copy,
       currentPage,
       isDisabledValidate,
+      siriusAddressInput,
       siriusAddress,
       disableSiriusAddress,
       showAmountErr,
