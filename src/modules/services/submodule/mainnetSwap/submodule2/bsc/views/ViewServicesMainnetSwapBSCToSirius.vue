@@ -823,10 +823,10 @@ export default {
         isInvalidSignedMeta.value = false;
         provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
         signer = provider.getSigner();
-        const messageSignature = await signer.signMessage(Helper.createAddress(siriusAddress.value).pretty());
+        const messageSignature = await signer.signMessage(Address.createFromRawAddress(siriusAddress.value).pretty());
         messageHash.value = messageSignature;
         const data = {
-          recipient: Helper.createAddress(siriusAddress.value).pretty(),
+          recipient: Address.createFromRawAddress(siriusAddress.value).pretty(),
           signature: messageSignature,
           txnInfo: {
             network: "BSC",
