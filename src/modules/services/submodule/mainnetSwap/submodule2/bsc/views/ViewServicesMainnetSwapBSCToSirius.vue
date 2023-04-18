@@ -314,7 +314,7 @@ export default {
     const {t} = useI18n();
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const toggleContact = shallowRef(false)
-    const verifyMetaMaskPlugin = ref(true);
+    const verifyMetaMaskPlugin = ref(true); 
     const siriusAddress = ref('');
     const showAddressError = shallowRef(true); 
      const chainAPIEndpoint = computed(()=> ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, networkState.currentNetworkProfile.httpPort));
