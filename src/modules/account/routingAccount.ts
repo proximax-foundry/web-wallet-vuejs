@@ -83,6 +83,15 @@ export const AccountRoutes: RouteRecordRaw[] = [
       title: "Account Pending Transactions",
     }
   },
+  {
+    path: '/view-failed-transactions/:address',
+    name: 'ViewAccountFailedTransactions',
+    props: true,
+    component: () => import('@/modules/account/views/ViewAccountFailedTransactions.vue'),
+    meta: {
+      title: "Account Failed Transactions",
+    }
+  },
   
   ...DelegateRoutes,
   ...LinkToNamespaceRoutes,

@@ -361,7 +361,7 @@ export default {
       return selectableMultisig
     })
     const haveSelectableMultisig = computed(() => {
-      if(!selectableMultisig.value){
+      if(selectableMultisig.value.length==0){
         return false
       } else {
         return true
