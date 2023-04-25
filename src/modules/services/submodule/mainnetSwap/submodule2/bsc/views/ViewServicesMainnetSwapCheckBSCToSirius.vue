@@ -164,7 +164,24 @@
                 <div v-if="isInitiateSwap">
                   <div class="sm:flex justify-between">
                     <div class="w-full">
-                      <SelectInputAccount v-model="siriusAddressSelected" :placeholder="$t('swap.toSiriusAcc')" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
+                      <div class="flex">
+                        <AddressInputClean :placeholder="$t('transfer.transferPlaceholder')" v-model="siriusAddressSelected" v-debounce:1000="checkRecipient" :showError="showAddressError" />
+                        <div @click="toggleContact=!toggleContact" class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 ' >
+                          <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
+                          <div class='text-xxs text-blue-primary font-semibold uppercase'>{{$t('general.select')}}</div>
+                        </div>
+                      </div>
+                      <div v-if="toggleContact" class=" border ">
+                        <div class='text-xxs text-left text-gray-300 font-semibold py-2 px-2 uppercase'>{{$t('general.importFromAB')}}</div>
+                        <div v-for="(item, number) in contacts" :key="number" class="cursor-pointer">
+                          <div @click="siriusAddressSelected=item.value;toggleContact=false" class="flex justify-between">
+                            <div v-if="number%2==0" class="text-xs py-2 bg-gray-100 pl-2 w-full text-left">{{item.label}}</div>
+                            <div v-if="number%2==1" class="text-xs py-2 pl-2 w-full text-left">{{item.label}}</div>
+                            <div v-if="number%2==0" class="ml-auto pr-2 text-xxs py-2 font-semibold text-blue-primary bg-gray-100 uppercase">{{$t('general.select')}}</div>
+                            <div v-if="number%2==1" class="ml-auto mr-2 text-xxs py-2 font-semibold text-blue-primary uppercase">{{$t('general.select')}}</div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                     <button :disabled="!siriusAddressSelected || !disableConfirmAddressSelection" @click="confirmAddress" class="sm:flex-none justify-start sm:justify-end bg-blue-primary h-15 w-40 rounded-3xl sm:ml-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-2 disabled:opacity-50 self-center" type="button">{{$t('general.confirm')}}</button>
                   </div>
@@ -276,6 +293,7 @@ import { computed, ref, watch, onBeforeUnmount } from "vue";
 import TextInputClean from '@/components/TextInputClean.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
 import SelectInputAccount from '@/components/SelectInputAccount.vue';
+import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue";
 import { walletState } from '@/state/walletState';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
@@ -294,6 +312,7 @@ export default {
     TextInputClean,
     SwapCertificateComponent,
     SelectInputAccount,
+    AddressInputClean,
   },
 
   setup() {
@@ -688,16 +707,78 @@ export default {
     const isInitiateSwap = ref(false);
     const disableSiriusAddress = ref(false);
     const disableConfirmAddressSelection = ref(true);
-    const siriusAddressSelected = ref(walletState.currentLoggedInWallet.selectDefaultAccount().address);
+    const siriusAddressSelected = ref('');
 
     const siriusAddressSelectedName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
 
     watch(siriusAddressSelected, (newAddress) => {
-      let accountSelected = walletState.currentLoggedInWallet.accounts.find(account => account.address == newAddress);
-      if(!accountSelected){
-        accountSelected = walletState.currentLoggedInWallet.others.find(account => account.address == newAddress);
+      let accountSelected = walletState.currentLoggedInWallet.accounts.find(account => account.address == newAddress) || walletState.currentLoggedInWallet.others.find(account => account.address == newAddress)
+      if(accountSelected){
+        siriusAddressSelectedName.value = accountSelected.name;
+      }else{
+        siriusAddressSelectedName.value = 'ACCOUNT-' + siriusAddressSelected.value.substring(siriusAddressSelected.value.length-4,siriusAddressSelected.value.length)
       }
-      siriusAddressSelectedName.value = accountSelected.name;
+    });
+
+    const showAddressError = shallowRef(true);
+    const toggleContact = shallowRef(false)
+    watch(siriusAddressSelected,n=>{
+      if(n.length==40 || n.length==46){
+        checkRecipient()
+      }else{
+        showAddressError.value = true
+      }
+    })
+    const checkRecipient = () =>{
+    if(!walletState.currentLoggedInWallet){
+        return;
+    }
+    try {
+      let recipientAddress = Helper.createAddress(siriusAddressSelected.value);
+      let networkOk = Helper.checkAddressNetwork(recipientAddress, AppState.networkType);
+      if(!networkOk){
+        showAddressError.value = true;
+      }
+      else{
+        showAddressError.value = false;
+      }
+    } catch (error) {
+      try{
+        let namespaceId = Helper.createNamespaceId(siriusAddressSelected.value);
+        checkNamespace(namespaceId).then((address)=>{
+          siriusAddressSelected.value = address.plain();
+          showAddressError.value = false;
+        }).catch((error)=>{
+          showAddressError.value = true;
+        });
+      }
+      catch(error){
+        showAddressError.value = true;
+      }
+    }
+  }
+    const contacts = computed(() => {
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
+      const wallet = walletState.currentLoggedInWallet;
+      var contact = [];
+      accounts.value.forEach((element) => {
+        contact.push({ 
+          value: Address.createFromRawAddress(element.address).pretty() ,
+          label: element.name + " - "+t('general.ownerAcc'),
+        });
+      });
+      if (wallet.contacts != undefined) {
+        wallet.contacts.forEach((element) => {
+          contact.push({
+            value: Address.createFromRawAddress(element.address).pretty(),
+            label: element.name + " - "+t('general.contact'),
+          });
+        });
+      }
+      return contact;
+     
     });
 
     const displayInitiateSwapPanel = () => {
@@ -909,7 +990,11 @@ export default {
       Helper,
       amount,
       amountReceived,
-      swapToken
+      swapToken,
+      contacts,
+      showAddressError,
+      checkRecipient,
+      toggleContact,
     };
   },
 }
