@@ -292,7 +292,6 @@
 import { computed, ref, watch, onBeforeUnmount, shallowRef } from "vue";
 import TextInputClean from '@/components/TextInputClean.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
-import SelectInputAccount from '@/components/SelectInputAccount.vue';
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue";
 import { walletState } from '@/state/walletState';
 import { copyToClipboard } from '@/util/functions';
