@@ -289,7 +289,7 @@
   </div>
 </template>
 <script>
-import { computed, ref, watch, onBeforeUnmount } from "vue";
+import { computed, ref, watch, onBeforeUnmount, shallowRef } from "vue";
 import TextInputClean from '@/components/TextInputClean.vue';
 import SwapCertificateComponent from '@/modules/services/submodule/mainnetSwap/components/SwapCertificateComponent.vue';
 import SelectInputAccount from '@/components/SelectInputAccount.vue';
@@ -298,12 +298,13 @@ import { walletState } from '@/state/walletState';
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { ethers } from 'ethers';
-import { abi, SwapUtils } from '@/util/swapUtils';
+import { SwapUtils } from '@/util/swapUtils';
 import { networkState } from '@/state/networkState';
 import { ChainSwapConfig } from "@/models/stores/chainSwapConfig";
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
+import {Address} from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesMainnetSwapCheckBSCToSirius',
@@ -757,6 +758,35 @@ export default {
       }
     }
   }
+    const accounts = computed(()=>{
+      if(!walletState.currentLoggedInWallet){
+        return [];
+      }
+      let accounts = walletState.currentLoggedInWallet.accounts.map(
+        (acc)=>{ 
+          return { 
+            name: acc.name,
+            balance: acc.balance,
+            address: acc.address,
+            publicKey: acc.publicKey,
+            isMultisig: acc.getDirectParentMultisig().length ? true: false
+          }; 
+        });
+        
+       
+       let otherAccounts =walletState.currentLoggedInWallet.others.filter((acc)=> acc.type === "MULTISIG").map(
+        (acc)=>{ 
+          return { 
+            name: acc.name,
+            balance: acc.balance,
+            address: acc.address,
+            publicKey: acc.publicKey,
+            isMultisig: true
+          }; 
+        });
+        return accounts.concat(otherAccounts);
+      
+    });
     const contacts = computed(() => {
       if(!walletState.currentLoggedInWallet){
         return [];
