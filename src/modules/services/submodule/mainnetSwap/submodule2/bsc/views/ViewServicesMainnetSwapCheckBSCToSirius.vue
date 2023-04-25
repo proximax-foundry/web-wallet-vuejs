@@ -312,7 +312,6 @@ export default {
   components: {
     TextInputClean,
     SwapCertificateComponent,
-    SelectInputAccount,
     AddressInputClean,
   },
 
@@ -710,7 +709,7 @@ export default {
     const disableConfirmAddressSelection = ref(true);
     const siriusAddressSelected = ref('');
 
-    const siriusAddressSelectedName = ref(walletState.currentLoggedInWallet.selectDefaultAccount().name);
+    const siriusAddressSelectedName = ref('');
 
     watch(siriusAddressSelected, (newAddress) => {
       let accountSelected = walletState.currentLoggedInWallet.accounts.find(account => account.address == newAddress) || walletState.currentLoggedInWallet.others.find(account => account.address == newAddress)
