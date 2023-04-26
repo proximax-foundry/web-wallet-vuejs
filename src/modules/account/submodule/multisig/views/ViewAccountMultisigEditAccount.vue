@@ -260,9 +260,9 @@ export default {
       }
       return multiSign.checkIsMultiSig(acc.value.address)
     })
-    const disableSend = computed(() => !(
-      isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) &&  (err.value == ''|| err.value== t('general.walletPasswordInvalid',{name : wallet?wallet.name:''})) && (showAddressError.value.indexOf(true) == -1) && (numDeleteUser.value >= 0) && (numApproveTransaction.value >= 0)
-    ));
+    const disableSend = computed(() => 
+      !isMultisig.value || onPartial.value || !passwd.value.match(passwdPattern) || !(err.value == ''|| err.value== t('general.walletPasswordInvalid',{name : wallet?wallet.name:''})) || !(showAddressError.value.indexOf(true) == -1) || !(numDeleteUser.value >= 0) || !(numApproveTransaction.value >= 0)
+    );
     const disabledPassword = computed(() => !(!onPartial.value && isMultisig.value && !fundStatus.value && isCoSigner.value));
     const isCoSigner = computed(() => {
       return getWalletCosigner().hasCosigner;
