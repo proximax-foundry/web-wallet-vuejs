@@ -52,12 +52,50 @@ const checkTxnStatus = async () => {
 
     const currentAccountPubKey = currentAccount? currentAccount.publicKey: ""
 
+    let storeActivityFailedTxn = JSON.parse(sessionStorage.getItem("txnFailedActivityLog")) || []
+    let storeCosignFailedTxn = JSON.parse(sessionStorage.getItem("txnFailedCosignLog")) || []
+    let storeSwapFailedTxn = JSON.parse(sessionStorage.getItem("txnFailedSwapLog")) || []
+
     let activityFailedTxn = AppState.txnActivityLog
-        .filter((x) => x.status === "failed" && x.accPubKey === currentAccountPubKey)
+    if(!storeActivityFailedTxn){
+        activityFailedTxn.filter((x) => x.status === "failed" && x.accPubKey === currentAccountPubKey)
+        if(AppState.txnActivityLog.length>0){
+            sessionStorage.setItem("txnFailedActivityLog", JSON.stringify(AppState.txnActivityLog.filter((x)=> x.status === "failed")))
+        }
+    }
+    else{
+        let concatFailedTxns = storeActivityFailedTxn.concat(activityFailedTxn.filter((x) => x.status === "failed"))
+        let filterFailedTxns = concatFailedTxns.filter((value: { txnHash: string; }, index: number) => index === concatFailedTxns.findIndex((t: { txnHash: string; }) => (t.txnHash === value.txnHash)))
+        sessionStorage.setItem("txnFailedActivityLog", JSON.stringify(filterFailedTxns))
+        activityFailedTxn = filterFailedTxns.filter((x: { accPubKey: string; }) => x.accPubKey === currentAccountPubKey)
+    }
+
     let cosignFailedTxn = AppState.txnCosignLog
-        .filter((x) => x.status === "failed" && x.accPubKey.includes(currentAccountPubKey))
+    if(!storeCosignFailedTxn){
+        cosignFailedTxn.filter((x) => x.status === "failed" && x.accPubKey.includes(currentAccountPubKey))
+        if(AppState.txnCosignLog.length>0){
+            sessionStorage.setItem("txnFailedCosignLog", JSON.stringify(cosignFailedTxn))
+        }
+    }else{
+        let concatFailedTxns = storeCosignFailedTxn.concat(cosignFailedTxn.filter((x) => x.status === "failed"))
+        let filterFailedTxns = concatFailedTxns.filter((value: { txnHash: string; }, index: number) => index === concatFailedTxns.findIndex((t: { txnHash: string; }) => (t.txnHash === value.txnHash)))
+        sessionStorage.setItem("txnFailedCosignLog", JSON.stringify(filterFailedTxns))
+        cosignFailedTxn = filterFailedTxns.filter((x: { accPubKey: string | string[]; }) => x.accPubKey.includes(currentAccountPubKey))
+    }
+
     let swapFailedTxn = AppState.txnSwapLog
-        .filter((x) =>  x.status === "failed" && x.accPubKey === currentAccountPubKey)
+    if(!storeSwapFailedTxn){
+        swapFailedTxn.filter((x) =>  x.status === "failed" && x.accPubKey === currentAccountPubKey)
+        if(AppState.txnCosignLog.length>0){
+            sessionStorage.setItem("txnFailedSwapLog", JSON.stringify(swapFailedTxn))
+        }
+    }
+    else{
+        let concatFailedTxns = storeSwapFailedTxn.concat(swapFailedTxn.filter((x) => x.status === "failed"))
+        let filterFailedTxns = concatFailedTxns.filter((value: { txnHash: string; }, index: number) => index === concatFailedTxns.findIndex((t: { txnHash: string; }) => (t.txnHash === value.txnHash)))
+        sessionStorage.setItem("txnFailedSwapLog", JSON.stringify(filterFailedTxns))
+        swapFailedTxn = filterFailedTxns.filter((x: { accPubKey: string; }) => x.accPubKey === currentAccountPubKey)
+    }
 
     let allTxnStatus = []
 
