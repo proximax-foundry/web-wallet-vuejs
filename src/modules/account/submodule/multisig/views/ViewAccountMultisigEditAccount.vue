@@ -25,6 +25,7 @@
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>
            <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
+           <div class=" error error_box mb-5" v-if="passwordErr!=''">{{ passwordErr }}</div>
         </div>
         <div class="mt-4"></div>
 
@@ -137,6 +138,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref('');
+    const passwordErr = ref('');
     const fundStatus = ref(false);
     
     const passwd = ref('');
@@ -260,9 +262,15 @@ export default {
       }
       return multiSign.checkIsMultiSig(acc.value.address)
     })
-    const disableSend = computed(() => !(
-      isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) &&  err.value == ''|| err.value== t('general.walletPasswordInvalid',{name : wallet?wallet.name:''}) && (showAddressError.value.indexOf(true) == -1) && (numDeleteUser.value >= 0) && (numApproveTransaction.value > 0)
-    ));
+    const disableSend = computed(() => 
+      !isMultisig.value || 
+      onPartial.value || 
+      !passwd.value.match(passwdPattern) || 
+      err.value || 
+      showAddressError.value.indexOf(true) != -1 || 
+      numDeleteUser.value < 0 || 
+      numApproveTransaction.value < 0
+    );
     const disabledPassword = computed(() => !(!onPartial.value && isMultisig.value && !fundStatus.value && isCoSigner.value));
     const isCoSigner = computed(() => {
       return getWalletCosigner().hasCosigner;
@@ -317,10 +325,10 @@ export default {
       let modifyStatus = await multiSign.modifyMultisigAccount(selectedCosignPublicKey.value,coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value,acc.value, passwd.value);
        console.log(modifyStatus);
       if(!modifyStatus){
-        err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
+        passwordErr.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
-        err.value = '';
+        passwordErr.value = '';
         /* var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play(); */
         clear();
@@ -766,7 +774,8 @@ export default {
       selectedAccAdd,
       accBalance,
       getMultiSigCosigner,
-      checkCosignBalance
+      checkCosignBalance,
+      passwordErr
     };
   },
 }
