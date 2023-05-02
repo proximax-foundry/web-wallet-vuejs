@@ -343,7 +343,7 @@ home:
   assetDescription: Create your own unique token
   beginnerGuide: 初学者指南
   contactTeam: 联系我们的支持团队
-  copyright: Copyright 2022 ProximaX®. All rights reserved.
+  copyright: Copyright © 2023. All Rights Reserved.
   gettingStarted: 入门
   helpdesk: 服务台
   home: 首页
@@ -358,9 +358,9 @@ home:
   siriusChain: 什么是天狼星链？
   siriusChainTitle: 开始在ProximaX天狼星区块链层上构建应用程序
   switchDefault: 你的默认账户已切换为
-  title: ProximaX Sirius Wallet
+  title: Sirius Wallet
   titleDescription: >-
-    A highly secure and intuitive wallet and gateway to the ProximaX Sirius platform
+    A highly secure and intuitive wallet and gateway to the Sirius platform
   transferDescription: 发送资产到另一个账户
   version: 版本
 multisig:
@@ -559,7 +559,7 @@ swap:
   step2: 'Step 2: Validate your Sirius address'
   step3: 'Step 3: Initiate swap'
   swapAmount: Swap AMount
-  swapBscToSirius: Swap from BSC to ProximaX Sirius Chain
+  swapBscToSirius: Swap from BSC to Sirius Chain
   swapDetails: Swap Details
   swapInProgress: Swap in progress. Please wait...
   swapInitiated: Swap has already been initiated earlier.
@@ -577,7 +577,7 @@ swap:
     Transaction Hash.
   swapNotFound: Swap not found
   swapOperationFail: Swap operation failed
-  swapSiriusToBsc: Swap from ProximaX Sirius Chain to BSC
+  swapSiriusToBsc: Swap from Sirius Chain to BSC
   swapStarted: The swap process has already started!
   swapSuccess: Swap is successful
   swapSuccess2: Swap is already in progress or has been completed successfully.

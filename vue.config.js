@@ -36,7 +36,7 @@ module.exports = {
       config
           .plugin('html')
           .tap(args => {
-              args[0].title = "ProximaX Web Wallet";
+              args[0].title = "Sirius Wallet";
               return args;
           })
     }
