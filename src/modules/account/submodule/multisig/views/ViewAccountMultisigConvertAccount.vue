@@ -294,9 +294,9 @@ export default {
       isMultisig.value || 
       onPartial.value || 
       !passwd.value.match(passwdPattern) || 
-      !coSign.value.length > 0  ||  
+      coSign.value.length == 0  ||  
       err.value || 
-      !((showAddressError.value.every(value => value == false)) == true) || 
+      (showAddressError.value.every(value => value == false)) == false || 
       numDeleteUser.value == 0 || 
       numApproveTransaction.value == 0
     );
