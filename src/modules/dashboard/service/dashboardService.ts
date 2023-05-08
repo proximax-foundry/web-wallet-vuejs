@@ -5729,7 +5729,7 @@ export class DashboardService {
         if(divisibility === 0){
             return amount;
         }
-        return amount > 0 ? amount / Math.pow(10, divisibility) : 0;
+        return amount / Math.pow(10, divisibility);
     }
 }
 
