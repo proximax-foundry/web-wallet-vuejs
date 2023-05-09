@@ -25,42 +25,13 @@
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import { computed, ref, watch } from "vue";
 import FailedTxnDT from '@/modules/dashboard/components/TransactionDataTable/FailedTxnDT.vue';
-import { AppState } from "@/state/appState";
+import { AppState, TxnActivityLog, TxnCosignLog, TxnSwapLog } from "@/state/appState";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { walletState } from "@/state/walletState";
 
 defineProps({
     address: String,
 })
-
-interface TxnActivityLog{
-    txnHash: string,
-    accPubKey: string,
-    announced: boolean,
-    status: string,
-    statusMsg: string,
-    relatedAddress: string[],
-    checkedNum: number
-}
-
-interface TxnCosignLog{
-    txnHash: string,
-    accPubKey: string[],
-    announced: boolean,
-    status: string,
-    statusMsg: string,
-    relatedAddress: string[],
-    checkedNum: number
-}
-
-interface TxnSwapLog{
-    txnHash: string,
-    accPubKey: string,
-    status: string,
-    statusMsg: string,
-    relatedAddress: string[],
-    checkedNum: number
-}
 
 const txnStatus = ref([])
 const txnFailed = computed(() => {
@@ -82,22 +53,13 @@ const checkTxnStatus = async () => {
     const currentAccountPubKey = currentAccount? currentAccount.publicKey: ""
 
     if(AppState.txnActivityLog.length>0){
-        let fetchFailedTxn = JSON.parse(sessionStorage.getItem("txnFailedActivityLog")) || []
-        let concatFailedTxns = fetchFailedTxn.concat(AppState.txnActivityLog.filter((x) => x.status === "failed"))
-        let filterFailedTxns = concatFailedTxns.filter((value: { txnHash: string; }, index: number) => index === concatFailedTxns.findIndex((t: { txnHash: string; }) => (t.txnHash === value.txnHash)))
-        sessionStorage.setItem("txnFailedActivityLog", JSON.stringify(filterFailedTxns))
+        sessionStorage.setItem("txnFailedActivityLog", JSON.stringify(AppState.txnActivityLog.filter((x) => x.status === "failed")))
     }
     if(AppState.txnCosignLog.length>0){
-        let fetchFailedTxn = JSON.parse(sessionStorage.getItem("txnFailedCosignLog")) || []
-        let concatFailedTxns = fetchFailedTxn.concat(AppState.txnCosignLog.filter((x) => x.status === "failed"))
-        let filterFailedTxns = concatFailedTxns.filter((value: { txnHash: string; }, index: number) => index === concatFailedTxns.findIndex((t: { txnHash: string; }) => (t.txnHash === value.txnHash)))
-        sessionStorage.setItem("txnFailedCosignLog", JSON.stringify(filterFailedTxns))
+        sessionStorage.setItem("txnFailedCosignLog", JSON.stringify(AppState.txnCosignLog.filter((x) => x.status === "failed")))
     }
     if(AppState.txnSwapLog.length>0){
-        let fetchFailedTxn = JSON.parse(sessionStorage.getItem("txnFailedSwapLog")) || []
-        let concatFailedTxns = fetchFailedTxn.concat(AppState.txnSwapLog.filter((x) => x.status === "failed"))
-        let filterFailedTxns = concatFailedTxns.filter((value: { txnHash: string; }, index: number) => index === concatFailedTxns.findIndex((t: { txnHash: string; }) => (t.txnHash === value.txnHash)))
-        sessionStorage.setItem("txnFailedSwapLog", JSON.stringify(filterFailedTxns))
+        sessionStorage.setItem("txnFailedSwapLog", JSON.stringify(AppState.txnSwapLog.filter((x) => x.status === "failed")))
     }
 
     let storeActivityFailedTxn :TxnActivityLog[] = JSON.parse(sessionStorage.getItem("txnFailedActivityLog")) || []
