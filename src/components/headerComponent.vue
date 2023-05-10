@@ -432,6 +432,21 @@ export default defineComponent({
       }
     }
 
+    const setFailedTxns = (failedTxn) => {
+      let existingFailedTxns = JSON.parse(sessionStorage.getItem("allFailedTransactions"))
+          if(existingFailedTxns){
+              let existingFailedTxnsHash = existingFailedTxns.map((x) => x.txnHash)
+              let existingFailedTxnsPubKey = existingFailedTxns.map((x) => x.accPubKey)
+              if(!existingFailedTxnsHash.includes(failedTxn.txnHash) || !existingFailedTxnsPubKey.includes(failedTxn.accPubKey)){
+                existingFailedTxns.push(failedTxn)
+                sessionStorage.setItem("allFailedTransactions", JSON.stringify(existingFailedTxns))
+              }
+          }
+          else{
+              sessionStorage.setItem("allFailedTransactions", JSON.stringify([failedTxn]))
+          }
+    }
+
     const checkTxnStatus = async ()=>{
 
       let endStatuses = ["failed", transactionGroupType.CONFIRMED];
@@ -482,6 +497,7 @@ export default defineComponent({
              
               if(txnActivity.status === "failed"){
                 txnActivity.statusMsg = transactionStatuses[i].status;
+                setFailedTxns(txnActivity)
               }
               else if(txnActivity.status === transactionGroupType.CONFIRMED){
                 txnHashesConfirmed.push(txnActivity.txnHash);
@@ -500,6 +516,7 @@ export default defineComponent({
              
               if(txnCosign.status === "failed"){
                 txnCosign.statusMsg = transactionStatuses[i].status;
+                setFailedTxns(txnCosign)
               }
               else if(txnCosign.status === transactionGroupType.CONFIRMED){
                 txnHashesConfirmed.push(txnCosign.txnHash);
@@ -519,6 +536,7 @@ export default defineComponent({
              
               if(txnSwap.status === "failed"){
                 txnSwap.statusMsg = transactionStatuses[i].status;
+                setFailedTxns(txnSwap)
               }
               else if(txnSwap.status === transactionGroupType.CONFIRMED){
                 txnHashesConfirmed.push(txnSwap.txnHash);

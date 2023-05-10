@@ -13,7 +13,7 @@ interface NativeToken{
     creator: string
 }
 
-export interface TxnActivityLog{
+interface TxnActivityLog{
     txnHash: string,
     accPubKey: string,
     announced: boolean,
@@ -23,7 +23,7 @@ export interface TxnActivityLog{
     checkedNum: number
 }
 
-export interface TxnCosignLog{
+interface TxnCosignLog{
     txnHash: string,
     accPubKey: string[],
     announced: boolean,
@@ -33,7 +33,7 @@ export interface TxnCosignLog{
     checkedNum: number
 }
 
-export interface TxnSwapLog{
+interface TxnSwapLog{
     txnHash: string,
     accPubKey: string,
     status: string,

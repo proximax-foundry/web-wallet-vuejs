@@ -25,7 +25,7 @@
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import { computed, ref, watch } from "vue";
 import FailedTxnDT from '@/modules/dashboard/components/TransactionDataTable/FailedTxnDT.vue';
-import { AppState, TxnActivityLog, TxnCosignLog, TxnSwapLog } from "@/state/appState";
+import { AppState } from "@/state/appState";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { walletState } from "@/state/walletState";
 
@@ -52,78 +52,11 @@ const checkTxnStatus = async () => {
 
     const currentAccountPubKey = currentAccount? currentAccount.publicKey: ""
 
-    if(AppState.txnActivityLog.length>0){
-        let existingFailedTxns :TxnActivityLog[] = JSON.parse(sessionStorage.getItem("txnFailedActivityLog"))
-        let filterFailedTxns = AppState.txnActivityLog.filter((x) => x.status === "failed")
-        if(existingFailedTxns){
-            let existingFailedTxnsHash = existingFailedTxns.map((x)=> x.txnHash)
-            filterFailedTxns.forEach(value => {
-                if(!existingFailedTxnsHash.includes(value.txnHash)){
-                    existingFailedTxns.push(value)
-                    sessionStorage.setItem("txnFailedActivityLog", JSON.stringify(existingFailedTxns))
-                }
-            });
-        }
-        else{
-            sessionStorage.setItem("txnFailedActivityLog", JSON.stringify(filterFailedTxns))
-        }
-    }
-    if(AppState.txnCosignLog.length>0){
-        let existingFailedTxns :TxnCosignLog[] = JSON.parse(sessionStorage.getItem("txnFailedCosignLog"))
-        let filterFailedTxns = AppState.txnCosignLog.filter((x) => x.status === "failed")
-        if(existingFailedTxns){
-            let existingFailedTxnsHash = existingFailedTxns.map((x)=> x.txnHash)
-            filterFailedTxns.forEach(value => {
-                if(!existingFailedTxnsHash.includes(value.txnHash)){
-                    existingFailedTxns.push(value)
-                    sessionStorage.setItem("txnFailedCosignLog", JSON.stringify(existingFailedTxns))
-                }
-            });
-        }
-        else{
-            sessionStorage.setItem("txnFailedCosignLog", JSON.stringify(filterFailedTxns))
-        }
-    }
-    if(AppState.txnSwapLog.length>0){
-        let existingFailedTxns :TxnSwapLog[] = JSON.parse(sessionStorage.getItem("txnFailedSwapLog"))
-        let filterFailedTxns = AppState.txnSwapLog.filter((x) => x.status === "failed")
-        if(existingFailedTxns){
-            let existingFailedTxnsHash = existingFailedTxns.map((x)=> x.txnHash)
-            filterFailedTxns.forEach(value => {
-                if(!existingFailedTxnsHash.includes(value.txnHash)){
-                    existingFailedTxns.push(value)
-                    sessionStorage.setItem("txnFailedSwapLog", JSON.stringify(existingFailedTxns))
-                }
-            });
-        }
-        else{
-            sessionStorage.setItem("txnFailedSwapLog", JSON.stringify(filterFailedTxns))
-        }
-    }
+    let fetchAllFailedTxn = JSON.parse(sessionStorage.getItem("allFailedTransactions")) || []
 
-    let storeActivityFailedTxn :TxnActivityLog[] = JSON.parse(sessionStorage.getItem("txnFailedActivityLog")) || []
-    let storeCosignFailedTxn :TxnCosignLog[] = JSON.parse(sessionStorage.getItem("txnFailedCosignLog")) || []
-    let storeSwapFailedTxn :TxnSwapLog[] = JSON.parse(sessionStorage.getItem("txnFailedSwapLog")) || []
+    let allFailedTxns = fetchAllFailedTxn.filter((x: { accPubKey: string | string[]; }) => x.accPubKey.includes(currentAccountPubKey))
 
-    let activityFailedTxn = storeActivityFailedTxn.filter((x: { accPubKey: string; }) => x.accPubKey === currentAccountPubKey)
-
-    let cosignFailedTxn = storeCosignFailedTxn.filter((x: { accPubKey: string | string[]; }) => x.accPubKey.includes(currentAccountPubKey))
-
-    let swapFailedTxn = storeSwapFailedTxn.filter((x: { accPubKey: string; }) =>  x.accPubKey === currentAccountPubKey)
-
-    let allTxnStatus = []
-
-    if(activityFailedTxn.length>0){
-        allTxnStatus.push(activityFailedTxn);
-    }
-    if(cosignFailedTxn.length>0){
-        allTxnStatus.push(cosignFailedTxn);
-    }
-    if(swapFailedTxn.length>0){
-        allTxnStatus.push(swapFailedTxn);
-    }
-
-    txnStatus.value = allTxnStatus.flat()
+    txnStatus.value = allFailedTxns.flat()
 };
 
 const init = async () => {
