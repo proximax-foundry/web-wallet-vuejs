@@ -53,13 +53,52 @@ const checkTxnStatus = async () => {
     const currentAccountPubKey = currentAccount? currentAccount.publicKey: ""
 
     if(AppState.txnActivityLog.length>0){
-        sessionStorage.setItem("txnFailedActivityLog", JSON.stringify(AppState.txnActivityLog.filter((x) => x.status === "failed")))
+        let existingFailedTxns :TxnActivityLog[] = JSON.parse(sessionStorage.getItem("txnFailedActivityLog"))
+        let filterFailedTxns = AppState.txnActivityLog.filter((x) => x.status === "failed")
+        if(existingFailedTxns){
+            let existingFailedTxnsHash = existingFailedTxns.map((x)=> x.txnHash)
+            filterFailedTxns.forEach(value => {
+                if(!existingFailedTxnsHash.includes(value.txnHash)){
+                    existingFailedTxns.push(value)
+                    sessionStorage.setItem("txnFailedActivityLog", JSON.stringify(existingFailedTxns))
+                }
+            });
+        }
+        else{
+            sessionStorage.setItem("txnFailedActivityLog", JSON.stringify(filterFailedTxns))
+        }
     }
     if(AppState.txnCosignLog.length>0){
-        sessionStorage.setItem("txnFailedCosignLog", JSON.stringify(AppState.txnCosignLog.filter((x) => x.status === "failed")))
+        let existingFailedTxns :TxnCosignLog[] = JSON.parse(sessionStorage.getItem("txnFailedCosignLog"))
+        let filterFailedTxns = AppState.txnCosignLog.filter((x) => x.status === "failed")
+        if(existingFailedTxns){
+            let existingFailedTxnsHash = existingFailedTxns.map((x)=> x.txnHash)
+            filterFailedTxns.forEach(value => {
+                if(!existingFailedTxnsHash.includes(value.txnHash)){
+                    existingFailedTxns.push(value)
+                    sessionStorage.setItem("txnFailedCosignLog", JSON.stringify(existingFailedTxns))
+                }
+            });
+        }
+        else{
+            sessionStorage.setItem("txnFailedCosignLog", JSON.stringify(filterFailedTxns))
+        }
     }
     if(AppState.txnSwapLog.length>0){
-        sessionStorage.setItem("txnFailedSwapLog", JSON.stringify(AppState.txnSwapLog.filter((x) => x.status === "failed")))
+        let existingFailedTxns :TxnSwapLog[] = JSON.parse(sessionStorage.getItem("txnFailedSwapLog"))
+        let filterFailedTxns = AppState.txnSwapLog.filter((x) => x.status === "failed")
+        if(existingFailedTxns){
+            let existingFailedTxnsHash = existingFailedTxns.map((x)=> x.txnHash)
+            filterFailedTxns.forEach(value => {
+                if(!existingFailedTxnsHash.includes(value.txnHash)){
+                    existingFailedTxns.push(value)
+                    sessionStorage.setItem("txnFailedSwapLog", JSON.stringify(existingFailedTxns))
+                }
+            });
+        }
+        else{
+            sessionStorage.setItem("txnFailedSwapLog", JSON.stringify(filterFailedTxns))
+        }
     }
 
     let storeActivityFailedTxn :TxnActivityLog[] = JSON.parse(sessionStorage.getItem("txnFailedActivityLog")) || []
