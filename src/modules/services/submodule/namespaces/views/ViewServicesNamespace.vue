@@ -30,17 +30,9 @@
   </div>
 </template>
 <script>
-import { computed, ref, watch, getCurrentInstance } from 'vue';
+import { ref, getCurrentInstance } from 'vue';
 // import { useRouter } from "vue-router";
-import { ChainProfileConfig } from "@/models/stores/";
 import { walletState } from "@/state/walletState";
-import { Wallet } from "@/models/wallet";
-import { networkState } from "@/state/networkState";
-import { Currency } from "@/models/currency";
-import { Helper } from '@/util/typeHelper';
-import { ChainUtils } from '@/util/chainUtils';
-import { AssetsUtils } from '@/util/namespaceUtils';
-import { WalletUtils } from '@/util/walletUtils';
 import NamespaceDataTable from '@/modules/services/submodule/namespaces/components/NamespaceDataTable.vue';
 
 export default {

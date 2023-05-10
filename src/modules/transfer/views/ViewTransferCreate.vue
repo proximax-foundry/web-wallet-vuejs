@@ -85,17 +85,13 @@
 <script >
 import { Helper } from "@/util/typeHelper";
 import { computed, ref, getCurrentInstance, watch, effect } from "vue";
-import TextInput from "@/components/TextInput.vue";
 import PasswordInput from "@/components/PasswordInput.vue";
-import SelectInputPlugin from "@/components/SelectInputPlugin.vue";
 import MosaicInput from "@/modules/transfer/components/MosaicInput.vue";
-import SupplyInput from "@/components/SupplyInput.vue";
 import SelectMultisigInput from "@/components/SelectMultisigInput.vue"
 import TransferTextareaInput from "@/modules/transfer/components/TransferTextareaInput.vue";
 import {
   createTransaction,
-  makeTransaction,
-  enableACT
+  makeTransaction
 } from "@/util/transfer"; //getMosaicsAllAccounts
 import AddContactModal from "@/modules/transfer/components/AddContactModal.vue";
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";

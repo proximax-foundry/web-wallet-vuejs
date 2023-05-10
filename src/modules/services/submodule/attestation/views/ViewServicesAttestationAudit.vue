@@ -46,7 +46,7 @@
 </template>
 <script>
 import { ref , computed} from "vue";
-import {verifyHash, fileTour, ResultAuditInterface} from '@/util/attestationUtils'
+import { verifyHash, fileTour } from '@/util/attestationUtils'
 import { TransactionAPI } from '@/models/REST/transaction';
 import { networkState } from '@/state/networkState';
 import { NetworkStateUtils } from '@/state/utils/networkStateUtils';

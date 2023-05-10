@@ -42,7 +42,7 @@
   import { computed, defineComponent, ref, getCurrentInstance } from 'vue';
   import { toSvg } from "jdenticon";
   import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
-import { watch } from 'fs';
+
   export default defineComponent({
   name: 'SelectInputAccount',
   emits:[

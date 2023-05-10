@@ -13,22 +13,18 @@ import { MultisigInfo } from "../models/multisigInfo"
 import {
     SimpleWallet, Password, RawAddress, Convert, Crypto,
     WalletAlgorithm, PublicAccount, Account, NetworkType,
-    AggregateTransaction, CosignatureTransaction, MosaicNonce, NamespaceInfo,
-    NamespaceId, Address, AccountInfo, MosaicId, AliasType, Transaction,
-    MultisigAccountGraphInfo, MultisigAccountInfo, QueryParams,
+    AggregateTransaction, CosignatureTransaction, NamespaceInfo,
+    NamespaceId, Address, AccountInfo, MosaicId, AliasType,
+    MultisigAccountGraphInfo,
     MosaicInfo,
-    UInt64,
     TransactionQueryParams,
-    TransactionType,
     TransactionGroupType,
     TransactionSearch,
-    MosaicDefinitionTransaction,
     MosaicSearch,
     MosaicQueryParams,
     MosaicNames,
     Order_v2,
     TransactionSortingField,
-    MosaicSortingField,
     MosaicCreatorFilters
 } from "tsjs-xpx-chain-sdk";
 import { Helper, LooseObject } from "./typeHelper";
@@ -43,7 +39,6 @@ import { Label } from "@/models/label"
 import { AssetInfo } from "@/models/assetInfo"
 import { OtherAcountType } from "@/models/const/otherAccountType"
 
-const config = require("@/../config/config.json");
 const dataPerRequest = 50;
 const assetInfoSessionKey = "assetsInfo";
 const namespaceInfoSessionKey = "namespacesInfo";
@@ -545,17 +540,7 @@ export class WalletUtils {
     static verifyWalletPassword(name: string, networkName: string, password: string): boolean {
         const wallet = walletState.wallets.filterByNetworkNameAndName(networkName, name);
         if (!wallet) {
-            if (config.debug) {
-                console.error(
-                    "wallet not found",
-                    name, networkName
-                );
-            }
             return false;
-        }
-
-        if (config.debug) {
-            console.log("verifyWalletPassword triggered with", name, networkName);
         }
 
         const account = wallet.accounts[0];

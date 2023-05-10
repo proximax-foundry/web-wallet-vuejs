@@ -28,13 +28,9 @@ import PasswordInput from '@/components/PasswordInput.vue'
 import { networkState } from "@/state/networkState";
 import { walletState } from '@/state/walletState';
 import { WalletUtils } from '@/util/walletUtils';
-import { ChainUtils } from '@/util/chainUtils';
 import { WalletAccount } from "@/models/walletAccount"
-import { Helper } from "@/util/typeHelper";
-import { Account, Address, MosaicId, UInt64 } from "tsjs-xpx-chain-sdk";
+import { Account } from "tsjs-xpx-chain-sdk";
 import {useI18n} from 'vue-i18n'
-import { Asset } from '@/models/asset';
-import { Reconstruct } from '@/models/wallets';
 import { AppState } from '@/state/appState';
 
 
