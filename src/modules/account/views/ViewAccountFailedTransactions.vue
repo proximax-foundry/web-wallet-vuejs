@@ -52,26 +52,11 @@ const checkTxnStatus = async () => {
 
     const currentAccountPubKey = currentAccount? currentAccount.publicKey: ""
 
-    let activityFailedTxn = AppState.txnActivityLog
-        .filter((x) => x.status === "failed" && x.accPubKey === currentAccountPubKey)
-    let cosignFailedTxn = AppState.txnCosignLog
-        .filter((x) => x.status === "failed" && x.accPubKey.includes(currentAccountPubKey))
-    let swapFailedTxn = AppState.txnSwapLog
-        .filter((x) =>  x.status === "failed" && x.accPubKey === currentAccountPubKey)
+    let fetchAllFailedTxn = JSON.parse(sessionStorage.getItem("allFailedTransactions")) || []
 
-    let allTxnStatus = []
+    let allFailedTxns = fetchAllFailedTxn.filter((x: { accPubKey: string | string[]; }) => x.accPubKey.includes(currentAccountPubKey))
 
-    if(activityFailedTxn.length>0){
-        allTxnStatus.push(activityFailedTxn);
-    }
-    if(cosignFailedTxn.length>0){
-        allTxnStatus.push(cosignFailedTxn);
-    }
-    if(swapFailedTxn.length>0){
-        allTxnStatus.push(swapFailedTxn);
-    }
-
-    txnStatus.value = allTxnStatus.flat()
+    txnStatus.value = allFailedTxns.flat()
 };
 
 const init = async () => {
