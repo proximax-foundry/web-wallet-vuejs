@@ -435,9 +435,8 @@ export default defineComponent({
     const setFailedTxns = (failedTxn) => {
       let existingFailedTxns = JSON.parse(sessionStorage.getItem("allFailedTransactions"))
           if(existingFailedTxns){
-              let existingFailedTxnsHash = existingFailedTxns.map((x) => x.txnHash)
-              let existingFailedTxnsPubKey = existingFailedTxns.map((x) => x.accPubKey)
-              if(!existingFailedTxnsHash.includes(failedTxn.txnHash) || !existingFailedTxnsPubKey.includes(failedTxn.accPubKey)){
+              let findFailedTxnsHashAndPubKey = existingFailedTxns.find((x) => x.txnHash === failedTxn.txnHash && x.accPubKey === failedTxn.accPubKey)
+              if(!findFailedTxnsHashAndPubKey){
                 existingFailedTxns.push(failedTxn)
                 sessionStorage.setItem("allFailedTransactions", JSON.stringify(existingFailedTxns))
               }
