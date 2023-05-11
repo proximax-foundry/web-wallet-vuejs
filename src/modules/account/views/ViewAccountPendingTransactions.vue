@@ -27,7 +27,7 @@ import { listenerState } from "@/state/listenerState";
 import { walletState } from "@/state/walletState";
 import { Helper } from "@/util/typeHelper";
 import { TransactionMapping } from "tsjs-xpx-chain-sdk";
-import { computed, reactive, ref, watch } from "vue";
+import { computed, ref, watch, watchEffect } from "vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { TransactionUtils } from "@/util/transactionUtils";
 import Accordion from 'primevue/accordion';
@@ -157,6 +157,12 @@ import AccordionTab from 'primevue/accordiontab';
       });
     }
 
+    watchEffect(() => {
+      setInterval(() => {
+        init()
+      }, 1000)
+    })
+    
 </script>
 <style scoped>
 :deep(.p-accordion-header,.p-highlight) {

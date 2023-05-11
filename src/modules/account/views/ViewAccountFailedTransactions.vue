@@ -28,7 +28,7 @@
 
 <script setup lang='ts'>
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, watchEffect } from "vue";
 import FailedTxnDT from '@/modules/dashboard/components/TransactionDataTable/FailedTxnDT.vue';
 import { AppState } from "@/state/appState";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
@@ -42,30 +42,20 @@ defineProps({
 
 const txnStatus = ref([])
 const isTransactions = ref(true);
-const updatedFailedTxns = ref(false)
 const txnFailed = computed(() => {
-    updatedFailedTxns.value
     let txns = []
     txns = txnStatus.value
-    console.log(txns)
     return txns
 })
 
-const hasData = computed(() => {
-  return txnFailed.value.length > 0 ? 'Yes' : 'No'
-})
-
-
 let checkTransactions = async() =>{
-    console.log(hasData)
-         if(txnFailed.value.length>0){
-            isTransactions.value = false
-        }
-        else{
-            isTransactions.value = true
-        }
+    if(txnFailed.value.length>0){
+        isTransactions.value = false
     }
-    console.log(isTransactions.value)
+    else{
+        isTransactions.value = true
+    }
+}
 
 const checkTxnStatus = async () => {
     if (!AppState.chainAPI) {
@@ -99,7 +89,6 @@ const checkTxnStatus = async () => {
     }
 
     txnStatus.value = allTxnStatus.flat()
-    updatedFailedTxns.value = true
 };
 
 const init = async () => {
@@ -117,6 +106,13 @@ else {
         }
     });
 }
+
+watchEffect(() => {
+      setInterval(() => {
+        init()
+      }, 1000)
+    })
+
 </script>
 <style scoped>
 :deep(.p-accordion-header,.p-highlight) {
