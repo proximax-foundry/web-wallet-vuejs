@@ -5,7 +5,7 @@ import {
     ChainHttp, EmptyMessage,
     BlockHttp, TransactionSortingField, Order_v2, NetworkHttp,
     Deadline, NetworkType, Account, PublicAccount, NamespaceHttp, MosaicHttp, HashLockTransaction,
-    Mosaic, UInt64, TransferTransaction, AggregateTransaction, LimitType, MosaicId, TransactionBuilder, TransactionBuilderFactory, InnerTransaction, SignedTransaction
+    Mosaic, UInt64, TransferTransaction, AggregateTransaction, LimitType, MosaicId, TransactionBuilder, TransactionBuilderFactory, InnerTransaction, SignedTransaction, PlainMessage
 } from 'tsjs-xpx-chain-sdk';
 import { bignumber, sum, multiply, number as mathNumber } from "mathjs";
 import { ChronoUnit } from '@js-joda/core';
@@ -17,6 +17,7 @@ import { AppState } from "../state/appState";
 export interface DistributeListInterface {
     publicKeyOrAddress: string
     amount: number
+    message: string
 }
 
 let knownToken = [{
@@ -170,7 +171,13 @@ export class Sirius {
             }
 
             let mosaicToSend = new Mosaic(assetId, UInt64.fromUint(atomicAmount))
-            let transferTxn = AppState.buildTxn!.transfer(recipient, EmptyMessage, [mosaicToSend]);
+            let message
+            if(distributionList[i].message){
+                message = PlainMessage.create(distributionList[i].message)
+            }else{
+                message = EmptyMessage
+            }
+            let transferTxn = AppState.buildTxn!.transfer(recipient, message, [mosaicToSend]);
 
             transferTxns.push(transferTxn);
         }
