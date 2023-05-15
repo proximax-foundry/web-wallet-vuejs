@@ -120,8 +120,8 @@ import { listenerState } from "@/state/listenerState";
 import { ChainUtils } from "@/util/chainUtils";
 import { useRouter } from 'vue-router';
 import { AppState } from '@/state/appState'
-import Loading from 'vue-loading-overlay';
-import 'vue-loading-overlay/dist/vue-loading.css';
+import Loading from "vue-loading-overlay";
+import "vue-loading-overlay/dist/css/index.css";
 
 export default defineComponent({
   name: 'App',
