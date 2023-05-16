@@ -201,7 +201,7 @@ let loadCSV = (e: any)=>{
           let publicKeyOrAddress = distResultCsvData[i].publicKeyOrAddress.trim().replaceAll("-","");
           let originAmount = distResultCsvData[i].amount.trim();
           let amount = parseFloat(distResultCsvData[i].amount.trim());
-          let message = distResultCsvData[i].message.slice(1,-1).trim()
+          let message = distResultCsvData[i].message.replace(/['"]+/g, '').trim()
 
           if(publicKeyOrAddress.length === 64){
             if(!Convert.isHexString(publicKeyOrAddress)){
