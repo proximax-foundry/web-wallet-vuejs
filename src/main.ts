@@ -53,7 +53,6 @@ library.add(
 );
 const app = createApp(App);
 const emitter = mitt();
-let defaultoptions = { treeName: 'blocks-tree' }
 app.config.globalProperties.emitter = emitter;
 app.use(router)
 app.use(PrimeVue);
@@ -62,7 +61,7 @@ app.use(ToastService);
 app.use(i18n);
 app.use(VWave);
 app.use(vueDebounce);
-app.use(VueBlocksTree, defaultoptions)
+app.use(VueBlocksTree /* , {treeName:'blocks-tree'} */);
 app.mount('#app');
 // Use Components
 app.component('ConfirmDialog', ConfirmDialog);

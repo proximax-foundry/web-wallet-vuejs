@@ -151,8 +151,6 @@ export interface InnerTxnDetails{
     sdas: string[];
 }
 
-const {t} = i18n.global 
-
 export class DashboardService {
 
     wallet: Wallet;
@@ -3332,16 +3330,16 @@ export class DashboardService {
                if(messageData.type){
                     switch (messageData.type) {
                         case 'Swap':
-                            newType = t('general.swap') +' (nis1-XPX)';
+                            newType = 'Swap' +' (nis1-XPX)';
                             break;
                         case 'Swap-bsc-xpx':
-                            newType = t('general.swap') +' (BSC-XPX)';
+                            newType = 'Swap' +' (BSC-XPX)';
                             break;
                         case 'Swap-xpx-bsc':
-                            newType = t('general.swap') +' (XPX-BSC)';
+                            newType = 'Swap' +' (XPX-BSC)';
                             break;
                         case 'Swap-xpx-bsc-fees':
-                            newType = t('dashboard.swapFee') +' (XPX-BSC)';
+                            newType = 'Swap Fee' +' (XPX-BSC)';
                             break;
                         default:
                             break;

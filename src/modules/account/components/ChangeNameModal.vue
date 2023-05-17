@@ -43,6 +43,7 @@ import TextInput from '@/components/TextInput.vue'
 import TextInputClean from '@/components/TextInputClean.vue';
 import { Address } from "tsjs-xpx-chain-sdk";
 import { AddressBook } from "@/models/addressBook";
+import { AppState } from "@/state/appState";
 
 const props = defineProps({
     isOther: Boolean,
@@ -129,7 +130,22 @@ const saveContact = () => {
     toggleModal.value = false
     }
 }
-
+const publicKey = ref('');
+const getPublicKey = async(address) =>{
+      try{
+        let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
+        if(accInfo.publicKey == "0000000000000000000000000000000000000000000000000000000000000000"){
+          publicKey.value = null
+        }
+        else{
+          publicKey.value = accInfo.publicKey
+        }
+      }
+      catch{
+        publicKey.value = null
+      }
+    }
+getPublicKey(props.address)
 const editContact = ()=>{
     const wallet = walletState.currentLoggedInWallet
     if(!wallet){
@@ -148,7 +164,7 @@ const editContact = ()=>{
     }else if(findAddressInTempContact!=undefined){
         err.value = t('addressBook.addressExist');
     }else{
-        walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value.trim(), address: Address.createFromRawAddress(props.address).plain(),group:'-none-'});
+        walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value.trim(), address: Address.createFromRawAddress(props.address).plain(), group:'-none-', publicKey: publicKey.value});
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         err.value = '';
         contactName.value = ''

@@ -32,127 +32,125 @@ import { ChainConfigUtils } from "./chainConfigUtils";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { AnnounceType, AutoAnnounceSignedTransaction, HashAnnounceBlock } from "@/state/listenerState";
 import { networkState } from "@/state/networkState";
-import i18n from "@/i18n";
 import { walletState } from "@/state/walletState";
 
 
-const {t} = i18n.global
 export const transactionTypeName = {
   transfer: {
     id: TransactionType.TRANSFER,
-    name: t('general.transfer')
+    name: 'Transfer'
   },
   registerNameSpace: {
     id: TransactionType.REGISTER_NAMESPACE,
-    name: t('namespace.registerNamespace')
+    name: 'Register Namespace'
   },
   mosaicDefinition: {
     id: TransactionType.MOSAIC_DEFINITION,
-    name: t('transaction.sdaDefinition')
+    name: 'Mosaic Definition'
   },
   mosaicSupplyChange: {
     id: TransactionType.MOSAIC_SUPPLY_CHANGE,
-    name: t('transaction.sdaSupplyChange')
+    name: 'Mosaic Supply Change'
   },
   modifyMultisigAccount: {
     id: TransactionType.MODIFY_MULTISIG_ACCOUNT,
-    name: t('transaction.modifyMultisig')
+    name: 'Modify Multisig Account'
   },
   aggregateComplete: {
     id: TransactionType.AGGREGATE_COMPLETE,
-    name: t('transaction.aggregateComplete')
+    name: 'Aggregate Complete'
   },
   aggregateBonded: {
     id: TransactionType.AGGREGATE_BONDED,
-    name: t('transaction.aggregateBonded')
+    name: 'Aggregate Bonded'
   },
   mosaicAlias: {
     id: TransactionType.MOSAIC_ALIAS,
-    name: t('transaction.sdaAlias')
+    name: 'Mosaic Alias'
   },
   addressAlias: {
     id: TransactionType.ADDRESS_ALIAS,
-    name: t('transaction.addressAlias')
+    name: 'Address Alias'
   },
   lock: {
     id: TransactionType.LOCK,
-    name: t('general.lockFund')
+    name: 'LockFund'
   },
   accountLink: {
     id: TransactionType.LINK_ACCOUNT,
-    name: t('transaction.accountLink')
+    name: 'Account Link'
   },
   exchangeOffer: {
     id: TransactionType.EXCHANGE_OFFER,
-    name: t('transaction.exchangeOffer')
+    name: 'Exchange Offer'
   },
   addExchangeOffer: {
     id: TransactionType.ADD_EXCHANGE_OFFER,
-    name: t('transaction.addExchangeOffer')
+    name: 'Add Exchange Offer'
   },
   removeExchangeOffer: {
     id: TransactionType.REMOVE_EXCHANGE_OFFER,
-    name: t('transaction.removeExchangeOffer')
+    name: 'Remove Exchange Offer'
   },
   modifyAccountMetadata: {
     id: TransactionType.MODIFY_ACCOUNT_METADATA,
-    name: t('transaction.modifyAccMetadata')
+    name: 'Modify Account Metadata'
   },
   modifyMosaicMetadata: {
     id: TransactionType.MODIFY_MOSAIC_METADATA,
-    name: t('transaction.modifySdaMetadata')
+    name: 'Modify Asset Metadata'
   },
   modifyNamespaceMetadata: {
     id: TransactionType.MODIFY_NAMESPACE_METADATA,
-    name: t('transaction.modifyNsMetadata')
+    name: 'Modify Namespace Metadata'
   },
   modifyAccountRestrictionAddress: {
     id: TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS,
-    name: t('transaction.modifyAddressRestriction')
+    name: 'Modify Account Restriction Address'
   },
   modifyAccountRestrictionMosaic: {
     id: TransactionType.MODIFY_ACCOUNT_RESTRICTION_MOSAIC,
-    name: t('transaction.modifySdaRestriction')
+    name: 'Modify Account Restriction Asset'
   },
   modifyAccountRestrictionOperation: {
     id: TransactionType.MODIFY_ACCOUNT_RESTRICTION_OPERATION,
-    name: t('transaction.modifyOperationRestriction')
+    name: 'Modify Account Restriction Operation'
   },
   chainConfigure: {
     id: TransactionType.CHAIN_CONFIGURE,
-    name: t('transaction.chainConfigure')
+    name: 'Chain Configure'
   },
   chainUpgrade: {
     id: TransactionType.CHAIN_UPGRADE,
-    name: t('transaction.chainUpgrade')
+    name: 'Chain Upgrade'
   },
   secretLock: {
     id: TransactionType.SECRET_LOCK,
-    name: t('transaction.secretLock')
+    name: "Secret lock"
   },
   secretProof: {
     id: TransactionType.SECRET_PROOF,
-    name: t('transaction.secretProof')
+    name: "Secret proof"
   },
   modifyAccountMetadata_v2: {
     id: TransactionType.ACCOUNT_METADATA_V2,
-    name:t('transaction.accountMetadata')
+    name: 'Account Metadata'
   },
   modifyMosaicMetadata_v2: {
     id: TransactionType.MOSAIC_METADATA_V2,
-    name: t('transaction.sdaMetadata')
+    name: 'Sirius Digital Assets Metadata'
   },
   modifyNamespaceMetadata_v2: {
     id: TransactionType.NAMESPACE_METADATA_V2,
-    name: t('transaction.namespaceMetadata')
+    name: 'Namespace Metadata'
   },
   modifyMosaicLevy: {
     id: TransactionType.MODIFY_MOSAIC_LEVY,
-    name: t('transaction.modifySdaLevy')
+    name: 'Modify Mosaic Levy'
   },
   removeRemoveLevy: {
     id: TransactionType.REMOVE_MOSAIC_LEVY,
-    name: t('transaction.removeSdaLevy')
+    name: 'Remove Mosaic Levy'
   }
 };
 

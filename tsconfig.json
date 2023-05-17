@@ -16,9 +16,6 @@
     "noImplicitAny": false,
     "baseUrl": ".",
     "strictNullChecks": false,
-    "types": [
-      "webpack-env"
-    ],
     "paths": {
       "@/*": [
         "src/*"

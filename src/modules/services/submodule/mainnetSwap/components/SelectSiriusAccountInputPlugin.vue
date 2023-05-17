@@ -16,7 +16,7 @@
         :maxHeight="maxHeight"
         :classes="{ options: 'text-left' }"
         @deselect="$emit('update:modelValue', selected)"
-        @select="makeSelection;$emit('update:modelValue', selected);$emit('show-selection', selected)"
+        @select="makeSelection();$emit('update:modelValue', selected);$emit('show-selection', selected)"
         @clear="$emit('clear-selection')"
         ref="selectRef"
         :disabled="disabled"

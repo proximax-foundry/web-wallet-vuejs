@@ -113,11 +113,7 @@ import headerComponent from '@/components/headerComponent.vue'
 import NavigationMenu from '@/components/NavigationMenu.vue'
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
-import { Connector } from './models/connector';
-import { networkState } from './state/networkState';
 import { walletState } from "@/state/walletState";
-import { listenerState } from "@/state/listenerState";
-import { ChainUtils } from "@/util/chainUtils";
 import { useRouter } from 'vue-router';
 import { AppState } from '@/state/appState'
 import Loading from "vue-loading-overlay";

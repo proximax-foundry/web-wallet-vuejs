@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-    import {defineComponent, ref, type PropType} from 'vue';
+    import {defineComponent, ref, type PropType } from 'vue';
     import type { TreeExpandedKeys, TreeNode } from "primevue/tree";
 
     defineComponent({
