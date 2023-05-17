@@ -19,6 +19,7 @@ import { WalletUtils } from '@/util/walletUtils';
 import {useI18n} from 'vue-i18n'
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputAccount from "@/components/SelectInputAccount.vue";
+import { parse } from 'csv-parse';
 
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -166,6 +167,14 @@ let distribute = async()=>{
   txnsHash.value = allTxnsHash;
 }
 
+const removeQuote = (str) => {
+  if(str.charAt(0) === '"' && str.charAt(str.length -1) === '"'){
+    return str.slice(1,-1)
+  }else{
+    return str
+  }
+}
+
 let loadCSV = (e: any)=>{
   fileError.value = false;
   const file = e.target.files[0];
@@ -183,6 +192,22 @@ let loadCSV = (e: any)=>{
         if(lineData === ""){
           break;
         }
+        const datas = [];
+        const parser = parse(lineData, {
+          trim: true,
+          skip_empty_lines: true
+        })
+        // Use the readable stream api
+          parser.on('readable', function(){
+            let record; while ((record = parser.read()) !== null) {
+              datas.push(record);
+            }
+          })
+        // When we are done, test that the parsed records matched what expected
+          parser.on('end', function(){
+            console.log(datas)
+          });
+        console.log(datas)
         let data = lineData.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
         distResultCsvData.push({
           publicKeyOrAddress: data[0],
@@ -201,7 +226,7 @@ let loadCSV = (e: any)=>{
           let publicKeyOrAddress = distResultCsvData[i].publicKeyOrAddress.trim().replaceAll("-","");
           let originAmount = distResultCsvData[i].amount.trim();
           let amount = parseFloat(distResultCsvData[i].amount.trim());
-          let message = distResultCsvData[i].message.replace(/['"]+/g, '').trim()
+          let message = removeQuote(distResultCsvData[i].message)
 
           if(publicKeyOrAddress.length === 64){
             if(!Convert.isHexString(publicKeyOrAddress)){
