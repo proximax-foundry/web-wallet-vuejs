@@ -161,53 +161,9 @@ const loadExpiringNamespace = (): Notification[] => {
 
   return notifications;
 }
-const { t } = i18n.global;
+
 export class NotificationUtils {
   
-  static relativeTime = (timestamp:number) => {
-    let current = new Date();
-    let expired = new Date(timestamp);
-    let timeDiff = {
-      years: expired.getFullYear() - current.getFullYear(),
-      months: expired.getMonth() - current.getMonth(),
-      days: expired.getDate()  - current.getDate(),
-      hours: expired.getHours() - current.getHours(),
-      mins: expired.getMinutes() - current.getMinutes(),
-    }
-
-    if (timeDiff.mins < 0) {
-      timeDiff.hours--;
-      timeDiff.mins += 60;
-    }
-    if (timeDiff.hours < 0) {
-      timeDiff.days--;
-      timeDiff.hours += 24;
-    }
-    if (timeDiff.days < 0) {
-      timeDiff.months--;
-      // days = days left in current's month,
-      //   plus days that have passed in expiry's month
-      const copyCurrent = new Date(current.getTime());
-      copyCurrent.setDate(32);
-      timeDiff.days = 32 - current.getDate() - copyCurrent.getDate() + expired.getDate();
-    }
-    if (timeDiff.months < 0) {
-      timeDiff.years--;
-      timeDiff.months+=12;
-    }
-    if(timeDiff.years > 0){
-      return timeDiff.years + ' ' + t('general.year',timeDiff.years.toString());
-    }else if(timeDiff.months > 0){
-      return timeDiff.months + ' ' + t('general.month',timeDiff.months.toString());
-    }else if(timeDiff.days > 0){
-      return timeDiff.days + ' ' + t('general.day',timeDiff.days.toString());
-    }else if(timeDiff.hours > 0){
-      return timeDiff.hours + ' ' + t('general.hour',timeDiff.hours.toString());
-    }else{
-      return timeDiff.mins + ' ' + t('general.minute',timeDiff.mins.toString());
-    }
-  }
-
   static async getNotification(){
     let expiringNamespaceNotifications = await loadExpiringNamespace();
     let partialTxnNotifications = await loadPartialTransactions()

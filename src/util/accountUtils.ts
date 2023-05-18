@@ -158,7 +158,7 @@ const getMultisig = (address:string) => {
   let isMulti = false;
   const accountDirectParent = account?account.getDirectParentMultisig():[];
   const otherDirectParent = other?other.getDirectParentMultisig():[];
-  if((accountDirectParent.length > 0 || otherDirectParent.length) > 0){
+  if((accountDirectParent.length > 0 || otherDirectParent.length > 0)){
     isMulti = true;
   }
   

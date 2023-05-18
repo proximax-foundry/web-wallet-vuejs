@@ -19,7 +19,7 @@
     
     <script lang="ts" setup>
     import { Convert, MetadataHttp, MetadataQueryParams, MetadataType, MosaicId, NetworkType, PublicAccount } from 'tsjs-xpx-chain-sdk'
-    import { computed, getCurrentInstance, ref, shallowRef, watch, defineProps } from 'vue'
+    import { computed, ref, shallowRef, watch } from 'vue'
     import UTF8 from 'utf-8'
     import { useRouter } from 'vue-router';
     import { AppState } from '@/state/appState';

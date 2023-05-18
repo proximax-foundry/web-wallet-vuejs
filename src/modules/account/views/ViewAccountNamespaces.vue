@@ -75,7 +75,7 @@ import NamespaceDataTable from "../components/NamespaceDataTable.vue"
         id: namespace.idHex,
         linkedAssetAddress: namespace.linkedId!=''?namespace.linkType==2?Address.createFromRawAddress(namespace.linkedId).pretty():namespace.linkedId:'-',
         expiringBlock: namespace.endHeight,
-        isActive: validateExpiry(namespace.name)? true:  namespace.endHeight > AppState.readBlockHeight 
+        isActive: validateExpiry(namespace.name)? true : namespace.endHeight??0 > AppState.readBlockHeight ?true: false 
       })
     }
     return namespaces

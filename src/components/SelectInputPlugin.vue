@@ -18,7 +18,7 @@
         @close="closeSelection"
         :maxHeight="maxHeight"
         @deselect="$emit('update:modelValue', selected)"
-        @select="makeSelection;$emit('update:modelValue', selected);$emit('show-selection', selected)"
+        @select="makeSelection();$emit('update:modelValue', selected);$emit('show-selection', selected)"
         @clear="$emit('clear-selection')"
         ref="selectRef"
         :disabled="disabled"

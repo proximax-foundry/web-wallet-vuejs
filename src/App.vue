@@ -88,7 +88,7 @@
         <div :class="`${ login?'flex flex-col min-full-screen bg-white':''}`">
           <router-view class="lg:ml-60 mt-12 lg:mt-16 flex-grow" v-if="currentRouteName=='ViewDashboard' || currentRouteName=='ViewTransactionStatus'"></router-view>
           <router-view class="mt-24 lg:mt-16 flex-grow" v-else-if="currentRouteName=='ViewWallets'" ></router-view>
-          <router-view class="lg:ml-60 mt-10 lg:mt-16 flex-grow px-5 pt-5" v-else-if="login" :key="$route.path"></router-view>
+          <router-view class="lg:ml-60 mt-10 lg:mt-16 flex-grow px-5 pt-5" v-else-if="login" :key="this.$route.path"></router-view>
           <router-view class="mt-12 sm:mt-0 flex-grow px-2 pt-5 sm:p-0" v-else></router-view>
           <footer class="md:ml-60 md:h-9 mt-10 text-center sm:text-justify sm:flex text-txs md:text-xs sm:justify-between text-gray-700 px-10 flex-grow-0" v-if="login">
             <div class="ml-2 sm:ml-0">{{$t('home.copyright')}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary hover:underline">{{$t('home.helpdesk')}}</a> </div>
@@ -113,15 +113,11 @@ import headerComponent from '@/components/headerComponent.vue'
 import NavigationMenu from '@/components/NavigationMenu.vue'
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
-import { Connector } from './models/connector';
-import { networkState } from './state/networkState';
 import { walletState } from "@/state/walletState";
-import { listenerState } from "@/state/listenerState";
-import { ChainUtils } from "@/util/chainUtils";
 import { useRouter } from 'vue-router';
 import { AppState } from '@/state/appState'
-import Loading from 'vue-loading-overlay';
-import 'vue-loading-overlay/dist/vue-loading.css';
+import Loading from "vue-loading-overlay";
+import "vue-loading-overlay/dist/css/index.css";
 
 export default defineComponent({
   name: 'App',
