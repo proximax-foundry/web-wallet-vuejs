@@ -167,12 +167,24 @@ let distribute = async()=>{
   txnsHash.value = allTxnsHash;
 }
 
-const removeQuote = (str) => {
-  if(str.charAt(0) === '"' && str.charAt(str.length -1) === '"'){
-    return str.slice(1,-1)
-  }else{
-    return str
-  }
+const parseCSV = async (data) =>{
+  const promise = () => new Promise((resolve, reject) => {
+    const parseData = [];
+    const parser = parse(data, {
+      trim: true,
+      skip_empty_lines: true
+    })
+    parser.on('readable', function(){
+      let record; while ((record = parser.read()) !== null) {
+        parseData.push(record);
+      }
+    })
+    parser.on('end', function(){
+      resolve(parseData)
+    });
+  })
+  const parseData = await promise()
+  return parseData
 }
 
 let loadCSV = (e: any)=>{
@@ -192,27 +204,11 @@ let loadCSV = (e: any)=>{
         if(lineData === ""){
           break;
         }
-        const datas = [];
-        const parser = parse(lineData, {
-          trim: true,
-          skip_empty_lines: true
-        })
-        // Use the readable stream api
-          parser.on('readable', function(){
-            let record; while ((record = parser.read()) !== null) {
-              datas.push(record);
-            }
-          })
-        // When we are done, test that the parsed records matched what expected
-          parser.on('end', function(){
-            console.log(datas)
-          });
-        console.log(datas)
-        let data = lineData.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+        const data = await parseCSV(lineData);
         distResultCsvData.push({
-          publicKeyOrAddress: data[0],
-          amount: data[1],
-          message: data[2]?data[2]:""
+          publicKeyOrAddress: data[0][0],
+          amount: data[0][1],
+          message: data[0][2]?data[0][2]:""
         });
       }
 
@@ -226,7 +222,7 @@ let loadCSV = (e: any)=>{
           let publicKeyOrAddress = distResultCsvData[i].publicKeyOrAddress.trim().replaceAll("-","");
           let originAmount = distResultCsvData[i].amount.trim();
           let amount = parseFloat(distResultCsvData[i].amount.trim());
-          let message = removeQuote(distResultCsvData[i].message)
+          let message = distResultCsvData[i].message
 
           if(publicKeyOrAddress.length === 64){
             if(!Convert.isHexString(publicKeyOrAddress)){
