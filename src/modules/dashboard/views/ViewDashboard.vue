@@ -346,12 +346,11 @@ export default defineComponent({
       }
     );
     const addressQR = ref("")
-    let dashboardService = ref<DashboardService | null>(null)
+    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
 
     watch(selectedAccount, async (n) => {
       if (n && walletState.currentLoggedInWallet) {
         addressQR.value = await QRCode.toDataURL(n.address);
-        dashboardService.value = new DashboardService(walletState.currentLoggedInWallet, n);
         loadRecentTransactions()
       }
     }, { immediate: true })
