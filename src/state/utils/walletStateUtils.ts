@@ -1,6 +1,5 @@
 import { walletState } from "../walletState";
 import { AppState } from "../appState";
-import { AppStateUtils } from "../utils/appStateUtils";
 import { Wallets } from "../../models/wallets"
 import { Wallet } from "../../models/wallet";
 import { SessionService } from "../../models/stores/sessionService"

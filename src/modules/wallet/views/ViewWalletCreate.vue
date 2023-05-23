@@ -98,7 +98,7 @@ import { AppState } from '@/state/appState';
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { toSvg } from "jdenticon";
 import jsPDF from 'jspdf';
-import qrcode from 'qrcode-generator';
+import qrcode from 'qrcode';
 import { pdfWalletPaperImg } from '@/modules/account/pdfPaperWalletBackground';
 export default defineComponent({
   name: 'ViewWalletCreate',
@@ -172,11 +172,8 @@ export default defineComponent({
         publicKey.value = account.publicKey
       }
     };
-    const generateQR = (url, size = 2, margin = 0) => {
-      const qr = qrcode(10, 'H');
-      qr.addData(url);
-      qr.make();
-      return qr.createDataURL(size, margin);
+    const generateQR = async (url, size = 2, margin = 0) => {
+      return await qrcode.toString(url, { width: size, margin: margin });
     }
     const saveWalletPaper =() => {
       const doc = new jsPDF({

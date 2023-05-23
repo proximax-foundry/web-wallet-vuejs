@@ -89,7 +89,7 @@ import { walletState } from '@/state/walletState';
 import { ChainUtils } from '@/util/chainUtils';
 import { networkState } from "@/state/networkState";
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
-import qrcode from 'qrcode-generator';
+import QRCode from 'qrcode';
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { listenerState } from '@/state/listenerState';
@@ -345,19 +345,17 @@ export default defineComponent({
         }
       }
     );
-    const addressQR = computed(
-      () => {
-        if(selectedAccountAddress.value){
-          let qr = qrcode(15, 'H');
-          qr.addData(selectedAccountAddress.value);
-          qr.make();
-          return qr.createDataURL();
-        }else{
-          return null
-        }
+    const addressQR = ref("")
+    let dashboardService = ref<DashboardService | null>(null)
+
+    watch(selectedAccount, async (n) => {
+      if (n && walletState.currentLoggedInWallet) {
+        addressQR.value = await QRCode.toDataURL(n.address);
+        dashboardService.value = new DashboardService(walletState.currentLoggedInWallet, n);
+        loadRecentTransactions()
       }
-    )
-    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
+    }, { immediate: true })
+
     let accountConfirmedTxnsCount = ref(0);
     let updateAccountTransactionCount = async()=>{
       let transactionsCount = await dashboardService.getAccountTransactionsCount(selectedAccount.value);

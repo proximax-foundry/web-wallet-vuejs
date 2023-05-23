@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import qrcode from 'qrcode-generator';
+import QRCode from "qrcode";
 import { Account, Address, AggregateTransaction, SignedTransaction } from "tsjs-xpx-chain-sdk";
 import { pdfImg } from '@/modules/services/submodule/mainnetSwap/pdfBackground';
 import { walletState } from '@/state/walletState';
@@ -648,12 +648,9 @@ export const abi = [
 
 
 export class SwapUtils {
-  static generateQRCode = (url: string) :string => {
-    const qr = qrcode(0, 'H');
-    qr.addData(url);
-    qr.make();
-    return qr.createDataURL();
-  }
+  static generateQRCode = async (url: string): Promise<string> => {
+    return await QRCode.toDataURL(url);
+  };
 
   static generateIncomingPdfCert = (networkName: string, swapTimestamp: string, siriusAddress: string, swapToken: string, transactionHash: string, qrImage: string) => {
     const imgData = pdfImg;

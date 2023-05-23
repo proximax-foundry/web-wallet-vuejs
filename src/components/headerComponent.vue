@@ -124,7 +124,6 @@ import { Helper } from '@/util/typeHelper';
 import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue'
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { useToast } from "primevue/usetoast";
-import { Connector } from '../models/connector';
 import { listenerState, AnnounceType} from "@/state/listenerState";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { TransactionType } from "tsjs-xpx-chain-sdk";
