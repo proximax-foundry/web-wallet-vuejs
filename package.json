@@ -39,7 +39,7 @@
     "postcss-nested": "^4.2.3",
     "primeicons": "^6.0.1",
     "primevue": "^3.23.0",
-    "qrcode": "^1.5.3",
+    "qrcode-generator": "^1.4.4",
     "sass": "^1.62.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.3",
     "tsjs-xpx-chain-sdk": "^0.9.18",

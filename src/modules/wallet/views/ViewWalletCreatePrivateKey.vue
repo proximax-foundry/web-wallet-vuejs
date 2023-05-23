@@ -104,7 +104,7 @@ import { Account } from "tsjs-xpx-chain-sdk";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { toSvg } from "jdenticon";
 import jsPDF from 'jspdf';
-import qrcode from 'qrcode';
+import qrcode from 'qrcode-generator';
 import { pdfWalletPaperImg } from '@/modules/account/pdfPaperWalletBackground';
 export default defineComponent({
   name: 'ViewWalletCreatePrivateKey',
@@ -186,8 +186,11 @@ export default defineComponent({
         publicKey.value = account.publicKey
       }
     };
-    const generateQR = async (url, size = 2, margin = 0) => {
-      return await qrcode.toString(url, { width: size, margin: margin });
+    const generateQR = (url, size = 2, margin = 0) => {
+      const qr = qrcode(10, 'H');
+      qr.addData(url);
+      qr.make();
+      return qr.createDataURL(size, margin);
     }
     const saveWalletPaper =() => {
       const doc = new jsPDF({

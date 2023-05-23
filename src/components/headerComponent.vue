@@ -133,6 +133,7 @@ import { NotificationUtils } from '@/util/notificationUtils';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
 import { AppStateUtils } from "@/state/utils/appStateUtils";
+import ding from "@/assets/audio/ding.ogg"
 
 export default defineComponent({
   components: {
@@ -783,7 +784,7 @@ export default defineComponent({
         /*volume = volume || 100;*/
 
         try{
-            let sound = new Audio(require('@/assets/audio/ding.ogg'));
+            let sound = new Audio(ding);
 
             // Set volume
             /*sound.volume = volume / 100;*/

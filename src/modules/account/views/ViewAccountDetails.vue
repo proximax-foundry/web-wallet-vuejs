@@ -134,7 +134,7 @@ import { WalletUtils } from "@/util/walletUtils";
 import { useI18n } from 'vue-i18n';
 import { pdfWalletPaperImg } from '@/modules/account/pdfPaperWalletBackground';
 import jsPDF from 'jspdf';
-import qrcode from 'qrcode';
+import qrcode from 'qrcode-generator';
 import PkPasswordModal from '@/modules/account/components/PkPasswordModal.vue'
 import PdfPasswordModal from '@/modules/account/components/PdfPasswordModal.vue'
 import { AppState } from '@/state/appState';
@@ -252,8 +252,11 @@ if (AppState.nativeToken.label === "XPX") {
 }
 
 
-const generateQR = async(url, size = 2, margin = 0) => {
-  return await qrcode.toDataURL(url, { width: size, margin: margin });
+const generateQR = (url, size = 2, margin = 0) => {
+  const qr = qrcode(10, 'H');
+  qr.addData(url);
+  qr.make();
+  return qr.createDataURL(size, margin);
 }
 
 const saveWalletPaper = (password) => {
