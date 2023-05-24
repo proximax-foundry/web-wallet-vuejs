@@ -32,7 +32,21 @@
       <div class="gray-line my-8"></div>
       <div class='text-xs font-semibold'>{{$t('multisig.cosignatoryOf')}}</div>
       <div class='border p-4 mt-3'>
-        <div class="flex flex-col gap-2">
+        <div v-if="multisigLength" class="w-full">
+          <button
+            class="mr-5 w-32 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
+            @click="expandTree()"
+          >
+            Expand All
+          </button>
+          <button
+            class="w-32 blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
+            @click="collapseTree()">
+            Collapse All
+          </button>
+          <Tree v-model:expandedKeys="expandedKeys" :value="multisigAddress" :filter="true" filterMode="strict" @node-select="onNodeSelect" selectionMode="single" class="pt-1.5"></Tree>
+        </div>
+        <!-- <div class="flex flex-col gap-2">
           <div v-for="(multisig,index) in multisigAccountsList" :key="index">
             <div class="border w-full cursor-pointer rounded-md p-3" @click="navigate(multisig.address)">
               <div class="text-txs font-semibold text-blue-primary">{{multisig.name}}</div>
@@ -43,7 +57,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
         <div v-if="!isCosigner" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
         <div v-if="!isCosigner" class='flex text-txs w-9/12 ml-auto mr-auto text-gray-400 mt-1 justify-center text-center'>
           <span v-if="!isCosigner"> {{$t('multisig.noMultisig',{name:acc?acc.name:''})}}</span>
@@ -68,6 +82,9 @@ import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { setDefaultAccInStorage } from '@/models/account';
+import { MultisigInfo } from '@/models/multisigInfo';
+import { WalletUtils } from '@/util/walletUtils';
+import Tree from 'primevue/tree';
 export default {
     name: "ViewMultisigHome",
     props: {
@@ -185,6 +202,128 @@ export default {
         window.open(networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.addressRoute + '/' + address)
       }
     }
+    const multisigAddress = ref([]);
+    const multisigLength = ref(0);
+    const generateMultisigInfoBelowLevelZero = async (strAddress) => {
+      if (!AppState.isReady) {
+        setTimeout(generateMultisigInfoBelowLevelZero, 1000);
+        return;
+      }
+      if (!AppState.chainAPI) {
+        return;
+      }
+      let address = Address.createFromRawAddress(strAddress);
+      let graphInfo =
+        await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(address);
+      let multisigInfos= [];
+      console.log(graphInfo)
+      graphInfo.multisigAccounts.forEach((value, key) => {
+        const level = key;
+        for (let i = 0; i < value.length; ++i) {
+          let multiInfo = value[i];
+          let newMultisigInfo = new MultisigInfo(
+            multiInfo.account.publicKey,
+            level,
+            multiInfo.cosignatories.map((cosign) => cosign.publicKey),
+            multiInfo.multisigAccounts.map((cosign) => cosign.publicKey),
+            multiInfo.minApproval,
+            multiInfo.minRemoval
+          );
+          multisigInfos.push(newMultisigInfo);
+        }
+      });
+      var multisigAccounts = [];
+      var indexNo = 0
+      multisigAccounts.push({
+        key: "0",
+        label: "Level 1",
+        selectable: false,
+        children: []
+      })
+      multisigAccounts.push({
+        key: "1",
+        label: "Level 2",
+        selectable: false,
+        children: []
+      })
+      multisigAccounts.push({
+        key: "2",
+        label: "Level 3",
+        selectable: false,
+        children: []
+      })
+
+      const multisigAccBelowLevelZero = multisigInfos.filter((accounts) => accounts.level < 0 ).map(acc => WalletUtils.createAddressFromPublicKey(acc.publicKey).plain())
+      const multisigAccLevelNOne = multisigInfos.filter((accounts) => accounts.level == -1 ).map(acc => WalletUtils.createAddressFromPublicKey(acc.publicKey).pretty())
+
+      multisigAccLevelNOne.forEach((element) => {
+        multisigAccounts[0].children.push(
+          {
+            key: '0-' + indexNo.toString(),
+            label: element,
+            data: element,
+            selectable: true
+          }
+        )
+        indexNo++
+      })
+      indexNo = 0
+
+      const multisigAccLevelNTwo = multisigInfos.filter((accounts) => accounts.level == -2 ).map(acc => WalletUtils.createAddressFromPublicKey(acc.publicKey).pretty())
+
+      multisigAccLevelNTwo.forEach((element) => {
+        multisigAccounts[1].children.push(
+          {
+            key: '1-' + indexNo.toString(),
+            label: element,
+            data: element,
+            selectable: true
+          }
+        )
+        indexNo++
+      })
+      indexNo = 0
+
+      const multisigAccLevelNThree = multisigInfos.filter((accounts) => accounts.level == -3 ).map(acc => WalletUtils.createAddressFromPublicKey(acc.publicKey).pretty())
+
+      multisigAccLevelNThree.forEach((element) => {
+        multisigAccounts[2].children.push(
+          {
+            key: '2-' + indexNo.toString(),
+            label: element,
+            data: element,
+            selectable: true
+          }
+        )
+        indexNo++
+      })
+      indexNo = 0
+      console.log(multisigAccounts)
+      multisigAddress.value = multisigAccounts
+      multisigLength.value = multisigAccBelowLevelZero.length;
+    };
+    generateMultisigInfoBelowLevelZero(p.address)
+
+    const onNodeSelect = (node) => {
+  }
+
+    const expandedKeys = ref({});
+    const expandTree = () => {
+        for (let node of multisigAddress.value) {
+            expandNode(node);
+        }
+
+        expandedKeys.value = { ...expandedKeys.value };
+    };
+    const collapseTree = () => {
+        expandedKeys.value = {};
+    };
+    const expandNode = (node) => {
+        if (node.children && node.children.length) {
+            expandedKeys.value[node.key] = true;
+        }
+    };
+    expandTree()
 
       return{
         findAccountWithAddress,
@@ -196,10 +335,57 @@ export default {
         isCosigner,
         multisigAccountsList,
         cosignerAccountsList,
+        multisigAddress,
+        multisigLength,
+        onNodeSelect,
+        expandedKeys,
+        expandTree,
+        collapseTree
       }
     }
 }
 </script>
 
-<style>
+<style scoped lang="scss">
+.p-tree:deep{
+  .p-tree {
+    border: 1px solid #495057;
+    background: #ffffff;
+    color: #495057;
+    padding: 1.25rem;
+    border-radius: 6px;
+  }
+  .p-link {
+    margin-top: 0px;
+  }
+  .p-treenode-children {
+    padding: 0 0 0 1rem;
+  }
+  .p-tree-container .p-treenode .p-treenode-content {
+    border-radius: 6px;
+    transition: box-shadow 0.2s;
+    padding: 0.5rem;
+  }
+  .p-treenode-label{
+    border: 1px solid rgb(231, 231, 234);
+    border-radius: 6px;
+    padding: 20px 12px;
+    width: 100%;
+    font-size: 10px;
+    line-height: 12px;
+    font-weight: 700;
+  }
+  .p-tree-filter-container{
+    width: 99%;
+    border: 1px solid rgb(231, 231, 234);
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin: 6px 0px
+  }
+  .p-tree-filter{
+    width: 98%;
+    outline: none;
+    height: 40px;
+  }
+}
 </style>
