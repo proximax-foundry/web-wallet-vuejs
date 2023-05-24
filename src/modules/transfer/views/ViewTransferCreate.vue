@@ -643,7 +643,7 @@ export default {
       if (findAcc) {
         cosignAddress.value = findAcc.address;
       }
-      if (parseFloat(checkCosignBalance.value) < lockFundTotalFee.value) {
+      if (parseFloat(checkCosignBalance.value.replace(/,/g,"")) < lockFundTotalFee.value) {
         disableAllInput.value = true;
       } else {
         disableAllInput.value = false;
