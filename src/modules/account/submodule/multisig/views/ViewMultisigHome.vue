@@ -46,21 +46,9 @@
           </button>
           <Tree v-model:expandedKeys="expandedKeys" :value="multisigAddress" :filter="true" filterMode="strict" @node-select="onNodeSelect" selectionMode="single" class="pt-1.5"></Tree>
         </div>
-        <!-- <div class="flex flex-col gap-2">
-          <div v-for="(multisig,index) in multisigAccountsList" :key="index">
-            <div class="border w-full cursor-pointer rounded-md p-3" @click="navigate(multisig.address)">
-              <div class="text-txs font-semibold text-blue-primary">{{multisig.name}}</div>
-              <div class="flex">
-                <div :id="`multisigAddress${index}`" :copyValue="multisig.address" :title="multisig.address" :copySubject="$t('general.address')" class="truncate md:text-clip md:w-auto text-txs font-bold mt-1">{{multisig.address}}</div>
-                <font-awesome-icon icon="copy" @mouseover="isHover = true" @mouseout="isHover = false" :title="$t('general.copy')" @click="copy(`multisigAddress${index}`)" class="ml-1 w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
-                <img v-if="findAccountWithAddress(multisig.address)" class="w-5 h-5 ml-auto" src="@/assets/img/chevron_right.svg">
-              </div>
-            </div>
-          </div>
-        </div> -->
-        <div v-if="!isCosigner" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
-        <div v-if="!isCosigner" class='flex text-txs w-9/12 ml-auto mr-auto text-gray-400 mt-1 justify-center text-center'>
-          <span v-if="!isCosigner"> {{$t('multisig.noMultisig',{name:acc?acc.name:''})}}</span>
+        <div v-if="!multisigLength" class='text-blue-primary text-xs text-center font-semibold'>{{$t('general.ntgToShow')}}</div>
+        <div v-if="!multisigLength" class='flex text-txs w-9/12 ml-auto mr-auto text-gray-400 mt-1 justify-center text-center'>
+          <span v-if="!multisigLength"> {{$t('multisig.noMultisig',{name:acc?acc.name:''})}}</span>
         </div>
       </div>
     </div>
@@ -184,7 +172,11 @@ export default {
     }
     const getAccountNameByAddress = (address)=>{
       let findAcc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address ==address) || walletState.currentLoggedInWallet.others.find(acc=>acc.address ==address)
-      return findAcc.name
+      if(findAcc){
+        return findAcc.name
+      }else{
+        return ""
+      }
     }
 
     const navigate = (address) =>{
@@ -216,7 +208,6 @@ export default {
       let graphInfo =
         await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(address);
       let multisigInfos= [];
-      console.log(graphInfo)
       graphInfo.multisigAccounts.forEach((value, key) => {
         const level = key;
         for (let i = 0; i < value.length; ++i) {
@@ -253,14 +244,14 @@ export default {
         children: []
       })
 
-      const multisigAccBelowLevelZero = multisigInfos.filter((accounts) => accounts.level < 0 ).map(acc => WalletUtils.createAddressFromPublicKey(acc.publicKey).plain())
-      const multisigAccLevelNOne = multisigInfos.filter((accounts) => accounts.level == -1 ).map(acc => WalletUtils.createAddressFromPublicKey(acc.publicKey).pretty())
+      const multisigAccBelowLevelZero = multisigInfos.filter((accounts) => accounts.level < 0 ).map(acc => WalletUtils.createAddressFromPublicKey(acc.publicKey, AppState.networkType).plain())
+      const multisigAccLevelNOne = multisigInfos.filter((accounts) => accounts.level == -1 ).map(acc => WalletUtils.createAddressFromPublicKey(acc.publicKey, AppState.networkType).pretty())
 
       multisigAccLevelNOne.forEach((element) => {
         multisigAccounts[0].children.push(
           {
             key: '0-' + indexNo.toString(),
-            label: element,
+            label: getAccountNameByAddress(Address.createFromRawAddress(element).plain())?getAccountNameByAddress(Address.createFromRawAddress(element).plain()):element,
             data: element,
             selectable: true
           }
@@ -269,13 +260,13 @@ export default {
       })
       indexNo = 0
 
-      const multisigAccLevelNTwo = multisigInfos.filter((accounts) => accounts.level == -2 ).map(acc => WalletUtils.createAddressFromPublicKey(acc.publicKey).pretty())
+      const multisigAccLevelNTwo = multisigInfos.filter((accounts) => accounts.level == -2 ).map(acc => WalletUtils.createAddressFromPublicKey(acc.publicKey, AppState.networkType).pretty())
 
       multisigAccLevelNTwo.forEach((element) => {
         multisigAccounts[1].children.push(
           {
             key: '1-' + indexNo.toString(),
-            label: element,
+            label: getAccountNameByAddress(Address.createFromRawAddress(element).plain())?getAccountNameByAddress(Address.createFromRawAddress(element).plain()):element,
             data: element,
             selectable: true
           }
@@ -284,13 +275,13 @@ export default {
       })
       indexNo = 0
 
-      const multisigAccLevelNThree = multisigInfos.filter((accounts) => accounts.level == -3 ).map(acc => WalletUtils.createAddressFromPublicKey(acc.publicKey).pretty())
+      const multisigAccLevelNThree = multisigInfos.filter((accounts) => accounts.level == -3 ).map(acc => WalletUtils.createAddressFromPublicKey(acc.publicKey, AppState.networkType).pretty())
 
       multisigAccLevelNThree.forEach((element) => {
         multisigAccounts[2].children.push(
           {
             key: '2-' + indexNo.toString(),
-            label: element,
+            label: getAccountNameByAddress(Address.createFromRawAddress(element).plain())?getAccountNameByAddress(Address.createFromRawAddress(element).plain()):element,
             data: element,
             selectable: true
           }
@@ -298,14 +289,28 @@ export default {
         indexNo++
       })
       indexNo = 0
-      console.log(multisigAccounts)
+
       multisigAddress.value = multisigAccounts
       multisigLength.value = multisigAccBelowLevelZero.length;
+      expandTree()
     };
     generateMultisigInfoBelowLevelZero(p.address)
 
     const onNodeSelect = (node) => {
-  }
+      if(findAccountWithAddress(node.data) && !isHover.value && !checkOtherAcc(node.data)){
+        setDefaultAcc(getAccountNameByAddress(Address.createFromRawAddress(node.data).plain()))
+        setDefaultAccInStorage(Address.createFromRawAddress(node.data).plain())
+        router.push({ name: 'ViewAccountDetails', params: { address:getPlainAddress(node.data) }})
+      }else if(findAccountWithAddress(node.data)){
+        router.push({ name: 'ViewAccountDetails', params: { address:getPlainAddress(node.data) }})
+      }
+      if(!networkState.currentNetworkProfile){
+        return ''
+      }
+      if(!findAccountWithAddress(node.data,true)){
+        window.open(networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.addressRoute + '/' + node.data)
+      }
+    }
 
     const expandedKeys = ref({});
     const expandTree = () => {
@@ -323,7 +328,6 @@ export default {
             expandedKeys.value[node.key] = true;
         }
     };
-    expandTree()
 
       return{
         findAccountWithAddress,
@@ -347,14 +351,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.p-tree:deep{
-  .p-tree {
-    border: 1px solid #495057;
-    background: #ffffff;
-    color: #495057;
-    padding: 1.25rem;
-    border-radius: 6px;
-  }
+.p-tree::v-deep{
+  border: none;
+  padding: 0;
   .p-link {
     margin-top: 0px;
   }
@@ -386,6 +385,7 @@ export default {
     width: 98%;
     outline: none;
     height: 40px;
+    border: none;
   }
 }
 </style>
