@@ -114,7 +114,6 @@ export default {
         return false
       }
       const isMultisig = ref(false) 
-      const isCosigner = ref(false)
       const networkType = AppState.networkType
       const convertAddress = publicKey =>{ 
         return Address.createFromPublicKey(publicKey, networkType)
@@ -131,15 +130,7 @@ export default {
           return findAccount(publicKey) ? findAccount(publicKey).name : `Cosigner-${convertAddress(publicKey).plain().substr(-4)}`
         }
       }
-      let multisigAccountsList = computed(()=>{
-        if(!acc.value){
-          return []
-        }
-        let multisigAccountsList= []
-        let multisigAccounts =  acc.value.multisigInfo.filter(info=>info.level== -1)
-        multisigAccounts.forEach(account=>multisigAccountsList.push({name: getAccountName(account.publicKey),address:  PublicAccount.createFromPublicKey(account.publicKey,networkType).address.pretty()}))
-        return multisigAccountsList
-      },{deep:true})
+      
       let cosignerAccountsList = computed(()=>{
         if(!acc.value){
           return []
@@ -150,9 +141,6 @@ export default {
         return cosignerAccountsList
       },{deep:true})
       
-      //check if account is a cosigner
-      let verifyHasMultisig = multiSign.checkHasMultiSig(acc.value?acc.value.address:'')
-      isCosigner.value = verifyHasMultisig;
       //check if account is a multisig
       let verifyMultisig = multiSign.checkIsMultiSig(acc.value?acc.value.address:'')
       isMultisig.value = verifyMultisig;
@@ -336,8 +324,6 @@ export default {
         copy,
         isMultisig,
         acc,
-        isCosigner,
-        multisigAccountsList,
         cosignerAccountsList,
         multisigAddress,
         multisigLength,
