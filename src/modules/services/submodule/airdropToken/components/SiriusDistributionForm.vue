@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed, getCurrentInstance } from 'vue'
 import { 
-  Convert, Address
+  AccountHttp, MosaicHttp, Convert, Address
 } from 'tsjs-xpx-chain-sdk';
 
 import { SimpleSDA } from '@/models/sda'
@@ -21,6 +21,7 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputAccount from "@/components/SelectInputAccount.vue";
 import type { Account } from '@/models/account';
 import type { WalletAccount } from '@/models/walletAccount';
+import { parse } from 'csv-parse';
 
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -162,6 +163,26 @@ let distribute = async()=>{
   txnsHash.value = allTxnsHash;
 }
 
+const parseCSV = async (data) =>{
+  const promise = () => new Promise((resolve, reject) => {
+    const parseData = [];
+    const parser = parse(data, {
+      trim: true,
+      skip_empty_lines: true
+    })
+    parser.on('readable', function(){
+      let record; while ((record = parser.read()) !== null) {
+        parseData.push(record);
+      }
+    })
+    parser.on('end', function(){
+      resolve(parseData)
+    });
+  })
+  const parseData = await promise()
+  return parseData
+}
+
 let loadCSV = (e: any)=>{
   fileError.value = false;
   const file = e.target.files[0];
@@ -179,10 +200,11 @@ let loadCSV = (e: any)=>{
         if(lineData === ""){
           break;
         }
-        let data = lineData.split(",");
+        const data = await parseCSV(lineData);
         distResultCsvData.push({
-          publicKeyOrAddress: data[0],
-          amount: data[1]
+          publicKeyOrAddress: data[0][0],
+          amount: data[0][1],
+          message: data[0][2]?data[0][2]:""
         });
       }
 
@@ -196,6 +218,7 @@ let loadCSV = (e: any)=>{
           let publicKeyOrAddress = distResultCsvData[i].publicKeyOrAddress.trim().replaceAll("-","");
           let originAmount = distResultCsvData[i].amount.trim();
           let amount = parseFloat(distResultCsvData[i].amount.trim());
+          let message = distResultCsvData[i].message
 
           if(publicKeyOrAddress.length === 64){
             if(!Convert.isHexString(publicKeyOrAddress)){
@@ -233,7 +256,8 @@ let loadCSV = (e: any)=>{
 
           let newData: DistributeListInterface = {
             publicKeyOrAddress: publicKeyOrAddress,
-            amount: amount
+            amount: amount,
+            message: message,
           }; 
 
           tempData.push(newData);
@@ -500,7 +524,7 @@ if (isMultiSigBool.value) {
     </div>
     <div class="p-2">
       <div>
-        <div class="border rounded-md border-gray-200 mb-3 w-3/4">
+        <div class="border rounded-md border-gray-200 mb-3 w-full">
           <input type="file" class="form-control" @change="loadCSV" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
         </div>
         <div class="error error_box" v-if="recipientError!=''">{{ recipientError }}</div>
@@ -522,24 +546,26 @@ if (isMultiSigBool.value) {
     </div>
     <div class="p-2 overflow-auto" v-if="distributionList.length">
       <div>
-        <div class="table w-3/4">
+        <div class="table table-auto w-full">
           <div class="table-header-group">
             <div class="table-row">
               <div class="table-cell border-b-2 font-semibold p-4 pt-0 pb-3">Recipient (Public Key or Address)</div>
               <div class="table-cell border-b-2 font-semibold p-4 pt-0 pb-3">Amount</div>
+              <div class="table-cell border-b-2 font-semibold p-4 pt-0 pb-3">Message</div>
             </div>
           </div>
           <div class="table-row-group">
             <div class="table-row" v-for="row, index in distributionList" :key="index">
               <div class="table-cell border-b p-4 pt-0 pb-3">{{ row.publicKeyOrAddress }}</div>
               <div class="table-cell border-b p-4 pt-0 pb-3">{{ row.amount }}</div>
+              <div class="table-cell border-b p-4 pt-0 pb-3">{{ row.message }}</div>
             </div>
           </div>
         </div>
       </div>
     </div>
     <div class="p-2">
-      <div class="mb-3 w-3/4 px-2 py-1">
+      <div class="mb-3 w-full px-2 py-1">
         <div class='font-semibold'>Enter your password to continue</div>
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3" :disabled="disablePassword"/>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
@@ -561,7 +587,7 @@ if (isMultiSigBool.value) {
     </div>
     <div class="p-2 overflow-auto" v-if="txnsHash.length">
       <div>
-        <div class="table w-3/4">
+        <div class="table w-full">
           <div class="table-header-group">
             <div class="table-row">
               <div class="table-cell border-b-2 p-4 pt-0 pb-3">Transaction Hash</div>
@@ -569,7 +595,7 @@ if (isMultiSigBool.value) {
           </div>
           <div class="table-row-group">
             <div class="table-row" v-for="txnHash, index in txnsHash" :key="index">
-              <div class="table-cell border-b p-4 pt-0 pb-3"><a :href="createTxnExplorerLink(txnHash)" >{{ txnHash }}</a></div>
+              <div class="table-cell border-b p-4 pt-0 pb-3"><a :href="createTxnExplorerLink(txnHash)" target="_blank">{{ txnHash }}</a></div>
             </div>
           </div>
         </div>

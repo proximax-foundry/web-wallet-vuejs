@@ -30,6 +30,7 @@ export class WalletStateUtils{
     sessionStorage.removeItem(sessionWalletKey);
     sessionStorage.removeItem('notification');
     sessionStorage.removeItem("defaultAcc");
+    sessionStorage.removeItem("allFailedTransactions")
   }
 
   static checkFromSession(): boolean{
