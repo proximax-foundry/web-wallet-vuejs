@@ -7,15 +7,15 @@
     <div class="border-2 border-t-0 filter shadow-lg lg:grid lg:grid-cols-3" >
       <div class="lg:col-span-2 py-6 px-6">
         <div v-if="isMultiSig" class="text-left mt-2 mb-5 "> 
-          <div v-if="walletCosignerList.length > 0">
+          <div v-if="walletCosignerList.cosignerList.length > 0">
             <div class="text-tsm">
               {{$t('general.initiateBy')}}:
               <span class="font-bold" v-if="walletCosignerList.length == 1"> 
-                {{ walletCosignerList[0].name }}
+                {{ walletCosignerList.cosignerList[0].name }}
               </span>
               <span class="font-bold" v-else>
                 <select class="" v-model="selectedCosignPublicKey">
-                  <option v-for="(element, item) in  walletCosignerList" :value="findAcc(element.publicKey).publicKey" :key="item">
+                  <option v-for="(element, item) in  walletCosignerList.cosignerList" :value="findAcc(element.publicKey).publicKey" :key="item">
                     {{ element.name }} 
                   </option>
                 </select>
