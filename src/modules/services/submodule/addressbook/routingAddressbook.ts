@@ -41,8 +41,16 @@ export const AddressbookRoutes = [
     name: 'ViewServicesAddressBookExport',
     component: () => import('@/modules/services/submodule/addressbook/views/ViewServicesAddressBookExport.vue'),
     meta: {
-      title: "Export Address Book",
+      title: "Export Group Address Book",
     }
   },
+  {
+    path: '/export-contacts-select',
+    name: 'ViewServicesAddressBookExportSelect',
+    component: () => import('@/modules/services/submodule/addressbook/views/ViewServicesAddressBookExportSelect.vue'),
+    meta: {
+      title: "Export Select Address Book",
+    }
+  }
 ];
 
