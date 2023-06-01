@@ -8,6 +8,14 @@
       </div>
       <div class="mt-10">
         <div class="text-md my-5 font-semibold">{{$t('addressBook.exportContacts')}}</div>
+        <div class="flex cursor-pointer">
+          <div class="border-2 border-blue-primary p-1 mb-3 w-16 text-white bg-blue-primary text-xs text-center font-semibold">
+            {{ $t('general.group') }}
+          </div>
+          <router-link :to="{ name: 'ViewServicesAddressBookExportSelect'}"
+              class="border-2 border-blue-primary p-1 mb-3 w-16 text-blue-primary text-xs text-center font-semibold ">{{ $t('general.name') }}
+          </router-link>
+        </div>
         <div class="text-tsm">{{$t('addressBook.exportBackUpContact')}}</div>
         <div class="mt-4"><SelectInputPluginClean v-model="filters['global'].value" placeholder="Group" :options="contactGroups" selectDefault="" class="w-60 inline-block mr-2" /></div>
       </div>
