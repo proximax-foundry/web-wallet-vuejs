@@ -8,6 +8,14 @@
       </div>
       <div class="mt-10">
         <div class="text-md my-5 font-semibold">{{$t('addressBook.importContacts')}}</div>
+        <div class="flex cursor-pointer">
+          <div class="border-2 border-blue-primary p-1 mb-3 w-20 text-white bg-blue-primary text-xs text-center font-semibold">
+            {{ $t('wallet.importFile') }}
+          </div>
+          <router-link :to="{ name: 'ViewServicesAddressBookImportAccount'}"
+              class="border-2 border-blue-primary p-1 mb-3 w-16 text-blue-primary text-xs text-center font-semibold ">{{ $t('general.account') }}
+          </router-link>
+        </div>
         <div class="text-tsm">{{$t('addressBook.addBackUpContact')}}</div>
         <DisplayImportContactModal class="inline-block w-36 flex-none" />
       </div>
