@@ -56,7 +56,7 @@ defineProps({
   z-index: 2;
 }
 
-::v-deep(.p-paginator) {
+::deep(.p-paginator) {
     .p-paginator-current {
         
         padding: 1rem;

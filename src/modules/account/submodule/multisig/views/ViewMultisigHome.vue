@@ -337,7 +337,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.p-tree::v-deep{
+.p-tree::deep{
   border: none;
   padding: 0;
   .p-link {

@@ -212,7 +212,7 @@ body{
 }
 
 .text-outline{
-  @apply transition-all duration-200 group rounded-3xl border-solid w-full py-2 mb-1 flex;
+  @apply transition-all duration-200 rounded-3xl border-solid w-full py-2 mb-1 flex;
 }
 
 .text-placeholder{

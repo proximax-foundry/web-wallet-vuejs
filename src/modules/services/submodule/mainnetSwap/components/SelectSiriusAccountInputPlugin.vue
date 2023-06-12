@@ -117,7 +117,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "@/assets/scss/multiselect.scss";
-.selectPlugin::v-deep{
+.selectPlugin::deep{
   border-bottom: 1px solid #E5E7EB;
   .multiselect-input{
     border-bottom: 0px;
@@ -132,7 +132,7 @@ export default defineComponent({
   }
 }
 @media (min-width: 1024px) {
-  .selectPlugin::v-deep{
+  .selectPlugin::deep{
     .multiselect-single-label{
       font-size: 16px;
     }

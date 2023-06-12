@@ -119,7 +119,7 @@ const explorerNamespaceLink = namespace=>{
 
 <style lang="scss" scoped>
 
-::v-deep(.p-paginator) {
+::deep(.p-paginator) {
     .p-paginator-current {
         
         padding: 1rem;

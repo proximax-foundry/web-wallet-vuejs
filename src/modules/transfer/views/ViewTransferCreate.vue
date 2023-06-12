@@ -968,7 +968,7 @@ export default {
   background: #d9ebff;
 }
 
-.p-tree::v-deep{
+.p-tree::deep{
   .p-tree-container .p-treenode .p-treenode-content{
     padding-left:2px;
     padding-top:2px
@@ -984,7 +984,7 @@ export default {
       border: 1px solid #ced4da;
     }
 }
-  ::v-deep(.p-inputtext) {
+  ::deep(.p-inputtext) {
       font-size: 1rem;
       text-align: left;
       padding: 0.5rem;
