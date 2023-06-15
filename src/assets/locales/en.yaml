@@ -37,11 +37,11 @@ addressBook:
   director: Director
   editContact: Edit Contact
   employee: Employee
-  exportBackUpContact: Export contacts for backup
+  exportBackUpContact: Export contacts for backup from selected group
   exportContacts: Export Contacts
   family: Family
   friend: Friend
-  groupValidation: Group name is not availble or already exist
+  groupValidation: Group name is not available or already exist
   importAddress: Import Address
   importContacts: Import Contacts
   nameExist: Name already exists in account or address book.
@@ -50,6 +50,7 @@ addressBook:
   removeContact: Remove Contact
   removeContactFromAB: Remove Contact from Address book?
   saveAddress: Save Address
+  selectExportContacts: Export contacts for backup from selected contacts
   work: Work
 asset:
   assetAns: >-

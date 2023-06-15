@@ -5131,7 +5131,7 @@ export class DashboardService {
                 for(let i =0; i < modifyMultisigFormat.removedCosigner.length; ++i){
                     let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.removedCosigner[i], AppState.networkType)
                     let removeCosignerInfo: TxnDetails = {
-                        type: MsgType.GREEN,
+                        type: MsgType.RED,
                         value: modifyMultisigFormat.removedCosigner[i],
                         short: this.wallet.convertAddressToName(publicAccount.address.plain())
                     };

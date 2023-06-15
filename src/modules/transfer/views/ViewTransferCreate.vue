@@ -14,7 +14,7 @@
         <div class="flex gap-1">
           <SelectInputAccountTransfer v-model="selectedAccAdd" :initiateBy="initiateBy"/>
           <div v-if="haveSelectableMultisig" @click="toggleMultisig = !toggleMultisig"
-              class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 h-16 w-18'>
+              class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 h-16 w-18 mt-auto'>
               <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
               <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.select') }}</div>
               <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.multisig') }}</div>

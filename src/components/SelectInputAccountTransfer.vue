@@ -17,7 +17,7 @@
                   <div v-html="selectedImg"/>
                   <div class='flex flex-col ml-2 text-left'>
                     <div v-if="initiateBy" class='text-blue-primary font-semibold text-xxs uppercase'  style="line-height: 9px;">{{ $t('general.initiateBy') }}</div>
-                    <div v-else class='text-blue-primary font-semibold text-xxs uppercase'  style="line-height: 9px;">{{$t('transfer.transferFrom')}}</div>
+                    <div v-else class='text-blue-primary font-semibold text-xxs uppercase'  style="line-height: 9px;">{{$t('transfer.transferFrom')}} OR Select Signing Account to initiate Multisig</div>
                     <div v-if="placeholder" class="mt-2 text-base">{{ $t("general.selectAccount") }}</div>
                     <div class='mt-2 text-base font-bold'>{{slotProps.value.label}}</div>
                   </div>
