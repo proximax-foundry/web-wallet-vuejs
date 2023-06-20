@@ -4,7 +4,7 @@
             Multisig Account</button>
             <div v-if="accounts.length && isSelected && !selectedAccountInfo" class="text-xs mt-3 text-blue-primary ">Select Multisig Account</div>
 
-            <Dropdown :showClear="true" v-if="isSelected" v-model=selectedAccountInfo :style="{ 'width': '100%' }" :options=accounts :filter="true"
+            <Dropdown  :showClear="true" v-if="isSelected && accounts.length" v-model=selectedAccountInfo :style="{ 'width': '100%' }" :options=accounts :filter="true"
                 :filterFields="['label', 'value']" emptyFilterMessage=" "
                 @change="selectAccount($event.value?.label, $event.value?.value); $emit('update:modelValue', $event.value?.value); $emit('select-multisig-account', $event.value?.value);">
                 <!-- For the display of the account information -->

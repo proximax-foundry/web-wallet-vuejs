@@ -64,8 +64,9 @@ const fetchAssets = async (address: string | null) => {
     if (!address) {
         return
     }
-    const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
     assetOptions.value = [];
+
+        const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
     for (let i = 0; i < accInfo.mosaics.length; i++) {
         const asset = accInfo.mosaics[i];
         assetOptions.value.push({
@@ -75,8 +76,9 @@ const fetchAssets = async (address: string | null) => {
             namespace: '',
             hasUpdated: false
         })
-
-    }
+    } 
+    
+    
 }
 
 const selectedAsset = ref<{ id: string, amount: number, namespace: string, divisibility: number } | null>(null)
