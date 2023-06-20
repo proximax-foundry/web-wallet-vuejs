@@ -33,27 +33,13 @@
       type: String,
       required: true,
     },
-    toolTip: {
-      type: String,
-      required: false,
-    },
     disabled: {
       type: Boolean,
       required: false,
     },
-    showError: {
-      type: Boolean,
-      required: false,
-    },
-  
-    logo: {
-      type: Boolean,
-      required: false
-    },
-    balance: {
-      type: Number,
-      required: false
-    }
+
+
+
   });
 
 
