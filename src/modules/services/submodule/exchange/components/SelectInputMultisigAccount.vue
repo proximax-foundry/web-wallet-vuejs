@@ -4,7 +4,7 @@
             Multisig Account</button>
             <div v-if="accounts.length && isSelected && !selectedAccountInfo" class="text-xs mt-3 text-blue-primary ">Select Multisig Account</div>
 
-            <Dropdown  :showClear="true" v-if="isSelected && accounts.length" v-model=selectedAccountInfo :style="{ 'width': '100%' }" :options=accounts :filter="true"
+            <Dropdown :showClear="true" v-if="isSelected && accounts.length" v-model=selectedAccountInfo :style="{ 'width': '100%' }" :options=accounts :filter="true"
                 :filterFields="['label', 'value']" emptyFilterMessage=" "
                 @change="selectAccount($event.value?.label, $event.value?.value); $emit('update:modelValue', $event.value?.value); $emit('select-multisig-account', $event.value?.value);">
                 <!-- For the display of the account information -->
@@ -23,7 +23,7 @@
                 <!-- For the display of the dropdown option -->
                 <template #option="slotProps">
                     <div class="account-item">
-                        <div class='flex'>
+                        <div class='flex items-center'>
                             <div v-html="toSvg(slotProps.option.value, 20, jdenticonConfig)" />
                             <div class='text-xs ml-2 font-semibold'>{{ slotProps.option.label }}</div>
                         </div>
@@ -40,7 +40,8 @@ import { ref, getCurrentInstance, toRefs, watch, PropType } from 'vue';
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { walletState } from '@/state/walletState';
-
+import {  PublicAccount } from 'tsjs-xpx-chain-sdk';
+import { AppState } from '@/state/appState';
 
 const isSelected = ref(false)
 
@@ -74,10 +75,10 @@ watch(selectedAddress, (n) => {
     const hasMultisigInfo = selectedAccount.multisigInfo.find(info => info.level == 0)
     accounts.value = hasMultisigInfo ? [...selectedAccount.multisigInfo].filter(info => info.level < 0).map(x => {
         const allAccounts = [...walletState.currentLoggedInWallet.accounts, ...walletState.currentLoggedInWallet.others]
-        const address = allAccounts.find(acc => acc.publicKey == x.publicKey).address
+        const findAcc = allAccounts.find(acc => acc.publicKey == x.publicKey)
         return {
-            label: walletState.currentLoggedInWallet.convertAddressToName(address),
-            value: address,
+            label: findAcc?  walletState.currentLoggedInWallet.convertAddressToName(findAcc.address) : PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain() ,
+            value: PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain(),
         }
     }) : []
 

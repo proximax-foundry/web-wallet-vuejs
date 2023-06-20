@@ -7,7 +7,7 @@
                     <div v-if="!selectedAddress" class="text-xs mt-3 text-blue-primary ">Select Account to Create / Initiate
                         Transaction</div>
                     <SelectInputAccount />
-                    <SelectInputMultisigAccount :selected-address="selectedAddress" />
+                    <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
                     <div class="text-blue-primary text-xs mt-3">Asset to Give</div>
                     <SelectInputAsset :selected-address="selectedAddress"
                         :selected-multisig-address="selectedMultisigAddress" />
