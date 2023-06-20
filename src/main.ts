@@ -3,7 +3,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
 import 'animate.css';
-import vueDebounce from 'vue-debounce'
+import { vue3Debounce } from 'vue-debounce'
 import { VuePassword } from 'vue-password';
 import mitt from 'mitt';
 import PrimeVue from 'primevue/config';
@@ -60,9 +60,7 @@ app.use(ConfirmationService);
 app.use(ToastService);
 app.use(i18n);
 app.use(VWave);
-app.use(vueDebounce);
 app.use(VueBlocksTree /* , {treeName:'blocks-tree'} */);
-app.mount('#app');
 // Use Components
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
@@ -73,6 +71,9 @@ app.component('Sidebar', Sidebar);
 app.component('Tree',Tree);
 app.directive("tooltip", Tooltip);
 app.directive("maska", vMaska);
+app.directive('debounce', vue3Debounce({ lock: true }))
+app.mount('#app');
+
 
 AppStateUtils.addNewReadyStates('chainProfile');
 AppStateUtils.addNewReadyStates('theme');
