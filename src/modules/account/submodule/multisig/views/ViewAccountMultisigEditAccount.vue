@@ -105,7 +105,7 @@ import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
 import TextInputClean from '@/components/TextInputClean.vue'
-import MultisigUtils from '@/util/multisigUtils'
+import {MultisigUtils} from '@/util/multisigUtils'
 import { walletState } from '@/state/walletState';
 import {
     PublicAccount,Address
