@@ -422,8 +422,8 @@ export default defineComponent({
       allTxnQueryParams.pageNumber = loadMore ? allTxnQueryParams.pageSize + 1 : 1;
       allTxnQueryParams.publicKey = selectedAccount.value.publicKey;
       if(allTxnQueryParams.type.length === 0 || 
-        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_COMPLETE) ||
-        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_BONDED)){
+        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_COMPLETE_V1) ||
+        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_BONDED_V1)){
         allTxnQueryParams.firstLevel = false;
       }
       else{

@@ -109,7 +109,7 @@ import { Helper } from "@/util/typeHelper";
 import { computed, ref, getCurrentInstance, watch} from "vue";
 import PasswordInput from "@/components/PasswordInput.vue";
 import {useI18n} from 'vue-i18n'
-import { multiSign } from "@/util/multiSignatory";
+import {MultisigUtils} from '@/util/multisigUtils'
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { TransactionUtils, findAcc } from "@/util/transactionUtils";
@@ -294,7 +294,7 @@ export default {
 
     const buildAggregateTxn = ()=>{
       if(metadataTxn){
-        aggregateTxn = aggregateTxnBuilder.innerTransactions([metadataTxn.toAggregate(targetPublicAccount)]).build();
+        aggregateTxn = aggregateTxnBuilder.innerTransactions([metadataTxn.toAggregateV1(targetPublicAccount)]).build();
       }
     }
 
@@ -459,18 +459,18 @@ export default {
       .calculateDifferences()
       .build()
       let aggregateTx = targetAccIsMultisig.value?
-      aggregateTxnBuilder.innerTransactions([accountMetadataTransaction.toAggregate(targetPublicAccount.value)]).build():
-      AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([accountMetadataTransaction.toAggregate(targetPublicAccount.value)]).build()
+      aggregateTxnBuilder.innerTransactions([accountMetadataTransaction.toAggregateV1(targetPublicAccount.value)]).build():
+      AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([accountMetadataTransaction.toAggregateV1(targetPublicAccount.value)]).build()
       let signer = targetAccIsMultisig.value? 
       walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosigner.value):
       walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == props.targetPublicKey) 
       let encryptedPassword = WalletUtils.createPassword(walletPassword.value);
       let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, signer.encrypted, signer.iv);
-      let signerAcc = Account.createFromPrivateKey(privateKey, AppState.networkType);
-      let signedAggregateTransaction = signerAcc.sign(aggregateTx, networkState.currentNetworkProfile.generationHash);
+      let signerAcc = Account.createFromPrivateKey(privateKey, AppState.networkType,1);
+      let signedAggregateTransaction = signerAcc.preV2Sign(aggregateTx, networkState.currentNetworkProfile.generationHash);
       if(targetAccIsMultisig.value){
         let lockHashTx = TransactionUtils.lockFundTx(signedAggregateTransaction)
-        let signedLockHashTransaction = signerAcc.sign(lockHashTx, networkState.currentNetworkProfile.generationHash);
+        let signedLockHashTransaction = signerAcc.preV2Sign(lockHashTx, networkState.currentNetworkProfile.generationHash);
         TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedLockHashTransaction,signedAggregateTransaction) 
       }else{
         TransactionUtils.announceTransaction(signedAggregateTransaction)
@@ -499,9 +499,9 @@ export default {
       if(!walletState.currentLoggedInWallet || !targetPublicAccount.value){
         return []
       }
-      if(multiSign.getCosignerInWallet(props.targetPublicKey).cosignerList.length){
+      if(MultisigUtils.getCosignerInWallet(props.targetPublicKey).cosignerList.length){
         if(accounts.value){
-          return multiSign.getCosignerInWallet(props.targetPublicKey).cosignerList.map(cosigner=>{
+          return MultisigUtils.getCosignerInWallet(props.targetPublicKey).cosignerList.map(cosigner=>{
             let foundCosigner = accounts.value.find(acc=>acc.publicKey==cosigner)
             return{
               name: foundCosigner.name,
@@ -557,7 +557,7 @@ export default {
 
     const getMultiSigCosigner = computed(() => {
       if(networkState.currentNetworkProfileConfig){
-        let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
+        let cosigners = MultisigUtils.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
         let list = [];
         cosigners.cosignerList.forEach( publicKey => {
           list.push({

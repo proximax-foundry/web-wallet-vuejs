@@ -68,23 +68,23 @@ export class Helper {
     }
 
     static appendInnerTransaction(transactions: Transaction[], publicKeyTosign: string, innerTransactions: InnerTransaction[]): InnerTransaction[] {
-        const networkType = transactions[0].networkType;
+        const networkType = transactions[0].version.networkType;
         const publicAccount = PublicAccount.createFromPublicKey(publicKeyTosign, networkType);
 
         transactions.forEach((transaction) => {
-            innerTransactions.push(transaction.toAggregate(publicAccount));
+            innerTransactions.push(transaction.toAggregateV1(publicAccount));
         });
 
         return innerTransactions;
     }
 
     static createInnerTransaction(transactions: Transaction[], publicKeyTosign: string): InnerTransaction[] {
-        const networkType = transactions[0].networkType;
+        const networkType = transactions[0].version.networkType;
         const publicAccount = PublicAccount.createFromPublicKey(publicKeyTosign, networkType);
         const newInnerTransaction: InnerTransaction[] = [];
 
         transactions.forEach((transaction) => {
-            newInnerTransaction.push(transaction.toAggregate(publicAccount));
+            newInnerTransaction.push(transaction.toAggregateV1(publicAccount));
         });
 
         return newInnerTransaction;
@@ -107,7 +107,7 @@ export class Helper {
     }
 
     static createAccount(privateKey: string, network: NetworkType): Account {
-        return Account.createFromPrivateKey(privateKey, network);
+        return Account.createFromPrivateKey(privateKey, network,1);
     }
 
     static createNonceRandom(): MosaicNonce {

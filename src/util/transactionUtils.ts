@@ -57,11 +57,11 @@ export const transactionTypeName = {
     name: 'Modify Multisig Account'
   },
   aggregateComplete: {
-    id: TransactionType.AGGREGATE_COMPLETE,
+    id: TransactionType.AGGREGATE_COMPLETE_V1,
     name: 'Aggregate Complete'
   },
   aggregateBonded: {
-    id: TransactionType.AGGREGATE_BONDED,
+    id: TransactionType.AGGREGATE_BONDED_V1,
     name: 'Aggregate Bonded'
   },
   mosaicAlias: {
@@ -73,7 +73,7 @@ export const transactionTypeName = {
     name: 'Address Alias'
   },
   lock: {
-    id: TransactionType.LOCK,
+    id: TransactionType.HASH_LOCK,
     name: 'LockFund'
   },
   accountLink: {
@@ -185,7 +185,7 @@ export class TransactionUtils {
   }
 
   static signTransaction(transaction: Transaction, account: Account, generationHash: string): SignedTransaction {
-    return account.sign(transaction, generationHash);
+    return account.preV2Sign(transaction, generationHash);
   }
 
   static aggregateToCosignatureTransaction(aggregateTransaction: AggregateTransaction): CosignatureTransaction {
@@ -195,7 +195,7 @@ export class TransactionUtils {
   static cosignTransaction(transactionToCosign: AggregateTransaction, account: Account): CosignatureSignedTransaction {
     const cosignatureTransaction = TransactionUtils.aggregateToCosignatureTransaction(transactionToCosign);
 
-    return account.signCosignatureTransaction(cosignatureTransaction);
+    return account.preV2SignCosignatureTransaction(cosignatureTransaction);
   }
 
   static async getTransactions(publicAccount: PublicAccount, queryParams?: TransactionQueryParams): Promise<Transaction[]> {
@@ -252,10 +252,10 @@ export class TransactionUtils {
       case TransactionType.ADD_EXCHANGE_OFFER:
         typeName = transactionTypeName.addExchangeOffer.name
         break;
-      case TransactionType.AGGREGATE_BONDED:
+      case TransactionType.AGGREGATE_BONDED_V1:
         typeName = transactionTypeName.aggregateBonded.name
         break;
-      case TransactionType.AGGREGATE_COMPLETE:
+      case TransactionType.AGGREGATE_COMPLETE_V1:
         typeName = transactionTypeName.aggregateComplete.name
         break;
       case TransactionType.CHAIN_CONFIGURE:
@@ -273,7 +273,7 @@ export class TransactionUtils {
       case TransactionType.LINK_ACCOUNT:
         typeName = transactionTypeName.accountLink.name
         break;
-      case TransactionType.LOCK:
+      case TransactionType.HASH_LOCK:
         typeName = transactionTypeName.lock.name
         break;
       case TransactionType.MODIFY_ACCOUNT_METADATA:
@@ -369,7 +369,7 @@ export class TransactionUtils {
   }
 
   static getLockFundFee() :number {
-    let abtType = TransactionType.AGGREGATE_BONDED
+    let abtType = TransactionType.AGGREGATE_BONDED_V1
     let txHash = new TransactionHash("0".repeat(64),abtType)
     const lockFundTx = TransactionUtils.lockFundTx(txHash)
     return lockFundTx.maxFee.compact();
@@ -385,7 +385,7 @@ export class TransactionUtils {
     addresses.push(txn.signer.address);
 
     switch(txn.type){
-      case TransactionType.AGGREGATE_BONDED:{
+      case TransactionType.AGGREGATE_BONDED_V1:{
         let aggregateBondedTxn = txn as AggregateTransaction; 
         let addressInDeep = aggregateBondedTxn.innerTransactions.map(x =>{
           return TransactionUtils.extractConfirmedRelatedAddressByTransactionType(x);
@@ -393,7 +393,7 @@ export class TransactionUtils {
         let allNewAddress = addressInDeep.flat();
         addresses = addresses.concat(allNewAddress);
       }  break;
-      case TransactionType.AGGREGATE_COMPLETE:{
+      case TransactionType.AGGREGATE_COMPLETE_V1:{
         let aggregateCompleteTxn = txn as AggregateTransaction; 
         let addressInDeep = aggregateCompleteTxn.innerTransactions.map(x =>{
           return TransactionUtils.extractConfirmedRelatedAddressByTransactionType(x);
@@ -424,7 +424,7 @@ export class TransactionUtils {
         addresses.push(linkAccountAddress);
       }
         break;
-      case TransactionType.LOCK:
+      case TransactionType.HASH_LOCK:
         break;
       case TransactionType.MODIFY_ACCOUNT_RESTRICTION_ADDRESS:
         break;
