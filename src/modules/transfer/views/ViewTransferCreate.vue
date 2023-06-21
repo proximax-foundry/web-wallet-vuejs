@@ -96,7 +96,7 @@ import {
 import AddContactModal from "@/modules/transfer/components/AddContactModal.vue";
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
 import {useI18n} from 'vue-i18n'
-import { multiSign } from "@/util/multiSignatory";
+
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { accountUtils } from "@/util/accountUtils";

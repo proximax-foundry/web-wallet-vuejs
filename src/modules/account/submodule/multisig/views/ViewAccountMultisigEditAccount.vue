@@ -105,7 +105,7 @@ import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
 import TextInputClean from '@/components/TextInputClean.vue'
-import { multiSign } from '@/util/multiSignatory';
+import MultisigUtils from '@/util/multisigUtils'
 import { walletState } from '@/state/walletState';
 import {
     PublicAccount,Address
@@ -192,7 +192,7 @@ export default {
       if(!acc.value){
         return
       }
-      multiSign.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value).then(fee=>{
+      MultisigUtils.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value).then(fee=>{
        aggregateFee.value=fee
      })
     }
@@ -235,7 +235,7 @@ export default {
       if(!acc.value){
         return {hasCosigner:false , cosignerList: []}
       }
-      return multiSign.getCosignerInWallet(acc.value.publicKey)
+      return MultisigUtils.getCosignerInWallet(acc.value.publicKey)
     }
     const walletCosignerList = computed(() =>{
       if(!walletState.currentLoggedInWallet){
@@ -260,7 +260,7 @@ export default {
       if(!acc.value){
         return false
       }
-      return multiSign.checkIsMultiSig(acc.value.address)
+      return MultisigUtils.checkIsMultiSig(acc.value.address)
     })
     const disableSend = computed(() => 
       !isMultisig.value || 
@@ -322,7 +322,7 @@ export default {
         signer.push({address: walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey).address})
       })
       console.log(signer)
-      let modifyStatus = await multiSign.modifyMultisigAccount(selectedCosignPublicKey.value,coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value,acc.value, passwd.value);
+      let modifyStatus = await MultisigUtils.modifyMultisigAccount(selectedCosignPublicKey.value,coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value,acc.value, passwd.value);
        console.log(modifyStatus);
       if(!modifyStatus){
         passwordErr.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
@@ -468,7 +468,7 @@ export default {
     
       function changeToPublicKey(address, index){
         try {
-          multiSign.verifyContactPublicKey(address).then(result=>{
+          MultisigUtils.verifyContactPublicKey(address).then(result=>{
             if(result.status==true){
               coSign.value[index] = result.publicKey
             }
@@ -637,7 +637,7 @@ export default {
    
     // check if onPartial
     try {
-       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(onPartialBoolean => onPartial.value = onPartialBoolean)
+       MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(onPartialBoolean => onPartial.value = onPartialBoolean)
     } catch (error) {
       
     }
@@ -696,7 +696,7 @@ export default {
 
     const getMultiSigCosigner = computed(() => {
       if(networkState.currentNetworkProfileConfig){
-        let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
+        let cosigners = MultisigUtils.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
         let list = [];
         cosigners.cosignerList.forEach( publicKey => {
           list.push({

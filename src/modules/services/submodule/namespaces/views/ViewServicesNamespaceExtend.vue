@@ -72,7 +72,7 @@ import { useToast } from "primevue/usetoast";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
-import { multiSign } from '@/util/multiSignatory';
+import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
 import { isMultiSig, TransactionUtils, findAcc, findAccWithAddress } from '@/util/transactionUtils';
 import { WalletUtils } from '@/util/walletUtils';
@@ -308,7 +308,7 @@ export default {
         return
       }
       if(networkState.currentNetworkProfileConfig){
-        let cosigners = multiSign.getCosignerInWallet(account.value?account.value.publicKey:'');
+        let cosigners = MultisigUtils.getCosignerInWallet(account.value?account.value.publicKey:'');
         let list = [];
         cosigners.cosignerList.forEach( publicKey => {
           list.push({

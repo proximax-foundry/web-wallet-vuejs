@@ -107,7 +107,7 @@ import {
       const aggregateBondedTx = txBuilder
         .aggregateBondedBuilder()
         .innerTransactions([
-          convertIntoMultisigTransaction.toAggregate(publicAcc),
+          convertIntoMultisigTransaction.toAggregateV1(publicAcc),
         ])
         .build();
       return aggregateBondedTx.maxFee.compact()/Math.pow(10, AppState.nativeToken.divisibility)
@@ -150,7 +150,7 @@ import {
       );
       const accountToConvert = Account.createFromPrivateKey(
         privateKey,
-        AppState.networkType
+        AppState.networkType,1
       );
       if (!AppState.chainAPI) {
         throw new Error("Service unavailable");
@@ -200,7 +200,7 @@ import {
       const aggregateBondedTransaction = txBuilder
         .aggregateBondedBuilder()
         .innerTransactions([
-          convertIntoMultisigTransaction.toAggregate(
+          convertIntoMultisigTransaction.toAggregateV1(
             accountToConvert.publicAccount
           ),
         ])
@@ -208,14 +208,14 @@ import {
       if (!networkState.currentNetworkProfile) {
         throw new Error("Service unavailable");
       }
-      const signedAggregateBondedTransaction = accountToConvert.sign(
+      const signedAggregateBondedTransaction = accountToConvert.preV2Sign(
         aggregateBondedTransaction,
         networkState.currentNetworkProfile.generationHash
       );
       const lockFundsTransaction = TransactionUtils.lockFundTx(
         signedAggregateBondedTransaction
       );
-      const lockFundsTransactionSigned = accountToConvert.sign(
+      const lockFundsTransactionSigned = accountToConvert.preV2Sign(
         lockFundsTransaction,
         networkState.currentNetworkProfile.generationHash
       );
@@ -490,7 +490,7 @@ import {
       );
       const aggregateBondedTransaction = txBuilder
         .aggregateBondedBuilder()
-        .innerTransactions([modifyMultisigTransaction.toAggregate(publicAcc)])
+        .innerTransactions([modifyMultisigTransaction.toAggregateV1(publicAcc)])
         .build();
   
       const initiator = wallet.accounts.find(
@@ -509,16 +509,16 @@ import {
       );
       const initiatorAccount = Account.createFromPrivateKey(
         initiatorPrivateKey,
-        AppState.networkType
+        AppState.networkType,1
       );
-      const signedAggregateBondedTransaction = initiatorAccount.sign(
+      const signedAggregateBondedTransaction = initiatorAccount.preV2Sign(
         aggregateBondedTransaction,
         networkState.currentNetworkProfile.generationHash
       );
       const lockFundsTransaction = TransactionUtils.lockFundTx(
         signedAggregateBondedTransaction
       );
-      const lockFundsTransactionSigned = initiatorAccount.sign(
+      const lockFundsTransactionSigned = initiatorAccount.preV2Sign(
         lockFundsTransaction,
         networkState.currentNetworkProfile.generationHash
       );

@@ -76,7 +76,7 @@ import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
 import TextInputClean from '@/components/TextInputClean.vue'
-import { multiSign } from '@/util/multiSignatory';
+import {MultisigUtils} from '@/util/multisigUtils'
 import { walletState } from '@/state/walletState';
 import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
@@ -159,13 +159,13 @@ export default {
       if(!acc.value){
         return
       }
-      return multiSign.checkIsMultiSig(acc.value.address)
+      return MultisigUtils.checkIsMultiSig(acc.value.address)
     }) 
     let updateAggregateFee=()=>{
       if(!acc.value){
         return
       }
-      multiSign.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value).then(fee=>{
+      MultisigUtils.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value).then(fee=>{
        aggregateFee.value=fee
      })
     }
@@ -268,7 +268,7 @@ export default {
 
       function changeToPublicKey(address, index){
         try {
-          multiSign.verifyContactPublicKey(address).then(result=>{
+          MultisigUtils.verifyContactPublicKey(address).then(result=>{
             if(result.status==true){
               coSign.value[index] = result.publicKey
             }
@@ -331,7 +331,7 @@ export default {
       maxNumDeleteUser.value = 0;
     };
     const convertAccount = async() => {
-      let convertstatus = await multiSign.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.value.name, passwd.value);
+      let convertstatus = await MultisigUtils.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.value.name, passwd.value);
       if(!convertstatus){
         passwordErr.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
       }else{
@@ -465,7 +465,7 @@ export default {
    
     // check if onPartial
     if(acc.value){
-      multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(verify=>
+      MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(verify=>
       onPartial.value = verify
     )
     }

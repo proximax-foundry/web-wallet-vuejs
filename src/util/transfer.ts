@@ -91,21 +91,21 @@ export const createTransaction = async (recipient :string, sendXPX :string, mess
   .message(msg)
   .build()
 
-  const account = Account.createFromPrivateKey(privateKey, networkType);
+  const account = Account.createFromPrivateKey(privateKey, networkType,1);
 
   if (!selectedCosigner) { // no cosigner, normal transaction
-    const signedTransaction = account.sign(transferTransaction, hash);
+    const signedTransaction = account.preV2Sign(transferTransaction, hash);
     TransactionUtils.announceTransaction(signedTransaction)
   } else { // there is a cosigner, aggregate  bonded transaction
     let selectedWalletSigner = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==selectedCosigner) 
     let selectedSignerPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), selectedWalletSigner.encrypted, selectedWalletSigner.iv);
-    let selectedSignerAccount = Account.createFromPrivateKey(selectedSignerPrivateKey,networkType)
-    const innerTxn = [transferTransaction.toAggregate(senderPublicAccount)];
+    let selectedSignerAccount = Account.createFromPrivateKey(selectedSignerPrivateKey,networkType,1)
+    const innerTxn = [transferTransaction.toAggregateV1(senderPublicAccount)];
     const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)
-    const aggregateBondedTransactionSigned = selectedSignerAccount.sign(aggregateBondedTransaction, hash);
+    const aggregateBondedTransactionSigned = selectedSignerAccount.preV2Sign(aggregateBondedTransaction, hash);
 
     const hashLockTransaction = TransactionUtils.lockFundTx(aggregateBondedTransactionSigned)
-    const hashLockTransactionSigned = selectedSignerAccount.sign(hashLockTransaction, hash)
+    const hashLockTransactionSigned = selectedSignerAccount.preV2Sign(hashLockTransaction, hash)
     TransactionUtils.announceLF_AND_addAutoAnnounceABT(hashLockTransactionSigned,aggregateBondedTransactionSigned)
   }
   
@@ -154,7 +154,7 @@ const calculate_aggregate_fee = (message :string , amount :string, mosaic :{id :
   .mosaics(mosaics)
   .message(PlainMessage.create(message))
   .build()
-  let innerTxn= [transferTransaction.toAggregate(PublicAccount.createFromPublicKey(test_publicKey,AppState.networkType))]
+  let innerTxn= [transferTransaction.toAggregateV1(PublicAccount.createFromPublicKey(test_publicKey,AppState.networkType))]
   let aggregateBondedTx = transactionBuilder.aggregateBondedBuilder()
   .innerTransactions(innerTxn)
   .build()

@@ -74,7 +74,7 @@ import { ChainUtils } from '@/util/chainUtils';
 import { TransactionUtils, isMultiSig, findAcc, findAccWithAddress } from '@/util/transactionUtils';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
-import { multiSign } from '@/util/multiSignatory';
+import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { WalletUtils } from '@/util/walletUtils';
@@ -246,7 +246,7 @@ export default {
 
     const getMultiSigCosigner = computed(() => {
       if(networkState.currentNetworkProfileConfig){
-        let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
+        let cosigners = MultisigUtils.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
         let list = [];
         cosigners.cosignerList.forEach( publicKey => {
           list.push({
