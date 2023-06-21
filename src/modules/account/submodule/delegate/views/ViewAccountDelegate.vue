@@ -90,11 +90,10 @@ import { useI18n } from 'vue-i18n';
 import { accountUtils } from "@/util/accountUtils";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import { Account } from "tsjs-xpx-chain-sdk";
-import { listenerState } from '@/state/listenerState';
-import { multiSign } from '@/util/multiSignatory';
 import { AppState } from '@/state/appState';
 import { TransactionUtils, findAcc } from '@/util/transactionUtils';
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
+import {MultisigUtils} from '@/util/multisigUtils'
 export default {
   name: 'ViewAccountDelegate',
   components: {
@@ -131,7 +130,7 @@ export default {
       if(!acc.value){
         return []
       }
-      return multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList;
+      return MultisigUtils.getCosignerInWallet(acc.value.publicKey).cosignerList;
     }
 
     const walletCosignerList = computed(() =>{
@@ -146,7 +145,7 @@ export default {
       if(!acc.value){
         return false
       }
-      return (multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList.length>0)?true: false;
+      return (MultisigUtils.getCosignerInWallet(acc.value.publicKey).cosignerList.length>0)?true: false;
     });
     const selectedCosignPublicKey = ref(walletCosignerList.value[0]?walletCosignerList.value[0].publicKey:'')
     
@@ -160,7 +159,7 @@ export default {
        if(!acc.value){
         return 
       }
-       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType))
+       MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType))
        .then(onPartialBoolean => onPartial.value = onPartialBoolean)
        .catch(err=>{
          onPartial.value = false
@@ -394,7 +393,7 @@ export default {
 
     const getMultiSigCosigner = computed(() => {
       if(networkState.currentNetworkProfileConfig){
-        let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
+        let cosigners = MultisigUtils.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
         let list = [];
         cosigners.cosignerList.forEach( publicKey => {
           list.push({

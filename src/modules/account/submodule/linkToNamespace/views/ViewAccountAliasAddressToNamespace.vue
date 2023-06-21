@@ -85,7 +85,7 @@ import { Helper } from "@/util/typeHelper";
 import { useI18n } from 'vue-i18n'
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
-import { multiSign } from '@/util/multiSignatory';
+import {MultisigUtils} from '@/util/multisigUtils'
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue"
 import { listenerState } from '@/state/listenerState';
 import { AppState } from '@/state/appState';
@@ -160,7 +160,7 @@ export default {
       if(!acc.value){
         return
       }
-      multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType))
+      MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType))
       .then(onPartialBoolean => onPartial.value = onPartialBoolean)
       .catch(err=>{
         onPartial.value = false
@@ -296,7 +296,7 @@ export default {
 
     const walletCosignerList = computed(() =>{
       if(networkState.currentNetworkProfileConfig){
-        let cosigners = multiSign.getCosignerInWallet(acc.value.publicKey?acc.value.publicKey:'');
+        let cosigners = MultisigUtils.getCosignerInWallet(acc.value.publicKey?acc.value.publicKey:'');
         let list = [];
         cosigners.cosignerList.forEach( publicKey => {
           list.push({
@@ -325,7 +325,7 @@ export default {
       if(!acc.value){
         return false
       }
-      return (multiSign.getCosignerInWallet(acc.value.publicKey).cosignerList.length>0)?true: false;
+      return (MultisigUtils.getCosignerInWallet(acc.value.publicKey).cosignerList.length>0)?true: false;
     });
 
     const disableContactSelection = computed(()=>{

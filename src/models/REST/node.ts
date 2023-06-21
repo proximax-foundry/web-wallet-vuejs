@@ -2,7 +2,7 @@ import {
     NodeHttp, NodeInfo, NodeTime
 } from "tsjs-xpx-chain-sdk";
 import {RequestAuth} from './auth';
-
+import { lastValueFrom } from 'rxjs';
 export class NodeAPI {
 
     nodeHttp: NodeHttp;
@@ -13,12 +13,12 @@ export class NodeAPI {
 
     getNodeInfo(): Promise<NodeInfo>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.nodeHttp.getNodeInfo(authHeader).toPromise();
+        return lastValueFrom(this.nodeHttp.getNodeInfo(authHeader));
     }
 
     getNodeTime(): Promise<NodeTime>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.nodeHttp.getNodeTime(authHeader).toPromise();
+        return lastValueFrom(this.nodeHttp.getNodeTime(authHeader));
     }
 }
 

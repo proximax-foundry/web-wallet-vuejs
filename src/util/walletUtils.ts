@@ -567,7 +567,7 @@ export class WalletUtils {
                     return false;
                 }
                 else {
-                    const checkingAddress = Account.createFromPrivateKey(common.privateKey, AppState.networkType).address.plain();
+                    const checkingAddress = Account.createFromPrivateKey(common.privateKey, AppState.networkType,1).address.plain();
 
                     if (checkingAddress !== account.address) {
                         return false;
@@ -722,7 +722,7 @@ export class WalletUtils {
      * @returns {Account}
      */
     static createAccountFromPrivateKey(privateKey: string, network: NetworkType): Account {
-        return Account.createFromPrivateKey(privateKey, network);
+        return Account.createFromPrivateKey(privateKey, network,1);
     }
 
     /**
@@ -755,7 +755,7 @@ export class WalletUtils {
      * @return checkAddress
      */
     static checkAddress(privateKey: string, net: NetworkType, address: string): boolean {
-        return (Account.createFromPrivateKey(privateKey, net).address.plain() === address) ? true : false;
+        return (Account.createFromPrivateKey(privateKey, net,1).address.plain() === address) ? true : false;
     }
 
     static createPublicAccount(publicKey: string, network: NetworkType): PublicAccount {
@@ -780,7 +780,7 @@ export class WalletUtils {
         const endpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, chainProfile.httpPort);
 
         return AppState.chainAPI.transactionAPI.announceAggregateBondedCosignature(
-            account.signCosignatureTransaction(cosignatureTransaction)
+            account.preV2SignCosignatureTransaction(cosignatureTransaction)
         );
     }
 
@@ -789,7 +789,7 @@ export class WalletUtils {
     }
 
     static getPublicAccountFromPrivateKey(privateKey: string, net: NetworkType): PublicAccount {
-        return Account.createFromPrivateKey(privateKey, net).publicAccount;
+        return Account.createFromPrivateKey(privateKey, net,1).publicAccount;
     }
 
     static generateNewAccount(network: NetworkType): Account {
@@ -2721,7 +2721,7 @@ export class WalletUtils {
     }
 
     static addNewWalletWithPrivateKey(allWallets: Wallets, privateKey: string, password: Password, walletName: string, networkName: string, networkType: NetworkType): WalletAccount {
-        const account = Account.createFromPrivateKey(privateKey, networkType);
+        const account = Account.createFromPrivateKey(privateKey, networkType,1);
         const wallet = WalletUtils.createAccountSimpleFromPrivateKey(walletName, password, privateKey, networkType);
         let walletAccounts: WalletAccount[] = [];
         let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.publicAccount.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);

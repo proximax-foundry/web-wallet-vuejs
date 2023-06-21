@@ -76,7 +76,7 @@ export default {
           err.value = t('general.walletPasswordInvalid',{name : walletName}) ;
         } else {    
           // create account
-          const account = Account.createFromPrivateKey(privKey.value,AppState.networkType);
+          const account = Account.createFromPrivateKey(privKey.value,AppState.networkType,1);
           const verifyExistingAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.publicKey == account.publicKey);
           if (verifyExistingAccount) {
             err.value = t('account.privateKeyExist');
