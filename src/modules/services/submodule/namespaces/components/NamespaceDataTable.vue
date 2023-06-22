@@ -421,7 +421,7 @@ export default{
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" >
 .p-datatable-tbody{
   td{
     font-size: 11px;

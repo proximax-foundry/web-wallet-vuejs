@@ -1,10 +1,18 @@
 export const ExchangeRoutes = [
     {
-      path: '/exchange/sell',
-      name: 'ViewServicesExchangeSell',
-      component: () => import('@/modules/services/submodule/exchange/ViewExchangeSell.vue'),
+      path: '/exchange/create',
+      name: 'ViewServicesExchangeCreatel',
+      component: () => import('@/modules/services/submodule/exchange/ViewExchangeCreate.vue'),
       meta: {
-        title: "SDA-SDA Exchange: Sell",
+        title: "Create SDA-SDA Exchange",
+      }
+    },
+    {
+      path: '/exchange/listing',
+      name: 'ViewServicesExchangeListing',
+      component: () => import('@/modules/services/submodule/exchange/ViewExchangeListing.vue'),
+      meta: {
+        title: "SDA-SDA Exchange: Listing",
       }
     },
   

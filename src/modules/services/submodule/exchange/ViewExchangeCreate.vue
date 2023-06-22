@@ -3,7 +3,7 @@
         <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5">
             <div class='border-2 xl:grid xl:grid-cols-3'>
                 <div class="xl:col-span-2 p-12">
-                    <div>SDA Exchange - Sell</div>
+                    <div>Create SDA-SDA Exchange</div>
                     <div v-if="!selectedAddress" class="text-xs mt-3 text-blue-primary ">Select Account to Create / Initiate
                         Transaction</div>
                     <SelectInputAccount />
