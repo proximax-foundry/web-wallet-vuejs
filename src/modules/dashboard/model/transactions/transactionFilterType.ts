@@ -56,7 +56,7 @@ export class TransactionFilterTypes{
     }
 
     static getLockTypes(){
-        return [TransactionType.LOCK];
+        return [TransactionType.HASH_LOCK];
     }
 
     static getLinkTypes(){
@@ -80,8 +80,8 @@ export class TransactionFilterTypes{
 
     static getAggregateTypes(){
         return [
-            TransactionType.AGGREGATE_BONDED,
-            TransactionType.AGGREGATE_COMPLETE
+            TransactionType.AGGREGATE_BONDED_V1,
+            TransactionType.AGGREGATE_COMPLETE_V1
         ];
         
     }

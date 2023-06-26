@@ -124,7 +124,6 @@ import { Helper } from '@/util/typeHelper';
 import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue'
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { useToast } from "primevue/usetoast";
-import { Connector } from '../models/connector';
 import { listenerState, AnnounceType} from "@/state/listenerState";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { TransactionType } from "tsjs-xpx-chain-sdk";
@@ -134,6 +133,7 @@ import { NotificationUtils } from '@/util/notificationUtils';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
 import { AppStateUtils } from "@/state/utils/appStateUtils";
+import ding from "@/assets/audio/ding.ogg"
 
 export default defineComponent({
   components: {
@@ -801,7 +801,7 @@ export default defineComponent({
         /*volume = volume || 100;*/
 
         try{
-            let sound = new Audio(require('@/assets/audio/ding.ogg'));
+            let sound = new Audio(ding);
 
             // Set volume
             /*sound.volume = volume / 100;*/

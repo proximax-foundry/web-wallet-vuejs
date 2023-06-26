@@ -61,7 +61,7 @@ import { walletState } from '@/state/walletState';
 import {  ref, computed } from "vue";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
-import { multiSign } from '@/util/multiSignatory';
+import {MultisigUtils }from '@/util/multisigUtils'
 import {Address, PublicAccount} from  "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
@@ -142,7 +142,7 @@ export default {
       },{deep:true})
       
       //check if account is a multisig
-      let verifyMultisig = multiSign.checkIsMultiSig(acc.value?acc.value.address:'')
+      let verifyMultisig = MultisigUtils.checkIsMultiSig(acc.value?acc.value.address:'')
       isMultisig.value = verifyMultisig;
     
       const copy = (id) =>{
@@ -337,7 +337,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.p-tree::v-deep{
+.p-tree::deep{
   border: none;
   padding: 0;
   .p-link {

@@ -76,10 +76,6 @@ export default {
         {name: computed(() => t('welcome.storage')), link: ''},
         {name: computed(() => t('welcome.streaming')), link: ''},
       ]},
-      {name: computed(() => t('services.attestation')), desc: computed(() => t('services.attestdescription')), img: 'icon-attestation-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: computed(() => t('services.attest')), link: 'ViewServicesAttestationCreate'},
-        {name: computed(() => t('services.audit')), link: 'ViewServicesAttestationAudit'},
-      ]},
       {name: computed(() => t('services.notifications')), desc: computed(() => t('services.notificationdescription')), img: 'icon-notifications-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
         {name: computed(() => t('services.notifications')), link: 'ViewServicesNotifications'},
       ]},
@@ -94,7 +90,6 @@ export default {
         {name: computed(() => t('services.sendshare')), link: ''}
       ]},
       {name: computed(() => t('services.siriusgift')), desc: computed(() => t('services.siriusgiftdescription')), img: 'icon-gift-sirius-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[
-        {name: computed(() => t('welcome.create')), link: 'ViewServicesSiriusGiftCreateGift'},
         {name: computed(() => t('services.redeem')), link: 'ViewServicesSiriusGiftRedeem'},
       ]},
       {name: computed(() => t('services.aggregatetransactions')), desc: computed(() => t('services.aggregatetransactions')), img: 'icon-aggregate-transactions-full-color-80h-proximax-sirius-wallet.svg', enable: true, menu:[

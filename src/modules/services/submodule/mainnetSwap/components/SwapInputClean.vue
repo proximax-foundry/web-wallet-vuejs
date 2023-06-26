@@ -3,24 +3,16 @@
     <div class="border border-gray-200 px-2 py-1 h-14 rounded-md ">
       <div class=" uppercase text-gray-500 text-txs  text-left mb-1">{{ placeholder }} <img src="@/assets/img/icon-info.svg" class="inline-block ml-1 relative cursor-pointer" style="top: -1px;" v-tooltip.bottom="{ value: '<tiptext>' + toolTip + '</tiptext>', escape: true }" v-if="toolTip"></div>
       <div class="flex justify-between items-center">
-        <AutoNumericVue 
+        <input
         :value="modelValue"
-        class="supply_input "  
-        :options="{
-          showWarnings : false,
-          digitGroupSeparator: ',',
-          decimalCharacter: '.',
-          currencySymbol: '',
-          allowDecimalPadding: false,
-          decimalPlaces: decimal,
-          roundingMethod: 'U',
-          minimumValue: '0'
-        }"
-        @input="$emit('update:modelValue',parseFloat($event.target.value.replace(/,/g, '')) )"
+        class="supply_input"
+        v-maska:[options]
+        :data-maska="maskaFormat()"
+        data-maska-tokens="0:\d:multiple|9:\d:optional"
+        :placeholder="placeholder"
         @keyup="checkBalance($event)"
-        @focus="$event.target.select()" 
-        @blur="blurInputText()"
-        ></AutoNumericVue>
+        @input="$emit('update:modelValue',parseFloat((<HTMLInputElement>$event.target).value.replace(/,/g, '')))"
+      />
         <button :disabled="disabled == true" class="w-24 cursor-pointer focus:outline-none text-blue-primary text-xs font-bold" @click="showRemark();$emit('clickedMaxAvailable', true);clearAllError()">{{$t('swap.maxAmount')}}</button>
       </div>
     </div>
@@ -30,100 +22,95 @@
   </div>
 </template>
 
-<script>
-import Tooltip from 'primevue/tooltip';
-import AutoNumericVue from 'autonumeric-vue/src/components/AutoNumericVue';
-export default{
-directives: {'tooltip': Tooltip },
-props: {
+<script setup lang="ts">
+import {ref, watch, toRefs} from 'vue'
+
+const p = defineProps({
     placeholder: String,
     errorMessage: String,
     emptyErrorMessage: String,
     icon: String,
     showError: Boolean,
-    modelValue: Number,
+    modelValue: {
+      type: Number,
+      required: true
+    },
     title: String,
     disabled: Boolean,
-    maxAmount: Number,
+    maxAmount: {
+      type: Number,
+      required: true
+    },
     remarkOption: Boolean,
     transactionFee: String,
     gasFee: Number,
     toolTip: String,
-    decimal: Number,
-  },
-  components:{
-    AutoNumericVue
-  },
-  emits:[
+    decimal: {
+      type: Number,
+      required: true
+    },
+  })
+  defineEmits([
     'update:modelValue',
     'clickedMaxAvailable',
-  ],
-  name: 'SwapInputClean',
-  data() {
-    return {
-      inputText: "",
-      borderColor: 'border border-gray-300',
-      textErr: false,
-      isShowRemark: false,
-      emptyErr: false
-    };
-  },
-  watch:{
-    modelValue: function(val){
-      if(val == this.maxAmount){
-        this.isShowRemark = true;
+  ])
+  
+  const {modelValue} = toRefs(p)
+      const textErr=ref(false)
+      const isShowRemark = ref(false)
+      const emptyErr = ref(false)
+  watch(modelValue, val => {
+      if(val == p.maxAmount){
+        isShowRemark.value = true;
       }else{
-        this.isShowRemark = false;
+        isShowRemark.value = false;
       }
     }
-  },
-  methods: {
-    showRemark: function() {
-      this.isShowRemark = true;
-    },
-    clearAllError: function(){
-      this.textErr = false;
-      this.emptyErr = false;
-      this.borderColor = 'border-2 border-gray-300';
-    },
-    clickInputText: function() {
-      if(!this.pswdErr){
-        this.borderColor = 'border-2 border-blue-primary';
-      }
-    },
-    blurInputText: function() {
-      if(!this.disabled){
-        if(this.modelValue == '' || this.modelValue == 0 || this.modelValue == '0'){
-          this.borderColor = 'border-2 border-red-primary';
-          this.emptyErr = true;
-        }else{
-          this.borderColor = 'border-2 border-gray-300';
-          this.emptyErr = false;
-        }
-      }
-    },
-    checkBalance: function(evt){
-      evt.target.value =  evt.target.value? evt.target.value : 0;
-      if(this.maxAmount < evt.target.value){
-        this.borderColor = 'border-2 border-red-primary';
-        this.textErr = true;
+  )
+    const showRemark = () => {
+      isShowRemark.value = true;
+    }
+    const clearAllError = () => {
+      textErr.value = false;
+      emptyErr.value = false;
+    }
+    const checkBalance = (evt:Event) => {
+      const target = evt.target as HTMLInputElement
+      target.value =  target.value? target.value : "0";
+      if(p.maxAmount < Number(target.value.replace(/,/g, ''))){
+        textErr.value = true;
       }else{
-        this.textErr = false;
-        this.blurInputText();
+        textErr.value = false;
       }
-    },
+    }
+    const maskaFormat = () => {
+  let maskaFormat = "0";
+  if (p.decimal > 0) {
+    maskaFormat = maskaFormat + "." + "9".repeat(p.decimal);
+  }
+  return maskaFormat;
+};
+
+const options = {
+  preProcess: (val: string) => {
+    return val.replace(/,/g, "");
   },
-  mounted() {
-    this.emitter.on("CLEAR_TEXT", payload => {
-      this.inputText = payload;
-      this.textErr = false;
-      this.borderColor = 'border border-gray-300';
-    });
-    this.emitter.on("CLOSE_MOSAIC_INSUFFICIENT_ERR", payload => {
-      this.textErr = payload;
-    });
+  postProcess: (val: string) => {
+    if (!val) return "";
+    let sub = 0;
+    if (p.decimal > 0) {
+      sub =
+        1 +
+        p.decimal -
+        (val.includes(".") ? val.length - val.indexOf(".") : 0);
+    }
+    return Intl.NumberFormat("en-US", {
+      minimumFractionDigits: p.decimal,
+    })
+      .format(parseFloat(val))
+      .slice(0, sub ? -sub : undefined);
   },
-}
+};
 </script>
 <style lang="scss" scoped>
 /* Chrome, Safari, Edge, Opera */

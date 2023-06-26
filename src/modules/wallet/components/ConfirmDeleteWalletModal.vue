@@ -1,8 +1,8 @@
 <template>
     <img @click=" toggleModal =! toggleModal" src="@/modules/wallet/img/icon-delete.svg" class=" cursor-pointer inline">
      <transition
-          enter-active-class="animate__animated animate__fadeInDown"
-          leave-active-class="animate__animated animate__fadeOutUp"
+          enterActiveClass="animate__animated animate__fadeInDown"
+          leaveActiveClass="animate__animated animate__fadeOutUp"
       >
       <div v-if='toggleModal' class="popup-outer fixed flex z-50 text-black mt-10">
         <div class="modal-popup-box">

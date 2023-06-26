@@ -7,7 +7,7 @@ import {
 import {RequestAuth} from './auth';
 import {AppState} from '../../state/appState';
 import { AppStateUtils } from "@/state/utils/appStateUtils";
-
+import { lastValueFrom } from 'rxjs';
 export class TransactionAPI {
 
     transactionHttp: TransactionHttp;
@@ -33,7 +33,7 @@ export class TransactionAPI {
             AppStateUtils.updateActivityLogNum();
         }
         let authHeader = RequestAuth.getAuthHeader();
-        return this.transactionHttp.announce(signedTransaction, authHeader).toPromise();
+        return lastValueFrom(this.transactionHttp.announce(signedTransaction, authHeader));
     }
 
     announceAggregateBonded(signedTransaction: SignedTransaction): Promise<TransactionAnnounceResponse>{
@@ -53,7 +53,7 @@ export class TransactionAPI {
             AppStateUtils.updateActivityLogNum();
         }
         let authHeader = RequestAuth.getAuthHeader();
-        return this.transactionHttp.announceAggregateBonded(signedTransaction, authHeader).toPromise();
+        return lastValueFrom(this.transactionHttp.announceAggregateBonded(signedTransaction, authHeader));
     }
 
     announceAggregateBondedCosignature(cosignatureSignedTransaction: CosignatureSignedTransaction): Promise<TransactionAnnounceResponse>{
@@ -78,7 +78,7 @@ export class TransactionAPI {
             AppStateUtils.addCosignLogNum();
         }
         let authHeader = RequestAuth.getAuthHeader();
-        return this.transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction, authHeader).toPromise();
+        return lastValueFrom(this.transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction, authHeader));
     }
 
     /**
@@ -87,7 +87,7 @@ export class TransactionAPI {
      */
     getTransaction(transactionId: string): Promise<Transaction>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.transactionHttp.getTransaction(transactionId, authHeader).toPromise();
+        return lastValueFrom(this.transactionHttp.getTransaction(transactionId, authHeader));
     }
 
     /**
@@ -96,7 +96,7 @@ export class TransactionAPI {
      */
      getUnconfirmedTransaction(transactionId: string): Promise<Transaction>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.transactionHttp.getUnconfirmedTransaction(transactionId, authHeader).toPromise();
+        return lastValueFrom(this.transactionHttp.getUnconfirmedTransaction(transactionId, authHeader));
     }
 
     /**
@@ -105,7 +105,7 @@ export class TransactionAPI {
      */
      getPartialTransaction(transactionId: string): Promise<Transaction>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.transactionHttp.getPartialTransaction(transactionId, authHeader).toPromise();
+        return lastValueFrom(this.transactionHttp.getPartialTransaction(transactionId, authHeader));
     }
 
     /**
@@ -115,7 +115,7 @@ export class TransactionAPI {
      */
     getTransactions(transactionIds: string[]): Promise<Transaction[]>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.transactionHttp.getTransactions(transactionIds, undefined, authHeader).toPromise();
+        return lastValueFrom(this.transactionHttp.getTransactions(transactionIds, undefined, authHeader));
     }
 
     /**
@@ -124,26 +124,26 @@ export class TransactionAPI {
      */
     getTransactionEffectiveFee(transactionId: string): Promise<number>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.transactionHttp.getTransactionEffectiveFee(transactionId, authHeader).toPromise();
+        return lastValueFrom(this.transactionHttp.getTransactionEffectiveFee(transactionId, authHeader));
     }
 
     getTransactionStatus(transactionHash: string): Promise<TransactionStatus>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.transactionHttp.getTransactionStatus(transactionHash, authHeader).toPromise();
+        return lastValueFrom(this.transactionHttp.getTransactionStatus(transactionHash, authHeader));
     }
 
     getTransactionsStatuses(transactionHashes: string[]): Promise<TransactionStatus[]>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.transactionHttp.getTransactionsStatuses(transactionHashes, authHeader).toPromise();
+        return lastValueFrom(this.transactionHttp.getTransactionsStatuses(transactionHashes, authHeader));
     }
 
     searchTransactions(transactionGroupType: TransactionGroupType, transactionQueryParams ?:TransactionQueryParams): Promise<TransactionSearch>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.transactionHttp.searchTransactions(transactionGroupType, transactionQueryParams, authHeader).toPromise();
+        return lastValueFrom(this.transactionHttp.searchTransactions(transactionGroupType, transactionQueryParams, authHeader));
     }
 
     getTransactionsCount(transactionTypes: TransactionType[], transactionGroupType: TransactionGroupType): Promise<TransactionCount[]> {
         let authHeader = RequestAuth.getAuthHeader();
-        return this.transactionHttp.getTransactionsCount(transactionTypes, transactionGroupType, authHeader).toPromise();
+        return lastValueFrom(this.transactionHttp.getTransactionsCount(transactionTypes, transactionGroupType, authHeader));
     }
 }

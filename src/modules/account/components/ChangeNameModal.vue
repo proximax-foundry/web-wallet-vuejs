@@ -13,8 +13,8 @@
             <div v-else-if="isOther && !isEdit">
                 <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
                 <div class= 'text-center mt-2 text-xs font-semibold'>Add to Address Book</div>
-                <TextInputClean :placeholder="$t('general.name')" :errorMessage="$t('general.nameRequired')" v-model="contactName" icon="id-card-alt" :showError="showNameErr" class="w-full md:w-96 inline-block mt-3  mr-2" />
-                <TextInputClean :placeholder="$t('general.address')" :errorMessage="addErr" v-model="address" :disabled="true" icon="wallet" class="w-full md:w-96 inline-block mr-2" />
+                <TextInputClean :placeholder="$t('general.name')" :errorMessage="$t('general.nameRequired')" v-model="contactName" icon="id-card-alt" class="w-full md:w-96 inline-block mt-3  mr-2" />
+                <TextInputClean :placeholder="$t('general.address')" v-model="addressCopy" :disabled="true" icon="wallet" class="w-full md:w-96 inline-block mr-2" />
                 <div class="flex justify-center">
                     <button @click="saveContact()"  class = ' blue-btn font-semibold py-2 cursor-pointer text-center w-7/12 disabled:opacity-50 disabled:cursor-auto' :disabled="disabledAdd">{{$t('general.add')}}</button>
                 </div>
@@ -23,15 +23,15 @@
                 <div class="error error_box mb-3" v-if="err!=''">{{ err }}</div>
                 <div class= 'text-center mt-2 text-xs font-semibold'>Edit Address Book</div>
                 <TextInputClean :placeholder="$t('general.name')" :errorMessage="$t('general.nameRequired')" v-model="contactName" icon="id-card-alt"  class="w-full md:w-96 inline-block mt-3  mr-2" />
-                <TextInputClean :placeholder="$t('general.address')"  v-model="address" :disabled="true" icon="wallet" class="w-full md:w-96 inline-block mr-2" />
+                <TextInputClean :placeholder="$t('general.address')"  v-model="addressCopy" :disabled="true" icon="wallet" class="w-full md:w-96 inline-block mr-2" />
                 <div class="flex justify-center">
                     <button @click="editContact()"  class = ' blue-btn font-semibold py-2 cursor-pointer text-center w-7/12 disabled:opacity-50 disabled:cursor-auto' :disabled="disabledAdd">{{$t('general.add')}}</button>
                 </div>
             </div>
-            <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-2' @click="toggleModal = !toggleModal;walletPasswd='';err=''">{{$t('general.cancel')}}</div>
+            <div class= 'text-center cursor-pointer text-xs font-semibold text-blue-link mt-2' @click="toggleModal = !toggleModal;err=''">{{$t('general.cancel')}}</div>
         </div>
       </div>
-    <div @click="toggleModal = !toggleModal;err = '';walletPasswd=''" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 bg-gray-100 z-20"></div>
+    <div @click="toggleModal = !toggleModal;err = '';" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 bg-gray-100 z-20"></div>
 </template>
 
 <script setup lang='ts'>
@@ -43,11 +43,13 @@ import TextInput from '@/components/TextInput.vue'
 import TextInputClean from '@/components/TextInputClean.vue';
 import { Address } from "tsjs-xpx-chain-sdk";
 import { AddressBook } from "@/models/addressBook";
+import { AppState } from "@/state/appState";
 
 const props = defineProps({
     isOther: Boolean,
     address: String
 })
+const addressCopy = ref(props.address)
 const {t} = useI18n() 
 const disabledConfirm = computed(()=>{ 
     if(accountName.value.trim()!=""  ){
@@ -128,7 +130,22 @@ const saveContact = () => {
     toggleModal.value = false
     }
 }
-
+const publicKey = ref('');
+const getPublicKey = async(address) =>{
+      try{
+        let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
+        if(accInfo.publicKey == "0000000000000000000000000000000000000000000000000000000000000000"){
+          publicKey.value = null
+        }
+        else{
+          publicKey.value = accInfo.publicKey
+        }
+      }
+      catch{
+        publicKey.value = null
+      }
+    }
+getPublicKey(props.address)
 const editContact = ()=>{
     const wallet = walletState.currentLoggedInWallet
     if(!wallet){
@@ -147,7 +164,7 @@ const editContact = ()=>{
     }else if(findAddressInTempContact!=undefined){
         err.value = t('addressBook.addressExist');
     }else{
-        walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value.trim(), address: Address.createFromRawAddress(props.address).plain(),group:'-none-'});
+        walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value.trim(), address: Address.createFromRawAddress(props.address).plain(), group:'-none-', publicKey: publicKey.value});
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         err.value = '';
         contactName.value = ''

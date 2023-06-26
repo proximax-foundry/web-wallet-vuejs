@@ -34,7 +34,7 @@ import {
     ExchangeOfferTransaction,
     RemoveExchangeOfferTransaction,
     AccountLinkTransaction,
-    LockFundsTransaction,
+    HashLockTransaction,
     MosaicMetadataTransaction,
     AccountMetadataTransaction,
     NamespaceMetadataTransaction,
@@ -150,8 +150,6 @@ export interface InnerTxnDetails{
     legendType: InnerTxnLegendType;
     sdas: string[];
 }
-
-const {t} = i18n.global 
 
 export class DashboardService {
 
@@ -835,7 +833,7 @@ export class DashboardService {
                 txn.targetId = assetId;
                 txn.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
                 txn.sizeChanged = assetMetadataTxn.valueSizeDelta;
-                txn.valueChange = Convert.uint8ToHex(assetMetadataTxn.valueDifferences);
+                txn.valueChange = Convert.uint8ArrayToHex(assetMetadataTxn.valueDifferences);
 
                 try {
                     let assetName = await DashboardService.getAssetName(assetId);
@@ -869,7 +867,7 @@ export class DashboardService {
                 txn.targetId = nsId;
                 txn.targetPublicKey = namespaceMetadataTxn.targetPublicKey.publicKey;
                 txn.sizeChanged = namespaceMetadataTxn.valueSizeDelta;
-                txn.valueChange = Convert.uint8ToHex(namespaceMetadataTxn.valueDifferences);
+                txn.valueChange = Convert.uint8ArrayToHex(namespaceMetadataTxn.valueDifferences);
 
                 try {
                     let nsName = await DashboardService.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
@@ -901,7 +899,7 @@ export class DashboardService {
                 txn.scopedMetadataKey = accountMetadataTxn.scopedMetadataKey.toHex();
                 txn.targetPublicKey = accountMetadataTxn.targetPublicKey.publicKey;
                 txn.sizeChanged = accountMetadataTxn.valueSizeDelta;
-                txn.valueChange = Convert.uint8ToHex(accountMetadataTxn.valueDifferences);
+                txn.valueChange = Convert.uint8ArrayToHex(accountMetadataTxn.valueDifferences);
 
                 try {
                     let nsMetadataEntry = await DashboardService.getAccountMetadata(accountMetadataTxn.targetPublicKey, accountMetadataTxn.scopedMetadataKey);
@@ -1014,7 +1012,7 @@ export class DashboardService {
                 txn.targetId = assetId;
                 txn.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
                 txn.sizeChanged = assetMetadataTxn.valueSizeDelta;
-                txn.valueChange = Convert.uint8ToHex(assetMetadataTxn.valueDifferences);
+                txn.valueChange = Convert.uint8ArrayToHex(assetMetadataTxn.valueDifferences);
 
                 try {
                     let assetName = await DashboardService.getAssetName(assetId);
@@ -1048,7 +1046,7 @@ export class DashboardService {
                 txn.targetId = nsId;
                 txn.targetPublicKey = namespaceMetadataTxn.targetPublicKey.publicKey;
                 txn.sizeChanged = namespaceMetadataTxn.valueSizeDelta;
-                txn.valueChange = Convert.uint8ToHex(namespaceMetadataTxn.valueDifferences);
+                txn.valueChange = Convert.uint8ArrayToHex(namespaceMetadataTxn.valueDifferences);
 
                 try {
                     let nsName = await DashboardService.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
@@ -1080,7 +1078,7 @@ export class DashboardService {
                 txn.scopedMetadataKey = accountMetadataTxn.scopedMetadataKey.toHex();
                 txn.targetPublicKey = accountMetadataTxn.targetPublicKey.publicKey;
                 txn.sizeChanged = accountMetadataTxn.valueSizeDelta;
-                txn.valueChange = Convert.uint8ToHex(accountMetadataTxn.valueDifferences);
+                txn.valueChange = Convert.uint8ArrayToHex(accountMetadataTxn.valueDifferences);
 
                 try {
                     let nsMetadataEntry = await DashboardService.getAccountMetadata(accountMetadataTxn.targetPublicKey, accountMetadataTxn.scopedMetadataKey);
@@ -1112,7 +1110,7 @@ export class DashboardService {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAggregateTransaction, formattedTxn) as UnconfirmedAggregateTransaction;
 
-            if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
+            if(txns[i].type === TransactionType.AGGREGATE_BONDED_V1 || txns[i].type === TransactionType.AGGREGATE_COMPLETE_V1){
                 let aggregateTxn = txns[i] as AggregateTransaction;
 
                 if(aggregateTxn.innerTransactions.length === 0){
@@ -1153,7 +1151,7 @@ export class DashboardService {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedAggregateTransaction, formattedTxn) as ConfirmedAggregateTransaction;
             
-            if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
+            if(txns[i].type === TransactionType.AGGREGATE_BONDED_V1 || txns[i].type === TransactionType.AGGREGATE_COMPLETE_V1){
                 let aggregateTxn = txns[i] as AggregateTransaction;
 
                 if(aggregateTxn.innerTransactions.length === 0){
@@ -1194,7 +1192,7 @@ export class DashboardService {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialAggregateTransaction, formattedTxn) as PartialAggregateTransaction;
             
-            if(txns[i].type === TransactionType.AGGREGATE_BONDED || txns[i].type === TransactionType.AGGREGATE_COMPLETE){
+            if(txns[i].type === TransactionType.AGGREGATE_BONDED_V1 || txns[i].type === TransactionType.AGGREGATE_COMPLETE_V1){
                 let aggregateTxn = txns[i] as AggregateTransaction;
 
                 if(aggregateTxn.innerTransactions.length === 0){
@@ -2074,7 +2072,7 @@ export class DashboardService {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedLockTransaction, formattedTxn) as UnconfirmedLockTransaction;
 
-            let lockFundTxn = txns[i] as LockFundsTransaction;
+            let lockFundTxn = txns[i] as HashLockTransaction;
             
             txn.lockHash = lockFundTxn.hash;
             txn.duration = lockFundTxn.duration.compact();
@@ -2095,7 +2093,7 @@ export class DashboardService {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedLockTransaction, formattedTxn) as ConfirmedLockTransaction;
             
-            let lockFundTxn = txns[i] as LockFundsTransaction;
+            let lockFundTxn = txns[i] as HashLockTransaction;
 
             txn.lockHash = lockFundTxn.hash;
             txn.duration = lockFundTxn.duration.compact();
@@ -2124,7 +2122,7 @@ export class DashboardService {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialLockTransaction, formattedTxn) as PartialLockTransaction;
             
-            let lockFundTxn = txns[i] as LockFundsTransaction;
+            let lockFundTxn = txns[i] as HashLockTransaction;
 
             txn.lockHash = lockFundTxn.hash;
             txn.duration = lockFundTxn.duration.compact();
@@ -2750,7 +2748,7 @@ export class DashboardService {
         formattedTxn.deadline = deadline;
         formattedTxn.initiator = initiator;
 
-        if(txn.type === TransactionType.AGGREGATE_BONDED || txn.type === TransactionType.AGGREGATE_COMPLETE){
+        if(txn.type === TransactionType.AGGREGATE_BONDED_V1 || txn.type === TransactionType.AGGREGATE_COMPLETE_V1){
             let aggregateTxn = txn as AggregateTransaction;
 
             for(let i = 0; i < aggregateTxn.cosignatures.length; ++i){
@@ -2817,7 +2815,7 @@ export class DashboardService {
             //txnBytes = aggregateTxn.serialize().length / 2;
             //deadline = aggregateTxn.deadline.adjustedValue.compact();
         }
-        else if(txn.type === TransactionType.AGGREGATE_BONDED || txn.type === TransactionType.AGGREGATE_COMPLETE){
+        else if(txn.type === TransactionType.AGGREGATE_BONDED_V1 || txn.type === TransactionType.AGGREGATE_COMPLETE_V1){
 
             let aggregateTxn = txn as AggregateTransaction;
 
@@ -2972,7 +2970,7 @@ export class DashboardService {
             valueUint8Array[i] = oldValueBytes[i] ^ valueChangeBytes[i];
         }
 
-        return Convert.decodeHexToUtf8(Convert.uint8ToHex(valueUint8Array));
+        return Convert.decodeHexToUtf8(Convert.uint8ArrayToHex(valueUint8Array));
     }
 
     static async getAssetInfo(assetId: string): Promise<MosaicInfo>{
@@ -3332,16 +3330,16 @@ export class DashboardService {
                if(messageData.type){
                     switch (messageData.type) {
                         case 'Swap':
-                            newType = t('general.swap') +' (nis1-XPX)';
+                            newType = 'Swap' +' (nis1-XPX)';
                             break;
                         case 'Swap-bsc-xpx':
-                            newType = t('general.swap') +' (BSC-XPX)';
+                            newType = 'Swap' +' (BSC-XPX)';
                             break;
                         case 'Swap-xpx-bsc':
-                            newType = t('general.swap') +' (XPX-BSC)';
+                            newType = 'Swap' +' (XPX-BSC)';
                             break;
                         case 'Swap-xpx-bsc-fees':
-                            newType = t('dashboard.swapFee') +' (XPX-BSC)';
+                            newType = 'Swap Fee' +' (XPX-BSC)';
                             break;
                         default:
                             break;
@@ -3769,7 +3767,7 @@ export class DashboardService {
         txnDetails.scopedMetadataKey = accMetadataTxn.scopedMetadataKey.toHex();
         txnDetails.targetPublicKey = accMetadataTxn.targetPublicKey.publicKey;
         txnDetails.sizeChanged = accMetadataTxn.valueSizeDelta;
-        txnDetails.valueChange = Convert.uint8ToHex(accMetadataTxn.valueDifferences);
+        txnDetails.valueChange = Convert.uint8ArrayToHex(accMetadataTxn.valueDifferences);
 
         try {
             let nsMetadataEntry = await DashboardService.getAccountMetadata(accMetadataTxn.targetPublicKey, accMetadataTxn.scopedMetadataKey);
@@ -3853,7 +3851,7 @@ export class DashboardService {
         txnDetails.targetId = nsId;
         txnDetails.targetPublicKey = nsMetadataTxn.targetPublicKey.publicKey;
         txnDetails.sizeChanged = nsMetadataTxn.valueSizeDelta;
-        txnDetails.valueChange = Convert.uint8ToHex(nsMetadataTxn.valueDifferences);
+        txnDetails.valueChange = Convert.uint8ArrayToHex(nsMetadataTxn.valueDifferences);
 
         try {
             let nsName = await DashboardService.getNamespacesName([NamespaceId.createFromEncoded(nsId)]);
@@ -3944,7 +3942,7 @@ export class DashboardService {
         txnDetails.targetId = assetId;
         txnDetails.targetPublicKey = assetMetadataTxn.targetPublicKey.publicKey;
         txnDetails.sizeChanged = assetMetadataTxn.valueSizeDelta;
-        txnDetails.valueChange = Convert.uint8ToHex(assetMetadataTxn.valueDifferences);
+        txnDetails.valueChange = Convert.uint8ArrayToHex(assetMetadataTxn.valueDifferences);
 
         try {
             let assetName = await DashboardService.getAssetName(assetId);
@@ -4405,7 +4403,7 @@ export class DashboardService {
     // --------------------------------------end------------------------------------------------------------------
 
     // -----------------------------------extract Lock Hash only--------------------------------------------------- 
-    async extractConfirmedLockHash(lockFundTxn: LockFundsTransaction): Promise<InnerLockTransaction> {
+    async extractConfirmedLockHash(lockFundTxn: HashLockTransaction): Promise<InnerLockTransaction> {
 
         let txnDetails = new InnerLockTransaction();
         
@@ -4429,11 +4427,11 @@ export class DashboardService {
         return txnDetails;
     }
 
-    extractUnconfirmedLockHash(lockFundTxn: LockFundsTransaction): InnerLockTransaction {
+    extractUnconfirmedLockHash(lockFundTxn: HashLockTransaction): InnerLockTransaction {
         return this.extractPartialLockHash(lockFundTxn);
     }
 
-    extractPartialLockHash(lockFundTxn: LockFundsTransaction): InnerLockTransaction {
+    extractPartialLockHash(lockFundTxn: HashLockTransaction): InnerLockTransaction {
 
         let txnDetails = new InnerLockTransaction();
         
@@ -4450,7 +4448,7 @@ export class DashboardService {
         return txnDetails;
     }
 
-    async extractLockHash(lockFundTxn: LockFundsTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED): Promise<InnerLockTransaction> {
+    async extractLockHash(lockFundTxn: HashLockTransaction, txnGroupType: TransactionGroupType = TransactionGroupType.CONFIRMED): Promise<InnerLockTransaction> {
 
         if(txnGroupType === TransactionGroupType.CONFIRMED){
             return await this.extractConfirmedLockHash(lockFundTxn);
@@ -4918,8 +4916,8 @@ export class DashboardService {
                 };
             }
                 break;
-            case TransactionType.LOCK:{
-                let lockFundTx = innerTransaction as LockFundsTransaction;
+            case TransactionType.HASH_LOCK:{
+                let lockFundTx = innerTransaction as HashLockTransaction;
                 tempData = await this.extractLockHash(lockFundTx, TransactionGroupType.PARTIAL);
                 let lockFundFormat = tempData as InnerLockTransaction;
 

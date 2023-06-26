@@ -12,13 +12,15 @@ import {networkState} from "@/state/networkState";
 import * as mathjs from "mathjs"
 import { walletState } from '@/state/walletState';
 import Dropdown from 'primevue/dropdown';
-import { multiSign } from "@/util/multiSignatory";
+import { MultisigUtils } from '@/util/multisigUtils';
 import { Helper } from '@/util/typeHelper';
-import { TransactionUtils } from '@/util/transactionUtils';
+import { TransactionUtils, isMultiSig } from '@/util/transactionUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import {useI18n} from 'vue-i18n'
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputAccount from "@/components/SelectInputAccount.vue";
+import type { Account } from '@/models/account';
+import type { WalletAccount } from '@/models/walletAccount';
 import { parse } from 'csv-parse';
 
 const internalInstance = getCurrentInstance();
@@ -33,13 +35,6 @@ const disablePassword = computed(() => disableAllInput.value);
 const walletPassword = ref("");
 const {t} = useI18n();
 const err = ref('');
-const distributePublicKey = ref("");
-let intiatorPrivateKey = ref('');
-
-let api = "https://api-2.testnet2.xpxsirius.io";
-let explorerURL = "https://bctestnetexplorer.xpxsirius.io";
-let accountHttp = new AccountHttp(api);
-let mosaicHttp = new MosaicHttp(api);
 
 let assetList = ref<SimpleSDA[]>([]);
 let assetSelected = ref(null);
@@ -74,7 +69,7 @@ let knownToken = [{
 let scanDistributorAsset = async() =>{
   noAssetFound.value = false;
   assetSelected.value = null;
-  let assets = await Sirius.scanAsset(selectedAccount.value.publicKey);
+  let assets = await Sirius.scanAsset(selectedAccount.value ? selectedAccount.value.publicKey : "");
 
   assetList.value = assets;
 
@@ -127,20 +122,21 @@ let distribute = async()=>{
   let totalInitiatorFee = sum(totalLockHashFee, totalLockHashToken, totalAggregateTxnsFee);
   let xpxNeeded = totalInitiatorFee / Math.pow(10, AppState.nativeToken.divisibility);
   const passwordInstance = WalletUtils.createPassword(walletPassword.value);
-  let selectedCosign;
+  let selectedCosign: string;
   if (isMultiSigBool.value) {
    let selectedCosignList = getWalletCosigner.value.cosignerList;
    if (selectedCosignList.length > 1) {
       selectedCosign = cosignAddress.value;
     } else {
-      selectedCosign = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==selectedCosignList[0].publicKey).address
+      let findAccount = walletState.currentLoggedInWallet?.accounts.find(acc => acc.publicKey == selectedCosignList[0].publicKey)
+      selectedCosign = findAccount ? findAccount.address : ""
     }
    }
   let initiatorAcc;
   if(!selectedCosign){
-    initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedAccount.value.address);
+    initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedAccount.value.address) as WalletAccount;
   }else{
-    initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedCosign)
+    initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedCosign) as WalletAccount;
   }
   const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance,initiatorAcc.encrypted, initiatorAcc.iv);
   let privateKey = walletPrivateKey.toUpperCase();
@@ -303,7 +299,7 @@ let setActive = () =>{
   dropFieldActive.value = true;
 }
 
-let checkDistributorAssetAmount = (selectedAssetId: string)=>{
+let checkDistributorAssetAmount = (selectedAssetId)=>{
   if(selectedAssetId){
     let data = assetList.value.find(x => x.id === selectedAssetId.id);
 
@@ -319,9 +315,9 @@ let checkDistributorAssetAmount = (selectedAssetId: string)=>{
   }
 }
 
-let checkDistributorAssetAmountDecimal = (selectedAssetId: string)=>{
+let checkDistributorAssetAmountDecimal = (selectedAssetId)=>{
   if(selectedAssetId){
-    let data = assetList.value.find(x => x.id === selectedAssetId.id );
+    let data = assetList.value.find(x => x.id === selectedAssetId.id);
 
     let invalidDivisibility = distributionList.value.find(x =>{
       let bigNumberAmount = mathjs.bignumber(x.amount);
@@ -341,82 +337,29 @@ let checkDistributorAssetAmountDecimal = (selectedAssetId: string)=>{
     assetWrongDivisibility.value = "";
   }
 }
-interface Account{
-  name: string,
-  balance: number,
-  publicKey: string,
-  address: string,
-  type?: string,
-  encrypted?: string,
-  iv?: string,
-  isMultisig: boolean
-}
-const selectedAccount = ref<Account[]>([])
+const selectedAccount = ref<Account>()
 
 const accounts = computed(
-      () => {
-        if(walletState.currentLoggedInWallet){
-          if(walletState.currentLoggedInWallet.others){
-          const accounts = walletState.currentLoggedInWallet.accounts.map((acc)=>{
-            return {
-              name: acc.name,
-              balance: acc.balance,
-              publicKey: acc.publicKey,
-              address: acc.address,
-              encrypted: acc.encrypted,
-              iv: acc.iv,
-              isMultisig: acc.getDirectParentMultisig().length ? true: false
-            }
-          })
-          const otherAccounts = walletState.currentLoggedInWallet.others.map((acc)=>{
-            return {
-              name: acc.name,
-              balance: acc.balance,
-              publicKey: acc.publicKey,
-              address: acc.address,
-              type: acc.type,
-              isMultisig: true
-            }
-          }).filter(item => {
-            return item.type !== "DELEGATE";
-          })
-          const concatOther = accounts.concat(otherAccounts)
-          return concatOther
-          }else{
-            const accounts =  walletState.currentLoggedInWallet.accounts.map((acc)=>{
-                return {
-                name: acc.name,
-                balance: acc.balance,
-                publicKey: acc.publicKey,
-                address: acc.address,
-                encrypted: acc.encrypted,
-                iv: acc.iv,
-                isMultisig: acc.getDirectParentMultisig().length ? true: false
-                }
-            });
-            return accounts
-          }
-        }else{
-            return null
-        }
-      }
-    );
+  () => {
+    if (!walletState.currentLoggedInWallet) {
+      return []
+    }
+    if (walletState.currentLoggedInWallet.others) {
+      const accounts = walletState.currentLoggedInWallet.accounts.map((acc) => acc as Account)
+      const filteredOthers = walletState.currentLoggedInWallet.others.filter(acc => acc.type != "DELEGATE")
+      const otherAccounts = filteredOthers.map((acc) => acc as Account)
+      return accounts.concat(otherAccounts)
+    } else {
+      const accounts = walletState.currentLoggedInWallet.accounts.map((acc) => acc as Account)
+      return accounts
+    }
+  }
+);
 
   selectedAccount.value = accounts.value[0]
   scanDistributorAsset()
   const currentAccount = ref(selectedAccount.value.address)
 
-  const isMultiSig = (address) => {
-  const account = accounts.value.find(
-    (account) => account.address === address
-  );
-  let isMulti = false;
-     
-  if (account != undefined) {
-    isMulti = account.isMultisig;
-  }
-  return isMulti;
-};
 const isMultiSigBool = computed(() => {
       return isMultiSig(selectedAccount.value.address)
   }
@@ -434,18 +377,16 @@ const findAccWithAddress = address =>{
  }
 
 const getWalletCosigner = computed(() =>{
-      if(networkState.currentNetworkProfileConfig){
-      let cosigners= multiSign.getCosignerInWallet(accounts.value.find(acc=>acc.address==selectedAccount.value.address)?accounts.value.find(acc => acc.address == selectedAccount.value.address).publicKey:'')
-      let list =[]
-      
-      cosigners.cosignerList.forEach(publicKey=>{
-        list.push({publicKey:publicKey,name:findAcc(publicKey).name,balance:findAcc(publicKey).balance })
-      })
-      cosigners.cosignerList = list
-      return cosigners
-      }else{
-        return {hasCosigner:false,cosignerList:[]}
-      }
+        const account = accounts.value.find((acc: Account) => acc.address == selectedAccount.value?.address) as Account
+        let cosigners = MultisigUtils.getCosignerInWallet(account.publicKey)
+        let list: { hasCosigner: boolean, cosignerList: { publicKey: string, name: string, balance: number, address: string }[] } = { hasCosigner: cosigners.hasCosigner, cosignerList: [] }
+        cosigners.cosignerList.forEach((publicKey: string) => {
+          const acc = findAcc(publicKey)
+          if (acc) {
+            list.cosignerList.push({ publicKey: publicKey, name: acc.name, balance: acc.balance, address: acc.address })
+          }
+        })
+        return list
     })
 
 const lockFund = computed(() =>
@@ -482,11 +423,7 @@ if (isMultiSigBool.value) {
   }
 }
 
-const clearInput = () => {
-      walletPassword.value = "";
-    };
-
-  watch(assetSelected, (value) => {
+  watch(assetSelected, (value:string) => {
     checkDistributorAssetAmount(value);
     checkDistributorAssetAmountDecimal(value);
   });
@@ -502,7 +439,7 @@ const clearInput = () => {
       if (accounts.value[i].address == address){
         selectedAccount.value = accounts.value[i]
         scanDistributorAsset()
-        currentAccount.value = ref(selectedAccount.value.address)
+        currentAccount.value = selectedAccount.value.address
       }
     }
   })

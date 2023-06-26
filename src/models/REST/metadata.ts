@@ -1,10 +1,10 @@
 import { 
     MetadataHttp, NetworkHttp,
-    MosaicId, NamespaceId, MetadataQueryParams,
+     MetadataQueryParams,
     MetadataEntry, MetadataSearch
 } from "tsjs-xpx-chain-sdk";
 import {RequestAuth} from './auth';
-
+import { lastValueFrom } from 'rxjs';
 export class MetadataAPI {
 
     metadataHttp: MetadataHttp;
@@ -20,16 +20,16 @@ export class MetadataAPI {
      */
     getMetadata(compositeHash: string): Promise<MetadataEntry>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.metadataHttp.getMetadata(compositeHash, authHeader).toPromise();
+        return lastValueFrom(this.metadataHttp.getMetadata(compositeHash, authHeader));
     }
 
     getMetadatas(compositeHashes: string[]): Promise<MetadataEntry[]>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.metadataHttp.getMetadatas(compositeHashes, authHeader).toPromise();
+        return lastValueFrom(this.metadataHttp.getMetadatas(compositeHashes, authHeader));
     }
 
     searchMetadatas(metadataQueryParams: MetadataQueryParams): Promise<MetadataSearch>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.metadataHttp.searchMetadata(metadataQueryParams, authHeader).toPromise();
+        return lastValueFrom(this.metadataHttp.searchMetadata(metadataQueryParams, authHeader));
     }
 }

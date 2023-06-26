@@ -2,7 +2,7 @@ import {
     DiagnosticHttp, BlockchainStorageInfo, ServerInfo
 } from "tsjs-xpx-chain-sdk";
 import {RequestAuth} from './auth';
-
+import { lastValueFrom } from 'rxjs';
 export class DiagnosticAPI {
 
     diagnosticHttp: DiagnosticHttp;
@@ -13,11 +13,11 @@ export class DiagnosticAPI {
 
     getServerInfo(): Promise<ServerInfo>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.diagnosticHttp.getServerInfo(authHeader).toPromise();
+        return lastValueFrom(this.diagnosticHttp.getServerInfo(authHeader));
     }
 
     getDiagnosticStorage(): Promise<BlockchainStorageInfo>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.diagnosticHttp.getDiagnosticStorage(authHeader).toPromise();
+        return lastValueFrom(this.diagnosticHttp.getDiagnosticStorage(authHeader));
     }
 }
