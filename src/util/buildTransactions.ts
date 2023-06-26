@@ -46,7 +46,9 @@ import {
     LinkAction,
     Message,
     EmptyMessage,
-    TransactionHash
+    TransactionHash,
+    AggregateCompleteV1TransactionBuilder,
+    AggregateBondedV1TransactionBuilder
 } from 'tsjs-xpx-chain-sdk';
 import { WalletUtils } from "./walletUtils";
 import { Helper } from "./typeHelper";
@@ -157,30 +159,30 @@ export class BuildTransactions {
 
         let abtDeadline = ChainConfigUtils.getABTMaxSafeDeadline();
 
-        return this.transactionBuilderFactory.aggregateBonded()
+        return this.transactionBuilderFactory.aggregateBondedV1()
             .deadline(abtDeadline)
             .innerTransactions(innerTxn)
             .build();
     }
 
-    aggregateBondedBuilder(): AggregateBondedTransactionBuilder {
+    aggregateBondedBuilder(): AggregateBondedV1TransactionBuilder  {
 
         let abtDeadline = ChainConfigUtils.getABTMaxSafeDeadline();
 
-        return this.transactionBuilderFactory.aggregateBonded().deadline(abtDeadline);
+        return this.transactionBuilderFactory.aggregateBondedV1().deadline(abtDeadline);
     }
 
     aggregateComplete(innerTxn: InnerTransaction[]): AggregateTransaction {
 
-        return this.transactionBuilderFactory.aggregateComplete()
+        return this.transactionBuilderFactory.aggregateCompleteV1 ()
             .deadline(Deadline.create())
             .innerTransactions(innerTxn)
             .build();
     }
 
-    aggregateCompleteBuilder(): AggregateCompleteTransactionBuilder {
+    aggregateCompleteBuilder(): AggregateCompleteV1TransactionBuilder {
 
-        return this.transactionBuilderFactory.aggregateComplete();
+        return this.transactionBuilderFactory.aggregateCompleteV1();
     }
 
     hashLock(mosaic: Mosaic, duration: UInt64, transactionHash: TransactionHash | SignedTransaction): HashLockTransaction {

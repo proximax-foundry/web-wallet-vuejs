@@ -52,7 +52,7 @@ import SelectInputAccount from './components/SelectInputAccount.vue';
 import SelectInputAsset from './components/SelectInputAsset.vue';
 import InputAmount from './components/InputAmount.vue';
 import InputId from './components/InputId.vue';
-import { Account, Deadline, MosaicId, NamespaceId, Password, PlaceSdaExchangeOfferTransaction, PublicAccount, SdaExchangeOffer, UInt64 } from 'tsjs-xpx-chain-sdk';
+import { Account, Deadline, MosaicId, NamespaceId, Password, PlaceSdaExchangeOfferTransaction, PublicAccount, RemoveSdaExchangeOfferTransaction, SdaExchangeOffer, UInt64 } from 'tsjs-xpx-chain-sdk';
 import { AppState } from '@/state/appState';
 import SelectInputMultisigAccount from './components/SelectInputMultisigAccount.vue';
 import PasswordInput from "@/components/PasswordInput.vue";

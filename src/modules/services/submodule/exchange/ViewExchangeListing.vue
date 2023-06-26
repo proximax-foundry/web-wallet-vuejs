@@ -137,7 +137,6 @@ const fetchGiveListing = async () => {
         const id =  await AppState.chainAPI.namespaceAPI.getLinkedMosaicId(new NamespaceId('prx.metx'))
         assetId = id.id.toHex()
     }
-    if (selected.value == 'xpx') {
         const sdaExchangeHttp = new ExchangeSdaHttp(AppState.nodeFullURL)
         listingInfo = await lastValueFrom(sdaExchangeHttp.getExchangeSdaOffers(SdaExchangeOfferType.GIVE, new MosaicId(assetId)))
         for (let i = 0; i < listingInfo.length; i++) {
@@ -159,7 +158,6 @@ const fetchGiveListing = async () => {
                 rate: (info.initialMosaicGetAmount.compact() / Math.pow(10, info.mosaicGetDivisibility)) / (info.initialMosaicGiveAmount.compact() / Math.pow(10, info.mosaicGiveDivisibility))
             }
         })
-    }
 }
 
 watch(selected, async () => {
