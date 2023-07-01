@@ -64,6 +64,7 @@ const fetchAssets = async (address: string | null) => {
     if (!address) {
         return
     }
+    selectAsset(null)
     assetOptions.value = [];
 
         const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))

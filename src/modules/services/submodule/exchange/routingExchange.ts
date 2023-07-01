@@ -24,6 +24,14 @@ export const ExchangeRoutes = [
         title: "SDA-SDA Exchange:Account Listing",
       }
     },
+    {
+      path: '/exchange/buy',
+      name: 'ViewExchangeBuy',
+      component: () => import('@/modules/services/submodule/exchange/ViewExchangeBuy.vue'),
+      props: route => ({ pair: route.query.p, owner: route.query.o,})
+      
+     
+  },
   
   ];
   

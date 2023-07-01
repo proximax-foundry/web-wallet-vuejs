@@ -3,7 +3,7 @@
         <div class="lg:w-9/12 ml-2 mr-2 lg:ml-auto lg:mr-auto mt-5 border-2 p-3">
             <div class="border border-blue-300 rounded-md p-3 mt-3 bg-blue-50">
                 <div class="flex items-center gap-2">
-                    <div v-html="svgString" ></div>
+                    <div v-html="svgString"></div>
                     <div class="flex flex-col gap-0.5">
                         <div class="uppercase text-xxs text-blue-primary">Selected Account</div>
                         <div class="font-semibold">{{ accountName }}</div>
@@ -18,9 +18,8 @@
                 <template #empty>
                     No exchanges found.
                 </template>
-                <Column field="pair" header="Pair"></Column>
-                <Column field="rate" header="Rate"></Column>
-                <Column field="amount" header="Amount"></Column>
+                <Column field="give" header="Give"></Column>
+                <Column field="get" header="Get"></Column>
                 <Column field="deadline" header="Deadline"></Column>
                 <Column header="Action">
                     <template #body>
@@ -49,13 +48,14 @@ const props = defineProps({
         required: true
     }
 })
- 
+
 interface SdaExchangeWithDivisibilityAndNamespace extends SdaOfferInfo {
     mosaicGiveDivisibility?: number,
     mosaicGetDivisibility?: number
     mosaicGiveName?: string,
     mosaicGetName?: string
 }
+
 
 const knownToken = [{
     namespace: "prx.xpx",
@@ -80,13 +80,13 @@ const accountName = computed(() => {
     return walletState.currentLoggedInWallet.convertAddressToName(props.address, true)
 })
 
-const themeConfig :any = new ThemeStyleConfig('ThemeStyleConfig');
-    themeConfig.init();
-    const svgString = computed(()=>toSvg(props.address, 40, themeConfig.jdenticonConfig))
+const themeConfig: any = new ThemeStyleConfig('ThemeStyleConfig');
+themeConfig.init();
+const svgString = computed(() => toSvg(props.address, 40, themeConfig.jdenticonConfig))
 
 
 
-const accountSdaExchanges = ref<{ deadline: string, pair: string, rate: number, amount: number }[]>([])
+const accountSdaExchanges = ref<{ deadline: string, give: string, get: string }[]>([])
 
 const fetchListing = async () => {
     let listingInfo: SdaExchangeWithDivisibilityAndNamespace[] = []
@@ -105,10 +105,12 @@ const fetchListing = async () => {
     const currentHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight()
     accountSdaExchanges.value = listingInfo.map(offer => {
         return {
+            give: `${displayAssetName(offer.mosaicGiveName)} (${offer.initialMosaicGiveAmount.compact() / Math.pow(10, offer.mosaicGiveDivisibility)})`,
+            get: `${displayAssetName(offer.mosaicGetName)} (${offer.initialMosaicGetAmount.compact() / Math.pow(10, offer.mosaicGetDivisibility)})`,
             deadline: new Date(Date.now() + ((offer.deadline.compact() - currentHeight) * 15000)).toLocaleString(),
-            pair: `${displayAssetName(offer.mosaicGiveName)} /  ${displayAssetName(offer.mosaicGetName)} `,
+            /* pair: `${displayAssetName(offer.mosaicGetName)} /  ${displayAssetName(offer.mosaicGetName)} `,
             amount: offer.currentMosaicGiveAmount.compact() / Math.pow(10, offer.mosaicGiveDivisibility),
-            rate: (offer.initialMosaicGiveAmount.compact() / Math.pow(10, offer.mosaicGiveDivisibility)) / (offer.initialMosaicGetAmount.compact() / Math.pow(10, offer.mosaicGetDivisibility))
+            rate: (offer.initialMosaicGiveAmount.compact() / Math.pow(10, offer.mosaicGiveDivisibility)) / (offer.initialMosaicGetAmount.compact() / Math.pow(10, offer.mosaicGetDivisibility)) */
         }
     })
 }
