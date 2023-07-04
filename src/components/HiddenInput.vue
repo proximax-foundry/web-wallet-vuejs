@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="bg-white py-2 border flex justify-between" >
-      <input type="text" :class="inputClass" :disabled="disabled == true" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" class="w-full text-placeholder text-left ml-2" :placeholder="placeholder" @click="clickInputPassword()" @blur="blurInputPassword()" autocomplete="off">
+      <input type="text" :class="inputClass" :disabled="disabled == true" :value="modelValue" @input="updateValue" class="w-full text-placeholder text-left ml-2" :placeholder="placeholder" @blur="blurInputPassword()" autocomplete="off">
         <font-awesome-icon icon="eye" class="text-gray-500 relative cursor-pointer text-right mt-1 mr-2" @click="hideShow();" v-if="!showPassword"></font-awesome-icon>
         <font-awesome-icon icon="eye-slash" class="text-gray-500 relative cursor-pointer text-right mt-1 mr-2" @click="hideShow();" v-if="showPassword"></font-awesome-icon>
     </div>
@@ -9,10 +9,10 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-export default defineComponent({
-  props: {
+<script lang="ts" setup>
+import { ref } from 'vue';
+
+  const props = defineProps({
     placeholder: {
       type: String
     },
@@ -31,57 +31,27 @@ export default defineComponent({
     disabled: {
       type: Boolean
     }
-  },
-  emits:[
-    'update:modelValue'
-  ],
-  name: 'HiddenInput',
-  data() {
-    return {
-      inputPassword: "",
-      showPassword: false,
-      inputType: 'password',
-      borderColor: 'border border-grey-300',
-      eyeIcon: 'eye',
-      inputClass: "key",
-      pswdErr: false,
-    };
-  },
-  methods: {
-    hideShow: function() : void {
-      this.showPassword = !this.showPassword;
-      this.showPassword?this.eyeIcon='eye-slash':this.eyeIcon='eye';
-      this.showPassword?this.inputType='text':this.inputType='password';
-      this.showPassword?this.inputClass='':this.inputClass='key';
-    },
+  })
+  const emit = defineEmits(["update:modelValue"]);
+  const showPassword = ref(false);
+  const inputClass = ref("key");
+  const pswdErr = ref(false);
+  const hideShow = () => {
+    showPassword.value = !showPassword.value;
+    showPassword.value ? (inputClass.value = "") : (inputClass.value = "key");
+  };
 
-    clickInputPassword: function() :void {
-      if(!this.pswdErr){
-        this.borderColor = 'border-2 border-blue-primary';
-      }
-    },
+  const updateValue = (e: Event) => {
+    emit("update:modelValue", (e.target as HTMLInputElement).value);
+  };
 
-    blurInputPassword: function() :void {
-      var passwdPattern = "^[^ ]{8,}$";
-      if(this.modelValue == ''){
-        this.borderColor = 'border-2 border-red-primary';
-        this.pswdErr = true;
-      }
-      else{
-        this.borderColor = 'border-2 border-gray-300';
-        this.pswdErr = false;
-        // }
-      }
-    },
-  },
-  mounted() {
-    // this.emitter.on("CLEAR_PASSWORD", (payload) => {
-    //   this.inputPassword = payload;
-    //   this.pswdErr = false;
-    //   this.borderColor = 'border border-gray-300';
-    // });
-  }
-});
+  const blurInputPassword = () => {
+    if (props.modelValue == "") {
+      pswdErr.value = true;
+    } else {
+      pswdErr.value = false;
+    }
+  };
 </script>
 
 <style lang="scss">

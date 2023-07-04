@@ -124,7 +124,6 @@ import { Helper } from '@/util/typeHelper';
 import selectLanguageModal from '@/modules/home/components/selectLanguageModal.vue'
 import { WalletStateUtils } from "@/state/utils/walletStateUtils";
 import { useToast } from "primevue/usetoast";
-import { Connector } from '../models/connector';
 import { listenerState, AnnounceType} from "@/state/listenerState";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
 import { TransactionType } from "tsjs-xpx-chain-sdk";
@@ -134,6 +133,7 @@ import { NotificationUtils } from '@/util/notificationUtils';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
 import { AppStateUtils } from "@/state/utils/appStateUtils";
+import ding from "@/assets/audio/ding.ogg"
 
 export default defineComponent({
   components: {
@@ -432,6 +432,20 @@ export default defineComponent({
       }
     }
 
+    const setFailedTxns = (failedTxn) => {
+      let existingFailedTxns = JSON.parse(sessionStorage.getItem("allFailedTransactions"))
+          if(existingFailedTxns){
+              let findFailedTxnsHashAndPubKey = existingFailedTxns.find((x) => x.txnHash === failedTxn.txnHash && x.accPubKey === failedTxn.accPubKey)
+              if(!findFailedTxnsHashAndPubKey){
+                existingFailedTxns.push(failedTxn)
+                sessionStorage.setItem("allFailedTransactions", JSON.stringify(existingFailedTxns))
+              }
+          }
+          else{
+              sessionStorage.setItem("allFailedTransactions", JSON.stringify([failedTxn]))
+          }
+    }
+
     const checkTxnStatus = async ()=>{
 
       let endStatuses = ["failed", transactionGroupType.CONFIRMED];
@@ -482,6 +496,7 @@ export default defineComponent({
              
               if(txnActivity.status === "failed"){
                 txnActivity.statusMsg = transactionStatuses[i].status;
+                setFailedTxns(txnActivity)
               }
               else if(txnActivity.status === transactionGroupType.CONFIRMED){
                 txnHashesConfirmed.push(txnActivity.txnHash);
@@ -500,6 +515,7 @@ export default defineComponent({
              
               if(txnCosign.status === "failed"){
                 txnCosign.statusMsg = transactionStatuses[i].status;
+                setFailedTxns(txnCosign)
               }
               else if(txnCosign.status === transactionGroupType.CONFIRMED){
                 txnHashesConfirmed.push(txnCosign.txnHash);
@@ -519,6 +535,7 @@ export default defineComponent({
              
               if(txnSwap.status === "failed"){
                 txnSwap.statusMsg = transactionStatuses[i].status;
+                setFailedTxns(txnSwap)
               }
               else if(txnSwap.status === transactionGroupType.CONFIRMED){
                 txnHashesConfirmed.push(txnSwap.txnHash);
@@ -784,7 +801,7 @@ export default defineComponent({
         /*volume = volume || 100;*/
 
         try{
-            let sound = new Audio(require('@/assets/audio/ding.ogg'));
+            let sound = new Audio(ding);
 
             // Set volume
             /*sound.volume = volume / 100;*/

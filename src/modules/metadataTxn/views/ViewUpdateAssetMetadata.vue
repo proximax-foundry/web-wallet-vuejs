@@ -92,7 +92,7 @@
                 <MetadataInput class="mt-2" v-model="newValue"  placeholder="New Value"/>
             </div>
             <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
-                <TransactionFeeDisplay :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
+                <TransactionFeeDisplay :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="String(lockFundCurrency)" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
                 <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
                 <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="walletPassword" icon="lock" class="mt-5 mb-3" />
                 <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="updateMetadata()" :disabled="disableAddBtn">
@@ -111,7 +111,7 @@ import { Helper } from "@/util/typeHelper";
 import { computed, ref, watch } from "vue";
 import PasswordInput from "@/components/PasswordInput.vue";
 import {useI18n} from 'vue-i18n'
-import { multiSign } from "@/util/multiSignatory";
+import {MultisigUtils} from '@/util/multisigUtils'
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { TransactionUtils, findAcc } from "@/util/transactionUtils";
@@ -297,7 +297,7 @@ export default {
 
     const buildAggregateTxn = ()=>{
       if(metadataTxn){
-        aggregateTxn = aggregateTxnBuilder.innerTransactions([metadataTxn.toAggregate(targetPublicAccount.value)]).build();
+        aggregateTxn = aggregateTxnBuilder.innerTransactions([metadataTxn.toAggregateV1(targetPublicAccount.value)]).build();
       }
     }
 
@@ -487,18 +487,18 @@ export default {
       .calculateDifferences()
       .build()
       let aggregateTx = targetAccIsMultisig.value?
-      aggregateTxnBuilder.innerTransactions([mosaicMetadataTransaction.toAggregate(targetPublicAccount.value)]).build():
-      AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([mosaicMetadataTransaction.toAggregate(targetPublicAccount.value)]).build()
+      aggregateTxnBuilder.innerTransactions([mosaicMetadataTransaction.toAggregateV1(targetPublicAccount.value)]).build():
+      AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([mosaicMetadataTransaction.toAggregateV1(targetPublicAccount.value)]).build()
       let signer = targetAccIsMultisig.value? 
       walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosigner.value):
       walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == targetPublicAccount.value.publicKey) 
       let encryptedPassword = WalletUtils.createPassword(walletPassword.value);
       let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, signer.encrypted, signer.iv);
-      let signerAcc = Account.createFromPrivateKey(privateKey, AppState.networkType);
-      let signedAggregateTransaction = signerAcc.sign(aggregateTx, networkState.currentNetworkProfile.generationHash);
+      let signerAcc = Account.createFromPrivateKey(privateKey, AppState.networkType,1);
+      let signedAggregateTransaction = signerAcc.preV2Sign(aggregateTx, networkState.currentNetworkProfile.generationHash);
       if(targetAccIsMultisig.value){
         let lockHashTx = TransactionUtils.lockFundTx(signedAggregateTransaction)
-        let signedLockHashTransaction = signerAcc.sign(lockHashTx, networkState.currentNetworkProfile.generationHash);
+        let signedLockHashTransaction = signerAcc.preV2Sign(lockHashTx, networkState.currentNetworkProfile.generationHash);
         TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedLockHashTransaction,signedAggregateTransaction) 
       }else{
         TransactionUtils.announceTransaction(signedAggregateTransaction)
@@ -528,9 +528,9 @@ export default {
       if(!walletState.currentLoggedInWallet || !targetPublicAccount.value){
         return []
       }
-      if(multiSign.getCosignerInWallet(targetPublicAccount.value.publicKey).cosignerList.length){
+      if(MultisigUtils.getCosignerInWallet(targetPublicAccount.value.publicKey).cosignerList.length){
         if(accounts.value){
-          return multiSign.getCosignerInWallet(targetPublicAccount.value.publicKey).cosignerList.map(cosigner=>{
+          return MultisigUtils.getCosignerInWallet(targetPublicAccount.value.publicKey).cosignerList.map(cosigner=>{
             let foundCosigner = accounts.value.find(acc=>acc.publicKey==cosigner)
             return{
               name: foundCosigner.name,
@@ -583,7 +583,7 @@ export default {
 
     const getMultiSigCosigner = computed(() => {
       if(networkState.currentNetworkProfileConfig){
-        let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
+        let cosigners = MultisigUtils.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
         let list = [];
         cosigners.cosignerList.forEach( publicKey => {
           list.push({

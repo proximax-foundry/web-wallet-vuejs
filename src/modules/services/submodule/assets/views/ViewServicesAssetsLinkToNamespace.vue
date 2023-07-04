@@ -93,7 +93,7 @@ import { useI18n } from 'vue-i18n';
 import { useToast } from "primevue/usetoast";
 import Tooltip from 'primevue/tooltip';
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
-import { multiSign } from '@/util/multiSignatory';
+import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
 import { isMultiSig, TransactionUtils, findAcc, findAccWithAddress } from '@/util/transactionUtils';
 
@@ -220,7 +220,7 @@ export default {
         return {hasCosigner:false,cosignerList: []}
       }
       if(networkState.currentNetworkProfileConfig){
-        let cosigners = multiSign.getCosignerInWallet(account.value?account.value.publicKey:'');
+        let cosigners = MultisigUtils.getCosignerInWallet(account.value?account.value.publicKey:'');
         let list = [];
         cosigners.cosignerList.forEach( publicKey => {
           list.push({

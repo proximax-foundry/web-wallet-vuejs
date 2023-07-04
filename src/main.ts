@@ -21,7 +21,8 @@ import { ChainAPICall } from './models/REST/chainAPICall';
 import { AppStateUtils } from './state/utils/appStateUtils';
 import { WalletMigration } from './models/walletMigration';
 import { ChainProfile, ChainProfileConfig, ChainProfileNames, ChainSwapConfig, ThemeStyleConfig, ChainProfileName } from "./models/stores/"
-
+import { vMaska } from "maska";
+import Tooltip from "primevue/tooltip";
 // Import Font Awesome Icons
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
@@ -52,7 +53,6 @@ library.add(
 );
 const app = createApp(App);
 const emitter = mitt();
-let defaultoptions = { treeName: 'blocks-tree' }
 app.config.globalProperties.emitter = emitter;
 app.use(router)
 app.use(PrimeVue);
@@ -61,7 +61,7 @@ app.use(ToastService);
 app.use(i18n);
 app.use(VWave);
 app.use(vueDebounce);
-app.use(VueBlocksTree, defaultoptions)
+app.use(VueBlocksTree /* , {treeName:'blocks-tree'} */);
 app.mount('#app');
 // Use Components
 app.component('ConfirmDialog', ConfirmDialog);
@@ -71,6 +71,8 @@ app.component(VuePassword);
 app.component('Dropdown', Dropdown);
 app.component('Sidebar', Sidebar);
 app.component('Tree',Tree);
+app.directive("tooltip", Tooltip);
+app.directive("maska", vMaska);
 
 AppStateUtils.addNewReadyStates('chainProfile');
 AppStateUtils.addNewReadyStates('theme');

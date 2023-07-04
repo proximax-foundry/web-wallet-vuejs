@@ -9,6 +9,8 @@
             <router-link :to="{name:'ViewAccountPendingTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer  rounded-md text-white py-2 px-5" style="background: #f3a91d">Pending</router-link>
             <router-link :to="{name:'ViewAccountFailedTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer  rounded-md text-white py-2 px-5" style="background: #DC143C">Failed</router-link>
           </div>
+        <Accordion :activeIndex="0">
+        <AccordionTab class="p-accordion-header p-highlight">
         <div class="bg-white px-2 " >
             <div class="flex flex-col gap-3 mt-3">
                
@@ -33,20 +35,20 @@
                 
             </div>
             <div v-if="boolIsTxnFetched" class="mt-3">
-                <MixedTxnDataTable v-if="selectedTxnType === 'all'" :selectedGroupType="transactionGroupType.CONFIRMED"  :transactions="searchedTransactions" :currentAddress="accAddress"></MixedTxnDataTable>
-                <TransferTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.TRANSFER" :selectedGroupType="transactionGroupType.CONFIRMED"  :transactions="searchedTransactions" :currentAddress="accAddress"></TransferTxnDataTable>
-                <AccountTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ACCOUNT" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></AccountTxnDataTable>
-                <AggregateTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.AGGREGATE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></AggregateTxnDataTable>
-                <AliasTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ALIAS" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></AliasTxnDataTable>
-                <AssetTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ASSET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></AssetTxnDataTable>
-                <ChainTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.CHAIN" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></ChainTxnDataTable>
-                <ExchangeTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></ExchangeTxnDataTable>
-                <LinkTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LINK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></LinkTxnDataTable>
-                <LockTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LOCK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></LockTxnDataTable>
-                <MetadataTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.METADATA" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></MetadataTxnDataTable>
-                <NamespaceTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.NAMESPACE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></NamespaceTxnDataTable>
-                <RestrictionTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></RestrictionTxnDataTable>
-                <SecretTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.SECRET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="searchedTransactions" :currentAddress="accAddress"></SecretTxnDataTable>
+                <MixedTxnDataTable v-if="selectedTxnType === 'all'" :selectedGroupType="transactionGroupType.CONFIRMED"  :transactions="mixedTransactions" :currentAddress="accAddress"></MixedTxnDataTable>
+                <TransferTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.TRANSFER" :selectedGroupType="transactionGroupType.CONFIRMED"  :transactions="transferTransactions" :currentAddress="accAddress"></TransferTxnDataTable>
+                <AccountTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ACCOUNT" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="accountTransactions" :currentAddress="accAddress"></AccountTxnDataTable>
+                <AggregateTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.AGGREGATE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="aggregateTransactions" :currentAddress="accAddress"></AggregateTxnDataTable>
+                <AliasTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ALIAS" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="aliasTransactions" :currentAddress="accAddress"></AliasTxnDataTable>
+                <AssetTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.ASSET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="assetTransactions" :currentAddress="accAddress"></AssetTxnDataTable>
+                <ChainTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.CHAIN" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="chainTransactions" :currentAddress="accAddress"></ChainTxnDataTable>
+                <ExchangeTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.EXCHANGE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="exchangeTransactions" :currentAddress="accAddress"></ExchangeTxnDataTable>
+                <LinkTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LINK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="linkTransactions" :currentAddress="accAddress"></LinkTxnDataTable>
+                <LockTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.LOCK" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="lockTransactions" :currentAddress="accAddress"></LockTxnDataTable>
+                <MetadataTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.METADATA" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="metadataTransactions" :currentAddress="accAddress"></MetadataTxnDataTable>
+                <NamespaceTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.NAMESPACE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="namespaceTransactions" :currentAddress="accAddress"></NamespaceTxnDataTable>
+                <RestrictionTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="restrictionTransactions" :currentAddress="accAddress"></RestrictionTxnDataTable>
+                <SecretTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.SECRET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="secretTransactions" :currentAddress="accAddress"></SecretTxnDataTable>
             </div>
             <div v-else class="border-t border-b border-gray-200 text-gray-400 text-xs mt-10">
                 <div class="border-t border-b border-gray-200 my-3 py-6 px-2">
@@ -58,6 +60,8 @@
             </div>
             <a :href="linkToExplorer()" target=_new v-if="searchedTransactions.length==10"><div class="text-right text-xs text-blue-primary mt-3" >View more...</div></a>
         </div>
+        </AccordionTab>
+      </Accordion>
     </div>
 </div>
 </template>
@@ -87,7 +91,9 @@ import { AppState } from "@/state/appState";
 import { Transaction } from "tsjs-xpx-chain-sdk";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { networkState } from "@/state/networkState";
-
+import Accordion from 'primevue/accordion';
+import AccordionTab from 'primevue/accordiontab';
+  
     const props = defineProps({
         address: String
     })
@@ -95,6 +101,20 @@ import { networkState } from "@/state/networkState";
     let transactionGroupType = Helper.getTransactionGroupType()
     let selectedTxnGroupType = transactionGroupType.CONFIRMED; 
     const searchedTransactions = ref([]); 
+    const mixedTransactions  = ref([]);
+    const transferTransactions  = ref([]);
+    const accountTransactions = ref([]);
+    const aggregateTransactions = ref([]);
+    const aliasTransactions = ref([]);
+    const assetTransactions = ref([]);
+    const namespaceTransactions = ref([]);
+    const metadataTransactions = ref([]);
+    const exchangeTransactions = ref([]);
+    const lockTransactions = ref([]);
+    const linkTransactions = ref([]);
+    const restrictionTransactions = ref([]);
+    const secretTransactions = ref([]);
+    const chainTransactions = ref([]);
     let boolIsTxnFetched = ref(false);
     let allTxnQueryParams = Helper.createTransactionQueryParams();
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
@@ -237,7 +257,65 @@ import { networkState } from "@/state/networkState";
         
         let transactionSearchResult = await dashboardService.searchTxns(selectedTxnGroupType, allTxnQueryParams);
         let formattedTxns = await formatConfirmedTransaction(transactionSearchResult.transactions);
-        searchedTransactions.value = formattedTxns;
+        let txnFilterGroup = selectedTxnType.value;
+        switch (txnFilterGroup) {
+          case TransactionFilterType.TRANSFER:
+            transferTransactions.value = formattedTxns
+            searchedTransactions.value = transferTransactions.value
+            break;
+          case TransactionFilterType.ACCOUNT:
+            accountTransactions.value = formattedTxns
+            searchedTransactions.value = accountTransactions.value
+            break;
+          case TransactionFilterType.ASSET:
+            assetTransactions.value = formattedTxns
+            searchedTransactions.value = assetTransactions.value
+            break;
+          case TransactionFilterType.ALIAS:
+            aliasTransactions.value = formattedTxns
+            searchedTransactions.value = aliasTransactions.value
+            break;
+          case TransactionFilterType.NAMESPACE:
+            namespaceTransactions.value = formattedTxns
+            searchedTransactions.value = namespaceTransactions.value
+            break;
+          case TransactionFilterType.METADATA:
+            metadataTransactions.value = formattedTxns
+            searchedTransactions.value = metadataTransactions.value
+            break;
+          case TransactionFilterType.CHAIN:
+            chainTransactions.value = formattedTxns
+            searchedTransactions.value = chainTransactions.value
+            break;
+          case TransactionFilterType.EXCHANGE:
+            exchangeTransactions.value = formattedTxns
+            searchedTransactions.value = exchangeTransactions.value
+            break;
+          case TransactionFilterType.AGGREGATE:
+            aggregateTransactions.value = formattedTxns
+            searchedTransactions.value = aggregateTransactions.value
+            break;
+          case TransactionFilterType.LINK:
+            linkTransactions.value = formattedTxns
+            searchedTransactions.value = linkTransactions.value
+            break;
+          case TransactionFilterType.LOCK:
+            lockTransactions.value = formattedTxns
+            searchedTransactions.value = lockTransactions.value
+            break;
+          case TransactionFilterType.SECRET:
+            secretTransactions.value = formattedTxns
+            searchedTransactions.value = secretTransactions.value
+            break;
+          case TransactionFilterType.RESTRICTION:
+            restrictionTransactions.value = formattedTxns
+            searchedTransactions.value = restrictionTransactions.value
+            break;
+          default:
+            mixedTransactions.value = formattedTxns
+            searchedTransactions.value = mixedTransactions.value
+            break;
+        }
         boolIsTxnFetched.value = true;
     }
     const init = ()=>{
@@ -257,4 +335,10 @@ import { networkState } from "@/state/networkState";
     }
 
 </script>
+<style scoped>
+:deep(.p-accordion-header,.p-highlight) {
+    background-color: white;
+    margin-top: 5px;
+}
+</style>
 

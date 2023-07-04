@@ -8,6 +8,7 @@
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>
            <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
+           <div class=" error error_box mb-5" v-if="passwordErr!=''">{{ passwordErr }}</div>
         </div>
         <div class="mt-4"></div>
         <div class="flex flex-col gap-2">
@@ -75,7 +76,7 @@ import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
 import TextInputClean from '@/components/TextInputClean.vue'
-import { multiSign } from '@/util/multiSignatory';
+import {MultisigUtils} from '@/util/multisigUtils'
 import { walletState } from '@/state/walletState';
 import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
@@ -109,6 +110,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref('');
+    const passwordErr = ref('');
     const fundStatus = ref(false);
     
     const passwd = ref('');
@@ -157,13 +159,13 @@ export default {
       if(!acc.value){
         return
       }
-      return multiSign.checkIsMultiSig(acc.value.address)
+      return MultisigUtils.checkIsMultiSig(acc.value.address)
     }) 
     let updateAggregateFee=()=>{
       if(!acc.value){
         return
       }
-      multiSign.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value).then(fee=>{
+      MultisigUtils.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value).then(fee=>{
        aggregateFee.value=fee
      })
     }
@@ -266,7 +268,7 @@ export default {
 
       function changeToPublicKey(address, index){
         try {
-          multiSign.verifyContactPublicKey(address).then(result=>{
+          MultisigUtils.verifyContactPublicKey(address).then(result=>{
             if(result.status==true){
               coSign.value[index] = result.publicKey
             }
@@ -288,9 +290,16 @@ export default {
         }
       }
 
-    const disableSend = computed(() => !(
-      !isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) && coSign.value.length > 0  &&  (err.value == '' || (err.value == t('general.walletpasswordInvalid',{name : walletState.currentLoggedInWallet.name}))) && (showAddressError.value.every(value => value == false)) == true && (numDeleteUser.value > 0) && (numApproveTransaction.value > 0)
-    ));
+    const disableSend = computed(() => 
+      isMultisig.value || 
+      onPartial.value || 
+      !passwd.value.match(passwdPattern) || 
+      coSign.value.length == 0  ||  
+      err.value || 
+      (showAddressError.value.every(value => value == false)) == false || 
+      numDeleteUser.value == 0 || 
+      numApproveTransaction.value == 0
+    );
     const addCoSigButton = computed(() => {
       if(!acc.value){
         return false
@@ -322,12 +331,12 @@ export default {
       maxNumDeleteUser.value = 0;
     };
     const convertAccount = async() => {
-      let convertstatus = await multiSign.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.value.name, passwd.value);
+      let convertstatus = await MultisigUtils.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.value.name, passwd.value);
       if(!convertstatus){
-        err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
+        passwordErr.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
-        err.value = '';
+        passwordErr.value = '';
         // toggleAnounceNotification.value = true;
         // var audio = new Audio(require('@/assets/audio/ding.ogg'));
         // audio.play();
@@ -456,7 +465,7 @@ export default {
    
     // check if onPartial
     if(acc.value){
-      multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(verify=>
+      MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(verify=>
       onPartial.value = verify
     )
     }
@@ -521,7 +530,8 @@ export default {
       totalFee,
       totalFeeFormatted,
       selectedAccAdd,
-      accBalance
+      accBalance,
+      passwordErr
     };
   },
 }
@@ -538,7 +548,7 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
-.p-tree::v-deep{
+.p-tree::deep{
   .p-tree-container .p-treenode .p-treenode-content{
     padding-left:2px;
     padding-top:2px
@@ -554,7 +564,7 @@ input[type=number] {
       border: 1px solid #ced4da;
     }
 }
-  ::v-deep(.p-inputtext) {
+  ::deep(.p-inputtext) {
       font-size: 1rem;
       text-align: left;
       padding: 0.5rem;

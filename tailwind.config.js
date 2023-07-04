@@ -1,10 +1,9 @@
 module.exports = {
-  purge: [
+  content: [
     './src/**/*.html',
     './src/**/*.vue',
     './src/**/*.jsx',
   ],
-  darkMode: false, // or 'media' or 'class'
   theme: {
     inset:{
       '0': 0,

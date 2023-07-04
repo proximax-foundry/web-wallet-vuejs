@@ -25,6 +25,7 @@
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>
            <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
+           <div class=" error error_box mb-5" v-if="passwordErr!=''">{{ passwordErr }}</div>
         </div>
         <div class="mt-4"></div>
 
@@ -104,7 +105,7 @@ import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
 import TextInputClean from '@/components/TextInputClean.vue'
-import { multiSign } from '@/util/multiSignatory';
+import {MultisigUtils} from '@/util/multisigUtils'
 import { walletState } from '@/state/walletState';
 import {
     PublicAccount,Address
@@ -137,6 +138,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref('');
+    const passwordErr = ref('');
     const fundStatus = ref(false);
     
     const passwd = ref('');
@@ -190,7 +192,7 @@ export default {
       if(!acc.value){
         return
       }
-      multiSign.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value).then(fee=>{
+      MultisigUtils.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value).then(fee=>{
        aggregateFee.value=fee
      })
     }
@@ -233,7 +235,7 @@ export default {
       if(!acc.value){
         return {hasCosigner:false , cosignerList: []}
       }
-      return multiSign.getCosignerInWallet(acc.value.publicKey)
+      return MultisigUtils.getCosignerInWallet(acc.value.publicKey)
     }
     const walletCosignerList = computed(() =>{
       if(!walletState.currentLoggedInWallet){
@@ -258,11 +260,17 @@ export default {
       if(!acc.value){
         return false
       }
-      return multiSign.checkIsMultiSig(acc.value.address)
+      return MultisigUtils.checkIsMultiSig(acc.value.address)
     })
-    const disableSend = computed(() => !(
-      isMultisig.value && !onPartial.value && passwd.value.match(passwdPattern) &&  err.value == ''|| err.value== t('general.walletPasswordInvalid',{name : wallet?wallet.name:''}) && (showAddressError.value.indexOf(true) == -1) && (numDeleteUser.value >= 0) && (numApproveTransaction.value > 0)
-    ));
+    const disableSend = computed(() => 
+      !isMultisig.value || 
+      onPartial.value || 
+      !passwd.value.match(passwdPattern) || 
+      err.value || 
+      showAddressError.value.indexOf(true) != -1 || 
+      numDeleteUser.value < 0 || 
+      numApproveTransaction.value < 0
+    );
     const disabledPassword = computed(() => !(!onPartial.value && isMultisig.value && !fundStatus.value && isCoSigner.value));
     const isCoSigner = computed(() => {
       return getWalletCosigner().hasCosigner;
@@ -314,13 +322,13 @@ export default {
         signer.push({address: walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey).address})
       })
       console.log(signer)
-      let modifyStatus = await multiSign.modifyMultisigAccount(selectedCosignPublicKey.value,coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value,acc.value, passwd.value);
+      let modifyStatus = await MultisigUtils.modifyMultisigAccount(selectedCosignPublicKey.value,coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value,acc.value, passwd.value);
        console.log(modifyStatus);
       if(!modifyStatus){
-        err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
+        passwordErr.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
-        err.value = '';
+        passwordErr.value = '';
         /* var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play(); */
         clear();
@@ -460,7 +468,7 @@ export default {
     
       function changeToPublicKey(address, index){
         try {
-          multiSign.verifyContactPublicKey(address).then(result=>{
+          MultisigUtils.verifyContactPublicKey(address).then(result=>{
             if(result.status==true){
               coSign.value[index] = result.publicKey
             }
@@ -629,7 +637,7 @@ export default {
    
     // check if onPartial
     try {
-       multiSign.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(onPartialBoolean => onPartial.value = onPartialBoolean)
+       MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(onPartialBoolean => onPartial.value = onPartialBoolean)
     } catch (error) {
       
     }
@@ -688,7 +696,7 @@ export default {
 
     const getMultiSigCosigner = computed(() => {
       if(networkState.currentNetworkProfileConfig){
-        let cosigners = multiSign.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
+        let cosigners = MultisigUtils.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
         let list = [];
         cosigners.cosignerList.forEach( publicKey => {
           list.push({
@@ -766,7 +774,8 @@ export default {
       selectedAccAdd,
       accBalance,
       getMultiSigCosigner,
-      checkCosignBalance
+      checkCosignBalance,
+      passwordErr
     };
   },
 }
@@ -814,7 +823,7 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
-.p-tree::v-deep{
+.p-tree::deep{
   .p-tree-container .p-treenode .p-treenode-content{
     padding-left:2px;
     padding-top:2px
@@ -830,7 +839,7 @@ input[type=number] {
       border: 1px solid #ced4da;
     }
 }
-  ::v-deep(.p-inputtext) {
+  ::deep(.p-inputtext) {
       font-size: 1rem;
       text-align: left;
       padding: 0.5rem;

@@ -5,7 +5,7 @@
         <div class="shadow-md w-full relative overflow-x-hidden address_div px-7 py-3 rounded flex flex-col bg-white text-black">
           <div class="text-center py-3">
             <div class="text-center my-2"><div class="inline-block"><span class="font-bold text-xl">{{ selectedAccountBalanceFront }}</span>{{ selectedAccountBalanceBack?'.':'' }}<span class="text-md">{{ selectedAccountBalanceBack }}</span> <span class="font-bold text-xl">{{ currentNativeTokenName }}</span></div><img src="@/modules/dashboard/img/icon-xpx.svg" class="inline-block w-6 h-6 ml-3 relative" style="top: -6px;"></div>
-            <router-link :to="{ name: 'ViewAccountDetails', params: { address: selectedAccountAddressPlain }}" class="inline-block text-xs font-bold text-blue-primary cursor-pointer">{{ selectedAccountName }}<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></router-link>
+            <router-link :to="'/details-account/' + selectedAccountAddressPlain" class="inline-block text-xs font-bold text-blue-primary cursor-pointer">{{ selectedAccountName }}<img src="@/modules/dashboard/img/icon-blue-chevron-right.svg" class="inline-block w-5 h-5 ml-1 relative" style="top: -2px"></router-link>
             <div class="mb-8">
               <div class="flex items-center justify-center">
                 <div id="address" class="inline-block font-bold outline-none break-all text-xs lg:text-tsm" :copyValue="selectedAccountAddressPlain" :copySubject="$t('general.address')">{{ selectedAccountAddressShort }}</div>
@@ -355,8 +355,7 @@ export default defineComponent({
         }else{
           return null
         }
-      }
-    )
+      })
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, selectedAccount.value);
     let accountConfirmedTxnsCount = ref(0);
     let updateAccountTransactionCount = async()=>{
@@ -423,8 +422,8 @@ export default defineComponent({
       allTxnQueryParams.pageNumber = loadMore ? allTxnQueryParams.pageSize + 1 : 1;
       allTxnQueryParams.publicKey = selectedAccount.value.publicKey;
       if(allTxnQueryParams.type.length === 0 || 
-        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_COMPLETE) ||
-        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_BONDED)){
+        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_COMPLETE_V1) ||
+        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_BONDED_V1)){
         allTxnQueryParams.firstLevel = false;
       }
       else{

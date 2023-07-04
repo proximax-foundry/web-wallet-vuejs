@@ -246,8 +246,9 @@ export default{
   -moz-transform:rotate(45deg);
   -webkit-transform:rotate(45deg);
 }
+@media (min-width: 1024px) {
 .explicitLeft{
-  @media (min-width: 1024px) { margin-left: 39.3rem}
+ margin-left: 39.3rem}
   
 }
 

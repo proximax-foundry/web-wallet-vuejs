@@ -2,7 +2,7 @@ import {
     ChainConfigHttp, ChainConfig, RequestOptions
 } from "tsjs-xpx-chain-sdk";
 import {RequestAuth} from './auth';
-
+import { lastValueFrom } from 'rxjs';
 export class ChainConfigAPI {
 
     chainConfigHttp: ChainConfigHttp;
@@ -14,7 +14,7 @@ export class ChainConfigAPI {
 
     getChainConfig(height: number): Promise<ChainConfig>{
         let authHeader = this.requestOptions ? this.requestOptions : RequestAuth.getAuthHeader();
-        return this.chainConfigHttp.getChainConfig(height, authHeader).toPromise();
+        return lastValueFrom(this.chainConfigHttp.getChainConfig(height, authHeader));
     }
 
 }

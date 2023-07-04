@@ -37,11 +37,11 @@ addressBook:
   director: Director
   editContact: Edit Contact
   employee: Employee
-  exportBackUpContact: Export contacts for backup
+  exportBackUpContact: Export contacts for backup from selected group
   exportContacts: Export Contacts
   family: Family
   friend: Friend
-  groupValidation: Group name is not availble or already exist
+  groupValidation: Group name is not available or already exist
   importAddress: Import Address
   importContacts: Import Contacts
   nameExist: Name already exists in account or address book.
@@ -50,6 +50,7 @@ addressBook:
   removeContact: Remove Contact
   removeContactFromAB: Remove Contact from Address book?
   saveAddress: Save Address
+  selectExportContacts: Export contacts for backup from selected contacts
   work: Work
 asset:
   assetAns: >-
@@ -348,7 +349,7 @@ home:
   assetDescription: Create your own unique token
   beginnerGuide: Beginner's Guide
   contactTeam: Contact our support team
-  copyright: Copyright 2022 ProximaX®. All rights reserved.
+  copyright: Copyright © 2023. All Rights Reserved.
   gettingStarted: Getting Started
   helpdesk: Helpdesk
   home: Home
@@ -361,11 +362,11 @@ home:
   signIn: Sign In
   signOut: Sign Out
   siriusChain: What is Sirius Chain?
-  siriusChainTitle: Start building apps on the ProximaX Sirius blockchain layer
+  siriusChainTitle: Start building apps on the Sirius blockchain layer
   switchDefault: Your default account has switched to
-  title: ProximaX Sirius Wallet
+  title: Sirius Wallet
   titleDescription: >-
-    A highly secure and intuitive wallet and gateway to the ProximaX Sirius platform
+    A highly secure and intuitive wallet and gateway to the Sirius platform
   transferDescription: Send assets to another account
   version: Version
 multisig:
@@ -564,7 +565,7 @@ swap:
   step2: 'Step 2: Validate your Sirius address'
   step3: 'Step 3: Initiate swap'
   swapAmount: Swap Amount
-  swapBscToSirius: Swap from BSC to ProximaX Sirius Chain
+  swapBscToSirius: Swap from BSC to Sirius Chain
   swapDetails: Swap Details
   swapInProgress: Swap in progress. Please wait...
   swapInitiated: Swap has already been initiated earlier.
@@ -582,7 +583,7 @@ swap:
     Transaction Hash.
   swapNotFound: Swap not found
   swapOperationFail: Swap operation failed
-  swapSiriusToBsc: Swap from ProximaX Sirius Chain to BSC
+  swapSiriusToBsc: Swap from Sirius Chain to BSC
   swapStarted: The swap process has already started!
   swapSuccess: Swap is successful
   swapSuccess2: Swap is already in progress or has been completed successfully.
@@ -718,7 +719,7 @@ wallet:
   numberOfAccounts: Number of Accounts
   passwordErrMsg: 'Min. length 8'
   privateKeyDescription: >-
-    Restore your existing ProximaX Sirius Wallet, import a private key from
+    Restore your existing Sirius Wallet, import a private key from
     another service or create a new wallet.
   signInHere: Sign In here
   unableImport: Unable to import wallet

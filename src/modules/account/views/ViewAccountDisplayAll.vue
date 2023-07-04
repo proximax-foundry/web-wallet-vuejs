@@ -249,8 +249,11 @@ export default {
 </script>
 
 <style scoped>
+
+@media (min-width: 1024px) {
 .explicitLeft{
-  @media (min-width: 1024px) { margin-left: 40rem}
+   margin-left: 40rem
+  }
   
 }
 </style>

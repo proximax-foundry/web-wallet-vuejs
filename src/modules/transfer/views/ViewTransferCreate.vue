@@ -14,7 +14,7 @@
         <div class="flex gap-1">
           <SelectInputAccountTransfer v-model="selectedAccAdd" :initiateBy="initiateBy"/>
           <div v-if="haveSelectableMultisig" @click="toggleMultisig = !toggleMultisig"
-              class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 h-16 w-18'>
+              class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 h-16 w-18 mt-auto'>
               <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
               <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.select') }}</div>
               <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.multisig') }}</div>
@@ -85,22 +85,18 @@
 <script >
 import { Helper } from "@/util/typeHelper";
 import { computed, ref, getCurrentInstance, watch, effect } from "vue";
-import TextInput from "@/components/TextInput.vue";
 import PasswordInput from "@/components/PasswordInput.vue";
-import SelectInputPlugin from "@/components/SelectInputPlugin.vue";
 import MosaicInput from "@/modules/transfer/components/MosaicInput.vue";
-import SupplyInput from "@/components/SupplyInput.vue";
 import SelectMultisigInput from "@/components/SelectMultisigInput.vue"
 import TransferTextareaInput from "@/modules/transfer/components/TransferTextareaInput.vue";
 import {
   createTransaction,
-  makeTransaction,
-  enableACT
+  makeTransaction
 } from "@/util/transfer"; //getMosaicsAllAccounts
 import AddContactModal from "@/modules/transfer/components/AddContactModal.vue";
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
 import {useI18n} from 'vue-i18n'
-import { multiSign } from "@/util/multiSignatory";
+
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { accountUtils } from "@/util/accountUtils";
@@ -647,7 +643,7 @@ export default {
       if (findAcc) {
         cosignAddress.value = findAcc.address;
       }
-      if (parseFloat(checkCosignBalance.value) < lockFundTotalFee.value) {
+      if (parseFloat(checkCosignBalance.value.replace(/,/g,"")) < lockFundTotalFee.value) {
         disableAllInput.value = true;
       } else {
         disableAllInput.value = false;
@@ -972,7 +968,7 @@ export default {
   background: #d9ebff;
 }
 
-.p-tree::v-deep{
+.p-tree::deep{
   .p-tree-container .p-treenode .p-treenode-content{
     padding-left:2px;
     padding-top:2px
@@ -988,7 +984,7 @@ export default {
       border: 1px solid #ced4da;
     }
 }
-  ::v-deep(.p-inputtext) {
+  ::deep(.p-inputtext) {
       font-size: 1rem;
       text-align: left;
       padding: 0.5rem;

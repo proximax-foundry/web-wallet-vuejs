@@ -392,6 +392,7 @@ export default {
       }
       const wallet = walletState.currentLoggedInWallet;
       var contact = [];
+      var uniqueContact = [];
       accounts.value.forEach((element) => {
         contact.push({ 
           value: Address.createFromRawAddress(element.address).pretty() ,
@@ -406,8 +407,15 @@ export default {
           });
         });
       }
-      return contact;
-     
+      uniqueContact = contact.reduce((obj, item) => {
+        let find = obj.find(i => i.value === item.value);
+        let _d = {  
+        ...item
+        }
+        find ? (find.label = item.label ) : obj.push(_d);
+        return obj;
+      }, [])
+      return uniqueContact;
     });
     onBeforeUnmount(() => {
        if(verifyingTxn){

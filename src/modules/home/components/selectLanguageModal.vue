@@ -79,7 +79,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "@/assets/scss/multiselect.scss";
-#langSelector ::v-deep {
+#langSelector ::deep {
   top: 7px;
   position: absolute;
   .multiselect-input{

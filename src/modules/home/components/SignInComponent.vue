@@ -24,7 +24,6 @@
 <script>
 import { computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
 import { useRouter } from "vue-router";
-import SelectInputPlugin from '@/components/SelectInputPlugin.vue';
 import SelectNetworkInput from '@/components/SelectNetworkInput.vue';
 import SelectWalletInput from '@/components/SelectWalletInput.vue';
 import PasswordInput from '@/components/PasswordInput.vue';

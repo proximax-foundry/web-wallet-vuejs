@@ -4,7 +4,7 @@ import {
     ExchangeOfferType, MosaicExchange, AccountExchanges
 } from "tsjs-xpx-chain-sdk";
 import {RequestAuth} from './auth';
-
+import { lastValueFrom } from 'rxjs';
 export class ExchangeAPI {
 
     exchangeHttp: ExchangeHttp;
@@ -15,16 +15,16 @@ export class ExchangeAPI {
 
     getAccountExchanges(accountId: Address | PublicAccount): Promise<AccountExchanges>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.exchangeHttp.getAccountExchanges(accountId, authHeader).toPromise();
+        return lastValueFrom(this.exchangeHttp.getAccountExchanges(accountId, authHeader))
     }
 
     getExchangeOffers(offerType: ExchangeOfferType, mosaicId: MosaicId): Promise<MosaicExchange[]>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.exchangeHttp.getExchangeOffers(offerType, mosaicId, authHeader).toPromise();
+        return lastValueFrom(this.exchangeHttp.getExchangeOffers(offerType, mosaicId, authHeader))
     }
 
     getExchangeList(): Promise<MosaicId[]>{
         let authHeader = RequestAuth.getAuthHeader();
-        return this.exchangeHttp.getOfferList(authHeader).toPromise();
+        return lastValueFrom(this.exchangeHttp.getOfferList(authHeader))
     }
 }
