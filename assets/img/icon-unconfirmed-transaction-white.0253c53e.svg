@@ -1,9 +1,0 @@
-<svg id="pending_black_24dp" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-  <g id="Group_48" data-name="Group 48">
-    <rect id="Rectangle_231" data-name="Rectangle 231" width="24" height="24" fill="none"/>
-    <rect id="Rectangle_232" data-name="Rectangle 232" width="24" height="24" fill="none"/>
-  </g>
-  <g id="Group_49" data-name="Group 49" transform="translate(2 2)">
-    <path id="Path_754" data-name="Path 754" d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2ZM7,13.5A1.5,1.5,0,1,1,8.5,12,1.5,1.5,0,0,1,7,13.5Zm5,0A1.5,1.5,0,1,1,13.5,12,1.5,1.5,0,0,1,12,13.5Zm5,0A1.5,1.5,0,1,1,18.5,12,1.5,1.5,0,0,1,17,13.5Z" transform="translate(-2 -2)" fill="#fff"/>
-  </g>
-</svg>
