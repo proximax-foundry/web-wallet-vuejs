@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "vite ",
-    "build": "cross-env NODE_ENV=production run-p type-check build-only",
+    "build": "cross-env NODE_ENV=production NODE_OPTIONS=--max-old-space-size=4096 run-p type-check build-only",
     "build-development": "cross-env NODE_ENV=development NODE_OPTIONS=--max-old-space-size=4096 run-p type-check build-only",
-    "build-staging": "cross-env NODE_ENV=staging run-p type-check build-only",
+    "build-staging": "cross-env NODE_ENV=staging  NODE_OPTIONS=--max-old-space-size=4096 run-p type-check build-only",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
