@@ -2,19 +2,15 @@
     <div>
         <div class='border-2 xl:grid xl:grid-cols-3'>
             <div class="xl:col-span-2 p-12">
-                <div>SDA-SDA Exchange - Buy</div>
+                <div>SDA-SDA Exchange - Sell</div>
                 <div v-if="!selectedAddress" class="text-xs mt-3 text-blue-primary ">Select Account to Create / Initiate
                     Transaction</div>
                 <SelectInputAccount />
                 <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
                 <div class="text-blue-primary mt-3">Price</div>
-                <div class="flex">
-                    <div class="mr-1">{{ displayRatio[1] ?? 0 }}</div>
-                    <div class=" mr-1">{{ displayAssetNameFull(offerInfo?.mosaicGiveName) }}</div>
-                    <div class="mr-1">: {{ displayRatio[0] ?? 0 }}</div>
-                    <div class="">{{ displayAssetNameFull(offerInfo?.mosaicGetName) }}</div>
-                </div>
-
+                <div> {{ displayRatio[1] ?? 0 }} {{ displayAssetName(offerInfo?.mosaicGiveName) }} : {{ displayRatio[0] ?? 0
+                }}
+                    {{ displayAssetName(offerInfo?.mosaicGetName) }} </div>
                 <div class="text-blue-primary mt-3">Available Amount</div>
                 <div>{{ offerInfo?.currentMosaicGiveAmount.compact() / Math.pow(10, offerInfo?.mosaicGiveDivisibility) }} {{
                     displayAssetName(offerInfo?.mosaicGiveName) }}</div>
@@ -35,7 +31,6 @@
                 </div>
                 <div class="mt-2 text-xs text-gray-600">Available to give: {{ giveAssetBalance }} {{
                     displayAssetName(offerInfo?.mosaicGetName) }}</div>
-
             </div>
             <div class='bg-navy-primary py-6 px-6 xl:col-span-1'>
                 <div v-if="selectedMultisigAddress">
@@ -117,7 +112,7 @@
                 <div class='font-semibold text-xs text-white mb-1.5'>{{ $t('general.enterPasswordContinue') }}</div>
                 <PasswordInput :placeholder="$t('general.enterPassword')" v-model="walletPassword" icon="lock"
                     class="mt-5 mb-3" />
-                <button class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="exchangeBuy()">
+                <button class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="exchangeSell()">
                     Sell
                 </button>
                 <div class="text-center">
@@ -141,12 +136,11 @@ import SelectInputAccount from './components/SelectInputAccount.vue';
 import SelectInputMultisigAccount from './components/SelectInputMultisigAccount.vue';
 import { Helper } from '@/util/typeHelper';
 import { walletState } from '@/state/walletState';
-import { networkState } from '@/state/networkState';
 import { TransactionUtils } from '@/util/transactionUtils';
+import { networkState } from '@/state/networkState';
 import PasswordInput from "@/components/PasswordInput.vue";
 import { WalletUtils } from '@/util/walletUtils';
 import { useRouter } from 'vue-router';
-
 
 const reduceFraction = (numerator: number, denominator: number): [number, number] => {
     // Find the greatest common divisor (GCD) using Euclid's algorithm
@@ -168,23 +162,34 @@ const reduceFraction = (numerator: number, denominator: number): [number, number
 }
 
 
-const getNativeTokenBalance = (address: string) => {
-    const findAcc = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == address) || walletState.currentLoggedInWallet.others.find(acc => acc.address == address)
-    if (!findAcc) {
-        return 0;
-    }
-    return splitCurrency(findAcc.balance)
+const knownToken = [{
+    namespace: "prx.xpx",
+    name: "XPX"
+},
+{
+    namespace: "prx.metx",
+    name: "METX"
+}, {
+    namespace: "xarcade.xar",
+    name: "XAR"
+}];
 
-}
+const amountToPay = ref('0')
 
-const splitCurrency = (amount: number) => {
-    let split = amount.toString().split(".")
-    if (split[1] != undefined) {
-        return '<span class="font-semibold text-sm">' + split[0] + '</span>.<span class="font-semibold text-xs">' + split[1] + '</span>';
-    } else {
-        return '<span class="font-semibold text-sm">' + split[0] + '</span>';
-    }
-};
+const amountToGet = computed(() => {
+    return parseFloat(amountToPay.value) * rate.value
+})
+
+const internalInstance = getCurrentInstance();
+
+const emitter = internalInstance.appContext.config.globalProperties.emitter;
+
+const walletPassword = ref('')
+
+const selectedAddress = ref<string | null>(null)
+
+const selectedMultisigAddress = ref<string | null>(null)
+
 
 const lockFund = computed(() =>
     Helper.convertToExact(
@@ -220,35 +225,6 @@ const txnFee = computed(() => {
 
 })
 
-
-const knownToken = [{
-    namespace: "prx.xpx",
-    name: "XPX"
-},
-{
-    namespace: "prx.metx",
-    name: "METX"
-}, {
-    namespace: "xarcade.xar",
-    name: "XAR"
-}];
-
-const amountToPay = ref('0')
-
-const amountToGet = computed(() => {
-    return parseFloat(amountToPay.value) * rate.value
-})
-
-const walletPassword = ref('')
-
-const internalInstance = getCurrentInstance();
-
-const emitter = internalInstance.appContext.config.globalProperties.emitter;
-
-const selectedAddress = ref<string | null>(null)
-
-const selectedMultisigAddress = ref<string | null>(null)
-
 emitter.on("select-account", (address: string) => {
     selectedAddress.value = address
 })
@@ -258,10 +234,7 @@ emitter.on("select-multisig-account", (address: string) => {
 
 })
 
-const displayAssetNameFull = (name: string) => {
-    if(!name){
-        return ''
-    }
+const displayAssetName = (name: string) => {
     const findKnownToken = knownToken.find(token => token.namespace == name)
     if (findKnownToken) {
         return findKnownToken.name
@@ -269,20 +242,18 @@ const displayAssetNameFull = (name: string) => {
     return name
 }
 
-const displayAssetName = (name: string) => {
-    if(!name){
-        return ''
+const totalFee = computed(() => {
+    if (isMultisig.value) {
+        return Math.round((lockFund.value + lockFundTxFee.value + txnFee.value)
+            * Math.pow(10, AppState.nativeToken.divisibility)) /
+            Math.pow(10, AppState.nativeToken.divisibility)
     }
-    const findKnownToken = knownToken.find(token => token.namespace == name)
-    if (findKnownToken) {
-        return findKnownToken.name
+
+    if (offerInfo.value && offerInfo.value.mosaicIdGet.id.toHex().toLowerCase() == AppState.nativeToken.assetId.toLowerCase()) {
+        return parseFloat(amountToPay.value) + txnFee.value
     }
-    return name.length == 16 ? name.substring(0, 4) + "..." : name
-}
-
-const isMultisig = computed(() => selectedMultisigAddress.value != null)
-
-
+    return txnFee.value
+})
 
 interface SdaOfferWithDivisibilityAndNamespace extends SdaOfferInfo {
     mosaicGiveDivisibility?: number,
@@ -302,20 +273,41 @@ const rate = ref(0)
 
 const toast = useToast()
 
-const getAsset = props.pair.split('/')[0]
+const giveAsset = props.pair.split('/')[0]
 
-const giveAsset = props.pair.split('/')[1]
+const getAsset = props.pair.split('/')[1]
 
 const giveAssetBalance = ref(0)
 
+const getNativeTokenBalance = (address: string) => {
+    const findAcc = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == address) || walletState.currentLoggedInWallet.others.find(acc => acc.address == address)
+    if (!findAcc) {
+        return 0;
+    }
+    return splitCurrency(findAcc.balance)
+
+}
+
+const splitCurrency = (amount: number) => {
+    let split = amount.toString().split(".")
+    if (split[1] != undefined) {
+        return '<span class="font-semibold text-sm">' + split[0] + '</span>.<span class="font-semibold text-xs">' + split[1] + '</span>';
+    } else {
+        return '<span class="font-semibold text-sm">' + split[0] + '</span>';
+    }
+};
+
 const displayRatio = computed(() => {
     if (!offerInfo.value) {
-        return []
+        return "";
     }
     const numerator = offerInfo.value.initialMosaicGiveAmount.compact() / Math.pow(10, offerInfo.value.mosaicGiveDivisibility ?? 0) * Math.pow(10, 6)
     const denominator = offerInfo.value.initialMosaicGetAmount.compact() / Math.pow(10, offerInfo.value.mosaicGetDivisibility ?? 0) * Math.pow(10, 6)
-    return reduceFraction(numerator, denominator)
+    return reduceFraction(denominator, numerator)
 })
+
+const isMultisig = computed(() => selectedMultisigAddress.value != null)
+
 
 
 const fetchExchange = async () => {
@@ -332,7 +324,7 @@ const fetchExchange = async () => {
     }
     const sdaExchangeHttp = new ExchangeSdaHttp(AppState.nodeFullURL)
     const accountExchangeOffers = await lastValueFrom(sdaExchangeHttp.getAccountSdaExchangeOffers(Address.createFromRawAddress(props.owner)))
-    offerInfo.value = accountExchangeOffers.sdaOfferBalances.find(offer => offer.mosaicIdGet.toHex() == getAsset && offer.mosaicIdGive.toHex() == giveAsset)
+    offerInfo.value = accountExchangeOffers.sdaOfferBalances.find(offer => offer.mosaicIdGive.toHex() == giveAsset && offer.mosaicIdGet.toHex() == getAsset)
     if (!offerInfo.value) {
         toast.add({
             severity: 'error',
@@ -350,8 +342,7 @@ const fetchExchange = async () => {
     offerInfo.value.mosaicGetDivisibility = assetInfo.find(info => info.mosaicId.toHex() == offerInfo.value.mosaicIdGet.toHex()).divisibility
     offerInfo.value.mosaicGiveDivisibility = assetInfo.find(info => info.mosaicId.toHex() == offerInfo.value.mosaicIdGive.toHex()).divisibility
 
-    rate.value = (offerInfo.value.initialMosaicGetAmount.compact() / Math.pow(10, offerInfo.value.mosaicGetDivisibility)) / (offerInfo.value.initialMosaicGiveAmount.compact() / Math.pow(10, offerInfo.value.mosaicGiveDivisibility))
-
+    rate.value = (offerInfo.value.initialMosaicGiveAmount.compact() / Math.pow(10, offerInfo.value.mosaicGiveDivisibility)) / (offerInfo.value.initialMosaicGetAmount.compact() / Math.pow(10, offerInfo.value.mosaicGetDivisibility))
 }
 
 const fetchGiveAssetBalance = async (address: string) => {
@@ -369,28 +360,11 @@ const fetchGiveAssetBalance = async (address: string) => {
 
 }
 
-const totalFee = computed(() => {
-    if (isMultisig.value) {
-        return Math.round((lockFund.value + lockFundTxFee.value + txnFee.value)
-            * Math.pow(10, AppState.nativeToken.divisibility)) /
-            Math.pow(10, AppState.nativeToken.divisibility)
+watch(amountToPay, n => {
+    if (isNaN(parseFloat(n))) {
+        amountToPay.value = '0'
     }
-
-    if (offerInfo.value && offerInfo.value.mosaicIdGet.id.toHex().toLowerCase() == AppState.nativeToken.assetId.toLowerCase()) {
-        return parseFloat(amountToPay.value) + txnFee.value
-    }
-    return txnFee.value
 })
-
-const getNativeTokenBalanceNumber = (address: string) => {
-    const findAcc = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == address) || walletState.currentLoggedInWallet.others.find(acc => acc.address == address)
-    if (!findAcc) {
-        return 0;
-    }
-    return findAcc.balance
-
-}
-
 
 watch([selectedAddress, selectedMultisigAddress], ([n, mn]) => {
     giveAssetBalance.value = 0
@@ -410,15 +384,18 @@ const stopWatch = watch(AppState, async (n, o) => {
     }
 }, { immediate: true })
 
-watch(amountToPay, n => {
-    if (isNaN(parseFloat(n))) {
-        amountToPay.value = '0'
+const getNativeTokenBalanceNumber = (address: string) => {
+    const findAcc = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == address) || walletState.currentLoggedInWallet.others.find(acc => acc.address == address)
+    if (!findAcc) {
+        return 0;
     }
-})
+    return findAcc.balance
+
+}
 
 const router = useRouter()
 
-const exchangeBuy = async () => {
+const exchangeSell = async() => {
     if (selectedAddress.value == null) {
         toast.add({
             severity: 'error',
@@ -510,7 +487,6 @@ const exchangeBuy = async () => {
         return;
     }
 
-
     const initiatorAcc = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == selectedAddress.value)
 
     const sdaExchangeOfferTxn = PlaceSdaExchangeOfferTransaction.create(
@@ -547,7 +523,8 @@ const exchangeBuy = async () => {
 
 
 
-}
 
+
+}
 
 </script>

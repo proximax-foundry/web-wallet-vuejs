@@ -133,7 +133,7 @@
                     <PasswordInput :placeholder="$t('general.enterPassword')" v-model="walletPassword" icon="lock"
                         class="mt-5 mb-3" />
                     <button class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
-                        @click="exchangeSell()">
+                        @click="exchangeCreate()">
                         Sell
                     </button>
                     <div class="text-center">
@@ -372,7 +372,7 @@ const totalFee = computed(() => {
     return txnFee.value
 })
 
-const exchangeSell = async () => {
+const exchangeCreate = async () => {
     if (selectedAddress.value == null) {
         toast.add({
             severity: 'error',

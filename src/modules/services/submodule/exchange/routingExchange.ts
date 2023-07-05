@@ -25,13 +25,17 @@ export const ExchangeRoutes = [
       }
     },
     {
+      path: '/exchange/sell',
+      name: 'ViewExchangeSell',
+      component: () => import('@/modules/services/submodule/exchange/ViewExchangeSell.vue'),
+      props: route => ({ pair: route.query.p, owner: route.query.o,})
+    },
+    {
       path: '/exchange/buy',
       name: 'ViewExchangeBuy',
       component: () => import('@/modules/services/submodule/exchange/ViewExchangeBuy.vue'),
       props: route => ({ pair: route.query.p, owner: route.query.o,})
-      
-     
-  },
+    },
   
   ];
   

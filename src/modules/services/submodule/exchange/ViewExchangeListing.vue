@@ -62,7 +62,7 @@
                 </Column>
                 <Column header="Action">
                     <template #body="{ data }">
-                        <router-link :to="{ name: 'ViewExchangeBuy', query: { p: data.idPair, o: data.owner } }">
+                        <router-link :to=" data.type == 'Sell'?  { name: 'ViewExchangeSell', query: { p: data.idPair, o: data.owner } } : { name: 'ViewExchangeBuy', query: { p: data.idPair, o: data.owner } }">
                             <button class="blue-btn py-2 px-3 ">Exchange</button>
                         </router-link>
 
