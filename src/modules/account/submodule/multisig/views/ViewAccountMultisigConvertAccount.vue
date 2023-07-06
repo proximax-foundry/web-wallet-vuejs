@@ -165,9 +165,7 @@ export default {
       if(!acc.value){
         return
       }
-      MultisigUtils.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value).then(fee=>{
-       aggregateFee.value=fee
-     })
+      aggregateFee.value = MultisigUtils.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value)
     }
     updateAggregateFee()
     const totalFee = computed(()=>{

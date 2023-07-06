@@ -192,9 +192,7 @@ export default {
       if(!acc.value){
         return
       }
-      MultisigUtils.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value).then(fee=>{
-       aggregateFee.value=fee
-     })
+      aggregateFee.value = MultisigUtils.getAggregateFee(acc.value.publicKey,coSign.value,numApproveTransaction.value,numDeleteUser.value,removeCosign.value)
     }
     
     const cosignerAddress = cosigner => Address.createFromPublicKey(cosigner, AppState.networkType).plain().substr(-4)
