@@ -180,8 +180,8 @@ const fetchGiveListing = async () => {
             idPair: `${info.mosaicIdGet.toHex()}/${info.mosaicIdGive.toHex()}`,
             deadline: new Date(Date.now() + ((info.deadline.compact() - currentHeight) * 15000)).toLocaleString(),
             pair: `${displayAssetName(info.mosaicGetName)}/${displayAssetName(info.mosaicGiveName)} `,
-            giveAmount: info.currentMosaicGiveAmount.compact() / Math.pow(10, info.mosaicGiveDivisibility),
-            getAmount: info.currentMosaicGetAmount.compact() / Math.pow(10, info.mosaicGetDivisibility),
+            giveAmount: info.currentMosaicGetAmount.compact() / Math.pow(10, info.mosaicGetDivisibility),
+            getAmount: info.currentMosaicGiveAmount.compact() / Math.pow(10, info.mosaicGiveDivisibility),
             rate: (info.initialMosaicGetAmount.compact() / Math.pow(10, info.mosaicGetDivisibility)) / (info.initialMosaicGiveAmount.compact() / Math.pow(10, info.mosaicGiveDivisibility))
         }
     })

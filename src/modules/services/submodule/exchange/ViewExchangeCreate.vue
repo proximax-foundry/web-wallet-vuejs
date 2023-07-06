@@ -366,7 +366,7 @@ const totalFee = computed(() => {
             Math.pow(10, AppState.nativeToken.divisibility)
     }
 
-    if(assetToGive.value && assetToGive.value.id.toLowerCase() == AppState.nativeToken.assetId.toLowerCase()){
+    if (assetToGive.value && assetToGive.value.id.toLowerCase() == AppState.nativeToken.assetId.toLowerCase()) {
         return parseFloat(amountToGive.value) + txnFee.value
     }
     return txnFee.value
@@ -453,8 +453,7 @@ const exchangeCreate = async () => {
 
     }
 
-    if (assetToGive.value.id.toLowerCase() == AppState.nativeToken.assetId.toLowerCase() && !isMultisig.value && signerBalance < totalFee.value ) {
-        console.log('triggered')
+    if (assetToGive.value.id.toLowerCase() == AppState.nativeToken.assetId.toLowerCase() && !isMultisig.value && signerBalance < totalFee.value) {
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -487,18 +486,23 @@ const exchangeCreate = async () => {
         return;
     }
     const sdaExchangeHttp = new ExchangeSdaHttp(AppState.nodeFullURL)
-    const accountExchangeOffers = await lastValueFrom(sdaExchangeHttp.getAccountSdaExchangeOffers(Address.createFromRawAddress(selectedMultisigAddress.value ?? selectedAddress.value)))
-    const findExistingPair = accountExchangeOffers.sdaOfferBalances.find(offer => offer.mosaicIdGive.toHex().toLowerCase() == assetToGive.value.id.toLowerCase() && offer.mosaicIdGet.toHex().toLowerCase() == assetToReceive.value.toLowerCase())
-    if (findExistingPair) {
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: "You cannot create an existing pair from this account",
-            group: 'br-custom',
-            life: 1000
-        });
-        return
+    try {
+        const accountExchangeOffers = await lastValueFrom(sdaExchangeHttp.getAccountSdaExchangeOffers(Address.createFromRawAddress(selectedMultisigAddress.value ?? selectedAddress.value)))
+        const findExistingPair = accountExchangeOffers.sdaOfferBalances.find(offer => offer.mosaicIdGive.toHex().toLowerCase() == assetToGive.value.id.toLowerCase() && offer.mosaicIdGet.toHex().toLowerCase() == assetToReceive.value.toLowerCase())
+        if (findExistingPair) {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: "You cannot create an existing pair from this account",
+                group: 'br-custom',
+                life: 1000
+            });
+            return
+        }
+    } catch (error) {
+
     }
+
     const initiatorAcc = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == selectedAddress.value)
 
     const sdaExchangeOfferTxn = PlaceSdaExchangeOfferTransaction.create(

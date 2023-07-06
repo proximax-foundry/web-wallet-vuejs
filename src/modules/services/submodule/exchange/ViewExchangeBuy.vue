@@ -10,9 +10,9 @@
                 <div class="text-blue-primary mt-3">Price</div>
                 <div class="flex">
                     <div class="mr-1">{{ displayRatio[1] ?? 0 }}</div>
-                    <div class=" mr-1">{{ displayAssetNameFull(offerInfo?.mosaicGiveName) }}</div>
+                    <div class=" mr-1">{{ displayAssetNameFull(offerInfo?.mosaicGetName) }}</div>
                     <div class="mr-1">: {{ displayRatio[0] ?? 0 }}</div>
-                    <div class="">{{ displayAssetNameFull(offerInfo?.mosaicGetName) }}</div>
+                    <div class="">{{ displayAssetNameFull(offerInfo?.mosaicGiveName) }}</div>
                 </div>
 
                 <div class="text-blue-primary mt-3">Available Amount</div>
@@ -29,9 +29,9 @@
 
                     <div class="text-gray-600 text-xs "> I will receive {{ Helper.toCurrencyFormat(amountToGet,
                         offerInfo?.mosaicGiveDivisibility) }} {{ displayAssetName(offerInfo?.mosaicGiveName) }}</div>
-                    <div class="text-red-500 text-xs ml-2"
+                    <!-- <div class="text-red-500 text-xs ml-2"
                         v-if="amountToGet > (offerInfo?.currentMosaicGiveAmount.compact() / Math.pow(10, offerInfo?.mosaicGiveDivisibility))">
-                        (Exceed Available Amount of {{ displayAssetName(offerInfo?.mosaicGiveName) }})</div>
+                        (Exceed Available Amount of {{ displayAssetName(offerInfo?.mosaicGiveName) }})</div> -->
                 </div>
                 <div class="mt-2 text-xs text-gray-600">Available to give: {{ giveAssetBalance }} {{
                     displayAssetName(offerInfo?.mosaicGetName) }}</div>
@@ -350,7 +350,7 @@ const fetchExchange = async () => {
     offerInfo.value.mosaicGetDivisibility = assetInfo.find(info => info.mosaicId.toHex() == offerInfo.value.mosaicIdGet.toHex()).divisibility
     offerInfo.value.mosaicGiveDivisibility = assetInfo.find(info => info.mosaicId.toHex() == offerInfo.value.mosaicIdGive.toHex()).divisibility
 
-    rate.value = (offerInfo.value.initialMosaicGetAmount.compact() / Math.pow(10, offerInfo.value.mosaicGetDivisibility)) / (offerInfo.value.initialMosaicGiveAmount.compact() / Math.pow(10, offerInfo.value.mosaicGiveDivisibility))
+    rate.value = (offerInfo.value.initialMosaicGiveAmount.compact() / Math.pow(10, offerInfo.value.mosaicGiveDivisibility)) / (offerInfo.value.initialMosaicGetAmount.compact() / Math.pow(10, offerInfo.value.mosaicGetDivisibility))
 
 }
 
@@ -452,7 +452,7 @@ const exchangeBuy = async () => {
         return
     }
 
-    if (amountToGet.value > (offerInfo.value.currentMosaicGiveAmount.compact() / Math.pow(10, offerInfo.value.mosaicGiveDivisibility))) {
+    /* if (amountToGet.value > (offerInfo.value.currentMosaicGiveAmount.compact() / Math.pow(10, offerInfo.value.mosaicGiveDivisibility))) {
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -461,7 +461,7 @@ const exchangeBuy = async () => {
             life: 1000
         });
         return
-    }
+    } */
 
     const signerBalance = getNativeTokenBalanceNumber(selectedAddress.value)
     if (isMultisig.value && (signerBalance < totalFee.value)) {

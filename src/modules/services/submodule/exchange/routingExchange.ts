@@ -36,7 +36,12 @@ export const ExchangeRoutes = [
       component: () => import('@/modules/services/submodule/exchange/ViewExchangeBuy.vue'),
       props: route => ({ pair: route.query.p, owner: route.query.o,})
     },
-  
+    {
+      path: '/exchange/remove',
+      name: 'ViewExchangeRemove',
+      component: () => import('@/modules/services/submodule/exchange/ViewExchangeRemove.vue'),
+      props: route => ({ pair: route.query.p, owner: route.query.o,})
+    },
   ];
   
   

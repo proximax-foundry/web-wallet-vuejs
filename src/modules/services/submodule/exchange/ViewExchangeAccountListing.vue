@@ -18,12 +18,31 @@
                 <template #empty>
                     No exchanges found.
                 </template>
-                <Column field="give" header="Give"></Column>
-                <Column field="get" header="Get"></Column>
                 <Column field="deadline" header="Deadline"></Column>
+                <Column field="give" header="Give">
+                    <template #body="{ data }">
+                        <div class="flex">
+                            <div class="mr-1">{{ data.giveAmount }}</div>
+                            <div class="text-blue-primary">{{ data.pair.split('/')[0] }}</div>
+                        </div>
+
+                    </template>
+                </Column>
+                <Column field="get" header="Get">
+                    <template #body="{ data }">
+                        <div class="flex">
+                            <div class="mr-1">{{ data.getAmount }}</div>
+                            <div class="text-blue-primary">{{  data.pair.split('/')[1]  }}</div>
+                        </div>
+
+                    </template>
+                </Column>
                 <Column header="Action">
-                    <template #body>
-                        <button class="blue-btn py-2 px-3 ">Remove</button>
+                    <template #body="{ data }">
+                        <router-link :to="{  name: 'ViewExchangeRemove', query: { p: data.idPair, o: address }}">
+                            <button class="blue-btn py-2 px-3 ">Remove</button>
+                        </router-link>
+
                     </template>
                 </Column>
             </DataTable>
@@ -35,7 +54,7 @@
 import { AppState } from '@/state/appState';
 import { lastValueFrom } from 'rxjs';
 import { Address, ExchangeSdaHttp, SdaOfferInfo } from 'tsjs-xpx-chain-sdk';
-import { watch, ref, computed } from 'vue';
+import { watch, ref, computed, getCurrentInstance } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { walletState } from '@/state/walletState';
@@ -69,6 +88,7 @@ const knownToken = [{
     name: "XAR"
 }];
 
+
 const displayAssetName = (name: string) => {
     const findKnownToken = knownToken.find(token => token.namespace == name)
     if (findKnownToken) {
@@ -84,9 +104,7 @@ const themeConfig: any = new ThemeStyleConfig('ThemeStyleConfig');
 themeConfig.init();
 const svgString = computed(() => toSvg(props.address, 40, themeConfig.jdenticonConfig))
 
-
-
-const accountSdaExchanges = ref<{ deadline: string, give: string, get: string }[]>([])
+const accountSdaExchanges = ref<{ idPair:string,deadline: string, giveAmount: number, getAmount: number, pair: string }[]>([])
 
 const fetchListing = async () => {
     let listingInfo: SdaExchangeWithDivisibilityAndNamespace[] = []
@@ -105,12 +123,11 @@ const fetchListing = async () => {
     const currentHeight = await AppState.chainAPI.chainAPI.getBlockchainHeight()
     accountSdaExchanges.value = listingInfo.map(offer => {
         return {
-            give: `${displayAssetName(offer.mosaicGiveName)} (${offer.initialMosaicGiveAmount.compact() / Math.pow(10, offer.mosaicGiveDivisibility)})`,
-            get: `${displayAssetName(offer.mosaicGetName)} (${offer.initialMosaicGetAmount.compact() / Math.pow(10, offer.mosaicGetDivisibility)})`,
+            idPair: `${offer.mosaicIdGive.toHex()}/${offer.mosaicIdGet.toHex()}`,
+            pair: `${displayAssetName(offer.mosaicGiveName)}/${displayAssetName(offer.mosaicGetName)} `,
+            giveAmount: offer.initialMosaicGiveAmount.compact() / Math.pow(10, offer.mosaicGiveDivisibility),
+            getAmount: offer.initialMosaicGetAmount.compact() / Math.pow(10, offer.mosaicGetDivisibility),
             deadline: new Date(Date.now() + ((offer.deadline.compact() - currentHeight) * 15000)).toLocaleString(),
-            /* pair: `${displayAssetName(offer.mosaicGetName)} /  ${displayAssetName(offer.mosaicGetName)} `,
-            amount: offer.currentMosaicGiveAmount.compact() / Math.pow(10, offer.mosaicGiveDivisibility),
-            rate: (offer.initialMosaicGiveAmount.compact() / Math.pow(10, offer.mosaicGiveDivisibility)) / (offer.initialMosaicGetAmount.compact() / Math.pow(10, offer.mosaicGetDivisibility)) */
         }
     })
 }
