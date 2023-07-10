@@ -120,8 +120,8 @@ import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
 import { 
   PublicAccount, Convert, AccountMetadataTransactionBuilder, 
-  AggregateTransaction, AggregateBondedTransactionBuilder, UInt64,
-  MetadataQueryParams, MetadataType, AccountMetadataTransaction, Account
+  AggregateTransaction, UInt64,
+  MetadataQueryParams, MetadataType, AccountMetadataTransaction, Account, AggregateBondedV1TransactionBuilder
 } from 'tsjs-xpx-chain-sdk';
 import { WalletAccount } from '@/models/walletAccount';
 import { OtherAccount } from '@/models/otherAccount';
@@ -154,7 +154,7 @@ export default {
     let inputScopedMetadataKey = ref(""); 
     let selectedAcc = ref<WalletAccount | OtherAccount>(null);
     let txnBuilder: AccountMetadataTransactionBuilder;
-    let aggregateTxnBuilder: AggregateBondedTransactionBuilder;
+    let aggregateTxnBuilder: AggregateBondedV1TransactionBuilder;
     let metadataTxn: AccountMetadataTransaction;
     let aggregateTxn: AggregateTransaction;
     const oldValue = ref("");
