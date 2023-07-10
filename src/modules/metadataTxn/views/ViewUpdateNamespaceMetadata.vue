@@ -118,10 +118,11 @@ import { TransactionUtils, findAcc } from "@/util/transactionUtils";
 import { AppState } from '@/state/appState';
 import { 
   Convert, NamespaceMetadataTransactionBuilder, 
-  AggregateTransaction, AggregateBondedTransactionBuilder, UInt64,
+  AggregateTransaction, UInt64,
   MetadataQueryParams, MetadataType, NamespaceMetadataTransaction,
   NamespaceId,
-  Account
+  Account,
+AggregateBondedV1TransactionBuilder
 } from 'tsjs-xpx-chain-sdk';
 import { WalletAccount } from '@/models/walletAccount';
 import { OtherAccount } from '@/models/otherAccount';
@@ -155,7 +156,7 @@ export default {
     let inputScopedMetadataKey = ref("");
     let selectedAcc = ref<WalletAccount | OtherAccount>(null); 
     let txnBuilder: NamespaceMetadataTransactionBuilder;
-    let aggregateTxnBuilder: AggregateBondedTransactionBuilder;
+    let aggregateTxnBuilder: AggregateBondedV1TransactionBuilder;
     let metadataTxn: NamespaceMetadataTransaction;
     let aggregateTxn: AggregateTransaction;
     const oldValue = ref("");
