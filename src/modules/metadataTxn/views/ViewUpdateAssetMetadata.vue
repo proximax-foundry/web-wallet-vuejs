@@ -121,10 +121,11 @@ import MetadataInput from '@/modules/metadataTxn/components/MetadataInput.vue'
 import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
 import { 
   Convert, MosaicMetadataTransactionBuilder, 
-  AggregateTransaction, AggregateBondedTransactionBuilder, UInt64,
+  AggregateTransaction, UInt64,
   MetadataQueryParams, MetadataType, MosaicMetadataTransaction,
   MosaicId,
-  Account
+  Account,
+AggregateBondedV1TransactionBuilder
 } from 'tsjs-xpx-chain-sdk';
 import { WalletAccount } from '@/models/walletAccount';
 import { OtherAccount } from '@/models/otherAccount';
@@ -155,7 +156,7 @@ export default {
     let inputScopedMetadataKey = ref("");
     let selectedAcc = ref<WalletAccount | OtherAccount>(null);
     let txnBuilder: MosaicMetadataTransactionBuilder;
-    let aggregateTxnBuilder: AggregateBondedTransactionBuilder;
+    let aggregateTxnBuilder: AggregateBondedV1TransactionBuilder;
     let metadataTxn: MosaicMetadataTransaction;
     let aggregateTxn: AggregateTransaction;
     const oldValue = ref("");
