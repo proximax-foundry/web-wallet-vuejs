@@ -550,12 +550,9 @@ export default {
     }
 
     watch(namespaceName,n=>{
-      if(n.length <= 1){
+      if(n.length==0){
         showNamespaceNameError.value = true;
         namespaceErrorMessage.value = t('namespace.validName');
-      }
-      else{
-        showNamespaceNameError.value = false;
       }
     })
 
