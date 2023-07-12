@@ -10,7 +10,7 @@
         :data-maska="maskaFormat()"
         data-maska-tokens="0:\d:multiple|9:\d:optional"
         :placeholder="placeholder"
-        @keyup="checkBalance($event)"
+        @keyup="checkBalance($event), validateInput($event)"
         @input="$emit('update:modelValue',parseFloat((<HTMLInputElement>$event.target).value.replace(/,/g, '')))"
       />
         <button :disabled="disabled == true" class="w-24 cursor-pointer focus:outline-none text-blue-primary text-xs font-bold" @click="showRemark();$emit('clickedMaxAvailable', true);clearAllError()">{{$t('swap.maxAmount')}}</button>
@@ -83,6 +83,15 @@ const p = defineProps({
         textErr.value = false;
       }
     }
+    const validateInput = (evt:Event) => {
+      const target = evt.target as HTMLInputElement
+      if(target.value === '' || Number(target.value) === 0 || target.value === '0'){
+        emptyErr.value = true
+      }
+      else{
+        emptyErr.value = false
+      }
+   };
     const maskaFormat = () => {
   let maskaFormat = "0";
   if (p.decimal > 0) {

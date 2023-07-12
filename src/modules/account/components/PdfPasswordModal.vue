@@ -38,11 +38,14 @@ export default {
       const internalInstance = getCurrentInstance();
       const emitter = internalInstance.appContext.config.globalProperties.emitter;
       const verifyWalletPwWalletPaper = () =>{
-        if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPasswd.value)) {
-            toggleModal.value =!toggleModal.value
-            emitter.emit('unlockWalletPaper', walletPasswd.value);
-            walletPasswd.value=''
-        } else {
+        try{
+          if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPasswd.value)) {
+              toggleModal.value =!toggleModal.value
+              emitter.emit('unlockWalletPaper', walletPasswd.value);
+              walletPasswd.value=''
+          } 
+        }
+        catch(e) {
           let walletName = walletState.currentLoggedInWallet.name
           err.value = t('general.walletPasswordInvalid',{name: walletName});
         }
