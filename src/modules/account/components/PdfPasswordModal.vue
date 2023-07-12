@@ -43,6 +43,10 @@ export default {
               toggleModal.value =!toggleModal.value
               emitter.emit('unlockWalletPaper', walletPasswd.value);
               walletPasswd.value=''
+          }
+          else{
+            let walletName = walletState.currentLoggedInWallet.name
+            err.value = t('general.walletPasswordInvalid',{name: walletName});
           } 
         }
         catch(e) {

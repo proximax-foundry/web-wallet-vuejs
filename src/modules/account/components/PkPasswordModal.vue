@@ -55,6 +55,10 @@ export default {
             err.value=''
             emitter.emit('revealPK',true);
             emitter.emit('pkValue',privateKey.value);
+          }
+          else{
+            let walletName = walletState.currentLoggedInWallet.name
+            err.value = t('general.walletPasswordInvalid',{name: walletName});
           } 
         }
         catch(e){
