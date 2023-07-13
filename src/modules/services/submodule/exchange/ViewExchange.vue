@@ -482,7 +482,7 @@ const exchangeSell = async () => {
         return
     }
 
-    if (amountToGet.value > (offerInfo.value.currentMosaicGiveAmount.compact() / Math.pow(10, offerInfo.value.mosaicGiveDivisibility))) {
+    if (Math.trunc(amountToGet.value * Math.pow(10, offerInfo.value.mosaicGiveDivisibility))/ Math.pow(10, offerInfo.value.mosaicGiveDivisibility)  > (offerInfo.value.currentMosaicGiveAmount.compact() / Math.pow(10, offerInfo.value.mosaicGiveDivisibility))) {
         toast.add({
             severity: 'error',
             summary: 'Error',
