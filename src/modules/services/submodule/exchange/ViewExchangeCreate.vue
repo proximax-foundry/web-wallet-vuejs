@@ -15,11 +15,20 @@
                         :decimal="assetToGive ? assetToGive.divisibility : 0" />
                     <div class="text-red-500 text-xs" v-if="parseFloat(amountToGive) > assetToGive?.amount">Insufficient
                         Balance</div>
+
+                        <InputAmount v-if="assetToGive" class="mt-3" :placeholder="`${ displayAssetFullName(assetToGive.namespace.length ?
+                                assetToGive.namespace : assetToGive.id)} price`" v-model="price"
+                        :decimal="4" />
+
                     <div class="text-blue-primary text-xs mt-3">Asset to Receive</div>
                     <InputId class="mt-3" v-model="assetToReceive" :show-error="!assetValid" v-debounce:1000="checkAsset" />
-                    <InputAmount class="mt-3" placeholder="Asset Amount" v-model="amountToReceive"
-                        :decimal="assetToReceiveProperties ? assetToReceiveProperties.divisibility : 0" />
-                    <div class="text-red-500 text-xs" v-if="parseFloat(amountToReceive) > assetToReceiveProperties?.supply">
+
+                    <div v-if="assetValid" class="mt-3">{{ displayAssetFullName(assetToReceiveProperties?.namespace) }} to receive: {{ Helper.toCurrencyFormat(amountToReceive,assetToReceiveProperties?.divisibility) }}</div>
+
+                    <!-- <InputAmount class="mt-3" placeholder="Asset Amount" v-model="amountToReceive"
+                        :decimal="assetToReceiveProperties ? assetToReceiveProperties.divisibility : 0" /> -->
+                    
+                    <div class="text-red-500 text-xs" v-if="parseFloat(Helper.toCurrencyFormat(amountToReceive,assetToReceiveProperties?.divisibility)) > assetToReceiveProperties?.supply">
                         Exceeded Maximum Supply</div>
                     <InputAmount class="mt-3" placeholder="Duration (Block)" v-model="duration" :decimal="0" />
                     <div v-if="parseInt(duration) <= 57600" class="text-xs">Approximately {{
@@ -57,7 +66,7 @@
                             class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-gray-200 my-1 items-center">
                             <div class='font-semibold text-xxs mt-2 lg:col-span-2 col-span-3 text-blue-primary uppercase'>
                                 Asset to Receive</div>
-                            <span class='ml-auto lg:col-span-2 col-span-3'>{{ amountToReceive }}</span>
+                            <span class='ml-auto lg:col-span-2 col-span-3'>{{  Helper.toCurrencyFormat(amountToReceive,assetToReceiveProperties?.divisibility) }}</span>
                             <span class="ml-1 text-blue-400 text-xs">{{ displayAssetName(assetToReceiveProperties.namespace)
                             }}</span>
                         </div>
@@ -94,7 +103,7 @@
                             class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-gray-200 my-1 items-center">
                             <div class='font-semibold text-xxs mt-2 lg:col-span-2 col-span-3 text-blue-primary uppercase'>
                                 Asset to Receive</div>
-                            <span class='ml-auto lg:col-span-2 col-span-3 font-semibold'>{{ amountToReceive }}</span>
+                            <span class='ml-auto lg:col-span-2 col-span-3 font-semibold'>{{  Helper.toCurrencyFormat(amountToReceive,assetToReceiveProperties?.divisibility)  }}</span>
                             <span class="ml-1 text-blue-400 text-xs">{{ displayAssetName(assetToReceiveProperties.namespace)
                             }}</span>
                         </div>
@@ -203,6 +212,15 @@ const knownToken = [{
     name: "XAR"
 }];
 
+const displayAssetFullName = (name: string) => {
+    const findKnownToken = knownToken.find(token => token.namespace == name)
+    if (findKnownToken) {
+        return findKnownToken.name
+    }
+
+    return name
+}
+
 
 const displayAssetName = (name: string) => {
     const findKnownToken = knownToken.find(token => token.namespace == name)
@@ -231,7 +249,13 @@ const assetValid = ref(false)
 
 const amountToGive = ref('0')
 
-const amountToReceive = ref('0')
+
+const price = ref('0')
+
+const amountToReceive =computed(()=>{
+    return parseFloat(amountToGive.value) * parseFloat(price.value)
+})
+
 
 const walletPassword = ref('')
 
@@ -273,7 +297,7 @@ const txnFee = computed(() => {
             new MosaicId(AppState.nativeToken.assetId),
             UInt64.fromUint(parseFloat(amountToGive.value) * Math.pow(10, assetToGive.value?.divisibility ?? 0)),
             new MosaicId(AppState.nativeToken.assetId),
-            UInt64.fromUint(parseFloat(amountToReceive.value) * Math.pow(10, assetToReceiveProperties.value?.divisibility ?? 0)),
+            UInt64.fromUint(amountToReceive.value * Math.pow(10, assetToReceiveProperties.value?.divisibility ?? 0)),
             UInt64.fromUint(parseInt(duration.value))
         ),
         ], AppState.networkType
@@ -353,9 +377,9 @@ watch(amountToGive, n => {
     }
 })
 
-watch(amountToReceive, n => {
+watch(price, n => {
     if (isNaN(parseFloat(n))) {
-        amountToReceive.value = '0'
+        price.value = '0'
     }
 })
 
@@ -396,7 +420,7 @@ const exchangeCreate = async () => {
     }
 
 
-    if (parseFloat(amountToReceive.value) <= 0 || parseFloat(amountToGive.value) <= 0) {
+    if (amountToReceive.value <= 0 || parseFloat(amountToGive.value) <= 0) {
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -418,7 +442,7 @@ const exchangeCreate = async () => {
         return
     }
 
-    if (parseFloat(amountToReceive.value) > assetToReceiveProperties.value?.supply) {
+    if (amountToReceive.value > assetToReceiveProperties.value?.supply) {
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -511,7 +535,7 @@ const exchangeCreate = async () => {
             new MosaicId(assetToGive.value.id),
             UInt64.fromUint(parseFloat(amountToGive.value) * Math.pow(10, assetToGive.value.divisibility)),
             new MosaicId(assetToReceive.value),
-            UInt64.fromUint(parseFloat(amountToReceive.value) * Math.pow(10, assetToReceiveProperties.value.divisibility)),
+            UInt64.fromUint(amountToReceive.value * Math.pow(10, assetToReceiveProperties.value.divisibility)),
             UInt64.fromUint(parseInt(duration.value))
         ),
         ], AppState.networkType

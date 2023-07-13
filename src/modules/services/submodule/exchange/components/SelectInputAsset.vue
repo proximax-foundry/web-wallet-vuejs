@@ -10,8 +10,8 @@
                         <div class='flex flex-col ml-2 text-left'>
                             <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
                                 Selected Asset</div>
-                            <div class='mt-1 text-tsm font-bold'>{{ slotProps.value.namespace == "" ? slotProps.value.id :
-                                slotProps.value.namespace }}</div>
+                            <div class='mt-1 text-tsm font-bold'>{{ displayAssetFullName(slotProps.value.namespace == "" ? slotProps.value.id :
+                                slotProps.value.namespace )}}</div>
                         </div>
                         <div class='mt-1 text-tsm font-bold'>Balance: {{ slotProps.value.amount }}</div>
                     </div>
@@ -21,8 +21,8 @@
                 <div class="account-item">
                     <div class='flex justify-between'>
 
-                        <div class='mt-1 text-tsm font-bold'>{{ slotProps.option.namespace == "" ? slotProps.option.id :
-                            slotProps.option.namespace }}</div>
+                        <div class='mt-1 text-tsm font-bold'>{{ displayAssetFullName(slotProps.option.namespace == "" ? slotProps.option.id :
+                                slotProps.option.namespace )}}</div>
                         <div class='mt-1 text-tsm font-bold'>Balance: {{ slotProps.option.amount }}</div>
                     </div>
                 </div>
@@ -47,6 +47,27 @@ const props = defineProps({
         required: false
     }
 })
+
+const knownToken = [{
+    namespace: "prx.xpx",
+    name: "XPX"
+},
+{
+    namespace: "prx.metx",
+    name: "METX"
+}, {
+    namespace: "xarcade.xar",
+    name: "XAR"
+}];
+
+const displayAssetFullName = (name: string) => {
+    const findKnownToken = knownToken.find(token => token.namespace == name)
+    if (findKnownToken) {
+        return findKnownToken.name
+    }
+
+    return name
+}
 
 defineEmits([
     'select-asset', 'update:modelValue'

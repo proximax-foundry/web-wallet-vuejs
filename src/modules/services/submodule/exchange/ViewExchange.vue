@@ -2,22 +2,25 @@
     <div>
         <div class='border-2 xl:grid xl:grid-cols-3'>
             <div class="xl:col-span-2 p-12">
-                <div>SDA-SDA Exchange - Buy</div>
+                <div>SDA-SDA Exchange </div>
                 <div v-if="!selectedAddress" class="text-xs mt-3 text-blue-primary ">Select Account to Create / Initiate
                     Transaction</div>
                 <SelectInputAccount />
                 <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
                 <div class="text-blue-primary mt-3">Price</div>
-                <div class="flex">
-                    <div class="mr-1">{{ displayRatio[1] ?? 0 }}</div>
-                    <div class=" mr-1">{{ displayAssetNameFull(offerInfo?.mosaicGetName) }}</div>
-                    <div class="mr-1">: {{ displayRatio[0] ?? 0 }}</div>
-                    <div class="">{{ displayAssetNameFull(offerInfo?.mosaicGiveName) }}</div>
+                <div> {{ Math.trunc(rate * Math.pow(10, offerInfo?.mosaicGiveDivisibility)) / Math.pow(10,
+                    offerInfo?.mosaicGiveDivisibility) }}
+                    {{ displayAssetName(offerInfo?.mosaicGiveName) }}/{{ displayAssetName(offerInfo?.mosaicGetName) }}
                 </div>
-
                 <div class="text-blue-primary mt-3">Available Amount</div>
-                <div>{{ offerInfo?.currentMosaicGiveAmount.compact() / Math.pow(10, offerInfo?.mosaicGiveDivisibility) }} {{
+                <div>{{ Helper.toCurrencyFormat(offerInfo?.currentMosaicGiveAmount.compact() / Math.pow(10, offerInfo?.mosaicGiveDivisibility),offerInfo?.mosaicGiveDivisibility) }} {{
                     displayAssetName(offerInfo?.mosaicGiveName) }}</div>
+
+                <div class="text-blue-primary mt-3">Minimum Offer </div>
+                <div>{{ Helper.toCurrencyFormat(baseRatio[0] / Math.pow(10, offerInfo?.mosaicGetDivisibility),offerInfo?.mosaicGetDivisibility) }} {{
+                    displayAssetName(offerInfo?.mosaicGetName) }} : {{ Helper.toCurrencyFormat(baseRatio[1] /
+        Math.pow(10, offerInfo?.mosaicGiveDivisibility),offerInfo?.mosaicGiveDivisibility) }} {{ displayAssetName(offerInfo?.mosaicGiveName) }}
+                </div>
 
                 <div class="text-blue-primary mt-3">Amount to give ({{ displayAssetName(offerInfo?.mosaicGetName) }}) </div>
 
@@ -25,16 +28,35 @@
                     :decimal="offerInfo?.mosaicGetDivisibility ?? 0" />
                 <div class="text-red-500 text-xs" v-if="parseFloat(amountToPay) > giveAssetBalance">Insufficient
                     Balance</div>
+                <div class="text-red-500 text-xs"
+                    v-if="parseFloat(amountToPay) < (baseRatio[0] / Math.pow(10, offerInfo?.mosaicGetDivisibility))">Less
+                    than minimum offer amount</div>
+
+                <div class="mt-2 text-xs text-gray-600">Available to give: {{  Helper.toCurrencyFormat( giveAssetBalance, offerInfo?.mosaicGetDivisibility )}} {{
+                    displayAssetName(offerInfo?.mosaicGetName) }}</div>
                 <div class="flex mt-2">
 
                     <div class="text-gray-600 text-xs "> I will receive {{ Helper.toCurrencyFormat(amountToGet,
                         offerInfo?.mosaicGiveDivisibility) }} {{ displayAssetName(offerInfo?.mosaicGiveName) }}</div>
-                    <!-- <div class="text-red-500 text-xs ml-2"
-                        v-if="amountToGet > (offerInfo?.currentMosaicGiveAmount.compact() / Math.pow(10, offerInfo?.mosaicGiveDivisibility))">
-                        (Exceed Available Amount of {{ displayAssetName(offerInfo?.mosaicGiveName) }})</div> -->
+                    <div class="text-red-500 text-xs ml-2"
+                        v-if="Math.trunc(amountToGet * Math.pow(10, offerInfo?.mosaicGiveDivisibility)) / Math.pow(10, offerInfo?.mosaicGiveDivisibility) > (offerInfo?.currentMosaicGiveAmount.compact() / Math.pow(10, offerInfo?.mosaicGiveDivisibility))">
+                        (Exceed Available Amount of {{ displayAssetName(offerInfo?.mosaicGiveName) }})</div>
                 </div>
-                <div class="mt-2 text-xs text-gray-600">Available to give: {{ giveAssetBalance }} {{
-                    displayAssetName(offerInfo?.mosaicGetName) }}</div>
+
+                <div class="text-gray-600 text-xs mt-2" v-if="exceededAmount > 0">{{ Helper.toCurrencyFormat(exceededAmount,
+                    offerInfo?.mosaicGetDivisibility) }} {{ displayAssetName(offerInfo?.mosaicGetName) }} will be ignored
+                </div>
+
+                <div class="text-blue-primary mt-3">Actual offer</div>
+                <div v-if="parseFloat(amountToPay) >= (baseRatio[0] / Math.pow(10, offerInfo?.mosaicGetDivisibility))">{{
+                    Helper.toCurrencyFormat(parseFloat(amountToPay) - exceededAmount,
+                        offerInfo?.mosaicGetDivisibility) }} {{
+            displayAssetName(offerInfo?.mosaicGetName) }} : {{ Helper.toCurrencyFormat(amountToGet,
+        offerInfo?.mosaicGiveDivisibility) }} {{ displayAssetName(offerInfo?.mosaicGiveName) }}
+                </div>
+                <div v-else> 0 {{
+                    displayAssetName(offerInfo?.mosaicGetName) }} : 0 {{ displayAssetName(offerInfo?.mosaicGiveName) }}
+                </div>
 
             </div>
             <div class='bg-navy-primary py-6 px-6 xl:col-span-1'>
@@ -55,7 +77,8 @@
                     <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-gray-200 my-1 items-center">
                         <div class='font-semibold text-xxs mt-2 lg:col-span-2 col-span-3 text-blue-primary uppercase'>
                             Asset to Give</div>
-                        <span class='ml-auto lg:col-span-2 col-span-3 font-semibold'> {{ amountToPay }}</span>
+                        <span class='ml-auto lg:col-span-2 col-span-3 font-semibold '> {{ parseFloat(amountToPay) -
+                            exceededAmount }}</span>
                         <span class="ml-1 text-blue-400 text-xs">{{ displayAssetName(offerInfo?.mosaicGetName) }}</span>
 
                     </div>
@@ -81,7 +104,8 @@
                     <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-gray-200 my-1 items-center">
                         <div class='font-semibold text-xxs mt-2 lg:col-span-2 col-span-3 text-blue-primary uppercase'>
                             Asset to Give</div>
-                        <span class='ml-auto lg:col-span-2 col-span-3 font-semibold'> {{ amountToPay }}</span>
+                        <span class='ml-auto lg:col-span-2 col-span-3 font-semibold'> {{ parseFloat(amountToPay) -
+                            exceededAmount }}</span>
                         <span class="ml-1 text-blue-400 text-xs">{{ displayAssetName(offerInfo?.mosaicGetName) }}</span>
 
                     </div>
@@ -117,7 +141,7 @@
                 <div class='font-semibold text-xs text-white mb-1.5'>{{ $t('general.enterPasswordContinue') }}</div>
                 <PasswordInput :placeholder="$t('general.enterPassword')" v-model="walletPassword" icon="lock"
                     class="mt-5 mb-3" />
-                <button class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="exchangeBuy()">
+                <button class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="exchangeSell()">
                     Sell
                 </button>
                 <div class="text-center">
@@ -134,19 +158,18 @@
 import { AppState } from '@/state/appState';
 import { useToast } from 'primevue/usetoast';
 import { lastValueFrom } from 'rxjs';
-import { Account, Address, Deadline, ExchangeSdaHttp, MosaicId, Password, PlaceSdaExchangeOfferTransaction, PublicAccount, SdaExchangeOffer, SdaOfferInfo, UInt64 } from 'tsjs-xpx-chain-sdk';
+import { Account, Address, Deadline, ExchangeSdaHttp, MosaicId, Password, PlaceSdaExchangeOfferTransaction, PublicAccount, SdaExchangeOffer, SdaOfferInfo, UInt64, XpxMosaicProperties } from 'tsjs-xpx-chain-sdk';
 import { computed, getCurrentInstance, ref, watch } from 'vue';
 import InputAmount from './components/InputAmount.vue';
 import SelectInputAccount from './components/SelectInputAccount.vue';
 import SelectInputMultisigAccount from './components/SelectInputMultisigAccount.vue';
 import { Helper } from '@/util/typeHelper';
 import { walletState } from '@/state/walletState';
-import { networkState } from '@/state/networkState';
 import { TransactionUtils } from '@/util/transactionUtils';
+import { networkState } from '@/state/networkState';
 import PasswordInput from "@/components/PasswordInput.vue";
 import { WalletUtils } from '@/util/walletUtils';
 import { useRouter } from 'vue-router';
-
 
 const reduceFraction = (numerator: number, denominator: number): [number, number] => {
     // Find the greatest common divisor (GCD) using Euclid's algorithm
@@ -168,23 +191,41 @@ const reduceFraction = (numerator: number, denominator: number): [number, number
 }
 
 
-const getNativeTokenBalance = (address: string) => {
-    const findAcc = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == address) || walletState.currentLoggedInWallet.others.find(acc => acc.address == address)
-    if (!findAcc) {
-        return 0;
+const exceededAmount = computed(() => {
+    if (parseFloat(amountToPay.value) < (baseRatio.value[0] / Math.pow(10, offerInfo.value?.mosaicGetDivisibility))) {
+        return 0
     }
-    return splitCurrency(findAcc.balance)
+    return parseFloat(amountToPay.value) % (baseRatio.value[0] / Math.pow(10, offerInfo.value?.mosaicGetDivisibility))
+})
 
-}
+const knownToken = [{
+    namespace: "prx.xpx",
+    name: "XPX"
+},
+{
+    namespace: "prx.metx",
+    name: "METX"
+}, {
+    namespace: "xarcade.xar",
+    name: "XAR"
+}];
 
-const splitCurrency = (amount: number) => {
-    let split = amount.toString().split(".")
-    if (split[1] != undefined) {
-        return '<span class="font-semibold text-sm">' + split[0] + '</span>.<span class="font-semibold text-xs">' + split[1] + '</span>';
-    } else {
-        return '<span class="font-semibold text-sm">' + split[0] + '</span>';
-    }
-};
+const amountToPay = ref('0')
+
+const amountToGet = computed(() => {
+    return parseFloat(amountToPay.value) * rate.value - exceededAmount.value * rate.value
+})
+
+const internalInstance = getCurrentInstance();
+
+const emitter = internalInstance.appContext.config.globalProperties.emitter;
+
+const walletPassword = ref('')
+
+const selectedAddress = ref<string | null>(null)
+
+const selectedMultisigAddress = ref<string | null>(null)
+
 
 const lockFund = computed(() =>
     Helper.convertToExact(
@@ -195,6 +236,7 @@ const lockFund = computed(() =>
 const lockFundTxFee = computed(() => {
     return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
 });
+
 
 const txnFee = computed(() => {
     if (!AppState.isReady) {
@@ -220,35 +262,6 @@ const txnFee = computed(() => {
 
 })
 
-
-const knownToken = [{
-    namespace: "prx.xpx",
-    name: "XPX"
-},
-{
-    namespace: "prx.metx",
-    name: "METX"
-}, {
-    namespace: "xarcade.xar",
-    name: "XAR"
-}];
-
-const amountToPay = ref('0')
-
-const amountToGet = computed(() => {
-    return parseFloat(amountToPay.value) * rate.value
-})
-
-const walletPassword = ref('')
-
-const internalInstance = getCurrentInstance();
-
-const emitter = internalInstance.appContext.config.globalProperties.emitter;
-
-const selectedAddress = ref<string | null>(null)
-
-const selectedMultisigAddress = ref<string | null>(null)
-
 emitter.on("select-account", (address: string) => {
     selectedAddress.value = address
 })
@@ -258,10 +271,9 @@ emitter.on("select-multisig-account", (address: string) => {
 
 })
 
-const displayAssetNameFull = (name: string) => {
-    if(!name){
-        return ''
-    }
+
+
+const displayAssetName = (name: string) => {
     const findKnownToken = knownToken.find(token => token.namespace == name)
     if (findKnownToken) {
         return findKnownToken.name
@@ -269,20 +281,20 @@ const displayAssetNameFull = (name: string) => {
     return name
 }
 
-const displayAssetName = (name: string) => {
-    if(!name){
-        return ''
+const totalFee = computed(() => {
+    if (isMultisig.value) {
+        return Math.round((lockFund.value + lockFundTxFee.value + txnFee.value)
+            * Math.pow(10, AppState.nativeToken.divisibility)) /
+            Math.pow(10, AppState.nativeToken.divisibility)
     }
-    const findKnownToken = knownToken.find(token => token.namespace == name)
-    if (findKnownToken) {
-        return findKnownToken.name
+
+    if (offerInfo.value && offerInfo.value.mosaicIdGet.id.toHex().toLowerCase() == AppState.nativeToken.assetId.toLowerCase()) {
+        return Math.round((parseFloat(amountToPay.value) - exceededAmount.value + txnFee.value)
+            * Math.pow(10, AppState.nativeToken.divisibility)) /
+            Math.pow(10, AppState.nativeToken.divisibility)
     }
-    return name.length == 16 ? name.substring(0, 4) + "..." : name
-}
-
-const isMultisig = computed(() => selectedMultisigAddress.value != null)
-
-
+    return txnFee.value
+})
 
 interface SdaOfferWithDivisibilityAndNamespace extends SdaOfferInfo {
     mosaicGiveDivisibility?: number,
@@ -292,6 +304,7 @@ interface SdaOfferWithDivisibilityAndNamespace extends SdaOfferInfo {
 }
 
 const props = defineProps({
+    type: String,
     owner: String,
     pair: String
 })
@@ -302,20 +315,51 @@ const rate = ref(0)
 
 const toast = useToast()
 
-const getAsset = props.pair.split('/')[0]
+const giveAsset = props.pair.split('/')[props.type == 'Sell' ? 0 : 1]
 
-const giveAsset = props.pair.split('/')[1]
+const getAsset = props.pair.split('/')[props.type == 'Sell' ? 1 : 0]
 
 const giveAssetBalance = ref(0)
 
-const displayRatio = computed(() => {
-    if (!offerInfo.value) {
-        return []
+const getNativeTokenBalance = (address: string) => {
+    const findAcc = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == address) || walletState.currentLoggedInWallet.others.find(acc => acc.address == address)
+    if (!findAcc) {
+        return 0;
     }
-    const numerator = offerInfo.value.initialMosaicGiveAmount.compact() / Math.pow(10, offerInfo.value.mosaicGiveDivisibility ?? 0) * Math.pow(10, 6)
-    const denominator = offerInfo.value.initialMosaicGetAmount.compact() / Math.pow(10, offerInfo.value.mosaicGetDivisibility ?? 0) * Math.pow(10, 6)
-    return reduceFraction(numerator, denominator)
+    return splitCurrency(findAcc.balance)
+
+}
+
+const splitCurrency = (amount: number) => {
+    let split = amount.toString().split(".")
+    if (split[1] != undefined) {
+        return '<span class="font-semibold text-sm">' + split[0] + '</span>.<span class="font-semibold text-xs">' + split[1] + '</span>';
+    } else {
+        return '<span class="font-semibold text-sm">' + split[0] + '</span>';
+    }
+};
+
+const baseRatio = computed(() => {
+    if (!offerInfo.value) {
+        return reduceFraction(0, 0)
+    }
+    const numerator = offerInfo.value.initialMosaicGiveAmount.compact() /* / Math.pow(10, offerInfo.value.mosaicGiveDivisibility ?? 0) * Math.pow(10, 6) */
+    const denominator = offerInfo.value.initialMosaicGetAmount.compact() /* / Math.pow(10, offerInfo.value.mosaicGetDivisibility ?? 0) * Math.pow(10, 6) */
+    return reduceFraction(denominator, numerator)
 })
+
+
+watch(offerInfo, n => {
+
+    if (n.mosaicGetDivisibility) {
+        amountToPay.value = (baseRatio.value[0] / Math.pow(10, n.mosaicGetDivisibility)).toString()
+    }
+}, { deep: true })
+
+
+
+const isMultisig = computed(() => selectedMultisigAddress.value != null)
+
 
 
 const fetchExchange = async () => {
@@ -332,7 +376,7 @@ const fetchExchange = async () => {
     }
     const sdaExchangeHttp = new ExchangeSdaHttp(AppState.nodeFullURL)
     const accountExchangeOffers = await lastValueFrom(sdaExchangeHttp.getAccountSdaExchangeOffers(Address.createFromRawAddress(props.owner)))
-    offerInfo.value = accountExchangeOffers.sdaOfferBalances.find(offer => offer.mosaicIdGet.toHex() == getAsset && offer.mosaicIdGive.toHex() == giveAsset)
+    offerInfo.value = accountExchangeOffers.sdaOfferBalances.find(offer => offer.mosaicIdGive.toHex() == giveAsset && offer.mosaicIdGet.toHex() == getAsset)
     if (!offerInfo.value) {
         toast.add({
             severity: 'error',
@@ -351,7 +395,6 @@ const fetchExchange = async () => {
     offerInfo.value.mosaicGiveDivisibility = assetInfo.find(info => info.mosaicId.toHex() == offerInfo.value.mosaicIdGive.toHex()).divisibility
 
     rate.value = (offerInfo.value.initialMosaicGiveAmount.compact() / Math.pow(10, offerInfo.value.mosaicGiveDivisibility)) / (offerInfo.value.initialMosaicGetAmount.compact() / Math.pow(10, offerInfo.value.mosaicGetDivisibility))
-
 }
 
 const fetchGiveAssetBalance = async (address: string) => {
@@ -369,28 +412,12 @@ const fetchGiveAssetBalance = async (address: string) => {
 
 }
 
-const totalFee = computed(() => {
-    if (isMultisig.value) {
-        return Math.round((lockFund.value + lockFundTxFee.value + txnFee.value)
-            * Math.pow(10, AppState.nativeToken.divisibility)) /
-            Math.pow(10, AppState.nativeToken.divisibility)
-    }
 
-    if (offerInfo.value && offerInfo.value.mosaicIdGet.id.toHex().toLowerCase() == AppState.nativeToken.assetId.toLowerCase()) {
-        return parseFloat(amountToPay.value) + txnFee.value
+watch(amountToPay, n => {
+    if (isNaN(parseFloat(n))) {
+        amountToPay.value = '0'
     }
-    return txnFee.value
 })
-
-const getNativeTokenBalanceNumber = (address: string) => {
-    const findAcc = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == address) || walletState.currentLoggedInWallet.others.find(acc => acc.address == address)
-    if (!findAcc) {
-        return 0;
-    }
-    return findAcc.balance
-
-}
-
 
 watch([selectedAddress, selectedMultisigAddress], ([n, mn]) => {
     giveAssetBalance.value = 0
@@ -410,15 +437,18 @@ const stopWatch = watch(AppState, async (n, o) => {
     }
 }, { immediate: true })
 
-watch(amountToPay, n => {
-    if (isNaN(parseFloat(n))) {
-        amountToPay.value = '0'
+const getNativeTokenBalanceNumber = (address: string) => {
+    const findAcc = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == address) || walletState.currentLoggedInWallet.others.find(acc => acc.address == address)
+    if (!findAcc) {
+        return 0;
     }
-})
+    return findAcc.balance
+
+}
 
 const router = useRouter()
 
-const exchangeBuy = async () => {
+const exchangeSell = async () => {
     if (selectedAddress.value == null) {
         toast.add({
             severity: 'error',
@@ -430,18 +460,18 @@ const exchangeBuy = async () => {
         return
     }
 
-    if (parseFloat(amountToPay.value) <= 0) {
+    if (parseFloat(amountToPay.value) < (baseRatio.value[0] / Math.pow(10, offerInfo.value.mosaicGetDivisibility))) {
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: "Amount to give cannot be 0",
+            detail: "Less than minimum offer amount",
             group: 'br-custom',
             life: 1000
         });
         return
     }
 
-    if (parseFloat(amountToPay.value) > giveAssetBalance.value) {
+    if (parseFloat(amountToPay.value) - exceededAmount.value > giveAssetBalance.value) {
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -452,7 +482,7 @@ const exchangeBuy = async () => {
         return
     }
 
-    /* if (amountToGet.value > (offerInfo.value.currentMosaicGiveAmount.compact() / Math.pow(10, offerInfo.value.mosaicGiveDivisibility))) {
+    if (amountToGet.value > (offerInfo.value.currentMosaicGiveAmount.compact() / Math.pow(10, offerInfo.value.mosaicGiveDivisibility))) {
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -461,7 +491,7 @@ const exchangeBuy = async () => {
             life: 1000
         });
         return
-    } */
+    }
 
     const signerBalance = getNativeTokenBalanceNumber(selectedAddress.value)
     if (isMultisig.value && (signerBalance < totalFee.value)) {
@@ -510,16 +540,15 @@ const exchangeBuy = async () => {
         return;
     }
 
-
     const initiatorAcc = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == selectedAddress.value)
 
     const sdaExchangeOfferTxn = PlaceSdaExchangeOfferTransaction.create(
         Deadline.create(),
         [new SdaExchangeOffer(
             offerInfo.value.mosaicIdGet as MosaicId,
-            UInt64.fromUint(parseFloat(amountToPay.value) * Math.pow(10, offerInfo.value.mosaicGetDivisibility)),
+            UInt64.fromUint(Math.trunc((parseFloat(amountToPay.value) - exceededAmount.value) * Math.pow(10, offerInfo.value.mosaicGetDivisibility))),
             offerInfo.value.mosaicIdGive as MosaicId,
-            UInt64.fromUint(amountToGet.value * Math.pow(10, offerInfo.value.mosaicGiveDivisibility)),
+            UInt64.fromUint(Math.trunc(amountToGet.value * Math.pow(10, offerInfo.value.mosaicGetDivisibility))),
             UInt64.fromUint(57600)
         ),
         ], AppState.networkType
@@ -547,7 +576,8 @@ const exchangeBuy = async () => {
 
 
 
-}
 
+
+}
 
 </script>
