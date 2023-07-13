@@ -77,8 +77,8 @@
                     <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-gray-200 my-1 items-center">
                         <div class='font-semibold text-xxs mt-2 lg:col-span-2 col-span-3 text-blue-primary uppercase'>
                             Asset to Give</div>
-                        <span class='ml-auto lg:col-span-2 col-span-3 font-semibold '> {{ parseFloat(amountToPay) -
-                            exceededAmount }}</span>
+                        <span class='ml-auto lg:col-span-2 col-span-3 font-semibold '> {{ Helper.toCurrencyFormat(parseFloat(amountToPay) -
+                            exceededAmount, offerInfo?.mosaicGetDivisibility)  }}</span>
                         <span class="ml-1 text-blue-400 text-xs">{{ displayAssetName(offerInfo?.mosaicGetName) }}</span>
 
                     </div>
@@ -104,8 +104,8 @@
                     <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-gray-200 my-1 items-center">
                         <div class='font-semibold text-xxs mt-2 lg:col-span-2 col-span-3 text-blue-primary uppercase'>
                             Asset to Give</div>
-                        <span class='ml-auto lg:col-span-2 col-span-3 font-semibold'> {{ parseFloat(amountToPay) -
-                            exceededAmount }}</span>
+                        <span class='ml-auto lg:col-span-2 col-span-3 font-semibold'>{{ Helper.toCurrencyFormat(parseFloat(amountToPay) -
+                            exceededAmount, offerInfo?.mosaicGetDivisibility)  }}</span>
                         <span class="ml-1 text-blue-400 text-xs">{{ displayAssetName(offerInfo?.mosaicGetName) }}</span>
 
                     </div>
