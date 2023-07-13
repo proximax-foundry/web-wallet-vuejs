@@ -43,7 +43,7 @@
                         (Exceed Available Amount of {{ displayAssetName(offerInfo?.mosaicGiveName) }})</div>
                 </div>
 
-                <div class="text-gray-600 text-xs mt-2" v-if="exceededAmount > 0">{{ Helper.toCurrencyFormat(exceededAmount,
+                <div class="text-gray-600 text-xs mt-2" v-if=" Math.trunc(exceededAmount*Math.pow(10,offerInfo?.mosaicGetDivisibility))/ Math.pow(10,offerInfo?.mosaicGetDivisibility)> 0">{{ Helper.toCurrencyFormat(exceededAmount,
                     offerInfo?.mosaicGetDivisibility) }} {{ displayAssetName(offerInfo?.mosaicGetName) }} will be ignored
                 </div>
 
