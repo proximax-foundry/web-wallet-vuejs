@@ -20,7 +20,7 @@
                 <button  :disabled="!assetValid" @click="searchListing()" class="disabled:opacity-50 bg-blue-primary my-3 px-6 py-1.5 rounded-lg text-white font-semibold ">Search listing</button>
             </div>
 
-            <DataTable v-if="showListing" :value="allListings" :paginator="true" :rows="10" responsiveLayout="scroll"
+            <DataTable v-if="showListing || selected!='others'" :value="allListings" :paginator="true" :rows="10" responsiveLayout="scroll"
                 scrollDirection="horizontal" :alwaysShowPaginator="false"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" class="w-full "  >
