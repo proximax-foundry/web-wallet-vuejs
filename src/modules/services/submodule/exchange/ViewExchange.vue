@@ -539,9 +539,7 @@ const exchangeSell = async () => {
         });
         return;
     }
-    console.log(Math.trunc((parseFloat(amountToPay.value) - exceededAmount.value) * Math.pow(10, offerInfo.value.mosaicGetDivisibility)))
-    console.log(Math.trunc(amountToGet.value * Math.pow(10, offerInfo.value.mosaicGetDivisibility)))
-    return
+   
     const initiatorAcc = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == selectedAddress.value)
 
     const sdaExchangeOfferTxn = PlaceSdaExchangeOfferTransaction.create(
