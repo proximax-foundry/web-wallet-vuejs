@@ -8,12 +8,19 @@
                 <button @click="selected = 'metx'"
                     :class="`${selected == 'metx' ? 'border-b-2  text-blue-primary border-blue-primary' : ''}`"
                     class='w-12 text-center py-3 word-break'>METX</button>
-                <!-- <button @click="selected = 'others'"
+                <button @click="selected = 'others'"
                     :class="`${selected == 'others' ? 'border-b-2  text-blue-primary border-blue-primary' : ''}`"
-                    class='w-12 text-center py-3 word-break'>OTHERS</button> -->
+                    class='w-12 text-center py-3 word-break'>OTHERS</button>
 
             </div>
-            <DataTable :value="allListings" :paginator="true" :rows="10" responsiveLayout="scroll"
+
+            <div v-if="selected == 'others'" class="text-sm text-blue-primary ">Input Asset ID/ Namespace</div>
+            <InputId v-if="selected == 'others'" class="mt-3" v-model="inputAsset" :show-error="!assetValid" v-debounce:1000="checkAsset" />
+            <div v-if="selected == 'others'" class="flex justify-center">
+                <button  :disabled="!assetValid" @click="searchListing()" class="disabled:opacity-50 bg-blue-primary my-3 px-6 py-1.5 rounded-lg text-white font-semibold ">Search listing</button>
+            </div>
+
+            <DataTable v-if="showListing" :value="allListings" :paginator="true" :rows="10" responsiveLayout="scroll"
                 scrollDirection="horizontal" :alwaysShowPaginator="false"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" class="w-full "  >
@@ -81,6 +88,7 @@ import { computed, ref, watch } from 'vue'
 import { lastValueFrom } from 'rxjs';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import InputId from './components/InputId.vue';
 
 interface SdaExchangeWithDivisibilityAndNamespace extends SdaOfferInfoWithOwner {
     mosaicGiveDivisibility?: number,
@@ -88,6 +96,11 @@ interface SdaExchangeWithDivisibilityAndNamespace extends SdaOfferInfoWithOwner 
     mosaicGiveName?: string,
     mosaicGetName?: string
 }
+
+const inputAsset = ref('')
+
+const showListing = ref(true)
+
 
 const knownToken = [{
     namespace: "prx.xpx",
@@ -113,6 +126,30 @@ const displayAssetName = (name: string) => {
 
     return name.length == 16 ? name.substring(0, 4) + "..." : name
 }
+const assetValid = ref(false)
+
+const checkAsset = async () => {
+    try {
+        new NamespaceId(inputAsset.value).fullName
+        const mosaicId = await AppState.chainAPI.namespaceAPI.getLinkedMosaicId(new NamespaceId(inputAsset.value))
+        inputAsset.value = mosaicId.toHex()
+        const properties = await AppState.chainAPI.assetAPI.getMosaic(mosaicId)
+        const namespaceName = await AppState.chainAPI.assetAPI.getMosaicsNames([mosaicId])
+        assetValid.value = true;
+        return;
+    } catch (_) {
+        assetValid.value = false;
+    }
+    try {
+
+        const id = new MosaicId(inputAsset.value.toUpperCase())
+        const properties = await AppState.chainAPI.assetAPI.getMosaic(id)
+        const namespaceName = await AppState.chainAPI.assetAPI.getMosaicsNames([id])
+        assetValid.value = true;
+    } catch (_) {
+        assetValid.value = false;
+    }
+}
 
 const selected = ref('xpx')
 const sellExchange = ref<{ owner: string, idPair: string, deadline: string, pair: string, rate: number, giveAmount: number, getAmount: number }[]>([])
@@ -120,6 +157,9 @@ const buyExchange = ref<{ owner: string, idPair: string, deadline: string, pair:
 const fetchGetListing = async () => {
     let listingInfo: SdaExchangeWithDivisibilityAndNamespace[] = []
     let assetId: string
+    if(selected.value == 'others' && assetValid.value){
+        assetId = inputAsset.value
+    }
     if (selected.value == 'xpx') {
         assetId = AppState.nativeToken.assetId
     }
@@ -152,9 +192,18 @@ const fetchGetListing = async () => {
     })
 }
 
+const searchListing = async() =>{
+    await fetchGiveListing()
+    await fetchGetListing()
+    showListing.value = true
+}
+
 const fetchGiveListing = async () => {
     let listingInfo: SdaExchangeWithDivisibilityAndNamespace[] = []
     let assetId
+    if(selected.value == 'others' && assetValid.value){
+        assetId = inputAsset.value
+    }
     if (selected.value == 'xpx') {
         assetId = AppState.nativeToken.assetId
     }
@@ -215,9 +264,14 @@ const allListings = computed(() => {
     })].sort((a,b)=> new Date(b.deadline).getTime() - new Date(a.deadline).getTime())
 })
 
-watch(selected, async () => {
-    await fetchGetListing()
-    await fetchGiveListing()
+watch(selected, async (n) => {
+    if(n == 'others' && !assetValid.value){
+        showListing.value = false
+    }else{
+        await fetchGetListing()
+        await fetchGiveListing()
+    }
+    
 })
 
 const stopWatch = watch(AppState, async n => {

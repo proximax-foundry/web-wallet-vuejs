@@ -504,7 +504,6 @@ const exchangeCreate = async () => {
     }
 
     const initiatorAcc = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == selectedAddress.value)
-
     const sdaExchangeOfferTxn = PlaceSdaExchangeOfferTransaction.create(
         Deadline.create(),
         [new SdaExchangeOffer(

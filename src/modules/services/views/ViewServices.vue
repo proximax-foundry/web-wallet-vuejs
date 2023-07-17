@@ -8,10 +8,10 @@
             <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg" class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
             <div class='text-center text-xs font-semibold'>Portfolio</div>
           </router-link>
-          <router-link :to="{ name : 'ViewServicesNFT'}" class='p-6 w-8/12 md:w-4/12'>
+          <!-- <router-link :to="{ name : 'ViewServicesNFT'}" class='p-6 w-8/12 md:w-4/12'>
             <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg" class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
             <div class='text-center text-xs font-semibold'>NFT</div>
-          </router-link>
+          </router-link> -->
           <router-link :to="{ name : 'ViewServicesAirdropToken'}" class='p-6 w-8/12 md:w-4/12'>
             <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg" class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
             <div class='text-center text-xs font-semibold'>Airdrop Token Utility</div>

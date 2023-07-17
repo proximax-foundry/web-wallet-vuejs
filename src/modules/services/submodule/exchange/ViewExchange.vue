@@ -195,7 +195,7 @@ const exceededAmount = computed(() => {
     if (parseFloat(amountToPay.value) < (baseRatio.value[0] / Math.pow(10, offerInfo.value?.mosaicGetDivisibility))) {
         return 0
     }
-    return parseFloat(amountToPay.value) % (baseRatio.value[0] / Math.pow(10, offerInfo.value?.mosaicGetDivisibility))
+    return parseFloat(amountToPay.value) * Math.pow(10,offerInfo.value?.mosaicGetDivisibility)% baseRatio.value[0]
 })
 
 const knownToken = [{
@@ -539,7 +539,9 @@ const exchangeSell = async () => {
         });
         return;
     }
-
+    console.log(Math.trunc((parseFloat(amountToPay.value) - exceededAmount.value) * Math.pow(10, offerInfo.value.mosaicGetDivisibility)))
+    console.log(Math.trunc(amountToGet.value * Math.pow(10, offerInfo.value.mosaicGetDivisibility)))
+    return
     const initiatorAcc = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == selectedAddress.value)
 
     const sdaExchangeOfferTxn = PlaceSdaExchangeOfferTransaction.create(
