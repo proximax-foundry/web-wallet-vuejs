@@ -53,7 +53,7 @@
            + {{$t('transfer.addAssets')}}
           </button>
         </div>
-        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" :decimal="6"  :disabled="disableSupply"/>
+        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" @clickedMaxAvailable="updateAmountToMax()" :decimal="6"  :disabled="disableSupply"/>
         <TransferTextareaInput class="pt-4" :placeholder="$t('general.message')" :errorMessage="$t('general.limitExceed')" v-model="messageText" :remainingChar="remainingChar" :showError="showLimitErr"   :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
@@ -279,7 +279,7 @@ export default {
     })
 
     const balance = ref(0)
-   
+    const maxAmount = ref(0)
    
     const moreThanOneAccount = computed(() => {
       return accounts.value.length> 1;
@@ -526,6 +526,29 @@ export default {
     }
   })
 
+  const showMaxAmount = ref(false)
+
+  const calculateMaxAmount = async (fee)=>{
+    if(selectedAccPublicKey.value){
+    let assets = await Sirius.scanAsset(selectedAccPublicKey.value);
+      if(assets.length>0){
+        balance.value = assets[0].amount
+      } else {
+        balance.value = 0
+      }
+    }
+      if(selectedMultisigAdd.value){
+        maxAmount.value = balance.value 
+      }
+      else{
+        maxAmount.value = balance.value - fee
+      }
+      if(sendXPX.value > maxAmount.value && showMaxAmount.value === true){
+        updateAmountToMax()
+      }
+      showMaxAmount.value = false
+  }
+
   const showBalanceErr = computed(()=>{
     if(!selectedAccAdd.value){
       return false
@@ -728,6 +751,10 @@ export default {
   const checkNamespace = async (nsId)=>{
     return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
   }
+  const updateAmountToMax = () => {
+    sendXPX.value = maxAmount.value.toString();
+    showMaxAmount.value = true
+  }
   const updateFee = ()=>{
      effectiveFee.value = selectedMultisigAdd.value? makeTransaction.calculate_aggregate_fee(
         messageText.value,
@@ -738,6 +765,7 @@ export default {
         sendXPX.value,
         selectedMosaic.value
       );
+      calculateMaxAmount(effectiveFee.value)
   }
   watch(selectedAccName, (n, o) => {
     if (n != o) {
@@ -928,7 +956,8 @@ export default {
       onNodeSelectMultisig,
       scanDistributorAsset,
       haveSelectableMultisig,
-      initiateBy
+      initiateBy,
+      updateAmountToMax
     };
   },
 };

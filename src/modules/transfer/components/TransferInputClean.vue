@@ -11,6 +11,7 @@
                   data-maska-tokens="0:\d:multiple|9:\d:optional" :placeholder="placeholder" 
                   @input="$emit('update:modelValue',parseFloat((<HTMLInputElement>$event.target).value.replace(/,/g, '')).toString() )"
                 />
+                <button v-if="logo" :disabled="disabled == true" class="w-24 cursor-pointer focus:outline-none text-blue-primary text-xs font-bold" @click="$emit('clickedMaxAvailable', true)">{{$t('swap.maxAmount')}}</button>
             </div>
         </div>
     </div>
