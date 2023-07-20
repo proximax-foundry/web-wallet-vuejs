@@ -20,8 +20,9 @@
                 <img src="@/modules/account/img/proximax-logo.svg" class='h-4 w-4 '>
             </div>
         </div>
-       <div class="text-blue-primary text-sm font-semibold my-4">Cosignatories of</div>
-        <Tree v-model:expandedKeys="expandedKeys" :value="treeValue" :filter="true" filterMode="strict"
+        <div v-if="!treeValue.length" class="text-blue-primary " >This account is not cosignatory of any accounts.</div>
+        <div v-if="treeValue.length"  class="text-blue-primary text-sm font-semibold my-4">Cosignatories of</div>
+        <Tree v-if="treeValue.length"  v-model:expandedKeys="expandedKeys" :value="treeValue" :filter="true" filterMode="strict"
             selectionMode="single" class="w-full ">
             <template #default="slotProps">
                 <div>{{ slotProps.node.label }}</div>
@@ -86,12 +87,11 @@ const accBalance = computed(() => {
     }
     const acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == plainAddress) ||
         walletState.currentLoggedInWallet.others.find((add) => add.address == plainAddress);
-
     return acc.balance
 })
 
 const splitBalance = (balance: number) => {
-    if (!balance) {
+    if (balance == null) {
         return { left: null, right: null }
     }
     let split = balance.toString().split(".")
@@ -116,29 +116,36 @@ const expandedKeys = ref<boolean[]>([]);
 
 
 const getMultisigInfo = async () => {
-    const graphInfo =
-        await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(Address.createFromRawAddress(props.address));
     const multisigInfos: MultisigInfoWithBalance[] = [];
 
-    for (const [key, value] of graphInfo.multisigAccounts) {
-        const level = key;
-        for (const multiInfo of value) {
-            const { account, cosignatories, multisigAccounts, minApproval, minRemoval } = multiInfo;
+    try {
+        const graphInfo =
+            await AppState.chainAPI.accountAPI.getMultisigAccountGraphInfo(Address.createFromRawAddress(props.address));
+        for (const [key, value] of graphInfo.multisigAccounts) {
+            const level = key;
+            for (const multiInfo of value) {
+                const { account, cosignatories, multisigAccounts, minApproval, minRemoval } = multiInfo;
 
-            const newMultisigInfo = {
-                publicKey: account.publicKey,
-                level: level,
-                cosignatories: cosignatories.map((cosign) => cosign.publicKey),
-                multisigAccounts: multisigAccounts.map((cosign) => cosign.publicKey),
-                minApproval: minApproval,
-                minRemoval: minRemoval,
-                balance: 0
-            };
+                const newMultisigInfo = {
+                    publicKey: account.publicKey,
+                    level: level,
+                    cosignatories: cosignatories.map((cosign) => cosign.publicKey),
+                    multisigAccounts: multisigAccounts.map((cosign) => cosign.publicKey),
+                    minApproval: minApproval,
+                    minRemoval: minRemoval,
+                    balance: 0
+                };
 
-            multisigInfos.push(newMultisigInfo);
+                multisigInfos.push(newMultisigInfo);
+            }
         }
+        return multisigInfos
+    } catch (_) {
+        return multisigInfos;
     }
-    return multisigInfos
+
+
+
 }
 
 
@@ -147,19 +154,21 @@ const processedMultisigInfo = ref<MultisigInfoWithBalance[] | null>(null)
 const updateBalance = async () => {
 
     const addresses = processedMultisigInfo.value.map(info => PublicAccount.createFromPublicKey(info.publicKey, AppState.networkType).address)
+    try {
+        const accInfo = await AppState.chainAPI.accountAPI.getAccountsInfo(addresses)
+        for (let i = 0; i < processedMultisigInfo.value.length; i++) {
+            const accIndex = accInfo.findIndex(acc => acc.publicKey == processedMultisigInfo.value[i].publicKey)
+            if (accIndex == -1) {
+                continue
+            }
+            const findXpx = accInfo[accIndex].mosaics.find(acc => acc.id.toHex() == AppState.nativeToken.assetId)
+            if (findXpx) {
+                processedMultisigInfo.value[i].balance = findXpx.amount.compact() / Math.pow(10, AppState.nativeToken.divisibility)
+            }
 
-    const accInfo = await AppState.chainAPI.accountAPI.getAccountsInfo(addresses)
-    for (let i = 0; i < processedMultisigInfo.value.length; i++) {
-        const accIndex = accInfo.findIndex(acc => acc.publicKey == processedMultisigInfo.value[i].publicKey)
-        if (accIndex == -1) {
-            continue
         }
-        const findXpx = accInfo[accIndex].mosaics.find(acc => acc.id.toHex() == AppState.nativeToken.assetId)
-        if (findXpx) {
-            processedMultisigInfo.value[i].balance = findXpx.amount.compact() / Math.pow(10, AppState.nativeToken.divisibility)
-        }
+    } catch (_) {}
 
-    }
 
 }
 
@@ -222,7 +231,7 @@ scope.run(() => {
             scope.stop()
         }
 
-    },{immediate:true})
+    }, { immediate: true })
 })
 
 
