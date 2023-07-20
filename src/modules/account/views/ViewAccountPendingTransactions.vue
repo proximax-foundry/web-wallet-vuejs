@@ -9,11 +9,7 @@
             <router-link :to="{name:'ViewAccountFailedTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer  rounded-md text-white py-2 px-5" style="background: #DC143C">Failed</router-link>
         </div>
 
-        <Accordion :activeIndex="isTransactions? null:0">
-            <AccordionTab class="p-accordion-header p-highlight" :disabled="isTransactions">
-                <PendingDataTable :transaction="transactions" class="mt-3" id="pending"/>
-            </AccordionTab>
-        </Accordion>
+        <PendingDataTable :transaction="transactions" class="mt-3" />
     </div>
 </div>
 </template>
@@ -30,8 +26,6 @@ import { TransactionMapping } from "tsjs-xpx-chain-sdk";
 import { computed, ref, watch, watchEffect } from "vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { TransactionUtils } from "@/util/transactionUtils";
-import Accordion from 'primevue/accordion';
-import AccordionTab from 'primevue/accordiontab';
         
     const props = defineProps({
         address: String
@@ -52,21 +46,10 @@ import AccordionTab from 'primevue/accordiontab';
     const unconfirmedTxns = ref([])
     const partialTxns = ref([])
     const inQueueTxns = ref([])
-    const updatedUnconfirmedTxns = ref(0)
     const transactions = computed(()=>{
-        updatedUnconfirmedTxns.value
         return unconfirmedTxns.value.concat(inQueueTxns.value).concat(partialTxns.value)
     })
-    const isTransactions = ref(true);
-    let checkTransactions = async() =>{
-            if(transactions.value.length>0){
-            isTransactions.value = false
-        }
-        else{
-            isTransactions.value = true
-        }
-    }
-    console.log(isTransactions.value)
+
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, acc.value);
     let transactionGroupType = Helper.getTransactionGroupType();
     let loadUnconfirmedTransactions = async()=>{
@@ -82,7 +65,6 @@ import AccordionTab from 'primevue/accordiontab';
         let formattedTxns = await dashboardService.formatUnconfirmedMixedTxns(transactionSearchResult.transactions);
         //groupType = 'unconfirmed'
         unconfirmedTxns.value = formattedTxns
-        updatedUnconfirmedTxns.value++
     }
 
     let loadPartialTransactions = async() => {
@@ -142,7 +124,6 @@ import AccordionTab from 'primevue/accordiontab';
     const init = async()=>{
         await loadUnconfirmedTransactions()
         await loadPartialTransactions()
-        await checkTransactions()
         loadInQueueTransactions()
     }
     if(AppState.isReady){  
@@ -164,11 +145,3 @@ import AccordionTab from 'primevue/accordiontab';
     })
     
 </script>
-<style scoped>
-:deep(.p-accordion-header,.p-highlight) {
-    background-color: white;
-    margin-top: 0px;
-    margin-bottom: 0px;
-}
-</style>
-

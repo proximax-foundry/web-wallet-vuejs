@@ -74,7 +74,6 @@ app.directive("maska", vMaska);
 app.directive('debounce', vue3Debounce({ lock: true }))
 app.mount('#app');
 
-
 AppStateUtils.addNewReadyStates('chainProfile');
 AppStateUtils.addNewReadyStates('theme');
 AppStateUtils.addNewReadyStates('checkSession');
