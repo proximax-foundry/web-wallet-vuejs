@@ -537,12 +537,6 @@ export default {
     }
   })
 
-  /* watch(() => maxAmount.value,(n) => {
-    if(maxAmount.value!=0){
-      updateAmountToMax()
-    }
-  }) */
-
   const showBalanceErr = computed(()=>{
     if(!selectedAccAdd.value){
       return false
