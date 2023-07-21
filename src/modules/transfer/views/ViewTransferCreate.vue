@@ -53,7 +53,7 @@
            + {{$t('transfer.addAssets')}}
           </button>
         </div>
-        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" @clickedMaxAvailable="updateAmountToMax()" :decimal="6"  :disabled="disableSupply"/>
+        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" @clickedMaxAvailable="updateAmountToMax(),showMaxAmount = true" :decimal="6"  :disabled="disableSupply"/>
         <TransferTextareaInput class="pt-4" :placeholder="$t('general.message')" :errorMessage="$t('general.limitExceed')" v-model="messageText" :remainingChar="remainingChar" :showError="showLimitErr"   :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
@@ -525,6 +525,7 @@ export default {
     }
   })
 
+  const showMaxAmount = ref(false)
   const maxAmount = computed(()=>{
     let tokenDivisibility = AppState.nativeToken.divisibility
     if(!selectedMultisigAdd.value){
@@ -535,9 +536,9 @@ export default {
   })
 
   watch(() => maxAmount.value,(n) => {
-    if(sendXPX.value > n){
-      updateAmountToMax()
-    }
+      if(sendXPX.value > n && showMaxAmount.value === true){
+        updateAmountToMax()
+      }
   })
 
   const showBalanceErr = computed(()=>{
@@ -744,6 +745,7 @@ export default {
   }
   const updateAmountToMax = () => {
     sendXPX.value = maxAmount.value.toString();
+    showMaxAmount.value = false
   }
   const updateFee = ()=>{
      effectiveFee.value = selectedMultisigAdd.value? makeTransaction.calculate_aggregate_fee(
@@ -946,7 +948,8 @@ export default {
       scanDistributorAsset,
       haveSelectableMultisig,
       initiateBy,
-      updateAmountToMax
+      updateAmountToMax,
+      showMaxAmount
     };
   },
 };
