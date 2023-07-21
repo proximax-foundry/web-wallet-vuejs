@@ -1,7 +1,8 @@
 <template>
   <div :class="disabled?'opacity-50':''">
     <div class="border border-gray-200 px-2 py-1  rounded-md">
-        <div class="flex flex-col">
+        <div class="flex justify-between">
+          <div class="flex flex-col">
             <div class="uppercase font-light text-gray-500 text-txs text-left mb-2">{{ placeholder }}</div>
             <div class="flex w-full">
                 <img v-if="logo" src="@/modules/account/img/proximax-logo.svg" class='h-5 w-5 mt-0.5'>
@@ -12,6 +13,9 @@
                   @input="$emit('update:modelValue',parseFloat((<HTMLInputElement>$event.target).value.replace(/,/g, '')).toString() )"
                 />
             </div>
+          </div>
+          <button v-if="logo" :disabled="disabled == true" class="w-24 cursor-pointer focus:outline-none text-blue-primary text-xs font-bold" @click="$emit('clickedMaxAvailable', true)">{{$t('swap.maxAmount')}}</button>
+            
         </div>
     </div>
   </div>
@@ -56,7 +60,7 @@ const props = defineProps({
 });
 
 defineEmits([
-    'update:modelValue', 'show-error'
+    'update:modelValue', 'show-error','clickedMaxAvailable'
   ])
 
 const maskaFormat = () => {

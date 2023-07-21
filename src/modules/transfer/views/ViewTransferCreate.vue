@@ -53,7 +53,7 @@
            + {{$t('transfer.addAssets')}}
           </button>
         </div>
-        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" :decimal="6"  :disabled="disableSupply"/>
+        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" @clickedMaxAvailable="updateAmountToMax()" :decimal="6"  :disabled="disableSupply"/>
         <TransferTextareaInput class="pt-4" :placeholder="$t('general.message')" :errorMessage="$t('general.limitExceed')" v-model="messageText" :remainingChar="remainingChar" :showError="showLimitErr"   :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
@@ -279,7 +279,6 @@ export default {
     })
 
     const balance = ref(0)
-   
    
     const moreThanOneAccount = computed(() => {
       return accounts.value.length> 1;
@@ -526,6 +525,18 @@ export default {
     }
   })
 
+  const maxAmount = computed(()=>{
+    if(!selectedAccAdd.value){
+      return 0
+    }
+    let tokenDivisibility = AppState.nativeToken.divisibility
+    if(!selectedMultisigAdd.value){
+      return Helper.convertNumberMinimumFormat(balance.value - parseFloat(effectiveFee.value),tokenDivisibility)
+    }else {
+      return Helper.convertNumberMinimumFormat(balance.value,tokenDivisibility)
+    }
+  })
+
   const showBalanceErr = computed(()=>{
     if(!selectedAccAdd.value){
       return false
@@ -728,6 +739,9 @@ export default {
   const checkNamespace = async (nsId)=>{
     return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
   }
+  const updateAmountToMax = () => {
+    sendXPX.value = maxAmount.value.toString();
+  }
   const updateFee = ()=>{
      effectiveFee.value = selectedMultisigAdd.value? makeTransaction.calculate_aggregate_fee(
         messageText.value,
@@ -928,7 +942,8 @@ export default {
       onNodeSelectMultisig,
       scanDistributorAsset,
       haveSelectableMultisig,
-      initiateBy
+      initiateBy,
+      updateAmountToMax,
     };
   },
 };
