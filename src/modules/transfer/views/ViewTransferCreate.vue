@@ -279,7 +279,6 @@ export default {
     })
 
     const balance = ref(0)
-    const maxAmount = ref(0)
    
     const moreThanOneAccount = computed(() => {
       return accounts.value.length> 1;
@@ -526,28 +525,20 @@ export default {
     }
   })
 
-  const showMaxAmount = ref(false)
-
-  const calculateMaxAmount = async (fee)=>{
-    if(selectedAccPublicKey.value){
-    let assets = await Sirius.scanAsset(selectedAccPublicKey.value);
-      if(assets.length>0){
-        balance.value = assets[0].amount
-      } else {
-        balance.value = 0
-      }
+  const maxAmount = computed(()=>{
+    let tokenDivisibility = AppState.nativeToken.divisibility
+    if(!selectedMultisigAdd.value){
+      return Helper.convertNumberMinimumFormat(balance.value - parseFloat(effectiveFee.value),tokenDivisibility)
+    }else {
+      return Helper.convertNumberMinimumFormat(balance.value,tokenDivisibility)
     }
-      if(selectedMultisigAdd.value){
-        maxAmount.value = balance.value 
-      }
-      else{
-        maxAmount.value = balance.value - fee
-      }
-      if(sendXPX.value > maxAmount.value && showMaxAmount.value === true){
-        updateAmountToMax()
-      }
-      showMaxAmount.value = false
-  }
+  })
+
+  watch(() => maxAmount.value,(n) => {
+    if(sendXPX.value > n){
+      updateAmountToMax()
+    }
+  })
 
   const showBalanceErr = computed(()=>{
     if(!selectedAccAdd.value){
@@ -753,7 +744,6 @@ export default {
   }
   const updateAmountToMax = () => {
     sendXPX.value = maxAmount.value.toString();
-    showMaxAmount.value = true
   }
   const updateFee = ()=>{
      effectiveFee.value = selectedMultisigAdd.value? makeTransaction.calculate_aggregate_fee(
@@ -765,7 +755,6 @@ export default {
         sendXPX.value,
         selectedMosaic.value
       );
-      calculateMaxAmount(effectiveFee.value)
   }
   watch(selectedAccName, (n, o) => {
     if (n != o) {
