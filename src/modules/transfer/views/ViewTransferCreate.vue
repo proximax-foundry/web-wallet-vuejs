@@ -434,6 +434,9 @@ export default {
   const updateAdd = (e) => {
     recipientInput.value = e;
   };
+
+
+
   const makeTransfer = async() => {
     if (sendXPX.value == "0" && !forceSend.value) {
       toggleConfirm.value = true;
@@ -746,11 +749,13 @@ export default {
      effectiveFee.value = selectedMultisigAdd.value? makeTransaction.calculate_aggregate_fee(
         messageText.value,
         sendXPX.value,
-        selectedMosaic.value
+        selectedMosaic.value,
+        encryptedMsgvalue
       ) : makeTransaction.calculate_fee(
         messageText.value,
         sendXPX.value,
-        selectedMosaic.value
+        selectedMosaic.value,
+        encryptedMsg.value
       );
   }
   watch(selectedAccName, (n, o) => {
@@ -793,9 +798,11 @@ export default {
     }
   });
   watch(encryptedMsg, (n) => {
+    updateFee()
     if (n) {
       if (messageText.value) {
         remainingChar.value = TransactionUtils.getFakeEncryptedMessageSize(messageText.value);
+
     if (messageText.value.length > messageLimit.value || remainingChar.value > messageLimit.value) {
       showLimitErr.value = true;
     }
