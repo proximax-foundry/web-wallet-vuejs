@@ -145,14 +145,14 @@ const getMosaic =(amount :string, mosaic :{id :string ,amount :string}[]) :Mosai
   return mosaics
 }
 
-const calculate_aggregate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]):string=> {
+const calculate_aggregate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[], isEncrypted: boolean):string=> {
   
   let transactionBuilder = AppState.buildTxn
   let mosaics = getMosaic(amount,mosaic)
   let transferTransaction = transactionBuilder.transferBuilder()
   .recipient(Address.createFromRawAddress(test_address))
   .mosaics(mosaics)
-  .message(PlainMessage.create(message))
+  .message( isEncrypted? EncryptedMessage.create(message,PublicAccount.createFromPublicKey('0'.repeat(64), AppState.networkType),'0'.repeat(64)) : PlainMessage.create(message))
   .build()
   let innerTxn= [transferTransaction.toAggregateV1(PublicAccount.createFromPublicKey(test_publicKey,AppState.networkType))]
   let aggregateBondedTx = transactionBuilder.aggregateBondedBuilder()
@@ -161,14 +161,14 @@ const calculate_aggregate_fee = (message :string , amount :string, mosaic :{id :
   return  Helper.amountFormatterSimple(aggregateBondedTx.maxFee.compact(),AppState.nativeToken.divisibility)
 }
 
-const calculate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[]) :string=> {
+const calculate_fee = (message :string , amount :string, mosaic :{id :string ,amount :string}[], isEncrypted: boolean) :string=> {
  
   let transactionBuilder = AppState.buildTxn
   let mosaics = getMosaic(amount,mosaic)
   let transferTransaction = transactionBuilder.transferBuilder()
   .recipient(Address.createFromRawAddress(test_address))
   .mosaics(mosaics)
-  .message(PlainMessage.create(message))
+  .message( isEncrypted? EncryptedMessage.create(message,PublicAccount.createFromPublicKey('0'.repeat(64), AppState.networkType),'0'.repeat(64)) : PlainMessage.create(message))
   .build()
   return Helper.amountFormatterSimple(transferTransaction.maxFee.compact(), AppState.nativeToken.divisibility)
  
