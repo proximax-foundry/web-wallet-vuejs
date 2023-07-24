@@ -53,7 +53,7 @@
            + {{$t('transfer.addAssets')}}
           </button>
         </div>
-        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" :decimal="6"  :disabled="disableSupply"/>
+        <TransferInputClean  v-model="sendXPX" :balance="Number(balance)" :placeholder="$t('transfer.transferAmount')" :logo="true" type="text" :showError="showBalanceErr" @clickedMaxAvailable="updateAmountToMax()" :decimal="6"  :disabled="disableSupply"/>
         <TransferTextareaInput class="pt-4" :placeholder="$t('general.message')" :errorMessage="$t('general.limitExceed')" v-model="messageText" :remainingChar="remainingChar" :showError="showLimitErr"   :limit="messageLimit" icon="comment" :msgOpt="msgOption" :disabled="disableMsgInput" />
         <div class="mb-5" v-if="!encryptedMsgDisable">
           <input id="encryptedMsg"  type="checkbox" value="encryptedMsg" v-model="encryptedMsg" :disabled="disableEncryptMsg == 1"/>
@@ -280,7 +280,6 @@ export default {
 
     const balance = ref(0)
    
-   
     const moreThanOneAccount = computed(() => {
       return accounts.value.length> 1;
     });
@@ -435,6 +434,9 @@ export default {
   const updateAdd = (e) => {
     recipientInput.value = e;
   };
+
+
+
   const makeTransfer = async() => {
     if (sendXPX.value == "0" && !forceSend.value) {
       toggleConfirm.value = true;
@@ -523,6 +525,18 @@ export default {
       }else{
         return Math.round((parseFloat(effectiveFee.value)+ lockFundTxFee.value + lockFund.value)*Math.pow(10,tokenDivisibility))/ Math.pow(10,tokenDivisibility)
       }
+    }
+  })
+
+  const maxAmount = computed(()=>{
+    if(!selectedAccAdd.value){
+      return 0
+    }
+    let tokenDivisibility = AppState.nativeToken.divisibility
+    if(!selectedMultisigAdd.value){
+      return Helper.convertNumberMinimumFormat(balance.value - parseFloat(effectiveFee.value),tokenDivisibility)
+    }else {
+      return Helper.convertNumberMinimumFormat(balance.value,tokenDivisibility)
     }
   })
 
@@ -728,15 +742,20 @@ export default {
   const checkNamespace = async (nsId)=>{
     return await NamespaceUtils.getLinkedAddress(nsId, chainAPIEndpoint.value);
   }
+  const updateAmountToMax = () => {
+    sendXPX.value = maxAmount.value.toString();
+  }
   const updateFee = ()=>{
      effectiveFee.value = selectedMultisigAdd.value? makeTransaction.calculate_aggregate_fee(
         messageText.value,
         sendXPX.value,
-        selectedMosaic.value
+        selectedMosaic.value,
+        encryptedMsgvalue
       ) : makeTransaction.calculate_fee(
         messageText.value,
         sendXPX.value,
-        selectedMosaic.value
+        selectedMosaic.value,
+        encryptedMsg.value
       );
   }
   watch(selectedAccName, (n, o) => {
@@ -779,9 +798,11 @@ export default {
     }
   });
   watch(encryptedMsg, (n) => {
+    updateFee()
     if (n) {
       if (messageText.value) {
         remainingChar.value = TransactionUtils.getFakeEncryptedMessageSize(messageText.value);
+
     if (messageText.value.length > messageLimit.value || remainingChar.value > messageLimit.value) {
       showLimitErr.value = true;
     }
@@ -928,7 +949,8 @@ export default {
       onNodeSelectMultisig,
       scanDistributorAsset,
       haveSelectableMultisig,
-      initiateBy
+      initiateBy,
+      updateAmountToMax,
     };
   },
 };

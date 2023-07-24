@@ -291,16 +291,19 @@ if (!walletState.currentLoggedInWallet) {
   AppStateUtils.setStateReady('loadLoadedData');
 
   // check sessionStorage
-  if (!WalletStateUtils.checkFromSession()) {
-    NetworkStateUtils.checkSession();
+ 
+  WalletStateUtils.checkFromSession().then(bool=>{
+    if(!bool){
+      NetworkStateUtils.checkSession();
+      AppStateUtils.setStateReady('checkSession');
+  
+      router.push({ name: "Home" });
+    }
+  }).finally(()=>{
     AppStateUtils.setStateReady('checkSession');
+    AppStateUtils.setStateReady('loadLoadedData');
+  })
 
-    router.push({ name: "Home" });
-  }
-
-  AppStateUtils.setStateReady('checkSession');
-  AppStateUtils.setStateReady('loadLoadedData');
 }
-
 // NetworkStateUtils.checkDefaultNetwork();
 
