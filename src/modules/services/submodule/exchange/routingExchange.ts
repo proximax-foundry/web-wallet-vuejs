@@ -1,4 +1,6 @@
-export const ExchangeRoutes = [
+
+const nodeEnv = import.meta.env.NODE_ENV??'development'
+export const ExchangeRoutes =  nodeEnv == 'production'? [] :[
     {
       path: '/exchange/create',
       name: 'ViewExchangeCreate',

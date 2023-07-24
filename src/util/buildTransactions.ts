@@ -47,8 +47,8 @@ import {
     Message,
     EmptyMessage,
     TransactionHash,
-    AggregateBondedV1TransactionBuilder,
-    AggregateCompleteV1TransactionBuilder
+    AggregateCompleteV1TransactionBuilder,
+    AggregateBondedV1TransactionBuilder
 } from 'tsjs-xpx-chain-sdk';
 import { WalletUtils } from "./walletUtils";
 import { Helper } from "./typeHelper";
@@ -165,7 +165,7 @@ export class BuildTransactions {
             .build();
     }
 
-    aggregateBondedBuilder(): AggregateBondedV1TransactionBuilder {
+    aggregateBondedBuilder(): AggregateBondedV1TransactionBuilder  {
 
         let abtDeadline = ChainConfigUtils.getABTMaxSafeDeadline();
 
@@ -174,7 +174,7 @@ export class BuildTransactions {
 
     aggregateComplete(innerTxn: InnerTransaction[]): AggregateTransaction {
 
-        return this.transactionBuilderFactory.aggregateCompleteV1()
+        return this.transactionBuilderFactory.aggregateCompleteV1 ()
             .deadline(Deadline.create())
             .innerTransactions(innerTxn)
             .build();
