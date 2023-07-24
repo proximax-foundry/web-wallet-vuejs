@@ -27,7 +27,7 @@
         <template #option="slotProps">
             <div class='flex '>
               <div v-html="toSvg(slotProps.option.value, 20, jdenticonConfig)" />
-                <div class='text-base ml-2 font-semibold'>{{ slotProps.option.label }}</div>
+                <div class='text-xs ml-2 font-semibold '>{{ slotProps.option.label }}</div>
             </div>
         </template>
       </Dropdown>
