@@ -34,7 +34,7 @@ const selectedMultisigAdd = ref("")
 const selectedMultisigName = ref("")
 const selectedMultisigPublicKey = ref("")
 const toggleMultisig = ref(false)
-const selectedNodeMultisig = ref({})
+const selectedMultisig = ref({})
 const disableAllInput = ref(false);
 const cosignAddress = ref("");
 const showPasswdError = ref(false);
@@ -410,14 +410,14 @@ const haveSelectableMultisig = computed(() => {
   }
 })
 
-const onNodeSelectMultisig = (node) => {
+const onSelectMultisig = (event) => {
   toggleMultisig.value = false
-  selectedMultisigAdd.value = WalletUtils.createAddressFromPublicKey(node.data,AppState.networkType).plain()
-  selectedMultisigName.value = node.label
-  selectedMultisigPublicKey.value = node.data
+  selectedMultisigAdd.value = WalletUtils.createAddressFromPublicKey(event.data,AppState.networkType).plain()
+  selectedMultisigName.value = event.label
+  selectedMultisigPublicKey.value = event.data
   cosignAddress.value = selectedAccount.value.address
   // this is too make it turn blue
-  selectedNodeMultisig.value[node.key] = true
+  selectedMultisig.value[event.key] = true
   scanDistributorAsset()
 }
 
@@ -522,8 +522,8 @@ if (isMultiSigBool.value) {
       </div>
       <!-- Pop Up when select icon is clicked -->
       <Sidebar v-model:visible="toggleMultisig" :baseZIndex="10000" position="full">
-          <SelectMultisigInput :account="selectableMultisig" :selectedNode="selectedNodeMultisig"
-            @node-select="onNodeSelectMultisig($event)" />
+          <SelectMultisigInput :account="selectableMultisig" :selectedMultisig="selectedMultisig"
+            @select="onSelectMultisig($event)" />
       </Sidebar>
       <div v-if="noAssetFound" class="error error_box" role="alert">
           No SDA found
