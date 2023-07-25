@@ -1,6 +1,6 @@
 <template>
-    <Tree :value="account" selectionMode="single" v-on:update:selection-keys="selectedNode" :expandedKeys="expandedKeys"
-      :filter="true" filterMode="strict" v-on:node-select="onNodeSelect" @node-expand="expandTree"
+    <Tree :value="account" selectionMode="single" v-on:update:selection-keys="selectedMultisig" :expandedKeys="expandedKeys"
+      :filter="true" filterMode="strict" v-on:node-select="onSelect" @node-expand="expandTree"
       @node-collapse="collapseTree">
     </Tree>
   </template>
@@ -13,7 +13,7 @@
     name: "SelectMultisigInput",
   });
   const emits = defineEmits([
-    'node-select'
+    'select'
   ])
   
   interface account {
@@ -28,7 +28,7 @@
             type: Array<account>,
             required: true,
         },
-        selectedNode: {
+        selectedMultisig: {
             type: Object as PropType<TreeNode>,
             required: true,
         },
@@ -36,8 +36,8 @@
   
   const expandedKeys = ref({});
   
-  const onNodeSelect = (node) => {
-    emits("node-select", node);
+  const onSelect = (event) => {
+    emits("select", event);
   };
   
   const expandTree = (expanded) => {
