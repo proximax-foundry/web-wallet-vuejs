@@ -100,7 +100,7 @@ import FieldValidationInput from '../components/FieldValidationInput.vue';
 import { TransferUtils } from '@/util/transferUtils';
 import TransferTxnSummary from '../components/TransferTxnSummary.vue';
 import { useToast } from 'primevue/usetoast';
-import { useRoute, useRouter } from 'vue-router';
+import {  useRouter } from 'vue-router';
 
 const addressPatternShort = "^[0-9A-Za-z]{40}$";
 
@@ -225,12 +225,13 @@ const maxAmount = computed(()=>{
     }
     let tokenDivisibility = AppState.nativeToken.divisibility
     if(!selectedMultisigAddress.value){
-        if(nativeTokenBalance.value - txnFee.value < 0 ){
-            return 0
-        }
-      return Helper.convertNumberMinimumFormat(nativeTokenBalance.value - txnFee.value,tokenDivisibility)
-    }else {
+      
       return Helper.convertNumberMinimumFormat(nativeTokenBalance.value,tokenDivisibility)
+
+        
+    }else {
+      return Helper.convertNumberMinimumFormat(nativeTokenBalance.value ,tokenDivisibility)
+       
     }
   })
 
@@ -395,7 +396,7 @@ const contacts = computed(() => {
         return <{ key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string }[] }[]>[];
     }
     const totalAcc = [...wallet.accounts, ...wallet.others]
-
+if(wallet.contacts.length){
     return <{ key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string }[] }[]>[{
         key: '0',
         label: t('general.ownerAcc'),
@@ -421,6 +422,21 @@ const contacts = computed(() => {
             }
         })
     }];
+}
+    return <{ key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string }[] }[]>[{
+        key: '0',
+        label: t('general.ownerAcc'),
+        selectable: true,
+        children: totalAcc.map((acc, index) => {
+            return {
+                key: "0-" + index.toString(),
+                label: acc.name,
+                data: Address.createFromRawAddress(acc.address).pretty(),
+                selectable: true
+            }
+        })
+    }]
+    
 
 
 });
