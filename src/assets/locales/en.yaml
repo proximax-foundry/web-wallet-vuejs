@@ -690,7 +690,7 @@ transfer:
   successfullySaved: 'Contact {name} successfully saved'
   transferAmount: Transfer Amount
   transferFrom: Transfer From
-  transferPlaceholder: Transfer to (Address / Namespace)
+  transferPlaceholder: Address / Namespace
 wallet:
   backHome: Back to Home
   backUpDescription: 'If you have a previously backed up wallet, please import the file here.'
