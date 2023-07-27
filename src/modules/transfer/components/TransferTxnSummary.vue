@@ -35,27 +35,29 @@
     <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-gray-200 my-1">
         <div class='font-semibold text-xxs mt-2 lg:col-span-2 col-span-3 text-blue-primary uppercase'>
             {{ $t('general.currentBalance') }}</div>
-        <span class='ml-auto lg:col-span-2 col-span-3' v-html="splitCurrency(selectedMultisigAddress? signerNativeTokenBalance : nativeTokenBalance ?? 0)"></span>
+        <span class='ml-auto lg:col-span-2 col-span-3'
+            v-html="splitCurrency(selectedMultisigAddress ? signerNativeTokenBalance : nativeTokenBalance ?? 0)"></span>
         <div class="flex">
             <div class='ml-1 text-blue-400 font-bold'>{{ AppState.nativeToken.label }}</div>
             <img src="@/modules/account/img/proximax-logo.svg" class='ml-1 h-5 w-5 mt-0.5'>
         </div>
     </div>
     <div class='border-b-2 border-gray-600 mt-2' />
-    <div v-if="!selectedMultisigAddress" class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-2">
+    <div v-if="!selectedMultisigAddress"
+        class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-2">
         <div class='font-semibold lg:col-span-2 col-span-3'>{{ $t('transfer.transferAmount') }}</div>
         <div v-if="isNaN(parseFloat(nativeAmount))" class="lg:col-span-2 col-span-3 ml-auto">0</div>
         <div v-else class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(nativeAmount ?? 0)"></div>
         <div class='ml-1 text-blue-400'>{{ AppState.nativeToken.label }}</div>
     </div>
-    <div v-if="!selectedMultisigAddress" class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white text-xs" v-for="(asset, index) in selectedAssets"
-        :key="index">
+    <div v-if="!selectedMultisigAddress" class="lg:grid lg:grid-cols-5 grid grid-cols-7 text-white text-xs"
+        v-for="(asset, index) in selectedAssets" :key="index">
         <div v-if="isNaN(parseFloat(asset.amount)) && asset.id != null" class="lg:col-span-4 col-span-6 ml-auto">0</div>
         <div v-else class="lg:col-span-4 col-span-6 ml-auto">{{ asset.amount }}</div>
         <div class="ml-1 text-blue-400" :index="index" v-if="asset.id != null">{{ displayAssetName(asset.namespace == "" ?
             asset.id : asset.namespace) }} </div>
     </div>
-    
+
     <div class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between  items-center text-gray-200 text-xs py-2">
         <div class="font-semibold lg:col-span-2 col-span-3">{{ selectedMultisigAddress != null ? $t('general.aggregateFee')
             :
@@ -118,9 +120,9 @@ defineProps({
         type: String,
         required: true
     },
-    signerNativeTokenBalance:{
-        type:Number,
-        required:true
+    signerNativeTokenBalance: {
+        type: Number,
+        required: true
     }
 })
 

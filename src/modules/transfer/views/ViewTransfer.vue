@@ -6,9 +6,13 @@
         <div class='w-10/12 ml-auto mr-auto mt-5'>
             <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8">
                 <div class="xl:col-span-2 p-12">
-                    <div v-if="showBalanceErr" class="mb-3 rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
-          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
-        </div>
+                    <div v-if="showBalanceErr"
+                        class="mb-3 rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+                        <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2">
+                            <font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute"
+                                style="top: 3px; left:4px"></font-awesome-icon></div>
+                        <div class="inline-block text-xs">{{ $t('general.insufficientBalance') }}</div>
+                    </div>
                     <div class="text-sm font-semibold ">{{ $t('transfer.newTransfer') }}</div>
                     <SelectInputAccount />
                     <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
@@ -34,31 +38,34 @@
                             v-model="selectedAssets[index].amount" :placeholder="$t('transfer.assetAmount')" type="text"
                             :decimal="selectedAssets[index].divisibility" />
                     </div>
-                    <button v-if="selectedAssets.length !=  assetOptions.length "
+                    <button v-if="selectedAssets.length != assetOptions.length"
                         class="my-2 font-semibold text-xs text-blue-primary outline-none focus:outline-none disabled:opacity-50"
                         @click="selectedAssets.push({ id: null, balance: 0, amount: '0', namespace: '', divisibility: 0 })">
                         + {{ $t('transfer.addAssets') }}
                     </button>
-                    <div v-else class="h-3"  />
+                    <div v-else class="h-3" />
                     <TransferInputClean v-model="nativeAmount" :balance="nativeTokenBalance"
                         :placeholder="$t('transfer.transferAmount')" :logo="true" type="text"
                         @clickedMaxAvailable="updateAmountToMax()" :decimal="6" />
 
-                    <TextAreaInput v-model="message" :limit="messageLimit"
-                        :placeholder="$t('general.message')" :current-bytes="currentBytes" />
+                    <TextAreaInput v-model="message" :limit="messageLimit" :placeholder="$t('general.message')"
+                        :current-bytes="currentBytes" />
                     <div class="mb-5" v-if="!showAddressError">
                         <input id="encryptedMsg" type="checkbox" v-model="isEncrypted" />
                         <label for="encryptedMsg" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">
                             {{ $t('transfer.enableEncryption') }}
                         </label>
                     </div>
-                    <FieldValidationInput v-if="!showAddressError && requirePublicKey && isEncrypted && currentBytes>0"
+                    <FieldValidationInput v-if="!showAddressError && requirePublicKey && isEncrypted && currentBytes > 0"
                         placeholder="Recipient Public Key" v-model="publicKeyInput" v-debounce:1000="checkPublicKey"
                         :showError="showPublicKeyError" />
 
                 </div>
                 <div class='bg-navy-primary py-6 px-6 xl:col-span-1'>
-                    <TransferTxnSummary :signer-native-token-balance="signerNativeTokenBalance" :native-amount="nativeAmount" :native-token-balance="nativeTokenBalance" :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee" :selected-multisig-address="selectedMultisigAddress" :txn-fee="txnFee" :total-fee="totalFee" :selected-assets="selectedAssets"  />
+                    <TransferTxnSummary :signer-native-token-balance="signerNativeTokenBalance"
+                        :native-amount="nativeAmount" :native-token-balance="nativeTokenBalance" :lock-fund="lockFund"
+                        :lock-fund-tx-fee="lockFundTxFee" :selected-multisig-address="selectedMultisigAddress"
+                        :txn-fee="txnFee" :total-fee="totalFee" :selected-assets="selectedAssets" />
                     <div class='font-semibold text-xs text-white mb-1.5'>{{ $t('general.enterPasswordContinue') }}</div>
                     <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"
                         v-model="walletPassword" icon="lock" class="mt-5 mb-3" />
@@ -100,7 +107,7 @@ import FieldValidationInput from '../components/FieldValidationInput.vue';
 import { TransferUtils } from '@/util/transferUtils';
 import TransferTxnSummary from '../components/TransferTxnSummary.vue';
 import { useToast } from 'primevue/usetoast';
-import {  useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 const addressPatternShort = "^[0-9A-Za-z]{40}$";
 
@@ -157,20 +164,20 @@ const disableCreate = computed(() => {
 });
 
 const canEncrypt = computed(() => {
-   
-    if(requirePublicKey.value && isEncrypted.value && currentBytes.value >0 && showPublicKeyError.value ){
+
+    if (requirePublicKey.value && isEncrypted.value && currentBytes.value > 0 && showPublicKeyError.value) {
         return false
     }
     return true
 })
 
-watch(selectedAssets,n=>{
-    for(let i = 0 ; i < n.length ; i ++){
-        if( isNaN((parseFloat(n[i].amount)))){
+watch(selectedAssets, n => {
+    for (let i = 0; i < n.length; i++) {
+        if (isNaN((parseFloat(n[i].amount)))) {
             n[i].amount = '0'
         }
     }
-},{deep:true})
+}, { deep: true })
 
 watch(nativeAmount, n => {
     if (isNaN(parseFloat(n))) {
@@ -178,28 +185,28 @@ watch(nativeAmount, n => {
     }
 })
 
-const showBalanceErr = computed(()=>{
-    if(!selectedAddress.value){
-      return false
+const showBalanceErr = computed(() => {
+    if (!selectedAddress.value) {
+        return false
     }
     else if (selectedMultisigAddress.value) {
-      if (parseFloat(nativeAmount.value) >nativeTokenBalance.value || !(selectedAssets.value.every(asset => parseFloat(asset.amount)<= asset.balance))){
-        return true
-      }else if(totalFee.value > signerNativeTokenBalance.value){
-        return true
-      }else{
-        return false
-      }
-    }else{
-      if(totalFee.value > nativeTokenBalance.value || !(selectedAssets.value.every(asset => parseFloat(asset.amount) <= asset.balance))){
-        return true
-      }else{
-        return false
-      }
+        if (parseFloat(nativeAmount.value) > nativeTokenBalance.value || !(selectedAssets.value.every(asset => parseFloat(asset.amount) <= asset.balance))) {
+            return true
+        } else if (totalFee.value > signerNativeTokenBalance.value) {
+            return true
+        } else {
+            return false
+        }
+    } else {
+        if (totalFee.value > nativeTokenBalance.value || !(selectedAssets.value.every(asset => parseFloat(asset.amount) <= asset.balance))) {
+            return true
+        } else {
+            return false
+        }
     }
-  })
+})
 
-const currentBytes = computed(() => message.value.length == 0? 0 : isEncrypted.value ? TransactionUtils.getFakeEncryptedMessageSize(message.value) : TransactionUtils.getPlainMessageSize(message.value))
+const currentBytes = computed(() => message.value.length == 0 ? 0 : isEncrypted.value ? TransactionUtils.getFakeEncryptedMessageSize(message.value) : TransactionUtils.getPlainMessageSize(message.value))
 
 const messageLimit = computed(
     () => networkState?.currentNetworkProfileConfig.maxMessageSize - 1
@@ -219,21 +226,21 @@ const lockFundTxFee = computed(() => {
     return 0;
 });
 
-const maxAmount = computed(()=>{
-    if(!selectedAddress.value){
-      return 0
+const maxAmount = computed(() => {
+    if (!selectedAddress.value) {
+        return 0
     }
     let tokenDivisibility = AppState.nativeToken.divisibility
-    if(!selectedMultisigAddress.value){
-      
-      return Helper.convertNumberMinimumFormat(nativeTokenBalance.value,tokenDivisibility)
+    if (!selectedMultisigAddress.value) {
 
-        
-    }else {
-      return Helper.convertNumberMinimumFormat(nativeTokenBalance.value ,tokenDivisibility)
-       
+        return Helper.convertNumberMinimumFormat(nativeTokenBalance.value - txnFee.value, tokenDivisibility)
+
+
+    } else {
+        return Helper.convertNumberMinimumFormat(nativeTokenBalance.value, tokenDivisibility)
+
     }
-  })
+})
 
 const totalFee = computed(() => {
     let tokenDivisibility = AppState.nativeToken.divisibility
@@ -254,16 +261,16 @@ const totalFee = computed(() => {
 
 const txnFee = computed(() => {
     const assets = selectedAssets.value.map(asset => {
-        return{ id:asset.id, amount: asset.amount}
-    } )
+        return { id: asset.id, amount: asset.amount }
+    })
 
-    assets.push({ id:AppState.nativeToken.assetId, amount: nativeAmount.value })
+    assets.push({ id: AppState.nativeToken.assetId, amount: nativeAmount.value })
 
 
-    return selectedMultisigAddress.value?
-    TransferUtils.calculateAggregateFee(message.value,nativeAmount.value,assets,isEncrypted.value): selectedAddress.value?
-    TransferUtils.calculateFee(message.value,nativeAmount.value,assets,isEncrypted.value) : 0
-    
+    return selectedMultisigAddress.value ?
+        TransferUtils.calculateAggregateFee(message.value, nativeAmount.value, assets, isEncrypted.value) : selectedAddress.value ?
+            TransferUtils.calculateFee(message.value, nativeAmount.value, assets, isEncrypted.value) : 0
+
 })
 
 const updateAmountToMax = () => {
@@ -275,16 +282,16 @@ const toast = useToast()
 
 const router = useRouter()
 
-const makeTransfer = async() => {
+const makeTransfer = async () => {
     const isPasswordCorrect = await TransferUtils.createTransaction(
         recipientInput.value,
         nativeAmount.value,
         message.value,
-        selectedAssets.value.map(asset =>{
-            return{
-                id:asset.id,
+        selectedAssets.value.map(asset => {
+            return {
+                id: asset.id,
                 amount: parseFloat(asset.amount),
-                divisibility:asset.divisibility
+                divisibility: asset.divisibility
             }
         }),
         walletPassword.value,
@@ -293,7 +300,7 @@ const makeTransfer = async() => {
         isEncrypted.value,
         publicKeyInput.value
     )
-    if(!isPasswordCorrect){
+    if (!isPasswordCorrect) {
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -304,11 +311,11 @@ const makeTransfer = async() => {
         return
     }
 
-    router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAddress.value} })
+    router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
 
 }
 
-const fetchSignerNativeBalance = async() =>{
+const fetchSignerNativeBalance = async () => {
     if (!AppState.chainAPI) {
         return
     }
@@ -318,10 +325,10 @@ const fetchSignerNativeBalance = async() =>{
         if (findIndex != -1) {
             signerNativeTokenBalance.value = accInfo.mosaics[findIndex].amount.compact() / Math.pow(10, AppState.nativeToken.divisibility)
             accInfo.mosaics.splice(findIndex, 1)
-        }else{
+        } else {
             signerNativeTokenBalance.value = 0
         }
-    }catch(_){
+    } catch (_) {
         signerNativeTokenBalance.value = 0
     }
 }
@@ -340,7 +347,7 @@ const fetchAssets = async (address: string) => {
         if (findIndex != -1) {
             nativeTokenBalance.value = accInfo.mosaics[findIndex].amount.compact() / Math.pow(10, AppState.nativeToken.divisibility)
             accInfo.mosaics.splice(findIndex, 1)
-        }else{
+        } else {
             nativeTokenBalance.value = 0
         }
         for (let i = 0; i < accInfo.mosaics.length; i++) {
@@ -357,7 +364,7 @@ const fetchAssets = async (address: string) => {
         assetOptions.value = []
         nativeTokenBalance.value = 0
     }
-    
+
 }
 
 
@@ -371,7 +378,7 @@ watch([selectedAddress, selectedMultisigAddress], async ([n, mn]) => {
     } else if (n != null && mn != null) {
         await fetchSignerNativeBalance()
         await fetchAssets(mn)
-       /*  signerTokenBalance.value = await AppState.chainAPI.accountAPI.getAccountInfo() */
+        /*  signerTokenBalance.value = await AppState.chainAPI.accountAPI.getAccountInfo() */
     }
 
 })
@@ -396,33 +403,33 @@ const contacts = computed(() => {
         return <{ key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string }[] }[]>[];
     }
     const totalAcc = [...wallet.accounts, ...wallet.others]
-if(wallet.contacts.length){
-    return <{ key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string }[] }[]>[{
-        key: '0',
-        label: t('general.ownerAcc'),
-        selectable: true,
-        children: totalAcc.map((acc, index) => {
-            return {
-                key: "0-" + index.toString(),
-                label: acc.name,
-                data: Address.createFromRawAddress(acc.address).pretty(),
-                selectable: true
-            }
-        })
-    }, {
-        key: '1',
-        label: t('general.contact'),
-        selectable: true,
-        children: wallet.contacts.map((contact, index) => {
-            return {
-                key: "1-" + index.toString(),
-                label: contact.name,
-                data: Address.createFromRawAddress(contact.address).pretty(),
-                selectable: true
-            }
-        })
-    }];
-}
+    if (wallet.contacts.length) {
+        return <{ key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string }[] }[]>[{
+            key: '0',
+            label: t('general.ownerAcc'),
+            selectable: true,
+            children: totalAcc.map((acc, index) => {
+                return {
+                    key: "0-" + index.toString(),
+                    label: acc.name,
+                    data: Address.createFromRawAddress(acc.address).pretty(),
+                    selectable: true
+                }
+            })
+        }, {
+            key: '1',
+            label: t('general.contact'),
+            selectable: true,
+            children: wallet.contacts.map((contact, index) => {
+                return {
+                    key: "1-" + index.toString(),
+                    label: contact.name,
+                    data: Address.createFromRawAddress(contact.address).pretty(),
+                    selectable: true
+                }
+            })
+        }];
+    }
     return <{ key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string }[] }[]>[{
         key: '0',
         label: t('general.ownerAcc'),
@@ -436,7 +443,7 @@ if(wallet.contacts.length){
             }
         })
     }]
-    
+
 
 
 });
