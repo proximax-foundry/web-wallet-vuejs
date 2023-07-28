@@ -34,7 +34,6 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
 import i18n from './i18n';
-import VWave from 'v-wave';
 import VueBlocksTree from 'vue3-blocks-tree';
 import 'vue3-blocks-tree/dist/vue3-blocks-tree.css';
 import { RequestOptions } from "tsjs-xpx-chain-sdk";
@@ -59,7 +58,6 @@ app.use(PrimeVue);
 app.use(ConfirmationService);
 app.use(ToastService);
 app.use(i18n);
-app.use(VWave);
 app.use(VueBlocksTree /* , {treeName:'blocks-tree'} */);
 // Use Components
 app.component('ConfirmDialog', ConfirmDialog);
