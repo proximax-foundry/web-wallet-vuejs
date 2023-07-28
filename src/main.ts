@@ -2,9 +2,7 @@ import "./assets/scss/main.scss";
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
-import 'animate.css';
 import { vue3Debounce } from 'vue-debounce'
-import { VuePassword } from 'vue-password';
 import mitt from 'mitt';
 import PrimeVue from 'primevue/config';
 import "primeicons/primeicons.css";
@@ -63,7 +61,6 @@ app.use(VueBlocksTree /* , {treeName:'blocks-tree'} */);
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
 app.component('font-awesome-icon', FontAwesomeIcon);
-app.component(VuePassword);
 app.component('Dropdown', Dropdown);
 app.component('Sidebar', Sidebar);
 app.component('Tree',Tree);
