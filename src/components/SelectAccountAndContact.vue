@@ -1,12 +1,12 @@
 <template>
-    <Tree :value="contacts" selectionMode="single" v-on:update:selection-keys="selectedNode" :expandedKeys="expandedKeys"
+    <Tree :value="contacts" selectionMode="single"  :expandedKeys="expandedKeys"
     :filter="true" filterMode="strict" v-on:node-select="onNodeSelect" @node-expand="expandTree"
     @node-collapse="collapseTree">
   </Tree>
 </template>
 
 <script setup lang="ts">
-    import {defineComponent, ref, type PropType } from 'vue';
+    import {defineComponent, ref } from 'vue';
     import type { TreeExpandedKeys, TreeNode } from "primevue/tree";
 
     defineComponent({
@@ -28,10 +28,7 @@
             type: Array<contact>,
             required: true,
         },
-        selectedNode: {
-            type: Object as PropType<TreeNode>,
-            required: true,
-        },
+      
     });
 
     const expandedKeys = ref<TreeExpandedKeys>({})

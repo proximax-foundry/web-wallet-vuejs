@@ -5,11 +5,11 @@
                 <div class="uppercase text-gray-500 font-light text-xxs text-left  ">{{ placeholder }}</div>
                 <input type="text" :value="modelValue" @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"  class="w-full font-semibold text-tsm outline-none mt-1">
             </div>
-            <div v-if="showError" class="flex flex-col ml-auto justify-center mt-1">
+            <div v-if="showError && modelValue.length != 0" class="flex flex-col ml-auto justify-center mt-1">
                 <img src="@/assets/img/icon-red-x.svg" class="h-5 w-5 mr-auto ml-auto">
                 <div class="text-xxs text-red-400 font-bold uppercase">{{$t('general.invalid')}}</div>
             </div>
-            <div v-else class="flex flex-col ml-auto justify-center mt-1">
+            <div v-else-if="!showError" class="flex flex-col ml-auto justify-center mt-1">
                 <img src="@/assets/img/icon-green-tick.svg" class="h-5 w-5 mr-auto ml-auto">
                 <div class="text-xxs text-green-400 font-bold uppercase">{{$t('general.valid')}}</div>
             </div>

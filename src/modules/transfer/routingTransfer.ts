@@ -1,9 +1,9 @@
 import { RouteRecordRaw } from 'vue-router'
 export const TransferRoutes: RouteRecordRaw[] = [
   {
-    path: '/create-transfer',
+    path: '/transfer',
     name: 'ViewTransferCreate',
-    component: () => import('@/modules/transfer/views/ViewTransferCreate.vue'),
+    component: () => import('@/modules/transfer/views/ViewTransfer.vue'),
     meta: {
       title: "Create Transfer",
     }
