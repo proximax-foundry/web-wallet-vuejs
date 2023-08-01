@@ -4,7 +4,75 @@
             <AccountComponent :address="address" class="mb-6" />
             <AccountTabs :address="address" selected="assets" />
             <div class='border-2 border-t-0  '>
-                <AssetDataTable :assets="mosaics" :address="address" />
+                <DataTable :value="assets" :paginator="true" :rows="10" dataKey="id" ref="dt" @page="onPage($event)"
+                    @update:rows="updateRow($event)" :loading="loading" :rowsPerPageOptions="[10, 20, 30, 40, 50]"
+                    paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    responsiveLayout="scroll">
+                    <template #empty>
+                        No assets found.
+                    </template>
+
+                    <Column field="id" header="Asset ID">
+                        <template #body="{ data }" headerClass="w-96">
+                            <a :href="explorerLink(data.id)" target=_new class="col-span-2">
+                                <div
+                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
+                                    {{ data.id }}</div>
+                            </a>
+                        </template>
+                    </Column>
+                    <Column field="name" header="Namespace">
+                        <template #body="{ data }">
+                            <div class="flex items-center  pr-7 ">
+                                <img v-if="displayTokenName(data.name).name == 'XPX'"
+                                    src="@/modules/account/img/proximax-logo.svg"
+                                    class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
+                                <img v-else-if="displayTokenName(data.name).name == 'XAR'"
+                                    src="@/modules/account/img/xarcade-logo.svg"
+                                    class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
+                                <img v-else-if="displayTokenName(data.name).name == 'METX'"
+                                    src="@/modules/account/img/metx-logo.svg"
+                                    class='inline-block h-7 w-7 mr-2 border-2 rounded-3xl'>
+                                <div v-else-if="data.name == '-'" />
+                                <img v-else src="@/modules/dashboard/img/icon-proximax-logo-gray.svg"
+                                    class='inline-block h-6 w-6 mr-2 '>
+                                <div v-if="displayTokenName(data.name).registered" class="inline-block text-xs ml-2 mt-1">
+                                    {{ displayTokenName(data.name).name }}</div>
+                                <div v-else class="inline-block text-xs ml-2 cursor-pointer mt-1">{{ data.name }}</div>
+                            </div>
+                        </template>
+                    </Column>
+
+                    <Column field="amount" header="Balance">
+                        <template #body="{ data }">
+                            <div>{{ data.amount }}</div>
+                        </template>
+                    </Column>
+
+                    <Column field="creator" header="Creator">
+                        <template #body="{ data }">
+                            <img v-if="data.creator" src="@/assets/img/icon-green-tick.svg" class="h-5 w-5">
+                            <img v-else src="@/assets/img/icon-red-x.svg" class="h-5 w-5">
+                        </template>
+                    </Column>
+                    <Column header="Actions ">
+                        <template #body="{ data }">
+                            <img src="@/modules/dashboard/img/icon-more-options.svg"
+                                class="w-4 h-4 cursor-pointer ml-2 mt-0.5"  @click="showMenu(data.i)"  @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
+                            <div v-if="isMenuShow[data.i]" class="mt-5  w-36 absolute rounded-sm shadow-lg bg-white focus:outline-none z-10 text-left " >
+                    <div class="my-2" >
+                        <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.id, address: address, assetBalance: data.balance} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
+                        <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.linkToNamespace')}}</router-link>
+                        <router-link :to="{ name: 'ViewAssetMetadata', params: {assetId: data.id, address: address} }">
+                            <div class="block hover:bg-gray-100 transition duration-200 p-2 z-20 cursor-pointer">View Metadata</div>
+                            </router-link>
+                    </div>
+                </div>
+                            </template>
+                    </Column>
+                </DataTable>
+                <!-- <AssetDataTable :assets="mosaics" :address="address" /> -->
                 <div class="flex my-3 px-6 flex-col w-full ml-auto mr-auto gap-2 sm:flex-row sm:items-center">
                     <router-link :to="{ name: 'ViewTransferCreate' }"
                         class=" bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center "><img
@@ -19,121 +87,196 @@
                         class="bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center"><img
                             src="@/assets/img/icon-plus.svg" class="inline-block w-4 h-4 mr-2">{{ $t('asset.createNewAsset')
                             }}</router-link>
-                    <router-link v-if="nodeEnv!='production'" :to="{ name: 'ViewExchangeAccountListing', params:{address: address}}"
-                        class="bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center">
-                        <font-awesome-icon icon="eye" class="inline-block w-4 h-4 mr-2"></font-awesome-icon>
-                         View Asset Offers
-                        </router-link>
                 </div>
             </div>
         </div>
     </div>
 </template>
 
-<script>
-import { computed, } from "vue";
+<script setup lang="ts">
+import { effectScope, getCurrentInstance, ref, watch } from "vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-import { walletState } from '@/state/walletState';
 import { Helper } from '@/util/typeHelper';
-import { AppState } from '@/state/appState';
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
-import AssetDataTable from "@/modules/account/components/AssetDataTable.vue";
+import { AppState } from "@/state/appState";
+import { Address, MosaicId } from "tsjs-xpx-chain-sdk";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import { networkState } from "@/state/networkState";
 
-export default {
-    name: 'ViewAccountAssets',
-    components: {
-        AccountComponent,
-        AccountTabs,
-        AssetDataTable
-    },
-    props: {
-        address: String,
-    },
-    setup(p) {
-        const nodeEnv = import.meta.env.NODE_ENV ?? 'development'
+const p = defineProps({
+    address: String
+})
 
-        const wallet = walletState.currentLoggedInWallet
-        const currentNativeTokenName = computed(() => AppState.nativeToken.label);
-        const acc = computed(() => {
-            if (!wallet) {
-                return null
-            }
-            let currentAccount = wallet.accounts.find(account => account.address == p.address)
-            if (currentAccount != undefined) {
-                return currentAccount
-            } else {
-                return wallet.others.filter(accounts => accounts.type === "MULTISIG").find(account => account.address == p.address)
-            }
-        })
-        const isMultiSig = computed(() => {
-            if (!acc.value) {
-                return false
-            }
-            let isMulti = acc.value.getDirectParentMultisig().length ? true : false
-            return isMulti;
-        });
-        let isDelegate = () => {
-            if (!walletState.currentLoggedInWallet) {
-                return false
-            }
-            let account = walletState.currentLoggedInWallet.others.find(acc => acc.address == p.address)
-            if (account) {
-                return account.type == "DELEGATE" ? true : false
-            } else {
-                return false
-            }
-        }
-        const mosaics = computed(() => {
-
-            var mosaicOption = [];
-            if (!walletState.currentLoggedInWallet) {
-                return mosaicOption;
-            }
-            const account = walletState.currentLoggedInWallet.accounts.find(
-                (element) => element.address == p.address
-            ) || walletState.currentLoggedInWallet.others.find(
-                (element) => element.address == p.address)
-            if (!account) {
-                return mosaicOption
-            }
-            account.assets.forEach((i, index) => {
-                mosaicOption.push({
-                    i: index,
-                    id: i.idHex,
-                    name: (i.namespaceNames.length > 0 ? formatNamespaceName(i.namespaceNames) : '-'),
-                    balance: Helper.toCurrencyFormat(i.amount, i.divisibility),
-                    isCreator: acc.value ? (i.creator == acc.value.publicKey ? true : false) : false
-                });
-            });
-
-            return mosaicOption
-
-        });
-
-        const formatNamespaceName = (namespaceNames) => {
-            return namespaceNames.join(" / ")
-        }
-
-        const splitBalance = balance => {
-            let split = balance.split(".")
-            if (split[1] != undefined) {
-                return { left: split[0], right: split[1] }
-            } else {
-                return { left: split[0], right: null }
-            }
-        }
-
-
-        return {
-            acc,
-            isDelegate,
-            isMultiSig,
-            mosaics,
-            splitBalance,
-            currentNativeTokenName,
-            nodeEnv
-        }
+const displayTokenName = (name: string) => {
+    if (name == 'prx.xpx') {
+        return { name: 'XPX', registered: true }
+    } else if (name == 'prx.metx') {
+        return { name: 'METX', registered: true }
+    } else if (name == 'xarcade.xar') {
+        return { name: 'XAR', registered: true }
+    } else {
+        return { name: name, registered: false }
     }
 }
+
+const lazyParams = ref<{ page: number, rows: number }>({
+    page: 0,
+    rows: 10
+})
+
+const dt = ref()
+
+interface Asset {
+    i: number,
+    id: string,
+    amount: string,
+    name: string,
+    creator: boolean,
+    isLoaded: boolean
+
+}
+
+const updateRow = (rows: number) => {
+    lazyParams.value.rows = rows
+}
+
+const assets = ref<Asset[]>([])
+
+const explorerLink = (assetId: string) => {
+    if (!networkState.currentNetworkProfile) {
+        return ''
+    }
+    return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
+}
+
+const isMenuShow = ref([]);
+
+const currentMenu = ref(0); 
+const showMenu = (i) => {
+    currentMenu.value = i;
+    isMenuShow.value[i] = !isMenuShow.value[i];
+} 
+const internalInstance = getCurrentInstance(); 
+const emitter = internalInstance.appContext.config.globalProperties.emitter; 
+    // emitted from App.vue when click on any part of the page
+emitter.on('PAGE_CLICK', () => {
+    var k = 0;
+    while(k < isMenuShow.value.length){
+    if(k != currentMenu.value){
+        isMenuShow.value[k] = false;
+    }
+    k++;
+    }
+});
+
+const hoverOverMenu = (i) => {
+    currentMenu.value = i;
+};
+
+const hoverOutMenu = () => {
+    currentMenu.value = -1;
+};
+
+
+const fetchAssets = async () => {
+    try {
+        const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(p.address))
+        return accInfo.mosaics.map((asset, index) => {
+            return {
+                i: index,
+                id: asset.id.toHex(),
+                amount: asset.amount.compact().toString(),
+                name: "",
+                creator: false,
+                isLoaded: false
+            }
+        })
+    } catch (_) {
+        return <Asset[]>[]
+    }
+}
+
+const scope = effectScope()
+
+const loading = ref(false)
+
+scope.run(() => {
+    const hasTriggered = ref(false)
+    const stopWatch = watch(AppState, async n => {
+        if (n.isReady && !hasTriggered.value) {
+            loading.value = true;
+            assets.value = await fetchAssets()
+            hasTriggered.value = true
+            lazyLoad()
+            loading.value = false;
+
+            stopWatch()
+            scope.stop()
+
+        }
+    }, { immediate: true })
+
+})
+
+const onPage = (event: { page: number, pageCount: number, rows: number }) => {
+    const { page, rows } = event
+    lazyParams.value = {
+        page: page,
+        rows: rows
+    }
+    lazyLoad()
+};
+
+const lazyLoad = async () => {
+    loading.value = true;
+    const { page, rows } = lazyParams.value
+    const assetIds: MosaicId[] = []
+    for (let i = 0; i < rows; i++) {
+        const index = (page * rows) + (i)
+        if (!assets.value[index]) {
+            continue;
+        }
+        if (assets.value[index].isLoaded) {
+            continue;
+        }
+        const asset = assets.value[index]
+        assetIds.push(new MosaicId(asset.id))
+    }
+    if (!assetIds.length) {
+        loading.value = false;
+
+        return
+    }
+    const names = await AppState.chainAPI.assetAPI.getMosaicsNames(assetIds)
+    const assetProperties = await AppState.chainAPI.assetAPI.getMosaics(assetIds)
+
+    const assetIdToIndexMap: { [key: string]: number } = {};
+    assetIds.forEach((asset, index) => {
+        assetIdToIndexMap[asset.toHex()] = index;
+    });
+
+    assetProperties.sort((a, b) => {
+        const indexA = assetIdToIndexMap[a.mosaicId.toHex()];
+        const indexB = assetIdToIndexMap[b.mosaicId.toHex()];
+        return indexA - indexB;
+    });
+
+    for (let i = 0; i < assetIds.length; i++) {
+
+        const findAsset = assets.value.find(asset => asset.id == assetIds[i].toHex())
+        findAsset.name = names[i].names[0]?.name ?? '-'
+        findAsset.amount = Helper.toCurrencyFormat(parseFloat(findAsset.amount) / Math.pow(10, assetProperties[i].divisibility), assetProperties[i].divisibility)
+        findAsset.creator = assetProperties[i].owner.address.plain() == Address.createFromRawAddress(p.address).plain()
+        findAsset.isLoaded = true;
+    }
+
+
+    loading.value = false;
+
+
+}
+
+
 </script>
 

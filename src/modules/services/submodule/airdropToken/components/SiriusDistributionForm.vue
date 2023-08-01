@@ -17,6 +17,8 @@ import { Helper } from '@/util/typeHelper';
 import { TransactionUtils, isMultiSig } from '@/util/transactionUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import {useI18n} from 'vue-i18n'
+import SelectMultisigInput from "@/components/SelectMultisigInput.vue"
+import MultisigInput from "@/components/MultisigInput.vue"
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputAccount from "@/components/SelectInputAccount.vue";
 import type { Account } from '@/models/account';
@@ -28,6 +30,11 @@ const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
 const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 const cosignerBalanceInsufficient = ref(false);
+const selectedMultisigAdd = ref("")
+const selectedMultisigName = ref("")
+const selectedMultisigPublicKey = ref("")
+const toggleMultisig = ref(false)
+const selectedMultisig = ref({})
 const disableAllInput = ref(false);
 const cosignAddress = ref("");
 const showPasswdError = ref(false);
@@ -35,6 +42,13 @@ const disablePassword = computed(() => disableAllInput.value);
 const walletPassword = ref("");
 const {t} = useI18n();
 const err = ref('');
+const initiateBy = computed(() => {
+  if(selectedMultisigAdd.value){
+    return true
+  } else {
+    return false
+  }
+})
 
 let assetList = ref<SimpleSDA[]>([]);
 let assetSelected = ref(null);
@@ -69,7 +83,7 @@ let knownToken = [{
 let scanDistributorAsset = async() =>{
   noAssetFound.value = false;
   assetSelected.value = null;
-  let assets = await Sirius.scanAsset(selectedAccount.value ? selectedAccount.value.publicKey : "");
+  let assets = await Sirius.scanAsset(selectedMultisigPublicKey.value ? selectedMultisigPublicKey.value : selectedAccount.value ? selectedAccount.value.publicKey : "");
 
   assetList.value = assets;
 
@@ -117,7 +131,7 @@ let distribute = async()=>{
   let totalLockHashToken = totalLockHashTxn * networkState.currentNetworkProfileConfig!.lockedFundsPerAggregate!;
 
   let selectedSda = assetList.value.find(x => x.id === assetSelected.value.id);
-  let aggregateTxns = Sirius.createDistributeAggregateTransactions(selectedAccount.value.publicKey, distributionList.value, aggregateNum.value, selectedSda!);
+  let aggregateTxns = Sirius.createDistributeAggregateTransactions(selectedMultisigPublicKey.value ? selectedMultisigPublicKey.value : selectedAccount.value.publicKey, distributionList.value, aggregateNum.value, selectedSda!);
   let totalAggregateTxnsFee = sum(aggregateTxns.map(x=> x.maxFee.compact()));
   let totalInitiatorFee = sum(totalLockHashFee, totalLockHashToken, totalAggregateTxnsFee);
   let xpxNeeded = totalInitiatorFee / Math.pow(10, AppState.nativeToken.divisibility);
@@ -365,6 +379,48 @@ const isMultiSigBool = computed(() => {
   }
 )
 
+const selectableMultisig = computed(() => {
+  const wallet = walletState.currentLoggedInWallet;
+  if(!wallet){
+    return []
+  }
+  let account = wallet.accounts.find(acc => acc.address == selectedAccount.value.address)
+  if(!account){
+    return []
+  }
+  let accountMultisigs = account.multisigInfo.filter((info) => info.level < 0).map(
+    (info, index) => {
+      return {
+        key: index.toString(),
+        label: wallet.contacts.find((contacts) => contacts.address == WalletUtils.createAddressFromPublicKey(info.publicKey,AppState.networkType).plain())?wallet.contacts.find((contacts) => contacts.address == WalletUtils.createAddressFromPublicKey(info.publicKey,AppState.networkType).plain()).name:wallet.accounts.find((acc) => acc.publicKey == info.publicKey)?wallet.accounts.find((acc) => acc.publicKey == info.publicKey).name:"MULTISIG-" + WalletUtils.createAddressFromPublicKey(info.publicKey,AppState.networkType).plain().slice(-4),
+        data: info.publicKey,
+        selectable: true
+      }
+    }
+  )
+  var selectableMultisig = accountMultisigs
+  return selectableMultisig
+})
+
+const haveSelectableMultisig = computed(() => {
+  if(selectableMultisig.value.length==0){
+    return false
+  } else {
+    return true
+  }
+})
+
+const onSelectMultisig = (event) => {
+  toggleMultisig.value = false
+  selectedMultisigAdd.value = WalletUtils.createAddressFromPublicKey(event.data,AppState.networkType).plain()
+  selectedMultisigName.value = event.label
+  selectedMultisigPublicKey.value = event.data
+  cosignAddress.value = selectedAccount.value.address
+  // this is too make it turn blue
+  selectedMultisig.value[event.key] = true
+  scanDistributorAsset()
+}
+
 const findAcc = (publicKey)=>{
       return walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey)
     }
@@ -433,6 +489,13 @@ if (isMultiSigBool.value) {
     checkDistributorAssetAmountDecimal(assetSelected.value);
   });
 
+  // Cancel transfer from multisig
+  emitter.on("CLOSE_MULTISIG", () =>{
+    selectedMultisigAdd.value = ""
+    selectedMultisigName.value = ""
+    selectedMultisigPublicKey.value = ""
+    scanDistributorAsset()
+  })
   // account is clicked
   emitter.on("select-account", (address) => {
     for (let i = 0; i < accounts.value.length; i++){
@@ -448,35 +511,26 @@ if (isMultiSigBool.value) {
 <template>
   <div class="container">
     <div class="p-2">
-      <div class="flex flex-col">
-        <SelectInputAccount v-model="currentAccount" :selectDefault="currentAccount"/>
-        <div v-if="isMultiSigBool" class="text-left mt-2 mb-5 ml-4">
-          <div v-if="getWalletCosigner.cosignerList.length > 0">
-              <div class="text-tsm">
-                {{$t('general.initiateBy')}}:
-                <span class="font-bold" v-if="getWalletCosigner.cosignerList.length == 1"> 
-                  {{ getWalletCosigner.cosignerList[0].name }} ({{$t('general.balance')}}:{{  getWalletCosigner.cosignerList[0].balance }} {{ currentNativeTokenName }})
-                </span>
-                <span class="font-bold" v-else>
-                  <select class="" v-model="cosignAddress">
-                    <option v-for="(element, item) in  getWalletCosigner.cosignerList" :value="findAcc(element.publicKey).address" :key="item">
-                      {{ element.name }} ({{$t('general.balance')}}: {{ element.balance }} {{ currentNativeTokenName }})
-                    </option>
-                  </select>
-                </span>
-                <div v-if="cosignerBalanceInsufficient" class="error">
-                  {{$t('general.insufficientBalance')}}
-                </div>
-              </div>
-            </div>
-            <div class="error" v-else>
-             {{$t('general.noCosigner')}} 
-            </div>
-        </div>
-        <div v-if="noAssetFound" class="error error_box" role="alert">
-          No SDA found
-        </div>
+      <div class="flex gap-1">
+        <SelectInputAccount v-model="currentAccount" :initiateBy="initiateBy" :selectDefault="currentAccount"/>
+          <div v-if="haveSelectableMultisig" @click="toggleMultisig = !toggleMultisig"
+            class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 h-16 w-18 mt-auto'>
+            <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
+            <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.select') }}</div>
+            <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.multisig') }}</div>
+          </div>
       </div>
+      <!-- Pop Up when select icon is clicked -->
+      <Sidebar v-model:visible="toggleMultisig" :baseZIndex="10000" position="full">
+          <SelectMultisigInput :account="selectableMultisig" :selectedMultisig="selectedMultisig"
+            @select="onSelectMultisig($event)" />
+      </Sidebar>
+      <div v-if="noAssetFound" class="error error_box" role="alert">
+          No SDA found
+      </div>
+      <div v-if="selectedMultisigAdd" class="mt-3">
+          <MultisigInput :select-default-address="selectedMultisigAdd" :select-default-name="selectedMultisigName"/>
+        </div>
     </div>
     <div class="p-2">
       <div>
