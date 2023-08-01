@@ -32,7 +32,16 @@ export const AddressbookRoutes = [
     name: 'ViewServicesAddressBookImport',
     component: () => import('@/modules/services/submodule/addressbook/views/ViewServicesAddressBookImport.vue'),
     meta: {
-      title: "Import Address Book",
+      title: "Import Backup Address Book",
+    }
+  },
+
+  {
+    path: '/import-contacts-account',
+    name: 'ViewServicesAddressBookImportAccount',
+    component: () => import('@/modules/services/submodule/addressbook/views/ViewServicesAddressBookImportAccount.vue'),
+    meta: {
+      title: "Import Account Address Book",
     }
   },
 
