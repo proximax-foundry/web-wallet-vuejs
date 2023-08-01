@@ -1,0 +1,1 @@
+var i,n;function o(){if(n)return i;n=1,i=e;function e(s,r){if(!s)throw new Error(r||"Assertion failed")}return e.equal=function(r,t,a){if(r!=t)throw new Error(a||"Assertion failed: "+r+" != "+t)},i}export{o as r};

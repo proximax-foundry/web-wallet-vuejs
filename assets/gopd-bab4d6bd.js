@@ -1,0 +1,1 @@
+import{r as n}from"./get-intrinsic-f35014ba.js";var e,t;function u(){if(t)return e;t=1;var i=n(),r=i("%Object.getOwnPropertyDescriptor%",!0);if(r)try{r([],"length")}catch{r=null}return e=r,e}export{u as r};
