@@ -104,7 +104,6 @@ import toggleSwitch from '@/modules/services/submodule/stacking/components/toggl
 import { getCurrentPriceUSD } from "@/util/functions";
 import { Utilities } from "@/util/utilities";
 import { Helper } from "@/util/typeHelper";
-import { pdfImg } from '@/modules/services/submodule/mainnetSwap/pdfBackground';
 
 
 export default {
@@ -909,7 +908,7 @@ export default {
 
     const saveCertificate = () => {
       const swapQr = SwapUtils.generateQRCode(explorerLink.value + transactionHash.value);
-      SwapUtils.generateIncomingPdfCert(pdfImg,selectedChainId.value === bscChainId ? "BSC" : "ETH", swapTimestamp.value, siriusAddress.value, selectedFromToken.value, transactionHash.value, swapQr);
+      SwapUtils.generateIncomingPdfCert(selectedChainId.value === bscChainId ? "BSC" : "ETH", swapTimestamp.value, siriusAddress.value, selectedFromToken.value, transactionHash.value, swapQr);
     };
 
     return {
