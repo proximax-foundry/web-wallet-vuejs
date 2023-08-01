@@ -174,7 +174,7 @@ export class BuildTransactions {
 
     aggregateComplete(innerTxn: InnerTransaction[]): AggregateTransaction {
 
-        return this.transactionBuilderFactory.aggregateCompleteV1 ()
+        return this.transactionBuilderFactory.aggregateCompleteV1()
             .deadline(Deadline.create())
             .innerTransactions(innerTxn)
             .build();
