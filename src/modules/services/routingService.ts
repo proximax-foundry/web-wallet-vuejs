@@ -1,10 +1,10 @@
 import { AddressbookRoutes } from '@/modules/services/submodule/addressbook/routingAddressbook';
 import { NamespaceRoutes } from '@/modules/services/submodule/namespaces/routingNamespace';
 import { MainnetSwapRoutes } from '@/modules/services/submodule/mainnetSwap/routingMainnetSwap';
-
 import { SettingsRoutes } from '@/modules/services/submodule/settings/routingSettings';
 import { AssetsRoutes } from '@/modules/services/submodule/assets/routingAssets';
 import { StackingRoutes } from '@/modules/services/submodule/stacking/routingStacking';
+import { ExchangeRoutes } from './submodule/exchange/routingExchange';
 import { RouteRecordRaw } from 'vue-router'
 
 export const ServiceRoutes: RouteRecordRaw[] = [
@@ -42,4 +42,5 @@ export const ServiceRoutes: RouteRecordRaw[] = [
   ...SettingsRoutes,
   ...AssetsRoutes,
   ...StackingRoutes,
+   ...ExchangeRoutes
 ];

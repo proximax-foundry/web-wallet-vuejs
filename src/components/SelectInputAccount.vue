@@ -25,12 +25,10 @@
         </template>
         <!-- For the display of the dropdown option -->
         <template #option="slotProps">
-          <div class="account-item">
-            <div class='flex'>
+            <div class='flex '>
               <div v-html="toSvg(slotProps.option.value, 20, jdenticonConfig)" />
-                <div class='text-base ml-2 font-semibold'>{{ slotProps.option.label }}</div>
+                <div class='text-xs ml-2 font-semibold '>{{ slotProps.option.label }}</div>
             </div>
-          </div>
         </template>
       </Dropdown>
   </div>
