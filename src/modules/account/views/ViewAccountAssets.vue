@@ -52,7 +52,7 @@
 
                     <Column field="creator" header="Creator">
                         <template #body="{ data }">
-                            <img v-if="data.creator" src="@/assets/img/icon-green-tick.svg" class="h-5 w-5">
+                            <img v-if="data.isCreator" src="@/assets/img/icon-green-tick.svg" class="h-5 w-5">
                             <img v-else src="@/assets/img/icon-red-x.svg" class="h-5 w-5">
                         </template>
                     </Column>
@@ -62,7 +62,7 @@
                                 class="w-4 h-4 cursor-pointer ml-2 mt-0.5"  @click="showMenu(data.i)"  @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
                             <div v-if="isMenuShow[data.i]" class="mt-5  w-36 absolute rounded-sm shadow-lg bg-white focus:outline-none z-10 text-left " >
                     <div class="my-2" >
-                        <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.id, address: address, assetBalance: data.balance} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
+                        <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
                         <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.linkToNamespace')}}</router-link>
                         <router-link :to="{ name: 'ViewAssetMetadata', params: {assetId: data.id, address: address} }">
                             <div class="block hover:bg-gray-100 transition duration-200 p-2 z-20 cursor-pointer">View Metadata</div>
@@ -132,7 +132,7 @@ interface Asset {
     id: string,
     amount: string,
     name: string,
-    creator: boolean,
+    isCreator: boolean,
     isLoaded: boolean
 
 }
@@ -188,7 +188,7 @@ const fetchAssets = async () => {
                 id: asset.id.toHex(),
                 amount: asset.amount.compact().toString(),
                 name: "",
-                creator: false,
+                isCreator: false,
                 isLoaded: false
             }
         })
@@ -267,7 +267,7 @@ const lazyLoad = async () => {
         const findAsset = assets.value.find(asset => asset.id == assetIds[i].toHex())
         findAsset.name = names[i].names[0]?.name ?? '-'
         findAsset.amount = Helper.toCurrencyFormat(parseFloat(findAsset.amount) / Math.pow(10, assetProperties[i].divisibility), assetProperties[i].divisibility)
-        findAsset.creator = assetProperties[i].owner.address.plain() == Address.createFromRawAddress(p.address).plain()
+        findAsset.isCreator = assetProperties[i].owner.address.plain() == Address.createFromRawAddress(p.address).plain()
         findAsset.isLoaded = true;
     }
 
