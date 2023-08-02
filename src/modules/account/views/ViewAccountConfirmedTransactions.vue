@@ -26,9 +26,9 @@
                 </div>
                 
                 
-                <select v-model="selectedTxnType" @change="changeSearchTxnType" class="w-44 border border-gray-200 px-2 py-1 focus:outline-none">
-                    <option value="all" class="text-sm">All</option>
-                    <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
+                <select v-model="selectedTxnType" @change="changeSearchTxnType" class="w-44 border uppercase border-gray-200 px-2 py-1 focus:outline-none">
+                    <option value="all" class="text-sm ">ALL</option>
+                    <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm ">{{ txnType.value.toUpperCase() }}</option>
                 </select>
                 
             </div>
