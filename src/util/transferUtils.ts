@@ -99,7 +99,7 @@ export class TransferUtils {
     let msg :Message;
    
 
-    if (isEncrypted) {
+    if (isEncrypted &&  messageText.length>0) {
       try {
         const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(recipientAddress))
         msg = EncryptedMessage.create(messageText, accountInfo.publicAccount, privateKey);
