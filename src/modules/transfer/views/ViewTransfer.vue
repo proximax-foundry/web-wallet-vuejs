@@ -372,8 +372,12 @@ watch([selectedAddress, selectedMultisigAddress], async ([n, mn]) => {
     assetOptions.value = [];
     selectedAssets.value = []
     //reload asset
+    if(n == null){
+        nativeTokenBalance.value = 0
+    }
     if (n != null && mn == null) {
         signerNativeTokenBalance.value = 0
+       
         await fetchAssets(n)
     } else if (n != null && mn != null) {
         await fetchSignerNativeBalance()
@@ -407,7 +411,7 @@ const contacts = computed(() => {
         return <{ key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string }[] }[]>[{
             key: '0',
             label: t('general.ownerAcc'),
-            selectable: true,
+            selectable: false,
             children: totalAcc.map((acc, index) => {
                 return {
                     key: "0-" + index.toString(),
@@ -419,7 +423,7 @@ const contacts = computed(() => {
         }, {
             key: '1',
             label: t('general.contact'),
-            selectable: true,
+            selectable: false,
             children: wallet.contacts.map((contact, index) => {
                 return {
                     key: "1-" + index.toString(),
@@ -433,7 +437,7 @@ const contacts = computed(() => {
     return <{ key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string }[] }[]>[{
         key: '0',
         label: t('general.ownerAcc'),
-        selectable: true,
+        selectable: false,
         children: totalAcc.map((acc, index) => {
             return {
                 key: "0-" + index.toString(),

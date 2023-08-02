@@ -26,9 +26,9 @@
                 </div>
                 
                 
-                <select v-model="selectedTxnType" @change="changeSearchTxnType" class="w-36 border border-gray-200 px-2 py-1 focus:outline-none">
-                    <option value="all" class="text-sm">All</option>
-                    <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm">{{ txnType.label}}</option>
+                <select v-model="selectedTxnType" @change="changeSearchTxnType" class="w-44 border uppercase border-gray-200 px-2 py-1 focus:outline-none">
+                    <option value="all" class="text-sm ">ALL</option>
+                    <option v-bind:key="txnType.value" v-for="txnType in txnTypeList" :value="txnType.value" class="text-sm ">{{ txnType.value.toUpperCase() }}</option>
                 </select>
                 
             </div>
@@ -47,6 +47,8 @@
                 <NamespaceTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.NAMESPACE" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="namespaceTransactions" :currentAddress="accAddress"></NamespaceTxnDataTable>
                 <RestrictionTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.RESTRICTION" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="restrictionTransactions" :currentAddress="accAddress"></RestrictionTxnDataTable>
                 <SecretTxnDataTable v-else-if="selectedTxnType === TransactionFilterType.SECRET" :selectedGroupType="transactionGroupType.CONFIRMED" :transactions="secretTransactions" :currentAddress="accAddress"></SecretTxnDataTable>
+                <SdaExchangeTxnDT v-else-if="selectedTxnType === TransactionFilterType.SDA_EXCHANGE"  :transactions="sdaExchangeTransactions"></SdaExchangeTxnDT>
+
             </div>
             <div v-else class="border-t border-b border-gray-200 text-gray-400 text-xs mt-10">
                 <div class="border-t border-b border-gray-200 my-3 py-6 px-2">
@@ -87,7 +89,9 @@ import { AppState } from "@/state/appState";
 import { Transaction } from "tsjs-xpx-chain-sdk";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { networkState } from "@/state/networkState";
-  
+import { ConfirmedSdaExchangeTransaction } from "@/modules/dashboard/model/transactions/confirmed/sdaExchange";
+import SdaExchangeTxnDT from "@/modules/dashboard/components/TransactionDataTable/SdaExchangeTxnDT.vue";
+
     const props = defineProps({
         address: String
     })
@@ -109,6 +113,7 @@ import { networkState } from "@/state/networkState";
     const restrictionTransactions = ref([]);
     const secretTransactions = ref([]);
     const chainTransactions = ref([]);
+    const sdaExchangeTransactions = ref<ConfirmedSdaExchangeTransaction []>([])
     let boolIsTxnFetched = ref(false);
     let allTxnQueryParams = Helper.createTransactionQueryParams();
     let blockDescOrderSortingField = Helper.createTransactionFieldOrder(Helper.getQueryParamOrder_v2().DESC, Helper.getTransactionSortField().BLOCK);
@@ -128,7 +133,6 @@ import { networkState } from "@/state/networkState";
     const accAddress = computed(()=> acc.value?acc.value.address:'');
     let dashboardService = new DashboardService(walletState.currentLoggedInWallet, acc.value);
     const formatConfirmedTransaction = async(transactions :Transaction[])=>{
-
         let formattedTxns = [];
         allTxnQueryParams.embedded = true;
         switch(selectedTxnType.value){ 
@@ -171,6 +175,11 @@ import { networkState } from "@/state/networkState";
         case TransactionFilterType.NAMESPACE:
             formattedTxns = await dashboardService.formatConfirmedNamespaceTransaction(transactions);
             break;
+
+        case TransactionFilterType.SDA_EXCHANGE:
+            formattedTxns = await dashboardService.formatConfirmedSdaExchangeTransaction(transactions)
+            break;
+
         default:
             allTxnQueryParams.embedded = false;
             formattedTxns = await dashboardService.formatConfirmedMixedTxns(transactions);
@@ -227,6 +236,10 @@ import { networkState } from "@/state/networkState";
         case TransactionFilterType.RESTRICTION:
           allTxnQueryParams.type = TransactionFilterTypes.getRestrictionTypes();
           break;
+        case TransactionFilterType.SDA_EXCHANGE:
+          allTxnQueryParams.type = TransactionFilterTypes.getSdaExchangeTypes();
+          break;
+
         default:
           allTxnQueryParams.type = undefined;
           allTxnQueryParams.embedded = false
@@ -304,6 +317,10 @@ import { networkState } from "@/state/networkState";
           case TransactionFilterType.RESTRICTION:
             restrictionTransactions.value = formattedTxns
             searchedTransactions.value = restrictionTransactions.value
+            break;
+            case TransactionFilterType.SDA_EXCHANGE:
+            sdaExchangeTransactions.value = formattedTxns
+            searchedTransactions.value = sdaExchangeTransactions.value
             break;
           default:
             mixedTransactions.value = formattedTxns

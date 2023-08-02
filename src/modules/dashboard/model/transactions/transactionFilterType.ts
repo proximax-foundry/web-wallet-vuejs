@@ -85,6 +85,14 @@ export class TransactionFilterTypes{
         ];
         
     }
+
+    static getSdaExchangeTypes(){
+        return [
+            TransactionType.PLACE_SDA_EXCHANGE_OFFER,
+            TransactionType.REMOVE_SDA_EXCHANGE_OFFER
+        ];
+        
+    }
 }
 
 export enum TransactionFilterType{
@@ -101,4 +109,5 @@ export enum TransactionFilterType{
     RESTRICTION = "Restriction",
     SECRET = "Secret",
     CHAIN = "Chain",
+    SDA_EXCHANGE = "SDA Exchange"
 }
