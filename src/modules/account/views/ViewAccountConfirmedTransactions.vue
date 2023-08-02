@@ -320,7 +320,7 @@ import SdaExchangeTxnDT from "@/modules/dashboard/components/TransactionDataTabl
             break;
             case TransactionFilterType.SDA_EXCHANGE:
             sdaExchangeTransactions.value = formattedTxns
-            searchedTransactions.value = restrictionTransactions.value
+            searchedTransactions.value = sdaExchangeTransactions.value
             break;
           default:
             mixedTransactions.value = formattedTxns
