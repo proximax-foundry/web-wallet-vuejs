@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
     readonly BASE_URL: string
+    readonly NODE_ENV: string
     // more env variables...
   }
   

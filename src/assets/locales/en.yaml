@@ -22,6 +22,7 @@ account:
   privateKeyExist: Account with this Private Key is already in the wallet
 addressBook:
   addBackUpContact: Add contacts from a contact backup file
+  addAccountContact: Add contacts from wallet account
   addCustomGroup: Add Custom Group
   addNewContact: Add New Contact
   addressBookMessage1: imported to address book
@@ -690,7 +691,7 @@ transfer:
   successfullySaved: 'Contact {name} successfully saved'
   transferAmount: Transfer Amount
   transferFrom: Transfer From
-  transferPlaceholder: Transfer to (Address / Namespace)
+  transferPlaceholder: Address / Namespace
 wallet:
   backHome: Back to Home
   backUpDescription: 'If you have a previously backed up wallet, please import the file here.'

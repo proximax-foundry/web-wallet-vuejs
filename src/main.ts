@@ -2,9 +2,7 @@ import "./assets/scss/main.scss";
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
-import 'animate.css';
-import vueDebounce from 'vue-debounce'
-import { VuePassword } from 'vue-password';
+import { vue3Debounce } from 'vue-debounce'
 import mitt from 'mitt';
 import PrimeVue from 'primevue/config';
 import "primeicons/primeicons.css";
@@ -34,7 +32,6 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
 import i18n from './i18n';
-import VWave from 'v-wave';
 import VueBlocksTree from 'vue3-blocks-tree';
 import 'vue3-blocks-tree/dist/vue3-blocks-tree.css';
 import { RequestOptions } from "tsjs-xpx-chain-sdk";
@@ -59,20 +56,18 @@ app.use(PrimeVue);
 app.use(ConfirmationService);
 app.use(ToastService);
 app.use(i18n);
-app.use(VWave);
-app.use(vueDebounce);
 app.use(VueBlocksTree /* , {treeName:'blocks-tree'} */);
-app.mount('#app');
 // Use Components
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('Toast', Toast);
 app.component('font-awesome-icon', FontAwesomeIcon);
-app.component(VuePassword);
 app.component('Dropdown', Dropdown);
 app.component('Sidebar', Sidebar);
 app.component('Tree',Tree);
 app.directive("tooltip", Tooltip);
 app.directive("maska", vMaska);
+app.directive('debounce', vue3Debounce({ lock: true }))
+app.mount('#app');
 
 AppStateUtils.addNewReadyStates('chainProfile');
 AppStateUtils.addNewReadyStates('theme');
@@ -291,16 +286,19 @@ if (!walletState.currentLoggedInWallet) {
   AppStateUtils.setStateReady('loadLoadedData');
 
   // check sessionStorage
-  if (!WalletStateUtils.checkFromSession()) {
-    NetworkStateUtils.checkSession();
+ 
+  WalletStateUtils.checkFromSession().then(bool=>{
+    if(!bool){
+      NetworkStateUtils.checkSession();
+      AppStateUtils.setStateReady('checkSession');
+  
+      router.push({ name: "Home" });
+    }
+  }).finally(()=>{
     AppStateUtils.setStateReady('checkSession');
+    AppStateUtils.setStateReady('loadLoadedData');
+  })
 
-    router.push({ name: "Home" });
-  }
-
-  AppStateUtils.setStateReady('checkSession');
-  AppStateUtils.setStateReady('loadLoadedData');
 }
-
 // NetworkStateUtils.checkDefaultNetwork();
 

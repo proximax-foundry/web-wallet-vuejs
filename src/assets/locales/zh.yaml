@@ -682,7 +682,7 @@ transfer:
   successfullySaved: '联系人{name}成功保存'
   transferAmount: 转账数额
   transferFrom: 转自
-  transferPlaceholder: 转到（地址/名称空间）。
+  transferPlaceholder: 地址/名称空间
 wallet:
   backHome: 返回首页
   backUpDescription: '如果你有一个以前备份的钱包，请在这里导入文件。'

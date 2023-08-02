@@ -9,8 +9,6 @@
             <router-link :to="{name:'ViewAccountPendingTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer  rounded-md text-white py-2 px-5" style="background: #f3a91d">Pending</router-link>
             <router-link :to="{name:'ViewAccountFailedTransactions', params: { address: address}}" class="border opacity-60 hover:opacity-100 cursor-pointer  rounded-md text-white py-2 px-5" style="background: #DC143C">Failed</router-link>
           </div>
-        <Accordion :activeIndex="0">
-        <AccordionTab class="p-accordion-header p-highlight">
         <div class="bg-white px-2 " >
             <div class="flex flex-col gap-3 mt-3">
                
@@ -60,8 +58,6 @@
             </div>
             <a :href="linkToExplorer()" target=_new v-if="searchedTransactions.length==10"><div class="text-right text-xs text-blue-primary mt-3" >View more...</div></a>
         </div>
-        </AccordionTab>
-      </Accordion>
     </div>
 </div>
 </template>
@@ -91,8 +87,6 @@ import { AppState } from "@/state/appState";
 import { Transaction } from "tsjs-xpx-chain-sdk";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { networkState } from "@/state/networkState";
-import Accordion from 'primevue/accordion';
-import AccordionTab from 'primevue/accordiontab';
   
     const props = defineProps({
         address: String
@@ -335,10 +329,3 @@ import AccordionTab from 'primevue/accordiontab';
     }
 
 </script>
-<style scoped>
-:deep(.p-accordion-header,.p-highlight) {
-    background-color: white;
-    margin-top: 5px;
-}
-</style>
-

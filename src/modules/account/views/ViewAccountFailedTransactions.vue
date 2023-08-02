@@ -13,15 +13,7 @@
                 <div class="border rounded-md text-white py-2 px-5" style="background: #DC143C">Failed</div>
             </div>
 
-        <Accordion :activeIndex="isTransactions? null:0">
-            <AccordionTab class="p-accordion-header p-highlight" :disabled="isTransactions">
-                <div class="bg-white px-2 ">
-                    <div class="mt-3">
-                        <FailedTxnDT :transactions="txnFailed" class="mt-3"></FailedTxnDT>
-                    </div>
-                </div>
-            </AccordionTab>
-        </Accordion>
+            <FailedTxnDT :transactions="txnFailed" class="mt-3" />
         </div>
     </div>
 </template>
@@ -33,29 +25,17 @@ import FailedTxnDT from '@/modules/dashboard/components/TransactionDataTable/Fai
 import { AppState } from "@/state/appState";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { walletState } from "@/state/walletState";
-import Accordion from 'primevue/accordion';
-import AccordionTab from 'primevue/accordiontab';
 
 defineProps({
     address: String,
 })
 
 const txnStatus = ref([])
-const isTransactions = ref(true);
 const txnFailed = computed(() => {
     let txns = []
     txns = txnStatus.value
     return txns
 })
-
-let checkTransactions = async() =>{
-    if(txnFailed.value.length>0){
-        isTransactions.value = false
-    }
-    else{
-        isTransactions.value = true
-    }
-}
 
 const checkTxnStatus = async () => {
     if (!AppState.chainAPI) {
@@ -78,7 +58,6 @@ const checkTxnStatus = async () => {
 
 const init = async () => {
     await checkTxnStatus()
-    await checkTransactions()
 }
 if (AppState.isReady) {
     init();
@@ -99,10 +78,3 @@ watchEffect(() => {
     })
 
 </script>
-<style scoped>
-:deep(.p-accordion-header,.p-highlight) {
-    background-color: white;
-    margin-top: 0px;
-    margin-bottom: 0px;
-}
-</style>

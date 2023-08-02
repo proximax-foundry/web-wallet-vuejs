@@ -46,15 +46,22 @@ export default {
       const internalInstance = getCurrentInstance();
       const emitter = internalInstance.appContext.config.globalProperties.emitter;
       const verifyWalletPwPk =()=> {
-        if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPasswd.value)) {
-          // pw is correct
-          const passwordInstance = WalletUtils.createPassword(walletPasswd.value);
-          const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance,acc.value.encrypted,acc.value.iv);
-          privateKey.value= walletPrivateKey.toUpperCase();
-          err.value=''
-          emitter.emit('revealPK',true);
-          emitter.emit('pkValue',privateKey.value);
-        } else {
+        try{
+          if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPasswd.value)) {
+            // pw is correct
+            const passwordInstance = WalletUtils.createPassword(walletPasswd.value);
+            const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance,acc.value.encrypted,acc.value.iv);
+            privateKey.value= walletPrivateKey.toUpperCase();
+            err.value=''
+            emitter.emit('revealPK',true);
+            emitter.emit('pkValue',privateKey.value);
+          }
+          else{
+            let walletName = walletState.currentLoggedInWallet.name
+            err.value = t('general.walletPasswordInvalid',{name: walletName});
+          } 
+        }
+        catch(e){
           let walletName = walletState.currentLoggedInWallet.name
           err.value = t('general.walletPasswordInvalid',{name: walletName});
         }
