@@ -10,7 +10,7 @@ export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   let publicPath = '/';
 
-  switch (env.NODE_ENV) {
+  switch (env.VITE_NODE_ENV) {
     case 'staging':
       publicPath = '/web-wallet-vuejs'
       break;
