@@ -37,7 +37,7 @@ import { AppState } from "@/state/appState";
 import Menu from 'primevue/menu';
 import { useRouter } from 'vue-router'
 import { ref} from "vue";
-const nodeEnv = import.meta.env.NODE_ENV ?? 'development'
+const nodeEnv =  process.env.VITE_NODE_ENV
 const networkType = AppState.networkType
 const menu = ref();
 const toggle = (event) => {
