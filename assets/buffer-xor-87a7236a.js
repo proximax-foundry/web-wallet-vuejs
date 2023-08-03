@@ -1,1 +1,0 @@
-import"./node-stdlib-browser-23a8bc7f.js";import{b as a}from"./buffer-6d367910.js";var e,o;function m(){return o||(o=1,e=function(f,u){for(var n=Math.min(f.length,u.length),t=new a.Buffer(n),r=0;r<n;++r)t[r]=f[r]^u[r];return t}),e}export{m as r};

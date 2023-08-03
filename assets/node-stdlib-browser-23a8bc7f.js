@@ -1,1 +1,0 @@
-import"./buffer-6d367910.js";import"./process-2209b2b3.js";var i=function(e){function r(){var o=this||self;return delete e.prototype.__magic__,o}if(typeof globalThis=="object")return globalThis;if(this)return r();e.defineProperty(e.prototype,"__magic__",{configurable:!0,get:r});var t=__magic__;return t}(Object),l=i;export{l as _};
