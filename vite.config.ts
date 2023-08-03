@@ -36,21 +36,37 @@ export default defineConfig(({ command, mode }) => {
     ],
     resolve: {
       alias: {
+        vue: "vue/dist/vue.esm-bundler.js",
         "@": fileURLToPath(new URL("./src", import.meta.url)),
       },
     },
     build: {
       chunkSizeWarningLimit: 2000, //default 500
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-                return id.toString().split('node_modules/')[1].split('/')[0].toString();
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            const arr = id.toString().split('node_modules/')[1].split('/')
+            switch(arr[0]) {
+              case '@kangc':
+              case '@naturefw':
+              case '@popperjs':
+              case '@vue':
+              case 'axios':
+              case 'element-plus':
+                return '_' + arr[0]
+              default :
+                return '__vendor'
             }
-        }
+          }
         },
+        chunkFileNames: 'static/js1/[name]-[hash].js',
+        entryFileNames: 'static/js2/[name]-[hash].js',
+        assetFileNames: 'static/[ext]/[name]-[hash].[ext]'
       },
-    },
+      brotliSize: false, 
+      target: 'esnext', 
+      minify: 'esbuild' 
+    }
 
   }
 })
