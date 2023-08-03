@@ -3,7 +3,7 @@
         <div class="flex gap-2">
             <div class="flex flex-col w-full">
                 <div class="uppercase text-gray-500 font-light text-xxs text-left  ">{{ placeholder }}</div>
-                <input type="text" :value="modelValue" @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"  class="w-full font-semibold text-tsm outline-none mt-1">
+                <input type="text" v-model="modelValue"  class="w-full font-semibold text-tsm outline-none mt-1">
             </div>
             <div v-if="showError && modelValue.length != 0" class="flex flex-col ml-auto justify-center mt-1">
                 <img src="@/assets/img/icon-red-x.svg" class="h-5 w-5 mr-auto ml-auto">
@@ -19,17 +19,16 @@
     </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends string, U extends boolean" >
 
-  defineProps({
-    placeholder: String,
-    showError: Boolean,
-    modelValue: String,
-  })
-  defineEmits([
-    'update:modelValue'
-  ])
+  defineProps<{
+    placeholder: T,
+    showError: U,
+  }>()
 
+
+ const modelValue = defineModel()
+ 
 </script>
 
 <style lang="scss">
