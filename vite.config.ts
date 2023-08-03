@@ -7,22 +7,22 @@ import path from "path";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 export default defineConfig(({ command, mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
-  let publicPath = '/';
+  const env = loadEnv(mode, process.cwd(), "");
+  let publicPath = "/";
 
   switch (env.VITE_NODE_ENV) {
     case 'staging':
       publicPath = '/web-wallet-vuejs'
       break;
-    case 'production':
-      publicPath = ''
+    case "production":
+      publicPath = "";
       break;
-    case 'development':
-      publicPath = '/'
+    case "development":
+      publicPath = "/";
       break;
   }
   return {
-    base:  publicPath,
+    base: publicPath,
     plugins: [
       //experimental features
       vue({
@@ -42,24 +42,35 @@ export default defineConfig(({ command, mode }) => {
     ],
     resolve: {
       alias: {
+        vue: "vue/dist/vue.esm-bundler.js",
         "@": fileURLToPath(new URL("./src", import.meta.url)),
       },
     },
     build: {
       chunkSizeWarningLimit: 2000, //default 500
-      rollupOptions: {
+      /* rollupOptions: {
         output: {
           manualChunks(id) {
-            if (id.includes('node_modules')) {
-                return id.toString().split('node_modules/')[1].split('/')[0].toString();
+            if (id.includes("node_modules")) {
+              const arr = id.toString().split("node_modules/")[1].split("/");
+              switch (arr[0]) {
+                case "@kangc":
+                case "@naturefw":
+                case "@popperjs":
+                case "@vue":
+                case "axios":
+                case "element-plus":
+                  return "_" + arr[0];
+                default:
+                  return arr[0].toString();
+              }
             }
-        }
+          },
+          chunkFileNames: "static/js1/[name]-[hash].js",
+          entryFileNames: "static/js2/[name]-[hash].js",
+          assetFileNames: "static/[ext]/[name]-[hash].[ext]",
         },
-      },
+      }, */
     },
-
-  }
-})
-
-
-
+  };
+});
