@@ -24,7 +24,13 @@ export default defineConfig(({ command, mode }) => {
   return {
     base:  publicPath,
     plugins: [
-      vue(),
+      //experimental features
+      vue({
+        script:{
+          defineModel:true,
+          propsDestructure: true
+        }
+      }),
       VueI18nPlugin({
         include: path.resolve(__dirname, "./src/assets/locales/**"),
       }),
