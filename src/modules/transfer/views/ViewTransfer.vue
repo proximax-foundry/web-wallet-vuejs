@@ -299,11 +299,8 @@ const toast = useToast()
 
 const router = useRouter()
 
-const makeTransfer = async () => {
-    if (nativeAmount.value == "0" && selectedAssets.value.length == 0) {
-      toggleConfirm.value = true;
-    } else {
-        const isPasswordCorrect = await TransferUtils.createTransaction(
+const createTransferTxn = async () => {
+    const isPasswordCorrect = await TransferUtils.createTransaction(
             recipientInput.value,
             nativeAmount.value,
             message.value,
@@ -333,6 +330,13 @@ const makeTransfer = async () => {
 
         router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
         clearInput()
+}
+
+const makeTransfer = () => {
+    if (nativeAmount.value == "0" && selectedAssets.value.length == 0) {
+      toggleConfirm.value = true;
+    } else {
+        createTransferTxn()
     }
 }
 
@@ -419,40 +423,11 @@ emitter.on("select-multisig-account", (address: string) => {
 emitter.on("CLOSE_CONFIRM_SEND_MODAL", (emitValue: boolean) => {
     toggleConfirm.value = emitValue;
   });
-emitter.on("CONFIRM_PROCEED_SEND", async (emitValue: boolean) => {
+emitter.on("CONFIRM_PROCEED_SEND", (emitValue: boolean) => {
 
   if (emitValue) {
     toggleConfirm.value = false
-    const isPasswordCorrect = await TransferUtils.createTransaction(
-            recipientInput.value,
-            nativeAmount.value,
-            message.value,
-            selectedAssets.value.map(asset => {
-                return {
-                    id: asset.id,
-                    amount: parseFloat(asset.amount),
-                    divisibility: asset.divisibility
-                }
-            }),
-            walletPassword.value,
-            selectedAddress.value,
-            selectedMultisigAddress.value,
-            isEncrypted.value,
-            publicKeyInput.value
-        )
-        if (!isPasswordCorrect) {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: "Password is incorrect",
-                group: 'br-custom',
-                life: 1000
-            });
-            return
-        }
-
-        router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
-        clearInput()
+    createTransferTxn()
   }
 });
 
