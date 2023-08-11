@@ -131,8 +131,6 @@ const toggleContact = ref(false)
 
 const toggleConfirm = ref(false);
 
-const forceSend = ref(false);
-
 const recipientInput = ref('')
 
 const isEncrypted = ref(false)
@@ -302,7 +300,7 @@ const toast = useToast()
 const router = useRouter()
 
 const makeTransfer = async () => {
-    if (nativeAmount.value == "0" && !forceSend.value) {
+    if (nativeAmount.value == "0" && selectedAssets.value.length == 0) {
       toggleConfirm.value = true;
     } else {
         const isPasswordCorrect = await TransferUtils.createTransaction(
@@ -336,7 +334,6 @@ const makeTransfer = async () => {
         router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
         clearInput()
     }
-    forceSend.value = false;
 }
 
 const fetchSignerNativeBalance = async () => {
@@ -419,15 +416,43 @@ emitter.on("select-multisig-account", (address: string) => {
     selectedMultisigAddress.value = address
 })
 
-emitter.on("CLOSE_CONFIRM_SEND_MODAL", (payload: boolean) => {
-    toggleConfirm.value = payload;
+emitter.on("CLOSE_CONFIRM_SEND_MODAL", (emitValue: boolean) => {
+    toggleConfirm.value = emitValue;
   });
-emitter.on("CONFIRM_PROCEED_SEND", (payload: boolean) => {
+emitter.on("CONFIRM_PROCEED_SEND", async (emitValue: boolean) => {
 
-  if (payload) {
-    forceSend.value = payload;
-    toggleConfirm.value = false;
-    makeTransfer()
+  if (emitValue) {
+    toggleConfirm.value = false
+    const isPasswordCorrect = await TransferUtils.createTransaction(
+            recipientInput.value,
+            nativeAmount.value,
+            message.value,
+            selectedAssets.value.map(asset => {
+                return {
+                    id: asset.id,
+                    amount: parseFloat(asset.amount),
+                    divisibility: asset.divisibility
+                }
+            }),
+            walletPassword.value,
+            selectedAddress.value,
+            selectedMultisigAddress.value,
+            isEncrypted.value,
+            publicKeyInput.value
+        )
+        if (!isPasswordCorrect) {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: "Password is incorrect",
+                group: 'br-custom',
+                life: 1000
+            });
+            return
+        }
+
+        router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
+        clearInput()
   }
 });
 
