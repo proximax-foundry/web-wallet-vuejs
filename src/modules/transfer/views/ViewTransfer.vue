@@ -3,6 +3,7 @@
         <Sidebar v-model:visible="toggleContact" :baseZIndex="10000" position="full">
             <SelectAccountAndContact :contacts="contacts" @node-select="onNodeSelect" />
         </Sidebar>
+        <ConfirmSendModal :toggleModal="toggleConfirm" />
         <div class='w-10/12 ml-auto mr-auto mt-5'>
             <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8">
                 <div class="xl:col-span-2 p-12">
@@ -108,6 +109,7 @@ import { TransferUtils } from '@/util/transferUtils';
 import TransferTxnSummary from '../components/TransferTxnSummary.vue';
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
+import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
 
 const addressPatternShort = "^[0-9A-Za-z]{40}$";
 
@@ -126,6 +128,8 @@ const selectedMultisigAddress = ref<string | null>(null)
 const selectedAddress = ref<string | null>(null)
 
 const toggleContact = ref(false)
+
+const toggleConfirm = ref(false);
 
 const recipientInput = ref('')
 
@@ -278,41 +282,62 @@ const updateAmountToMax = () => {
     nativeAmount.value = maxAmount.value.toString();
 }
 
+const clearInput = () => {
+      selectedAddress.value = null;
+      walletPassword.value = "";
+      recipientInput.value = "";
+      isEncrypted.value = false;
+      message.value = "";
+      nativeAmount.value = "0";
+      emitter.emit("CLEAR_SELECT", 0);
+      selectedAssets.value = [];
+      selectedMultisigAddress.value = null;
+      publicKeyInput.value = "";
+    };
+
 const toast = useToast()
 
 const router = useRouter()
 
-const makeTransfer = async () => {
+const createTransferTxn = async () => {
     const isPasswordCorrect = await TransferUtils.createTransaction(
-        recipientInput.value,
-        nativeAmount.value,
-        message.value,
-        selectedAssets.value.map(asset => {
-            return {
-                id: asset.id,
-                amount: parseFloat(asset.amount),
-                divisibility: asset.divisibility
-            }
-        }),
-        walletPassword.value,
-        selectedAddress.value,
-        selectedMultisigAddress.value,
-        isEncrypted.value,
-        publicKeyInput.value
-    )
-    if (!isPasswordCorrect) {
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: "Password is incorrect",
-            group: 'br-custom',
-            life: 1000
-        });
-        return
+            recipientInput.value,
+            nativeAmount.value,
+            message.value,
+            selectedAssets.value.map(asset => {
+                return {
+                    id: asset.id,
+                    amount: parseFloat(asset.amount),
+                    divisibility: asset.divisibility
+                }
+            }),
+            walletPassword.value,
+            selectedAddress.value,
+            selectedMultisigAddress.value,
+            isEncrypted.value,
+            publicKeyInput.value
+        )
+        if (!isPasswordCorrect) {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: "Password is incorrect",
+                group: 'br-custom',
+                life: 1000
+            });
+            return
+        }
+
+        router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
+        clearInput()
+}
+
+const makeTransfer = () => {
+    if (nativeAmount.value == "0" && selectedAssets.value.length == 0) {
+      toggleConfirm.value = true;
+    } else {
+        createTransferTxn()
     }
-
-    router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
-
 }
 
 const fetchSignerNativeBalance = async () => {
@@ -394,6 +419,17 @@ emitter.on("select-account", (address: string) => {
 emitter.on("select-multisig-account", (address: string) => {
     selectedMultisigAddress.value = address
 })
+
+emitter.on("CLOSE_CONFIRM_SEND_MODAL", (emitValue: boolean) => {
+    toggleConfirm.value = emitValue;
+  });
+emitter.on("CONFIRM_PROCEED_SEND", (emitValue: boolean) => {
+
+  if (emitValue) {
+    toggleConfirm.value = false
+    createTransferTxn()
+  }
+});
 
 const onNodeSelect = (node: TreeNode) => {
     toggleContact.value = false
