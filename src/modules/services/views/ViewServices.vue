@@ -20,7 +20,16 @@
             <div class='text-center text-xs font-semibold'>SDA Exchange</div>
           </div>
           <Menu ref="menu" id="overlay_menu" :model="items" :popup="true" />
-     
+          <router-link :to="{ name: 'ViewServicesNftMaker' }" class='w-40 '>
+            <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg"
+              class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
+            <div class='text-center text-xs font-semibold'>Nft Maker</div>
+          </router-link>
+          <router-link :to="{ name: 'ViewServicesNftDistribution' }" class='w-40 '>
+            <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg"
+              class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
+            <div class='text-center text-xs font-semibold'>Nft Distribution </div>
+          </router-link>
         </div>
       </div>
     </div>
