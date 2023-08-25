@@ -1,33 +1,43 @@
 <template>
 <div class="mx-12 justify-center pt-8">
-    <div v-if="!isConnected" class="text-center text-red-600 bg-red-300 rounded-lg ml-auto mr-auto w-52 py-1.5">Wallet is not connected</div>
-    <div class="font-semibold  dark:text-white mb-2">My items</div>
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 items-center ">
+    <SelectInputAccount />
+    <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
+    <div class="font-semibold  dark:text-white mb-2">My Nfts</div>
+    <div v-if="assets.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 items-center ">
         <div v-for="(asset,index) of assets" :key="index" >
             <div class="flex flex-col ">
-                <router-link :to="`nft-details/${asset.id}`">
-                    <img class="img" :src="asset.image" >
-                 </router-link>
-                <div class="dark:text-white">{{asset.name}}</div>
+                <img class="img" :src="asset.image" >
+                <div class="dark:text-white">Name:
+                    <span class="dark:text-white">{{asset.name}}</span>
+                </div>
                 <div class="dark:text-white">Asset ID:</div>
                 <div class="dark:text-white break-all">{{asset.id}}</div>
             </div>
         </div>
     </div>
+    <div v-else class="mb-3 rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+        <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2">
+            <font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute"
+            style="top: 3px; left:4px"></font-awesome-icon></div>
+        <div class="inline-block text-xs">No Nft</div>
+    </div>
 </div>
 </template>
 
 <script lang="ts" setup>
-import { AccountHttp, Convert, MetadataHttp, MetadataQueryParams, MetadataType, MosaicHttp, MosaicId, NetworkType, PublicAccount } from 'tsjs-xpx-chain-sdk';
-import { getCurrentInstance, ref, shallowRef, watch } from 'vue';
+import { Address, Convert, MetadataQueryParams, MetadataType, MosaicId, NetworkType, PublicAccount } from 'tsjs-xpx-chain-sdk';
+import { getCurrentInstance, ref, shallowRef } from 'vue';
 import UTF8 from 'utf-8';
+import { AppState } from '@/state/appState';
+import SelectInputAccount from "@/modules/services/submodule/nftMaker/components/SelectInputAccount.vue";
+import SelectInputMultisigAccount from "@/modules/services/submodule/nftMaker/components/SelectInputMultisigAccount.vue";
 
 //initialize variables
+const selectedAddress = ref<string | null>(null)
+const selectedMultisigAddress = ref<string | null>(null)
 const publicKey = shallowRef('')
-const isConnected = shallowRef(false)
 const internalInstance = getCurrentInstance() 
 const emitter = internalInstance!.appContext.config.globalProperties.emitter
-const testnetUrl = 'https://api-2.testnet2.xpxsirius.io'
 interface displayAsset{
     image: string,
     name: string,
@@ -36,7 +46,7 @@ interface displayAsset{
 const assets = ref<displayAsset[]>([]) 
 
 //get public key from session storage
-const fetchSessionStorage = () =>{
+/*const fetchSessionStorage = () =>{
   const searchStorage = sessionStorage.getItem('userPublicKey') 
   if(searchStorage!=null){
     publicKey.value = PublicAccount.createFromPublicKey(searchStorage, NetworkType.TEST_NET).publicKey
@@ -54,7 +64,7 @@ emitter.on('Mobile Wallet Connected',()=>{
 
 emitter.on('Mobile Wallet Disconnected',()=>{
     fetchSessionStorage()
-})
+})*/
 
 //functions to get convert utf8 from hex
 const removeDoubleZero = (string :string) =>{
@@ -82,10 +92,10 @@ const delay =( ms :number)=> new Promise(res => setTimeout(res, ms))
 const fetchNft = async() =>{
     let dataPerRequest = 100
     let publicAccount = PublicAccount.createFromPublicKey(publicKey.value,NetworkType.TEST_NET)
-    const accountHttp = new AccountHttp(testnetUrl)
-    const metadataHttp = new MetadataHttp(testnetUrl)
-    const mosaicHttp = new MosaicHttp(testnetUrl)
-    const accountInfo = await accountHttp.getAccountInfo(publicAccount.address).toPromise()
+    const metadataHttp = AppState.chainAPI.metadataAPI
+    const mosaicHttp = AppState.chainAPI.assetAPI
+    const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(selectedAddress.value))
+    console.log(accountInfo)
     const mosaicIds :MosaicId[] = accountInfo.mosaics.map(mosaic=>mosaic.id) //get all account mosaics
     let numOfRequest = Math.ceil(mosaicIds.length / dataPerRequest)
     let nftIds :string[] = [] //filter nft ids
@@ -93,7 +103,7 @@ const fetchNft = async() =>{
         let startIndex = i * dataPerRequest
         let endIndex = (i + 1) * dataPerRequest
         let requestData = mosaicIds.slice(startIndex, endIndex) 
-        let mosaicInfos = await mosaicHttp.getMosaics(requestData).toPromise()
+        let mosaicInfos = await mosaicHttp.getMosaics(requestData)
         let filteredMosaicInfos = mosaicInfos.filter(mosaicInfo=>{
             return mosaicInfo.supply.compact() == 1 && 
             mosaicInfo.divisibility == 0 && 
@@ -109,7 +119,7 @@ const fetchNft = async() =>{
     metadataQueryParams.pageSize = 100;
     metadataQueryParams.pageNumber = 1;
     metadataQueryParams.targetKey = publicKey.value
-    let searchedMetadata = await metadataHttp.searchMetadata(metadataQueryParams).toPromise()
+    let searchedMetadata = await metadataHttp.searchMetadatas(metadataQueryParams)
     for(let i = 0; i< searchedMetadata.metadataEntries.length; i++){
         let metadataEntry = searchedMetadata.metadataEntries[i]
         if(convertUtf8(metadataEntry.scopedMetadataKey.toHex()) == 'nft.json'){
@@ -128,7 +138,7 @@ const fetchNft = async() =>{
         metadataQueryParams.pageSize = 100
         metadataQueryParams.pageNumber = i;
         metadataQueryParams.targetKey = publicKey.value
-        let searchedMetadata = await metadataHttp.searchMetadata(metadataQueryParams).toPromise()
+        let searchedMetadata = await metadataHttp.searchMetadatas(metadataQueryParams)
         for(let i = 0; i< searchedMetadata.metadataEntries.length; i++){
             let metadataEntry = searchedMetadata.metadataEntries[i]
             if(convertUtf8(metadataEntry.scopedMetadataKey.toHex()) == 'nft.json'){
@@ -143,16 +153,21 @@ const fetchNft = async() =>{
     }   
 }
 
-//check if wallet is connected
-watch(publicKey,n=>{ 
-    if(n.length){
-        isConnected.value= true
-        fetchNft()
-    }else{
-        isConnected.value = false
-        assets.value = []
-    }
-},{immediate:true})
+emitter.on("select-account", async (address: string) => {
+    selectedAddress.value = address
+    const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(selectedAddress.value))
+    publicKey.value = accountInfo.publicKey
+    assets.value = []
+    fetchNft()
+})
+
+emitter.on("select-multisig-account", async (address: string) => {
+    selectedMultisigAddress.value = address
+    const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(selectedMultisigAddress.value))
+    publicKey.value = accountInfo.publicKey
+    assets.value = []
+    fetchNft()
+})
 
 </script>
 

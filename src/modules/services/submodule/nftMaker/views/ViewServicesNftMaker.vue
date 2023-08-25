@@ -8,7 +8,7 @@
       </div>
     </div>
       <div class='mt-2 py-3 '>
-        <div class="w-11/12 ml-auto mr-auto border-2">
+        <div class="w-11/12 ml-auto mr-auto">
           <CreateNftForm/>
         </div>
       </div>

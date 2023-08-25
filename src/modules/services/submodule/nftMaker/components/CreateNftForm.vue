@@ -1,49 +1,53 @@
 <template>
-    <div class='mt-2 py-3 '>
-        <div class="w-11/12 ml-auto mr-auto border-2 p-2">
-            <SelectInputAccount />
-            <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
-            <div class="mt-2 dark:text-white">Name</div>
-            <TextInput placeholder="Name your item" v-model="name"/>
-            <div class="mt-4 dark:text-white">Description</div>
-            <textarea type="text " v-model="description" placeholder="Prepare a detailed description of your item" class="w-full px-3  py-1.5 mt-1 border focus:outline-none border-black"></textarea>
-            <div class="mt-4 dark:text-white">External Link</div>
-            <TextInput placeholder="https://yoursite.io/item/123"  v-model="externalLink"  />
-            <div class="mt-4 dark:text-white">Properties</div>
-            <div v-for="(attributeName,index) of attributeNames" :key="index" >
-                <div class="flex gap-2 mb-2" >
-                    <img src="@/modules/services/submodule/nftMaker/img/icon-delete-red.svg" class="w-4 h-4 cursor-pointer mt-2.5" @click="removeProperty(index)">
-                    <div class="w-full">
-                        <TextInput placeholder="Property name" errorMessage="More than 8 bytes." v-model="attributeNames[index]" />
-                    </div>
-                    <div class="w-full">
-                        <TextInput placeholder="Property value" v-model="attributeValues[index]" />
+    <div class='w-10/12 ml-auto mr-auto mt-5'>
+        <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8">
+            <div class="xl:col-span-2 p-12">
+                <div v-if="showBalanceErr"
+                    class="mb-3 rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+                    <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2">
+                        <font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute"
+                            style="top: 3px; left:4px"></font-awesome-icon></div>
+                    <div class="inline-block text-xs">{{ $t('general.insufficientBalance') }}</div>
+                </div>
+                <SelectInputAccount />
+                <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
+                <div class="mt-2 dark:text-white">Name</div>
+                <TextInput placeholder="Name your item" v-model="name"/>
+                <div class="mt-4 dark:text-white">Description</div>
+                <textarea type="text " v-model="description" placeholder="Prepare a detailed description of your item" class="w-full px-3  py-1.5 mt-1 border focus:outline-none border-black"></textarea>
+                <div class="mt-4 dark:text-white">External Link</div>
+                <TextInput placeholder="https://yoursite.io/item/123"  v-model="externalLink"  />
+                <div class="mt-4 dark:text-white">Properties</div>
+                <div v-for="(attributeName,index) of attributeNames" :key="index" >
+                    <div class="flex gap-2 mb-2" >
+                        <img src="@/modules/services/submodule/nftMaker/img/icon-delete-red.svg" class="w-4 h-4 cursor-pointer mt-2.5" @click="removeProperty(index)">
+                        <div class="w-full">
+                            <TextInput placeholder="Property name" errorMessage="More than 8 bytes." v-model="attributeNames[index]" />
+                        </div>
+                        <div class="w-full">
+                            <TextInput placeholder="Property value" v-model="attributeValues[index]" />
+                        </div>
                     </div>
                 </div>
+                <div class="w-[80px] mt-2">
+                    <div class="text-blue-600 font-semibold text-xs cursor-pointer dark:text-blue-600 cursor-pointer" @click="addProperty()">+ Add more</div>
+                </div>
             </div>
-            <div class="w-[80px] mt-2">
-                <div class="text-blue-600 font-semibold text-xs cursor-pointer dark:text-blue-600 cursor-pointer" @click="addProperty()">+ Add more</div>
+            <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
+                <DisplayFee :signer-native-token-balance="signerNativeTokenBalance"
+                         :native-token-balance="nativeTokenBalance" :lock-fund="lockFund"
+                        :lock-fund-tx-fee="lockFundTxFee" :selected-multisig-address="selectedMultisigAddress"
+                        :txn-fee="txnFee" :total-fee="totalFee"/>
+                <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
+                <PasswordInput class="mt-5 mb-3" :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" />
+                <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" :disabled="disabledCreate" @click="createItem()">
+                    Create Nft
+                </button>
+                <div class="text-center">
+                    <router-link :to="{name: 'ViewDashboard'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
+                </div>
             </div>
-            <!-- <div class="mt-4 dark:text-white">Royalties</div>
-            <div class="my-2 text-gray-500 text-xs" >Collect a fee (XPX) when a user re-sells an item you created.</div>
-            <NumberInput v-model="royalties" :decimal="6"/> -->
-            <div class='font-semibold'>Enter your password to continue</div>
-            <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" icon="lock" class="mt-5 mb-3" :disabled="disablePassword"/>
-            <div class="error error_box" v-if="err!=''">{{ err }}</div>
-            <button @click="createItem()" class="dark:bg-blue-600 flex px-5 ml-auto mr-auto mt-3 py-1.5 bg-blue-600 text-white rounded-md disabled:opacity-50" :disabled="disabledCreate">Create Item</button>
             
-        <!--qr modal-->
-        <!--<transition enter-active-class="animate__animated animate__fadeInDown" leave-active-class="animate__animated animate__fadeOutUp">
-                <div v-if="toggleModal" class="popup-outer-lang absolute flex z-50 ">
-                    <div class="modal-popup-box ">
-                        <div v-html="qr" class="w-8/12 ml-auto mr-auto py-3" />
-                        <div class="text-gray-500 ml-auto mr-auto w-8/12">Please scan the QR above with Sirius Mobile App to sign the transaction.</div>
-                        <div @click="toggleModal=false;qr=''" class="cursor-pointer flex justify-center my-3 bg-blue-600 dark:bg-blue-600 w-24 rounded-lg text-white py-1.5 ml-auto mr-auto">Close</div>
-                    </div>
-                </div>
-            </transition>
-            <div @click="toggleModal=false;qr=''" v-if="toggleModal" class="fixed inset-0 opacity-50 bg-gray-600 dark:bg-[#171717] z-20"></div>
-        -->
         </div>
     </div>
 </template>
@@ -51,20 +55,20 @@
 <script lang="ts" setup>
 import {  computed, getCurrentInstance, shallowRef, watch, ref} from 'vue';
 import TextInput from '@/modules/services/submodule/nftMaker/components/TextInput.vue';
-import NumberInput from '@/components/NumberInput.vue';
-import { Account, AccountHttp, Address, AggregateBondedTransactionBuilder, AggregateBondedV1TransactionBuilder, AggregateCompleteTransactionBuilder, AggregateCompleteV1TransactionBuilder, Convert, Deadline, InnerTransaction, MosaicDefinitionTransactionBuilder, MosaicId, MosaicLevy, MosaicMetadataTransactionBuilder, MosaicModifyLevyTransactionBuilder, MosaicNonce, MosaicProperties,MosaicSupplyChangeTransactionBuilder, MosaicSupplyType, NetworkType, Password, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
+import { Account, Address, Convert, Deadline, InnerTransaction, MosaicId, MosaicNonce, MosaicProperties, MosaicSupplyType, Password, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
 import SelectInputAccount from "@/modules/services/submodule/nftMaker/components/SelectInputAccount.vue";
 import SelectInputMultisigAccount from "@/modules/services/submodule/nftMaker/components/SelectInputMultisigAccount.vue";
 import PasswordInput from '@/components/PasswordInput.vue';
+import DisplayFee from "@/modules/services/submodule/nftMaker/components/DisplayFee.vue";
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { walletState } from '@/state/walletState';
 import { networkState } from '@/state/networkState';
 import { WalletAccount } from '@/models/walletAccount';
+import { Helper } from '@/util/typeHelper';
 
 //initialize variables
-const testnetUrl = 'https://api-2.testnet2.xpxsirius.io'
 const selectedMultisigAddress = ref<string | null>(null)
 const selectedAddress = ref<string | null>(null)
 const nativeTokenBalance = ref(0)
@@ -80,8 +84,6 @@ const qr = shallowRef('')
 const walletPassword = ref("");
 const err = ref('');
 const showPasswdError = ref(false);
-const disableAllInput = ref(false);
-const disablePassword = computed(() => disableAllInput.value);
 const internalInstance = getCurrentInstance() 
 const emitter = internalInstance!.appContext.config.globalProperties.emitter
 
@@ -95,28 +97,6 @@ const removeProperty = (i :number) => {
     attributeNames.value.splice(i, 1);
     attributeValues.value.splice(i, 1)
 }
-
-//get public key from session storage
-/*const fetchSessionStorage = () =>{
-  const searchStorage = sessionStorage.getItem('userPublicKey')
-  if(searchStorage!=null){
-    publicKey.value = PublicAccount.createFromPublicKey(searchStorage, NetworkType.TEST_NET).publicKey
-  }else{
-    publicKey.value = ""  
-  }
-}
-
-fetchSessionStorage()
-
-//listens to wallet connection events, update publicKey
-emitter.on('Mobile Wallet Connected',()=>{
-    fetchSessionStorage()
-})
-
-emitter.on('Mobile Wallet Disconnected',()=>{
-    fetchSessionStorage()
-})*/
-
 
 //convert both array values into object keys and values
 const getAttributeObject = () =>{
@@ -161,11 +141,19 @@ const createItem = async() =>{
         attributes: getAttributeObject()
     }
     resetInputs()
-    let initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedAddress.value);
+    let initiatorAcc: WalletAccount
+    let senderPublicAccount: PublicAccount;
+    if (!selectedMultisigAddress) {
+      initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedAddress.value);
+    } else {
+      // initiator acc details
+      initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedAddress.value);
+      const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(selectedMultisigAddress.value))
+      senderPublicAccount = PublicAccount.createFromPublicKey(accountInfo.publicKey, networkType);
+    }
     let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword.value), initiatorAcc.encrypted, initiatorAcc.iv)
-    console.log(publicKey.value)
-    console.log(privateKey)
-    const publicAccount = PublicAccount.createFromPublicKey(publicKey.value,NetworkType.TEST_NET)
+
+    const publicAccount = selectedMultisigAddress ? senderPublicAccount : PublicAccount.createFromPublicKey(publicKey.value,networkType)
     const assetDefinitionBuilder = AppState.buildTxn.mosaicDefinitionBuilder()
     const nonce = MosaicNonce.createRandom(); 
     const assetDefinitionTx = assetDefinitionBuilder
@@ -218,7 +206,6 @@ const createItem = async() =>{
 
     if (!selectedMultisigAddress.value) { // no cosigner, normal transaction
       const signedTransaction = account.preV2Sign(aggregateTx, hash);
-      console.log(signedTransaction)
       TransactionUtils.announceTransaction(signedTransaction)
     } else { // there is a cosigner, aggregate  bonded transaction
       let selectedWalletSigner = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == selectedAddress.value)
@@ -231,16 +218,111 @@ const createItem = async() =>{
       TransactionUtils.announceLF_AND_addAutoAnnounceABT(hashLockTransactionSigned, aggregateBondedTransactionSigned)
     }
 
-    // TransactionUtils.announceLF_AND_addAutoAnnounceABT()
-
 }
 
 const txnFee = computed(()=>{
+
+    const newValue = {
+        name: name.value, 
+        description: description.value,
+        image: externalLink.value,  
+        attributes: getAttributeObject()
+    }
+    const publicAccount = PublicAccount.createFromPublicKey('0'.repeat(64), AppState.networkType)
+    const assetDefinitionBuilder = AppState.buildTxn.mosaicDefinitionBuilder()
+    const nonce = MosaicNonce.createRandom(); 
+    const assetDefinitionTx = assetDefinitionBuilder
+    .mosaicNonce(nonce)
+    .mosaicId(MosaicId.createFromNonce(nonce, publicAccount)) 
+    .mosaicProperties( 
+        MosaicProperties.create({
+            supplyMutable: false, 
+            transferable: true,
+            divisibility: 0,
+            duration: undefined
+        })
+    )
+    .build();
+
+    const assetSupplyChangeBuilder = AppState.buildTxn.buildMosaicSupplyChangeBuilder()
+    const assetSupplyChangeTx =  assetSupplyChangeBuilder
+    .mosaicId(assetDefinitionTx.mosaicId)
+    .direction(MosaicSupplyType.Increase)
+    .delta(UInt64.fromUint(1))
+    .build()
+
+    const mosaicMetadataBuilder = AppState.buildTxn.assetMetadataBuilder()
+    const mosaicMetadataTx = mosaicMetadataBuilder
+    .targetPublicKey(publicAccount)
+    .targetMosaicId(assetDefinitionTx.mosaicId) 
+    .scopedMetadataKey(UInt64.fromHex(Convert.utf8ToHex('nft.json')))
+    .value(JSON.stringify(newValue))
+    .oldValue('')
+    .calculateDifferences()
+    .build()
+
+    let innerTx :InnerTransaction[]
+    = [assetDefinitionTx.toAggregateV1(publicAccount),assetSupplyChangeTx.toAggregateV1(publicAccount),mosaicMetadataTx.toAggregateV1(publicAccount)] 
+
+
     const txnBuilder = !selectedMultisigAddress.value? AppState.buildTxn.aggregateCompleteBuilder() : AppState.buildTxn.aggregateBondedBuilder()
 
-    
+    const aggregateTx = txnBuilder
+    .innerTransactions(innerTx)
+    .build()
+
+    return aggregateTx.maxFee.compact() / Math.pow(10,AppState.nativeToken.divisibility) 
 })
 
+const lockFund = computed(() =>
+    Helper.convertToExact(
+        networkState?.currentNetworkProfileConfig.lockedFundsPerAggregate,
+        AppState.nativeToken.divisibility
+    )
+);
+
+const lockFundTxFee = computed(() => {
+    if (networkState.currentNetworkProfile) {
+        return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
+    }
+    return 0;
+});
+
+const totalFee = computed(() => {
+    let tokenDivisibility = AppState.nativeToken.divisibility
+    if (!selectedMultisigAddress.value) {
+        if (tokenDivisibility == 0) {
+            return txnFee.value
+        } else {
+            return (txnFee.value * Math.pow(10, tokenDivisibility)) / Math.pow(10, tokenDivisibility)
+        }
+    } else {
+        if (tokenDivisibility == 0) {
+            return (txnFee.value + lockFundTxFee.value + lockFund.value)
+        } else {
+            return (txnFee.value + lockFundTxFee.value + lockFund.value) * Math.pow(10, tokenDivisibility) / Math.pow(10, tokenDivisibility)
+        }
+    }
+})
+
+const showBalanceErr = computed(() => {
+    if (!selectedAddress.value) {
+        return false
+    }
+    else if (selectedMultisigAddress.value) {
+        if (totalFee.value > signerNativeTokenBalance.value) {
+            return true
+        } else {
+            return false
+        }
+    } else {
+        if (totalFee.value > nativeTokenBalance.value) {
+            return true
+        } else {
+            return false
+        }
+    }
+})
 
 const fetchSignerNativeBalance = async () => {
     if (!AppState.chainAPI) {
@@ -248,12 +330,12 @@ const fetchSignerNativeBalance = async () => {
     }
     try {
         const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(selectedAddress.value))
-        const findNativeToken = accInfo.mosaics.findIndex(asset => asset.id.toHex() == AppState.nativeToken.assetId)
-        if (findNativeToken != -1) {
-            signerNativeTokenBalance.value = accInfo.mosaics[findNativeToken].amount.compact() / Math.pow(10, AppState.nativeToken.divisibility)
-        } else {
+        const findNativeToken = accInfo.mosaics.find(asset => asset.id.toHex() == AppState.nativeToken.assetId)
+        if (!findNativeToken) {
             signerNativeTokenBalance.value = 0
-        }
+            return
+        } 
+            signerNativeTokenBalance.value = findNativeToken.amount.compact() / Math.pow(10,AppState.nativeToken.divisibility)
     } catch (_) {
         signerNativeTokenBalance.value = 0
     }
