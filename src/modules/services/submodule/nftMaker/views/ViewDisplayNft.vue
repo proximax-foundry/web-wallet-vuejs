@@ -3,15 +3,23 @@
     <SelectInputAccount />
     <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
     <div class="font-semibold  dark:text-white mb-2">My Nfts</div>
-    <div v-if="assets.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 items-center ">
+    <div v-if="assets.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2">
         <div v-for="(asset,index) of assets" :key="index" >
             <div class="flex flex-col ">
-                <img class="img" :src="asset.image" >
-                <div class="dark:text-white">Name:
-                    <span class="dark:text-white">{{asset.name}}</span>
+                <img class="img ml-auto mr-auto border border-black dark:border-white" :src="asset.image" >
+                <div class="text-2xl font-semibold mt-2 dark:text-white">{{asset.name}}</div>
+                <div class="text-sm text-gray-500  my-2">Asset ID: {{asset.id}}</div>
+                <div :class="asset.description.length?'dark:text-white font-semibold':'text-gray-500 text-xs'">{{asset.description.length?'Description':'This asset has no descriptions'}}</div>
+                <div class="border border-black dark:border-white p-3 mt-2 dark:text-white"  v-if="asset.description.length">{{asset.description}}</div>
+                <div class=" my-2" :class="propertyKeys.length?'font-semibold dark:text-white':'text-gray-500 text-xs'">{{propertyKeys.length?'Properties':'This asset has no properties'}}</div>
+                <div class="border border-black dark:border-white p-3 mt-2 " v-if="propertyKeys.length">
+                    <div v-for="(property,index) of propertyKeys" :key="index" >
+                        <div class="grid grid-cols-2 border-b">
+                            <div  v-html="property" class="dark:text-white"/>
+                            <div  v-html="propertyValues[index]" class="dark:text-white"/>
+                        </div>
+                    </div>
                 </div>
-                <div class="dark:text-white">Asset ID:</div>
-                <div class="dark:text-white break-all">{{asset.id}}</div>
             </div>
         </div>
     </div>
@@ -26,7 +34,7 @@
 
 <script lang="ts" setup>
 import { Address, Convert, MetadataQueryParams, MetadataType, MosaicId, NetworkType, PublicAccount } from 'tsjs-xpx-chain-sdk';
-import { getCurrentInstance, ref, shallowRef } from 'vue';
+import { computed, getCurrentInstance, ref, shallowRef } from 'vue';
 import UTF8 from 'utf-8';
 import { AppState } from '@/state/appState';
 import SelectInputAccount from "@/modules/services/submodule/nftMaker/components/SelectInputAccount.vue";
@@ -41,9 +49,11 @@ const emitter = internalInstance!.appContext.config.globalProperties.emitter
 interface displayAsset{
     image: string,
     name: string,
-    id: string
+    id: string,
+    description:string,
 }
 const assets = ref<displayAsset[]>([]) 
+let attributes = ref()  
 
 //get public key from session storage
 /*const fetchSessionStorage = () =>{
@@ -126,9 +136,11 @@ const fetchNft = async() =>{
             assets.value.push({
                 name: JSON.parse(metadataEntry.value).name,
                 image: JSON.parse(metadataEntry.value).image,
-                id:metadataEntry.targetId.toHex()
+                id:metadataEntry.targetId.toHex(),
+                description: JSON.parse(metadataEntry.value).description
             })
         }
+        attributes.value = JSON.parse(metadataEntry.value).attributes
     }
     let totalPageNumber = searchedMetadata.pagination.totalPages
     await delay(250)
@@ -145,13 +157,36 @@ const fetchNft = async() =>{
             assets.value.push({
                 name: JSON.parse(metadataEntry.value).name,
                 image: JSON.parse(metadataEntry.value).image,
-                id:metadataEntry.targetId.toHex()
+                id:metadataEntry.targetId.toHex(),
+                description: JSON.parse(metadataEntry.value).description
             })
+            attributes.value = JSON.parse(metadataEntry.value).attributes
         }
             await delay(250)
         }
     }   
 }
+
+//display property
+const propertyKeys = computed(()=>{ 
+    if(!attributes.value){
+        return []
+    }
+    let properties = Object.keys(attributes.value).map((key)=> {
+        return  key 
+    })
+    return properties
+})
+
+const propertyValues = computed(()=>{ 
+    if(!attributes.value){
+        return []
+    }
+    let properties = Object.keys(attributes.value).map((key)=> {
+        return attributes.value[key] 
+    })
+    return properties
+})
 
 emitter.on("select-account", async (address: string) => {
     selectedAddress.value = address

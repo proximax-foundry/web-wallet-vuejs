@@ -143,7 +143,7 @@ const createItem = async() =>{
     resetInputs()
     let initiatorAcc: WalletAccount
     let senderPublicAccount: PublicAccount;
-    if (!selectedMultisigAddress) {
+    if (!selectedMultisigAddress.value) {
       initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedAddress.value);
     } else {
       // initiator acc details
@@ -153,7 +153,7 @@ const createItem = async() =>{
     }
     let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword.value), initiatorAcc.encrypted, initiatorAcc.iv)
 
-    const publicAccount = selectedMultisigAddress ? senderPublicAccount : PublicAccount.createFromPublicKey(publicKey.value,networkType)
+    const publicAccount = selectedMultisigAddress.value ? senderPublicAccount : PublicAccount.createFromPublicKey(publicKey.value,networkType)
     const assetDefinitionBuilder = AppState.buildTxn.mosaicDefinitionBuilder()
     const nonce = MosaicNonce.createRandom(); 
     const assetDefinitionTx = assetDefinitionBuilder
