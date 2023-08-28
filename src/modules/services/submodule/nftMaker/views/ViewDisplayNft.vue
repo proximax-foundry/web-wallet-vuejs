@@ -11,12 +11,12 @@
                 <div class="text-sm text-gray-500  my-2">Asset ID: {{asset.id}}</div>
                 <div :class="asset.description.length?'dark:text-white font-semibold':'text-gray-500 text-xs'">{{asset.description.length?'Description':'This asset has no descriptions'}}</div>
                 <div class="border border-black dark:border-white p-3 mt-2 dark:text-white"  v-if="asset.description.length">{{asset.description}}</div>
-                <div class=" my-2" :class="propertyKeys.length?'font-semibold dark:text-white':'text-gray-500 text-xs'">{{propertyKeys.length?'Properties':'This asset has no properties'}}</div>
-                <div class="border border-black dark:border-white p-3 mt-2 " v-if="propertyKeys.length">
-                    <div v-for="(property,index) of propertyKeys" :key="index" >
+                <div class=" my-2" :class="Object.keys(asset.property).length?'font-semibold dark:text-white':'text-gray-500 text-xs'">{{Object.keys(asset.property).length?'Properties':'This asset has no properties'}}</div>
+                <div class="border border-black dark:border-white p-3 mt-2 " v-if="Object.keys(asset.property).length">
+                    <div v-for="(value,key) in asset.property" :key="index" >
                         <div class="grid grid-cols-2 border-b">
-                            <div  v-html="property" class="dark:text-white"/>
-                            <div  v-html="propertyValues[index]" class="dark:text-white"/>
+                            <div  v-html="key" class="dark:text-white"/>
+                            <div  v-html="value" class="dark:text-white"/>
                         </div>
                     </div>
                 </div>
@@ -51,9 +51,9 @@ interface displayAsset{
     name: string,
     id: string,
     description:string,
+    property: Object
 }
 const assets = ref<displayAsset[]>([]) 
-let attributes = ref()  
 
 //get public key from session storage
 /*const fetchSessionStorage = () =>{
@@ -105,7 +105,6 @@ const fetchNft = async() =>{
     const metadataHttp = AppState.chainAPI.metadataAPI
     const mosaicHttp = AppState.chainAPI.assetAPI
     const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(selectedAddress.value))
-    console.log(accountInfo)
     const mosaicIds :MosaicId[] = accountInfo.mosaics.map(mosaic=>mosaic.id) //get all account mosaics
     let numOfRequest = Math.ceil(mosaicIds.length / dataPerRequest)
     let nftIds :string[] = [] //filter nft ids
@@ -137,10 +136,10 @@ const fetchNft = async() =>{
                 name: JSON.parse(metadataEntry.value).name,
                 image: JSON.parse(metadataEntry.value).image,
                 id:metadataEntry.targetId.toHex(),
-                description: JSON.parse(metadataEntry.value).description
+                description: JSON.parse(metadataEntry.value).description,
+                property: JSON.parse(metadataEntry.value).attributes
             })
         }
-        attributes.value = JSON.parse(metadataEntry.value).attributes
     }
     let totalPageNumber = searchedMetadata.pagination.totalPages
     await delay(250)
@@ -158,35 +157,14 @@ const fetchNft = async() =>{
                 name: JSON.parse(metadataEntry.value).name,
                 image: JSON.parse(metadataEntry.value).image,
                 id:metadataEntry.targetId.toHex(),
-                description: JSON.parse(metadataEntry.value).description
+                description: JSON.parse(metadataEntry.value).description,
+                property: JSON.parse(metadataEntry.value).attributes
             })
-            attributes.value = JSON.parse(metadataEntry.value).attributes
         }
             await delay(250)
         }
     }   
 }
-
-//display property
-const propertyKeys = computed(()=>{ 
-    if(!attributes.value){
-        return []
-    }
-    let properties = Object.keys(attributes.value).map((key)=> {
-        return  key 
-    })
-    return properties
-})
-
-const propertyValues = computed(()=>{ 
-    if(!attributes.value){
-        return []
-    }
-    let properties = Object.keys(attributes.value).map((key)=> {
-        return attributes.value[key] 
-    })
-    return properties
-})
 
 emitter.on("select-account", async (address: string) => {
     selectedAddress.value = address

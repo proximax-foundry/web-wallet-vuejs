@@ -119,6 +119,7 @@ const resetInputs = () =>{
     attributeNames.value = []
     attributeValues.value = []
     royalties.value = '0'
+    walletPassword.value = ''
 }
 
 //create nft transaction
@@ -140,7 +141,6 @@ const createItem = async() =>{
         image: externalLink.value,  
         attributes: getAttributeObject()
     }
-    resetInputs()
     let initiatorAcc: WalletAccount
     let senderPublicAccount: PublicAccount;
     if (!selectedMultisigAddress.value) {
@@ -217,7 +217,7 @@ const createItem = async() =>{
       const hashLockTransactionSigned = selectedSignerAccount.preV2Sign(hashLockTransaction, hash)
       TransactionUtils.announceLF_AND_addAutoAnnounceABT(hashLockTransactionSigned, aggregateBondedTransactionSigned)
     }
-
+    resetInputs()
 }
 
 const txnFee = computed(()=>{
