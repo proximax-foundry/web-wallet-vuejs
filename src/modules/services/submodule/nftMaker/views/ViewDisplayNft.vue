@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Address, Convert, MetadataQueryParams, MetadataType, MosaicId, NetworkType, PublicAccount } from 'tsjs-xpx-chain-sdk';
+import { Address, Convert, MetadataQueryParams, MetadataType, MosaicId, NetworkType } from 'tsjs-xpx-chain-sdk';
 import { computed, getCurrentInstance, ref, shallowRef } from 'vue';
 import UTF8 from 'utf-8';
 import { AppState } from '@/state/appState';
@@ -101,7 +101,6 @@ const delay =( ms :number)=> new Promise(res => setTimeout(res, ms))
 
 const fetchNft = async() =>{
     let dataPerRequest = 100
-    let publicAccount = PublicAccount.createFromPublicKey(publicKey.value,NetworkType.TEST_NET)
     const metadataHttp = AppState.chainAPI.metadataAPI
     const mosaicHttp = AppState.chainAPI.assetAPI
     const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(selectedAddress.value))
