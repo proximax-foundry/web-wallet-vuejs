@@ -33,8 +33,8 @@
 </template>
 
 <script lang="ts" setup>
-import { Address, Convert, MetadataQueryParams, MetadataType, MosaicId, NetworkType } from 'tsjs-xpx-chain-sdk';
-import { computed, getCurrentInstance, ref, shallowRef } from 'vue';
+import { Address, Convert, MetadataQueryParams, MetadataType, MosaicId } from 'tsjs-xpx-chain-sdk';
+import { getCurrentInstance, ref, shallowRef } from 'vue';
 import UTF8 from 'utf-8';
 import { AppState } from '@/state/appState';
 import SelectInputAccount from "@/modules/services/submodule/nftMaker/components/SelectInputAccount.vue";
