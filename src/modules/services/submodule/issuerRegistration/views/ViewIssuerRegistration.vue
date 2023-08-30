@@ -40,7 +40,7 @@
             :disabled="disableCreate"
             @click="registerAsIssuer"
           >
-            {{ $t("general.transfer") }}
+            Register
           </button>
           <div class="text-center">
             <router-link
