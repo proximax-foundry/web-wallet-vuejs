@@ -14,6 +14,11 @@
               class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
             <div class='text-center text-xs font-semibold'>Airdrop Token Utility</div>
           </router-link>
+          <router-link :to="{ name: 'ViewIssuerRegistration' }" class='w-40 '>
+            <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg"
+              class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
+            <div class='text-center text-xs font-semibold'>Register as Issuer</div>
+          </router-link>
           <div class="w-40"  v-if="nodeEnv != 'production'" @click="toggle">
             <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg"
               class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
@@ -37,7 +42,7 @@ import { AppState } from "@/state/appState";
 import Menu from 'primevue/menu';
 import { useRouter } from 'vue-router'
 import { ref} from "vue";
-const nodeEnv =  process.env.VITE_NODE_ENV
+const nodeEnv =  import.meta.env.VITE_NODE_ENV
 const networkType = AppState.networkType
 const menu = ref();
 const toggle = (event) => {
