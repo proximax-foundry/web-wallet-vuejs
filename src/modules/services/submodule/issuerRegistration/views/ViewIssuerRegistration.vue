@@ -166,8 +166,6 @@ watch([selectedAddress, selectedMultisigAddress], async ([n, mn]) => {
   }
 });
 
-//TODO: check if any namespace has alias to issuer
-
 watch(showNamespaceErr, (n) => {
   if (!n) {
     namespaceErrMsg.value = "";
