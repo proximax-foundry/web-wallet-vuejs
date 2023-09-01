@@ -34,7 +34,7 @@
 
 <script lang="ts" setup>
 import { Address, Convert, MetadataQueryParams, MetadataType, MosaicId } from 'tsjs-xpx-chain-sdk';
-import { getCurrentInstance, ref, shallowRef } from 'vue';
+import { getCurrentInstance, ref, shallowRef, watch } from 'vue';
 import UTF8 from 'utf-8';
 import { AppState } from '@/state/appState';
 import SelectInputAccount from "@/modules/services/submodule/nftMaker/components/SelectInputAccount.vue";
@@ -166,9 +166,14 @@ const fetchNft = async() =>{
 }
 
 emitter.on("select-account", async (address: string) => {
-    selectedAddress.value = address
-    const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(selectedAddress.value))
-    publicKey.value = accountInfo.publicKey
+    if(address){
+        selectedAddress.value = address
+        const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(selectedAddress.value))
+        publicKey.value = accountInfo.publicKey
+    }
+    else{
+        selectedAddress.value = null
+    }
     assets.value = []
     fetchNft()
 })
@@ -179,6 +184,15 @@ emitter.on("select-multisig-account", async (address: string) => {
     publicKey.value = accountInfo.publicKey
     assets.value = []
     fetchNft()
+})
+
+watch(selectedMultisigAddress, async (n) => {
+  if(n === null){
+    const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(selectedAddress.value))
+    publicKey.value = accountInfo.publicKey
+    assets.value = []
+    fetchNft()
+  }
 })
 
 </script>

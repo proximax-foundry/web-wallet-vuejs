@@ -8,13 +8,15 @@
 
 </template>
 
-<script lang="ts" setup>
-    defineProps({ 
+<script>
+export default{
+    props:{ 
         placeholder: String,
         errorMessage: String,
         showError: Boolean,
         disabled: Boolean,
         modelValue: String,
-    })
+    }
+}
 
 </script>
