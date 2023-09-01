@@ -20,7 +20,17 @@
             <div class='text-center text-xs font-semibold'>SDA Exchange</div>
           </div>
           <Menu ref="menu" id="overlay_menu" :model="items" :popup="true" />
-     
+          <div class='w-40 ' @click="select">
+            <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg"
+              class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
+            <div class='text-center text-xs font-semibold'>Nft Maker</div>
+          </div>
+          <Menu ref="option" id="overlay_menu" :model="options" :popup="true" />
+          <router-link :to="{ name: 'ViewServicesNftDistribution' }" class='w-40 '>
+            <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg"
+              class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
+            <div class='text-center text-xs font-semibold'>Nft Distribution </div>
+          </router-link>
         </div>
       </div>
     </div>
@@ -40,8 +50,12 @@ import { ref} from "vue";
 const nodeEnv =  process.env.VITE_NODE_ENV
 const networkType = AppState.networkType
 const menu = ref();
+const option = ref();
 const toggle = (event) => {
   menu.value.toggle(event);
+};
+const select = (event) => {
+  option.value.toggle(event);
 };
 
 const router = useRouter()
@@ -57,6 +71,21 @@ const items = ref([
     label: 'View SDA Listing',
     command: () => {
       router.push('/exchange/listing')
+    }
+  }
+]);
+
+const options = ref([
+  {
+    label: 'Create Nft',
+    command: () => {
+      router.push('/view-nft-maker')
+    }
+  },
+  {
+    label: 'View Nft',
+    command: () => {
+      router.push('/view-nft')
     }
   }
 ]);
