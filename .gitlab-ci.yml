@@ -5,7 +5,6 @@ pages:
   stage: deploy
   only:
     - develop
-    - ci
   image: node:16
   script:
     - npm install
