@@ -1,0 +1,18 @@
+stages:
+  - deploy
+
+pages:
+  stage: deploy
+  only:
+    - develop
+    - ci
+  image: node:16
+  script:
+    - npm install
+    - npm run build
+    - cp $CHAINPROFILE_JSON dist/chainProfile.json
+    - rm -rf public
+    - mv dist public
+  artifacts:
+    paths:
+      - public
