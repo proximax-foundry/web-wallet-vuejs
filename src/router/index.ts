@@ -7,7 +7,7 @@ import { AccountRoutes } from '@/modules/account/routingAccount';
 import { ServiceRoutes  } from '@/modules/services/routingService';
 import { TransactionRoutes  } from '@/modules/transaction/routingTransaction';
 import { MetadataTransactionRoutes  } from '@/modules/metadataTxn/routingMetadataTransaction';
-
+import { IssuerRegistrationRoutes } from '@/modules/services/submodule/issuerRegistration/routingIssuerRegistration';
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
@@ -18,7 +18,8 @@ const router = createRouter({
   ...AccountRoutes,
   ...ServiceRoutes,
   ...TransactionRoutes,
-  ...MetadataTransactionRoutes
+  ...MetadataTransactionRoutes,
+  ...IssuerRegistrationRoutes
   ]
 })
 
