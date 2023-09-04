@@ -78,6 +78,7 @@ import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { WalletUtils } from '@/util/walletUtils';
+import { PublicAccount } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesNamespaceCreate',
@@ -130,6 +131,11 @@ export default {
     const selectNamespace = ref('');
     const cosignerBalanceInsufficient = ref(false);
     const cosignerAddress = ref('');
+
+    const nemesisAcc = PublicAccount.createFromPublicKey(
+      networkState.currentNetworkProfileConfig.publicKey,
+      AppState.networkType
+    ) ;
 
     const namespaceOption = computed(() => {
       let namespace = [];
@@ -281,6 +287,7 @@ export default {
       balance.value = Helper.toCurrencyFormat(account.balance, AppState.nativeToken.divisibility);
       balanceNumber.value = account.balance;
       currentSelectedName.value = account.name;
+      setDefaultDuration()
     }
 
     const updateNamespaceSelection = (namespaceNameSelected) => {
@@ -351,7 +358,12 @@ export default {
     });
 
     const setDefaultDuration = () => {
-      duration.value = '1';
+      if(selectedAccAdd.value === nemesisAcc.address){
+        duration.value = '0';
+      }
+      else{
+        duration.value = '1';
+      }
     }
 
     // calculate fees
