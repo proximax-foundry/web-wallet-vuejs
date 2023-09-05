@@ -22,6 +22,8 @@ export default{
     disabled: Boolean,
     max: Number,
     toolTip: String,
+    selectedAccAdd: String,
+    nemesisAccAdd: String,
   },
 
   emits:[
@@ -42,7 +44,12 @@ export default{
 
     verifyMinimum: function(e) {
       if(e.target.value == 0){
-        this.$emit('set-default-duration', '0');
+        if(this.selectedAccAdd == this.nemesisAccAdd){
+          this.$emit('set-default-duration', '0');
+        }
+        else{
+          this.$emit('set-default-duration', '1');
+        }
       }
     },
 
