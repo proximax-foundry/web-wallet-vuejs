@@ -78,7 +78,6 @@ import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { WalletUtils } from '@/util/walletUtils';
-import { PublicAccount } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesNamespaceCreate',
@@ -131,11 +130,6 @@ export default {
     const selectNamespace = ref('');
     const cosignerBalanceInsufficient = ref(false);
     const cosignerAddress = ref('');
-
-    const nemesisAcc = PublicAccount.createFromPublicKey(
-      networkState.currentNetworkProfileConfig.publicKey,
-      AppState.networkType
-    ) ;
 
     const namespaceOption = computed(() => {
       let namespace = [];
