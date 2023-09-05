@@ -137,7 +137,7 @@ export default {
       AppState.networkType
     ) ;
 
-    const nemesisAccAdd = nemesisAcc.address
+    const nemesisAccAdd = ref(nemesisAcc? nemesisAcc.address:'')
 
     const namespaceOption = computed(() => {
       let namespace = [];
@@ -360,7 +360,7 @@ export default {
     });
 
     const setDefaultDuration = () => {
-      if(selectedAccAdd.value === nemesisAccAdd){
+      if(selectedAccAdd.value === nemesisAccAdd.value){
         duration.value = '0';
       }
       else{
