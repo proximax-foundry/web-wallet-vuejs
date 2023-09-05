@@ -358,7 +358,7 @@ export default {
     });
 
     const setDefaultDuration = () => {
-      if(selectedAccAdd.value === nemesisAcc.address){
+      if(selectedAccAdd.value === "VCMCJPRMJ6IUBOZ7HCYBQOSEOVGISX6AMUJ4ESTN"){
         duration.value = '0';
       }
       else{
