@@ -27,7 +27,7 @@
               <TextInputTooltip :disabled="disableNamespaceName" :placeholder="$t('general.name')" :errorMessage="namespaceErrorMessage" v-model="namespaceName"  v-debounce:1000="checkNamespace" icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block" :toolTip="$t('namespace.namespaceNameMsg1') + '<br><br>' + $t('namespace.namespaceNameMsg2') + '<br><br>' + $t('namespace.namespaceNameMsg3')" tabindex="0"/>
             </div>
             <div class="mb-5 lg:mb-0 lg:ml-2">
-              <DurationInputClean :disabled="disabledDuration" v-model="duration" :max="maxDurationInDays" :placeholder="$t('namespace.duration')" @set-default-duration="setDefaultDuration" :showError="showDurationErr" :toolTip="$t('namespace.durationMsg')+'<br>' +`${maxDurationInDays === 365 ? '1 ' + $t('general.year') : ''}` +' ('+`${maxDurationInDays}`+ $t('general.day',maxDurationInDays) +').'" />
+              <DurationInputClean :disabled="disabledDuration" :selectedAccAdd="selectedAccAdd" :nemesisAccAdd="nemesisAccAdd" v-model="duration" :max="maxDurationInDays" :placeholder="$t('namespace.duration')" @set-default-duration="setDefaultDuration" :showError="showDurationErr" :toolTip="$t('namespace.durationMsg')+'<br>' +`${maxDurationInDays === 365 ? '1 ' + $t('general.year') : ''}` +' ('+`${maxDurationInDays}`+ $t('general.day',maxDurationInDays) +').'" />
             </div>
           </div>
         </div>
@@ -78,6 +78,7 @@ import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { WalletUtils } from '@/util/walletUtils';
+import { PublicAccount } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesNamespaceCreate',
@@ -130,6 +131,13 @@ export default {
     const selectNamespace = ref('');
     const cosignerBalanceInsufficient = ref(false);
     const cosignerAddress = ref('');
+
+    const nemesisAcc = PublicAccount.createFromPublicKey(
+      networkState.currentNetworkProfileConfig.publicKey,
+      AppState.networkType
+    ) ;
+
+    const nemesisAccAdd = ref(nemesisAcc? nemesisAcc.address:'')
 
     const namespaceOption = computed(() => {
       let namespace = [];
@@ -281,6 +289,7 @@ export default {
       balance.value = Helper.toCurrencyFormat(account.balance, AppState.nativeToken.divisibility);
       balanceNumber.value = account.balance;
       currentSelectedName.value = account.name;
+      setDefaultDuration()
     }
 
     const updateNamespaceSelection = (namespaceNameSelected) => {
@@ -351,7 +360,12 @@ export default {
     });
 
     const setDefaultDuration = () => {
-      duration.value = '1';
+      if(selectedAccAdd.value === nemesisAccAdd.value){
+        duration.value = '0';
+      }
+      else{
+        duration.value = '1';
+      }
     }
 
     // calculate fees
@@ -607,7 +621,8 @@ export default {
       setDefaultDuration,
       cosigner,
       defaultAcc,
-      checkCosignBalance
+      checkCosignBalance,
+      nemesisAccAdd
     }
   },
 
