@@ -132,12 +132,14 @@ export default {
     const cosignerBalanceInsufficient = ref(false);
     const cosignerAddress = ref('');
 
-    const nemesisAcc = PublicAccount.createFromPublicKey(
+
+    const nemesisAccAdd = computed(()=>{
+      return PublicAccount.createFromPublicKey(
       networkState.currentNetworkProfileConfig.publicKey,
       AppState.networkType
-    ) ;
+    ).address.plain()
+    })
 
-    const nemesisAccAdd = ref(nemesisAcc? nemesisAcc.address:'')
 
     const namespaceOption = computed(() => {
       let namespace = [];
