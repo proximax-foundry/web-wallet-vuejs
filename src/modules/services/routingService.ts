@@ -1,25 +1,12 @@
 import { AddressbookRoutes } from '@/modules/services/submodule/addressbook/routingAddressbook';
 import { NamespaceRoutes } from '@/modules/services/submodule/namespaces/routingNamespace';
-import { MainnetSwapRoutes } from '@/modules/services/submodule/mainnetSwap/routingMainnetSwap';
 import { SettingsRoutes } from '@/modules/services/submodule/settings/routingSettings';
 import { AssetsRoutes } from '@/modules/services/submodule/assets/routingAssets';
 import { StackingRoutes } from '@/modules/services/submodule/stacking/routingStacking';
-import { ExchangeRoutes } from './submodule/exchange/routingExchange';
-import { NftMakerRoutes } from '@/modules/services/submodule/nftMaker/routingNftMaker'
+import { NftMakerRoutes } from '@/modules/services/submodule/nftMaker/routingNftMaker';
 import { RouteRecordRaw } from 'vue-router'
 
 export const ServiceRoutes: RouteRecordRaw[] = [
-  {
-    path: '/view-portfolio',
-    name: 'ViewServicesPortfolio',
-    props: true,
-    component: () => import('@/modules/services/submodule/portfolio/views/ViewServicesPortfolio.vue'),
-    meta:{
-      title: "View Portfolio"
-    }
-  },
- 
-
   {
     path: '/view-airdrop-token',
     name: 'ViewServicesAirdropToken',
@@ -61,10 +48,8 @@ export const ServiceRoutes: RouteRecordRaw[] = [
   },
   ...AddressbookRoutes,
   ...NamespaceRoutes,
-  ...MainnetSwapRoutes,
   ...SettingsRoutes,
   ...AssetsRoutes,
   ...StackingRoutes,
-   ...ExchangeRoutes,
    ...NftMakerRoutes
 ];

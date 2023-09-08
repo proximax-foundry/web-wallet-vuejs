@@ -39,14 +39,6 @@
                 </div><br>
                 <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.buy')}}</div>
               </router-link> -->
-              <router-link :to="{ name: 'ViewServicesMainnetSwap'}" class="inline-block text-center mx-3" v-if="isPublicNetwork">
-                <div class="inline-block rounded-full bg-blue-primary w-8 h-8">
-                  <div class="h-full w-full flex items-center justify-center">
-                    <img src="@/modules/dashboard/img/icon-swap-white.svg" class="w-5 h-5">
-                  </div>
-                </div><br>
-                <div class="text-xxs text-gray-400 inline-block uppercase">{{$t('general.swap')}}</div>
-              </router-link>
             </div>
           </div>
         </div>
