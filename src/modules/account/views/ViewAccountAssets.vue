@@ -79,10 +79,6 @@
                             src="@/assets/img/icon-transfer-white.svg"
                             class="  inline-block w-4 h-4 mt-0.5  cursor-pointer mr-1">{{ $t('general.transfer')
                             }}</router-link>
-                    <router-link :to="{ name: 'ViewServicesMainnetSwap' }"
-                        class="bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center  "><img
-                            src="@/assets/img/navi/icon-swap.svg" class="w-4 h-4 inline-block relative mr-1">{{
-                                $t('general.swap') }}</router-link>
                     <router-link :to="{ name: 'ViewServicesAssetsCreate' }"
                         class="bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center"><img
                             src="@/assets/img/icon-plus.svg" class="inline-block w-4 h-4 mr-2">{{ $t('asset.createNewAsset')

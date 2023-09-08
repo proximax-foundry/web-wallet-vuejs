@@ -4,11 +4,6 @@
       <div>Services</div>
       <div class='border ml-auto mr-auto mt-6 filter shadow-lg'>
         <div class='flex  flex-wrap items-center justify-around p-3 gap-4'>
-          <router-link  v-if="nodeEnv != 'production'" :to="{ name: 'ViewServicesPortfolio' }" class='w-40 '>
-            <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg"
-              class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
-            <div class='text-center text-xs font-semibold'>Portfolio</div>
-          </router-link>
           <router-link :to="{ name: 'ViewServicesAirdropToken' }" class='w-40 '>
             <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg"
               class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
@@ -19,12 +14,6 @@
               class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
             <div class='text-center text-xs font-semibold'>Register as Issuer</div>
           </router-link>
-          <div class="w-40"  v-if="nodeEnv != 'production'" @click="toggle">
-            <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg"
-              class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
-            <div class='text-center text-xs font-semibold'>SDA Exchange</div>
-          </div>
-          <Menu ref="menu" id="overlay_menu" :model="items" :popup="true" />
           <div class='w-40 ' @click="select">
             <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg"
               class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
@@ -54,31 +43,12 @@ import { useRouter } from 'vue-router'
 import { ref} from "vue";
 const nodeEnv =  import.meta.env.VITE_NODE_ENV
 const networkType = AppState.networkType
-const menu = ref();
 const option = ref();
-const toggle = (event) => {
-  menu.value.toggle(event);
-};
 const select = (event) => {
   option.value.toggle(event);
 };
 
 const router = useRouter()
-
-const items = ref([
-  {
-    label: 'Create SDA Exchange',
-    command: () => {
-      router.push('/exchange/create')
-    }
-  },
-  {
-    label: 'View SDA Listing',
-    command: () => {
-      router.push('/exchange/listing')
-    }
-  }
-]);
 
 const options = ref([
   {
