@@ -1,23 +1,34 @@
 <template>
     <div class='w-10/12 ml-auto mr-auto mt-5'>
-        <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8">
+        <div class="border filter shadow-lg mt-8">
             <div class="xl:col-span-2 p-12">
-                <div v-if="showBalanceErr"
-                    class="mb-3 rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
-                    <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2">
-                        <font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute"
-                            style="top: 3px; left:4px"></font-awesome-icon></div>
-                    <div class="inline-block text-xs">{{ $t('general.insufficientBalance') }}</div>
-                </div>
                 <SelectInputAccount />
                 <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
-                <div class="mt-2 dark:text-white">Name</div>
+                <div class="mt-2">Name</div>
                 <TextInput placeholder="Name your item" v-model="name"/>
-                <div class="mt-4 dark:text-white">Description</div>
+                <div class="mt-4">Description</div>
                 <textarea type="text " v-model="description" placeholder="Prepare a detailed description of your item" class="w-full px-3  py-1.5 mt-1 border focus:outline-none border-black"></textarea>
-                <div class="mt-4 dark:text-white">External Link</div>
-                <TextInput placeholder="https://yoursite.io/item/123"  v-model="externalLink"  />
-                <div class="mt-4 dark:text-white">Properties</div>
+                <div class="mt-4">Upload Image</div>
+                    <input
+                    id="file"
+                    type="file"
+                    class="inputfile"
+                    :disabled = "disabled"
+                    @change="imageChange"
+                    />
+                    <img
+                    v-if="selectedImage"
+                    id="createfileImage"
+                    :src="selectedImage"
+                    alt=""
+                    data-black-overlay="6"
+                    />
+                    <label for="file" title="No File Chosen">
+                    <i v-if="!selectedImage" class="feather-upload" />
+                        
+                        
+                    </label>
+                <div class="mt-4">Properties</div>
                 <div v-for="(attributeName,index) of attributeNames" :key="index" >
                     <div class="flex gap-2 mb-2" >
                         <img src="@/modules/services/submodule/nftMaker/img/icon-delete-red.svg" class="w-4 h-4 cursor-pointer mt-2.5" @click="removeProperty(index)">
@@ -30,60 +41,58 @@
                     </div>
                 </div>
                 <div class="w-[80px] mt-2">
-                    <div class="text-blue-600 font-semibold text-xs cursor-pointer dark:text-blue-600 cursor-pointer" @click="addProperty()">+ Add more</div>
+                    <div class="text-blue-600 font-semibold text-xs cursor-pointer cursor-pointer" @click="addProperty()">+ Add more</div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" :disabled="disabledCreate" @click="createNft()">
+                        Create Nft
+                    </button>
                 </div>
             </div>
-            <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
-                <DisplayFee :signer-native-token-balance="signerNativeTokenBalance"
-                         :native-token-balance="nativeTokenBalance" :lock-fund="lockFund"
-                        :lock-fund-tx-fee="lockFundTxFee" :selected-multisig-address="selectedMultisigAddress"
-                        :txn-fee="txnFee" :total-fee="totalFee"/>
-                <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
-                <PasswordInput class="mt-5 mb-3" :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" />
-                <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" :disabled="disabledCreate" @click="createItem()">
-                    Create Nft
-                </button>
-                <div class="text-center">
-                    <router-link :to="{name: 'ViewDashboard'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
+
+            <!--qr modal-->
+            <transition enter-active-class="animate__animated animate__fadeInDown" leave-active-class="animate__animated animate__fadeOutUp">
+                <div v-if="toggleModal && !showPasswdError" class="popup-outer-lang absolute flex z-50 ">
+                    <div class="modal-popup-box ">
+                        <div v-html="qr" class="w-8/12 ml-auto mr-auto py-3" />
+                        <div class="text-gray-500 ml-auto mr-auto w-8/12">Please scan the QR above with MOEI Mobile App to sign the transaction.</div>
+                        <div @click="toggleModal=false;qr=''" class="cursor-pointer flex justify-center my-3 bg-blue-600 w-24 rounded-lg text-white py-1.5 ml-auto mr-auto">Close</div>
+                    </div>
                 </div>
-            </div>
-            
+            </transition>
+            <div @click="toggleModal=false;qr=''" v-if="toggleModal" class="fixed inset-0 opacity-50 bg-gray-600 z-20"></div>        
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import {  computed, getCurrentInstance, shallowRef, watch, ref} from 'vue';
+import {  computed, getCurrentInstance, shallowRef, ref} from 'vue';
 import TextInput from '@/modules/services/submodule/nftMaker/components/TextInput.vue';
-import { Account, Address, Convert, Deadline, InnerTransaction, MosaicId, MosaicNonce, MosaicProperties, MosaicSupplyType, Password, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
 import SelectInputAccount from "@/modules/services/submodule/nftMaker/components/SelectInputAccount.vue";
 import SelectInputMultisigAccount from "@/modules/services/submodule/nftMaker/components/SelectInputMultisigAccount.vue";
-import PasswordInput from '@/components/PasswordInput.vue';
-import DisplayFee from "@/modules/services/submodule/nftMaker/components/DisplayFee.vue";
-import { AppState } from '@/state/appState';
-import { TransactionUtils } from '@/util/transactionUtils';
-import { WalletUtils } from '@/util/walletUtils';
 import { walletState } from '@/state/walletState';
 import { networkState } from '@/state/networkState';
-import { WalletAccount } from '@/models/walletAccount';
-import { Helper } from '@/util/typeHelper';
+import { useToast } from "primevue/usetoast";;
+import { Peer } from "peerjs";
+import QRCode from 'qrcode'
+
 
 //initialize variables
+const toast = useToast();
 const selectedMultisigAddress = ref<string | null>(null)
 const selectedAddress = ref<string | null>(null)
-const nativeTokenBalance = ref(0)
-const signerNativeTokenBalance = ref(0)
 const name = shallowRef('')
 const description = shallowRef('')
-const externalLink = shallowRef('')
+const file = shallowRef<Blob>(null)
+const fileName = shallowRef('')
+const selectedImage = shallowRef('')
 const attributeNames = ref(['']) 
 const attributeValues = ref([''])
-const royalties = shallowRef('0')
 const publicKey = shallowRef('')
 const qr = shallowRef('')
-const walletPassword = ref("");
-const err = ref('');
+const toggleModal = shallowRef(false)
 const showPasswdError = ref(false);
+const disabled = ref(false);
 const internalInstance = getCurrentInstance() 
 const emitter = internalInstance!.appContext.config.globalProperties.emitter
 
@@ -108,22 +117,22 @@ const getAttributeObject = () =>{
 //create button validation
 const disabledCreate = computed(()=>{
     console.log(!attributeNames.value.every(name=>name!=''))
-    return !attributeNames.value.every(name=>name!='') || !attributeValues.value.every(name=>name!='') || name.value=='' || externalLink.value == '' || publicKey.value == '' || walletPassword.value == ''
+    return !attributeNames.value.every(name=>name!='') || !attributeValues.value.every(name=>name!='') || name.value=='' || file.value == null || publicKey.value == ''
 })
 
 //reset inputs
 const resetInputs = () =>{
     name.value = ''
     description.value = ''
-    externalLink.value = ''
+    file.value = null
     attributeNames.value = []
     attributeValues.value = []
-    royalties.value = '0'
-    walletPassword.value = ''
+
+    selectedImage.value = ''
 }
 
 //create nft transaction
-const createItem = async() =>{
+/*const createItem = async() =>{
 
     let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword.value)
 
@@ -218,177 +227,86 @@ const createItem = async() =>{
       TransactionUtils.announceLF_AND_addAutoAnnounceABT(hashLockTransactionSigned, aggregateBondedTransactionSigned)
     }
     resetInputs()
-}
+}*/
 
-const txnFee = computed(()=>{
+const nftBackendUrl = computed(()=> networkState.currentNetworkProfile.nftBackend.url);
 
-    const newValue = {
-        name: name.value, 
-        description: description.value,
-        image: externalLink.value,  
-        attributes: getAttributeObject()
+const createNft = async() =>{
+  if(!publicKey.value){
+    return
+  }
+
+  let form = new FormData()
+  form.append('owner', selectedAddress.value)
+  form.append('creator', publicKey.value)
+  form.append('file',file.value)
+  form.append('name',name.value)
+  form.append('description',description.value)
+  form.append('properties',JSON.stringify(getAttributeObject()))
+  let txnPayload = ""
+
+  try{
+    const res = await fetch(nftBackendUrl.value + '/nfts/create',{
+        method: 'POST',
+        body: form
+    })
+    const response :{txnPayload: string} = await res.json()
+    txnPayload = response.txnPayload
+    resetInputs()
     }
-    const publicAccount = PublicAccount.createFromPublicKey('0'.repeat(64), AppState.networkType)
-    const assetDefinitionBuilder = AppState.buildTxn.mosaicDefinitionBuilder()
-    const nonce = MosaicNonce.createRandom(); 
-    const assetDefinitionTx = assetDefinitionBuilder
-    .mosaicNonce(nonce)
-    .mosaicId(MosaicId.createFromNonce(nonce, publicAccount)) 
-    .mosaicProperties( 
-        MosaicProperties.create({
-            supplyMutable: false, 
-            transferable: true,
-            divisibility: 0,
-            duration: undefined
+    catch(e){
+        toast.add({severity:'error', summary: "Failed", detail:'Failed to create NFT', group: 'br', life: 3000});
+    }
+
+    const peer = new Peer(); 
+        peer.on("open", async () => {
+            const data = {
+                type:'reqPeerID',
+                generationHash: networkState.currentNetworkProfile.generationHash, //testnet2
+                recvId: peer.id
+            } 
+            qr.value = await QRCode.toString(JSON.stringify(data))
+            toggleModal.value = true
         })
-    )
-    .build();
-
-    const assetSupplyChangeBuilder = AppState.buildTxn.buildMosaicSupplyChangeBuilder()
-    const assetSupplyChangeTx =  assetSupplyChangeBuilder
-    .mosaicId(assetDefinitionTx.mosaicId)
-    .direction(MosaicSupplyType.Increase)
-    .delta(UInt64.fromUint(1))
-    .build()
-
-    const mosaicMetadataBuilder = AppState.buildTxn.assetMetadataBuilder()
-    const mosaicMetadataTx = mosaicMetadataBuilder
-    .targetPublicKey(publicAccount)
-    .targetMosaicId(assetDefinitionTx.mosaicId) 
-    .scopedMetadataKey(UInt64.fromHex(Convert.utf8ToHex('nft.json')))
-    .value(JSON.stringify(newValue))
-    .oldValue('')
-    .calculateDifferences()
-    .build()
-
-    let innerTx :InnerTransaction[]
-    = [assetDefinitionTx.toAggregateV1(publicAccount),assetSupplyChangeTx.toAggregateV1(publicAccount),mosaicMetadataTx.toAggregateV1(publicAccount)] 
+        peer.on("connection", (conn) => {
+            conn.on("data", async (data) => {
+                let payload = {
+                    type: 'txn',
+                    payload: txnPayload
+                }
+                if(data == 'requestTxnSigning'){
+                    conn.send(payload) 
+                }else if(data === 'txnHash'){
+                    conn.send("success"); 
+                    toast.add({severity:'success', summary: "Success", detail:'NFT successfully created', group: 'br', life: 3000});
+                }
+            });
+        });
+  }
 
 
-    const txnBuilder = !selectedMultisigAddress.value? AppState.buildTxn.aggregateCompleteBuilder() : AppState.buildTxn.aggregateBondedBuilder()
-
-    const aggregateTx = txnBuilder
-    .innerTransactions(innerTx)
-    .build()
-
-    return aggregateTx.maxFee.compact() / Math.pow(10,AppState.nativeToken.divisibility) 
-})
-
-const lockFund = computed(() =>
-    Helper.convertToExact(
-        networkState?.currentNetworkProfileConfig.lockedFundsPerAggregate,
-        AppState.nativeToken.divisibility
-    )
-);
-
-const lockFundTxFee = computed(() => {
-    if (networkState.currentNetworkProfile) {
-        return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
+  const imageChange= (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      file.value = e.target.files[0];
+      fileName.value = file.value.name
+      selectedImage.value = URL.createObjectURL(file.value);
     }
-    return 0;
-});
-
-const totalFee = computed(() => {
-    let tokenDivisibility = AppState.nativeToken.divisibility
-    if (!selectedMultisigAddress.value) {
-        if (tokenDivisibility == 0) {
-            return txnFee.value
-        } else {
-            return (txnFee.value * Math.pow(10, tokenDivisibility)) / Math.pow(10, tokenDivisibility)
-        }
-    } else {
-        if (tokenDivisibility == 0) {
-            return (txnFee.value + lockFundTxFee.value + lockFund.value)
-        } else {
-            return (txnFee.value + lockFundTxFee.value + lockFund.value) * Math.pow(10, tokenDivisibility) / Math.pow(10, tokenDivisibility)
-        }
-    }
-})
-
-const showBalanceErr = computed(() => {
-    if (!selectedAddress.value) {
-        return false
-    }
-    else if (selectedMultisigAddress.value) {
-        if (totalFee.value > signerNativeTokenBalance.value) {
-            return true
-        } else {
-            return false
-        }
-    } else {
-        if (totalFee.value > nativeTokenBalance.value) {
-            return true
-        } else {
-            return false
-        }
-    }
-})
-
-const fetchSignerNativeBalance = async () => {
-    if (!AppState.chainAPI) {
-        return
-    }
-    try {
-        const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(selectedAddress.value))
-        const findNativeToken = accInfo.mosaics.find(asset => asset.id.toHex() == AppState.nativeToken.assetId)
-        if (!findNativeToken) {
-            signerNativeTokenBalance.value = 0
-            return
-        } 
-            signerNativeTokenBalance.value = findNativeToken.amount.compact() / Math.pow(10,AppState.nativeToken.divisibility)
-    } catch (_) {
-        signerNativeTokenBalance.value = 0
-    }
-}
-
-const fetchAsset = async (address: string) => {
-    if (!AppState.chainAPI) {
-        return
-    }
-    if (!address) {
-        return
-    }
-    try {
-        const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
-        const findNativeToken = accInfo.mosaics.find(asset=>asset.id.toHex() == AppState.nativeToken.assetId)
-
-        if (!findNativeToken) {
-            nativeTokenBalance.value = 0
-            return
-        } 
-            nativeTokenBalance.value = findNativeToken.amount.compact() / Math.pow(10,AppState.nativeToken.divisibility)
-        
-    } catch (error) {
-        nativeTokenBalance.value = 0
-    }
-
-}
-
-watch([selectedAddress, selectedMultisigAddress], async ([n, mn]) => {
-    //reload asset
-    if(n == null){
-        nativeTokenBalance.value = 0
-    }
-    if (n != null && mn == null) {
-        signerNativeTokenBalance.value = 0
-       
-        await fetchAsset(n)
-    } else if (n != null && mn != null) {
-        await fetchSignerNativeBalance()
-        await fetchAsset(mn)
-    }
-
-})
+  }
 
 // account is clicked
-emitter.on("select-account", async (address: string) => {
+emitter.on("select-account", (address: string) => {
     selectedAddress.value = address
-    const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(selectedAddress.value))
+    const accountInfo = walletState.currentLoggedInWallet.accounts.find(account=>account.address == selectedAddress.value)
     publicKey.value = accountInfo.publicKey
 })
 
 emitter.on("select-multisig-account", (address: string) => {
     selectedMultisigAddress.value = address
+    if(!selectedMultisigAddress.value){
+        return
+    }
+    const accountInfo = walletState.currentLoggedInWallet.accounts.find(account=>account.address == selectedMultisigAddress.value)
+    publicKey.value = accountInfo.publicKey
 })
 
 </script>
