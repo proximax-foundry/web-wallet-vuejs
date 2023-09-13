@@ -166,6 +166,7 @@ const chainProfileIntegration = async () => {
         chainProfileStore.generationHash = chainProfileData['generationHash'];
         chainProfileStore.httpPort = chainProfileData['httpPort'];
         chainProfileStore.network = chainProfileData['network'];
+        chainProfileStore.nftBackend = chainProfileData['nftBackend'];
 
         if(isLocalAccess){
           if(chainProfileData['apikey']){

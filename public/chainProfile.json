@@ -81,6 +81,40 @@
         "hashRoute": "#/tx",
         "namespaceInfoRoute": "#/namespace",
         "assetInfoRoute": "#/asset"
+      },
+      "nftBackend": {
+        "url": "https://stg-moei-gateway.proximaxtest.com"
+      }
+    }, 
+    "Stg MOEI Chain": {
+      "version": "0.1.1",
+      "apiNodes": [
+      "stg-moei-sirius.proximaxtest.com"
+      ],
+      "httpPort": 3000,
+      "generationHash": "581F5CF04F6B3C8E01878389ED9B3AF3ADA9E09EDAB2A3834BD2057A02881DF2",
+      "network": {
+        "type": 200,
+        "currency": {
+          "name": "XPX",
+          "namespace": "prx.xpx",
+          "assetId": "50bb476856bfe8ca",
+          "namespaceId": "bffb42a19116bdf6",
+          "divisibility": 6
+        }
+      },
+      "secured": false,
+      "chainExplorer": {
+        "url": "https://prx-moei.gitlab.io/tools/web-explorer",
+        "blockRoute": "#/block",
+        "publicKeyRoute": "#/account",
+        "addressRoute": "#/account",
+        "hashRoute": "#/tx",
+        "namespaceInfoRoute": "#/namespace",
+        "assetInfoRoute": "#/asset"
+      },
+      "nftBackend": {
+        "url": "https://stg-moei-gateway.proximaxtest.com"
       }
     }
 }
