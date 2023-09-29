@@ -102,6 +102,14 @@ export class NamespaceUtils {
               level: level
             });
           }
+          else if(Number.isNaN(blockDifference)){
+            namespacesArr.push({
+              value: namespaceElement.name,
+              label: namespaceElement.name,
+              disabled: isDisabled,
+              level: level
+            });
+          }
         });
       }
 
@@ -128,6 +136,14 @@ export class NamespaceUtils {
           let blockDifference = namespaceElement.endHeight - listenerState.currentBlock;
   
           if (blockDifference > 0) {
+            namespacesArr.push({
+              value: namespaceElement.name,
+              label: namespaceElement.name,
+              disabled: isDisabled,
+              level: level
+            });
+          }
+          else if(Number.isNaN(blockDifference)){
             namespacesArr.push({
               value: namespaceElement.name,
               label: namespaceElement.name,

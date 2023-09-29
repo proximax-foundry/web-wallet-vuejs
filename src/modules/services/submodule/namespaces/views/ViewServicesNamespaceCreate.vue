@@ -13,7 +13,23 @@
         </div>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="mt-4">
-          <SelectInputAccount @select-account="changeSelection" v-model="selectedAccAdd" :selectDefault="defaultAcc?defaultAcc.address:''" />
+          <div class="flex gap-1">
+            <SelectInputAccount @select-account="changeSelection" v-model="selectedAccAdd" :initiateBy="initiateBy" :selectDefault="defaultAcc?defaultAcc.address:''" />
+            <div v-if="haveSelectableMultisig" @click="toggleMultisig = !toggleMultisig"
+              class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 h-16 w-18 mt-auto'>
+              <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
+              <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.select') }}</div>
+              <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.multisig') }}</div>
+            </div>
+          </div>
+          <!-- Pop Up when select icon is clicked -->
+          <Sidebar v-model:visible="toggleMultisig" :baseZIndex="10000" position="full">
+              <SelectMultisigInput :account="selectableMultisig" :selectedMultisig="selectedMultisig"
+                @select="onSelectMultisig($event)" />
+          </Sidebar>
+          <div v-if="selectedMultisigAdd" class="mt-3">
+            <MultisigInput :select-default-address="selectedMultisigAdd" :select-default-name="selectedMultisigName"/>
+          </div>
           <div v-if="getMultiSigCosigner.cosignerList.length > 0">
             <div class="text-tsm text-left mt-3">{{$t('general.initiateBy')}}:
               <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('general.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }})</span>
@@ -21,13 +37,13 @@
               <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('general.insufficientBalance')}}</div>
             </div>
           </div>
-          <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace" ref="nsRef" v-model="selectNamespace" :address="selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" />
+          <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace" ref="nsRef" v-model="selectNamespace" :address="selectedMultisigAdd?selectedMultisigAdd:selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" />
           <div class="lg:grid lg:grid-cols-2 mt-5">
             <div class="mb-5 lg:mb-0 lg:mr-2">
               <TextInputTooltip :disabled="disableNamespaceName" :placeholder="$t('general.name')" :errorMessage="namespaceErrorMessage" v-model="namespaceName"  v-debounce:1000="checkNamespace" icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block" :toolTip="$t('namespace.namespaceNameMsg1') + '<br><br>' + $t('namespace.namespaceNameMsg2') + '<br><br>' + $t('namespace.namespaceNameMsg3')" tabindex="0"/>
             </div>
             <div class="mb-5 lg:mb-0 lg:ml-2">
-              <DurationInputClean :disabled="disabledDuration" v-model="duration" :max="maxDurationInDays" :placeholder="$t('namespace.duration')" @set-default-duration="setDefaultDuration" :showError="showDurationErr" :toolTip="$t('namespace.durationMsg')+'<br>' +`${maxDurationInDays === 365 ? '1 ' + $t('general.year') : ''}` +' ('+`${maxDurationInDays}`+ $t('general.day',maxDurationInDays) +').'" />
+              <DurationInputClean :disabled="disabledDuration" :selectedAccAdd="selectedMultisigAdd?selectedMultisigAdd:selectedAccAdd" :nemesisAccAdd="nemesisAccAdd" v-model="duration" :max="maxDurationInDays" :placeholder="$t('namespace.duration')" @set-default-duration="setDefaultDuration" :showError="showDurationErr" :toolTip="$t('namespace.durationMsg')+'<br>' +`${maxDurationInDays === 365 ? '1 ' + $t('general.year') : ''}` +' ('+`${maxDurationInDays}`+ $t('general.day',maxDurationInDays) +').'" />
             </div>
           </div>
         </div>
@@ -58,7 +74,7 @@
 </template>
 
 <script>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, getCurrentInstance } from 'vue';
 import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextInputTooltip from '@/components/TextInputTooltip.vue';
@@ -66,6 +82,8 @@ import SelectInputAccount from '@/components/SelectInputAccount.vue';
 import SelectInputParentNamespace from '@/modules/services/submodule/namespaces/components/SelectInputParentNamespace.vue';
 import DurationInputClean from '@/modules/services/submodule/namespaces/components/DurationInputClean.vue';
 import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
+import SelectMultisigInput from "@/components/SelectMultisigInput.vue"
+import MultisigInput from "@/components/MultisigInput.vue"
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { Helper } from '@/util/typeHelper';
@@ -78,6 +96,7 @@ import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { WalletUtils } from '@/util/walletUtils';
+import { PublicAccount } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesNamespaceCreate',
@@ -87,13 +106,16 @@ export default {
     DurationInputClean,
     SelectInputAccount,
     SelectInputParentNamespace,
-    TransactionFeeDisplay
+    TransactionFeeDisplay,
+    SelectMultisigInput,
+    MultisigInput
   },
   setup(){
     const router = useRouter();
     const {t} = useI18n();
     const nsRef = ref(null);
-
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
 
@@ -104,6 +126,12 @@ export default {
     const duration = ref('1');
     const walletPassword = ref('');
     const err = ref('');
+    const toggleMultisig = ref(false)
+    const selectedMultisigAdd = ref("")
+    const selectedMultisigName = ref("")
+    const selectedMultisigPublicKey = ref("")
+    const selectedMultisig = ref({})
+    const cosignAddress = ref("");
     const namespaceErrorMessage = ref(t('namespace.validName'));
     const currentSelectedName = ref('');
     const disabledPassword = ref(false);
@@ -118,6 +146,13 @@ export default {
         return 0
       }
     })
+    const initiateBy = computed(() => {
+      if(selectedMultisigAdd.value){
+        return true
+      } else {
+        return false
+      }
+    })
     const namespacePattern = `^[0-9a-z]{2,${maxNamespaceLength.value}}$`;
     const showNamespaceNameError = ref(false);
     const maxDurationInDays = computed(()=>{
@@ -130,6 +165,10 @@ export default {
     const selectNamespace = ref('');
     const cosignerBalanceInsufficient = ref(false);
     const cosignerAddress = ref('');
+
+    const nemesisAccAdd = computed(()=>{
+      return PublicAccount.createFromPublicKey(networkState.currentNetworkProfileConfig.publicKey,AppState.networkType).address.plain()
+    })
 
     const namespaceOption = computed(() => {
       let namespace = [];
@@ -265,6 +304,47 @@ export default {
       
     });
 
+    const selectableMultisig = computed(() => {
+    const wallet = walletState.currentLoggedInWallet;
+    if(!wallet){
+      return []
+    }
+    let account = wallet.accounts.find(acc => acc.address == selectedAccAdd.value)
+    if(!account){
+      return []
+    }
+    let accountMultisigs = account.multisigInfo.filter((info) => info.level < 0).map(
+      (info, index) => {
+        return {
+          key: index.toString(),
+          label: wallet.contacts.find((contacts) => contacts.address == WalletUtils.createAddressFromPublicKey(info.publicKey,AppState.networkType).plain())?wallet.contacts.find((contacts) => contacts.address == WalletUtils.createAddressFromPublicKey(info.publicKey,AppState.networkType).plain()).name:wallet.accounts.find((acc) => acc.publicKey == info.publicKey)?wallet.accounts.find((acc) => acc.publicKey == info.publicKey).name:"MULTISIG-" + WalletUtils.createAddressFromPublicKey(info.publicKey,AppState.networkType).plain().slice(-4),
+          data: info.publicKey,
+          selectable: true
+        }
+      }
+    )
+    let selectableMultisig = accountMultisigs
+    return selectableMultisig
+  })
+
+  const haveSelectableMultisig = computed(() => {
+    if(selectableMultisig.value.length==0){
+      return false
+    } else {
+      return true
+    }
+  })
+
+  const onSelectMultisig = (event) => {
+    toggleMultisig.value = false
+    selectedMultisigAdd.value = WalletUtils.createAddressFromPublicKey(event.data,AppState.networkType).plain()
+    selectedMultisigName.value = event.label
+    selectedMultisigPublicKey.value = event.data
+    cosignAddress.value = selectedAccAdd.value
+    // this is too make it turn blue
+    selectedMultisig.value[event.key] = true
+  }
+
     const removeNamespace = () => {
       selectNamespace.value = '';
     }
@@ -281,6 +361,7 @@ export default {
       balance.value = Helper.toCurrencyFormat(account.balance, AppState.nativeToken.divisibility);
       balanceNumber.value = account.balance;
       currentSelectedName.value = account.name;
+      setDefaultDuration()
     }
 
     const updateNamespaceSelection = (namespaceNameSelected) => {
@@ -327,12 +408,12 @@ export default {
         err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
         return
       }
-      if(cosigner.value){
+      if(selectedMultisigAdd.value){
         // for multisig
         if(selectNamespace.value==='1'){
-          NamespaceUtils.createRootNamespaceMultisig(cosigner.value, walletPassword.value, namespaceName.value, duration.value, selectedAccAdd.value);
+          NamespaceUtils.createRootNamespaceMultisig(selectedAccAdd.value, walletPassword.value, namespaceName.value, duration.value, selectedMultisigAdd.value);
         }else{
-          NamespaceUtils.createSubNamespaceMultisig(cosigner.value, walletPassword.value, namespaceName.value, selectNamespace.value, selectedAccAdd.value);
+          NamespaceUtils.createSubNamespaceMultisig(selectedAccAdd.value, walletPassword.value, namespaceName.value, selectNamespace.value, selectedMultisigAdd.value);
         }
       }else{
         if(selectNamespace.value==='1'){
@@ -351,7 +432,12 @@ export default {
     });
 
     const setDefaultDuration = () => {
-      duration.value = '1';
+      if(selectedAccAdd.value === nemesisAccAdd.value || selectedMultisigAdd.value === nemesisAccAdd.value){
+        duration.value = '0';
+      }
+      else{
+        duration.value = '1';
+      }
     }
 
     // calculate fees
@@ -556,6 +642,13 @@ export default {
       }
     })
 
+    // Cancel transfer from multisig
+    emitter.on("CLOSE_MULTISIG", () =>{
+      selectedMultisigAdd.value = ""
+      selectedMultisigName.value = ""
+      selectedMultisigPublicKey.value = ""
+    })
+
     return {
       Helper,
       accounts,
@@ -607,7 +700,16 @@ export default {
       setDefaultDuration,
       cosigner,
       defaultAcc,
-      checkCosignBalance
+      checkCosignBalance,
+      nemesisAccAdd,
+      initiateBy,
+      toggleMultisig,
+      selectedMultisig,
+      selectableMultisig,
+      haveSelectableMultisig,
+      selectedMultisigAdd,
+      selectedMultisigName,
+      onSelectMultisig
     }
   },
 
