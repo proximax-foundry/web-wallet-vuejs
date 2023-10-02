@@ -434,6 +434,7 @@ namespace:
   registerNamespace: Register Namespace
   registerNewNamespace: Register New Namespace
   reservedName: Reserved namespace name
+  invalidLength: Invalid length
   selectAction: Select Action
   selectNamespace: Select Namespace
   unlinkNamespace: Unlink Namespace
