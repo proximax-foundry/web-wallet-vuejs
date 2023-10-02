@@ -427,6 +427,7 @@ namespace:
   registerNamespace: 注册名称空间
   registerNewNamespace: 注册新的命名空间
   reservedName: 此命名空间名称已被保留
+  invalidLength: 此命名空间名称过长或过短
   selectAction: 选择操作
   selectNamespace: 选择命名空间
   unlinkNamespace: 解除链接名称空间

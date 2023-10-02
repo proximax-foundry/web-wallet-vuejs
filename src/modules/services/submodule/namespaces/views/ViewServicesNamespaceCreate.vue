@@ -118,7 +118,8 @@ export default {
         return 0
       }
     })
-    const namespacePattern = `^[0-9a-z]{2,${maxNamespaceLength.value}}$`;
+    const minNamespaceLength = 2;
+    const namespacePattern = `^[0-9a-z]{1,}[-_]{0,1}[0-9a-z]{1,}$`;
     const showNamespaceNameError = ref(false);
     const maxDurationInDays = computed(()=>{
       if(networkState.currentNetworkProfileConfig){
@@ -192,7 +193,9 @@ export default {
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value) && !showNamespaceNameError.value && selectNamespace.value
+      walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && 
+      (namespaceName.value.length < minNamespaceLength || namespaceName.value.length > maxNamespaceLength.value) &&
+      (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value) && !showNamespaceNameError.value && selectNamespace.value
     ));
 
     const defaultAcc = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount(): null
@@ -509,9 +512,23 @@ export default {
       
     }
   });
+
+    const isNamespaceValidLength = ()=>{
+      if(namespaceName.value.length < minNamespaceLength || namespaceName.value.length > maxNamespaceLength.value){
+          showNamespaceNameError.value = true;
+          namespaceErrorMessage.value = t('namespace.invalidLength');
+
+          return false;
+      }
+      return true;
+    }
+
     const checkNamespace = async () =>{
       if(namespaceName.value.trim()){
         if(isReservedRootNamespace()){
+          return;
+        }
+        else if(!isNamespaceValidLength()){
           return;
         }
         else{
