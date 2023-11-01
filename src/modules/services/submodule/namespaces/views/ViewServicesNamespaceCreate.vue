@@ -78,6 +78,7 @@ import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { WalletUtils } from '@/util/walletUtils';
+import { Address } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesNamespaceCreate',
@@ -198,18 +199,37 @@ export default {
     const defaultAcc = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount(): null
     const selectedAccName = ref(defaultAcc?defaultAcc.name:'');
     const selectedAccAdd = ref(defaultAcc?defaultAcc.address:'');
-    const balance = ref(Helper.toCurrencyFormat(defaultAcc?defaultAcc.balance:0, AppState.nativeToken.divisibility));
-    const balanceNumber = ref(defaultAcc?defaultAcc.balance:0);
-
+    const balance = ref('0');
     const isMultiSigBool =ref(isMultiSig(defaultAcc?defaultAcc.address:''));
 
+    const fetchAccountBalance = async (address) => {
+      if (!AppState.chainAPI) {
+        return
+      }
+      if (!address) {
+          return
+      }
+      try{
+        const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
+        const findIndex = accInfo.mosaics.findIndex(asset => asset.id.toHex() == AppState.nativeToken.assetId)
+        if (findIndex != -1) {
+            return accInfo.mosaics[findIndex].amount.compact() / Math.pow(10, AppState.nativeToken.divisibility)
+        } 
+      }
+      catch(e){}
+    }
+
+    const checkBalance = async () =>{
+      balance.value = (await fetchAccountBalance(selectedAccAdd.value)).toString()
+    }
+    checkBalance()
     const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
     const showNoBalance = computed(() => {
       if(isNotCosigner.value){
-        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value);
+        return balance.value < (rentalFee.value + transactionFeeExact.value);
       }else{
-        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value + lockFundTotalFee.value);
+        return balance.value < (rentalFee.value + transactionFeeExact.value + lockFundTotalFee.value);
       }
     });
 
@@ -269,7 +289,7 @@ export default {
       selectNamespace.value = '';
     }
 
-    const changeSelection = (address) => {
+    const changeSelection = async (address) => {
       let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
       if(!account){
         account = walletState.currentLoggedInWallet.others.find(account => account.address == address);
@@ -278,8 +298,7 @@ export default {
       nsRef.value.clearLabel();
       selectedAccName.value = account.name;
       selectedAccAdd.value = account.address;
-      balance.value = Helper.toCurrencyFormat(account.balance, AppState.nativeToken.divisibility);
-      balanceNumber.value = account.balance;
+      balance.value = (await fetchAccountBalance(selectedAccAdd.value)).toString()
       currentSelectedName.value = account.name;
     }
 
@@ -448,24 +467,29 @@ export default {
       }
       return false;
     }
-    if (isMultiSigBool.value) {
-      let cosigner = getMultiSigCosigner.value.cosignerList
-      if (cosigner.length > 0) {
-        cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
-        if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
+
+    const checkCosigner = async () =>{
+      if (isMultiSigBool.value) {
+        let cosigner = getMultiSigCosigner.value.cosignerList
+        if (cosigner.length > 0) {
+          cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
+          let cosignBalance = await fetchAccountBalance(cosignerAddress.value)
+          if (cosignBalance < lockFundTotalFee.value ) {
+            disabledPassword.value = true;
+            disableSelectNamespace.value = true;
+            cosignerBalanceInsufficient.value = true;
+          } else {
+            disabledPassword.value = false;
+            disableSelectNamespace.value = false;
+            cosignerBalanceInsufficient.value = false;
+          }
+        } else {
           disabledPassword.value = true;
           disableSelectNamespace.value = true;
-          cosignerBalanceInsufficient.value = true;
-        } else {
-          disabledPassword.value = false;
-          disableSelectNamespace.value = false;
-          cosignerBalanceInsufficient.value = false;
         }
-      } else {
-        disabledPassword.value = true;
-        disableSelectNamespace.value = true;
       }
     }
+    checkCosigner()
     watch(selectedAccAdd, (n, o) => {
       isMultiSigBool.value = isMultiSig(n);
       if (isMultiSigBool.value) {
