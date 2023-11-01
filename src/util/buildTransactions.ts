@@ -53,6 +53,10 @@ import {
 import { WalletUtils } from "./walletUtils";
 import { Helper } from "./typeHelper";
 import { ChainConfigUtils } from "./chainConfigUtils";
+import { AppState } from '@/state/appState';
+import { networkState } from '@/state/networkState';
+import { UnitConverter } from './unitConverter';
+import { TimeUnit } from '@/models/const/timeUnit';
 
 export class BuildTransactions {
 
@@ -155,10 +159,17 @@ export class BuildTransactions {
         return this.transactionBuilderFactory.mosaicDefinition();
     }
 
-    aggregateBonded(innerTxn: InnerTransaction[]): AggregateTransaction {
+    async aggregateBonded(innerTxn: InnerTransaction[]): Promise<AggregateTransaction> {
 
-        let abtDeadline = ChainConfigUtils.getABTMaxSafeDeadline();
-
+        let abtDeadline = Deadline.createForBonded();
+        let fetchNodeTime = await AppState.chainAPI.nodeAPI.getNodeTime()
+        let abtMaxLifeTime = networkState.currentNetworkProfileConfig.maxBondedTransactionLifetime;
+        const abtMaxLifeTimeInDays = UnitConverter.configReturn(abtMaxLifeTime, TimeUnit.DAY);
+        let sendTimeStamp = new UInt64(fetchNodeTime.sendTimeStamp).compact()
+        let convertTimestampToDate = new Date(sendTimeStamp + Deadline.timestampNemesisBlock * 1000)
+        convertTimestampToDate.setDate(convertTimestampToDate.getDate()+abtMaxLifeTimeInDays)
+        let getTimestampMaxDeadline = convertTimestampToDate.getTime() - Deadline.timestampNemesisBlock * 1000
+        abtDeadline.adjustedValue = UInt64.fromUint(getTimestampMaxDeadline)
         return this.transactionBuilderFactory.aggregateBondedV1()
             .deadline(abtDeadline)
             .innerTransactions(innerTxn)
