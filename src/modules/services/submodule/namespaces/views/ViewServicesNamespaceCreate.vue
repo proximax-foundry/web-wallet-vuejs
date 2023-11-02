@@ -214,6 +214,9 @@ export default {
         const findIndex = accInfo.mosaics.findIndex(asset => asset.id.toHex() == AppState.nativeToken.assetId)
         if (findIndex != -1) {
             return accInfo.mosaics[findIndex].amount.compact() / Math.pow(10, AppState.nativeToken.divisibility)
+        }
+        else{
+          return 0
         } 
       }
       catch(e){}
@@ -222,7 +225,6 @@ export default {
     const checkBalance = async () =>{
       balance.value = (await fetchAccountBalance(selectedAccAdd.value)).toString()
     }
-    checkBalance()
     const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
     const showNoBalance = computed(() => {
@@ -489,7 +491,6 @@ export default {
         }
       }
     }
-    checkCosigner()
     watch(selectedAccAdd, (n, o) => {
       isMultiSigBool.value = isMultiSig(n);
       if (isMultiSigBool.value) {
@@ -571,6 +572,23 @@ export default {
           }
         }
       }
+    }
+
+    const init = ()=>{
+      checkBalance();
+      checkCosigner();
+    }
+
+    if(AppState.isReady){
+      init();
+    }
+    else{
+      let readyWatcher = watch(AppState, (value) => {
+        if(value.isReady){
+          init();
+          readyWatcher();
+        }     
+      });
     }
 
     watch(namespaceName,n=>{
