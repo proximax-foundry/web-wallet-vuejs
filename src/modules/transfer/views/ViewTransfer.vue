@@ -15,8 +15,13 @@
                         <div class="inline-block text-xs">{{ $t('general.insufficientBalance') }}</div>
                     </div>
                     <div class="text-sm font-semibold ">{{ $t('transfer.newTransfer') }}</div>
-                    <SelectInputAccount />
-                    <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
+                    <div class="flex gap-1">
+                        <SelectInputAccount />
+                        <SelectInputMultisigAccount :selected-address="selectedAddress" />
+                    </div>
+                    <div v-if="selectedMultisigAddress" class="mt-3">
+                        <MultisigInput :select-default-address="selectedMultisigAddress" :select-default-name="selectedMultisigName"/>
+                    </div>
                     <div class="text-blue-primary font-semibold uppercase mt-3 text-xxs">Transfer to</div>
 
                     <div class="flex mt-1 gap-1 items-center">
@@ -91,6 +96,7 @@
 import { ref, getCurrentInstance, computed, watch } from 'vue';
 import SelectInputAccount from '../components/SelectInputAccount.vue';
 import SelectInputMultisigAccount from '../components/SelectInputMultisigAccount.vue';
+import MultisigInput from "../components/MultisigInput.vue"
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { walletState } from '@/state/walletState';
@@ -124,6 +130,8 @@ const { t } = useI18n();
 const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
 const selectedMultisigAddress = ref<string | null>(null)
+
+const selectedMultisigName = ref<string | null>(null)
 
 const selectedAddress = ref<string | null>(null)
 
@@ -393,31 +401,50 @@ const fetchAssets = async (address: string) => {
 }
 
 
-watch([selectedAddress, selectedMultisigAddress], async ([n, mn]) => {
+watch(selectedAddress, async (n,o) => {
     assetOptions.value = [];
     selectedAssets.value = []
     //reload asset
     if(n == null){
         nativeTokenBalance.value = 0
+        selectedMultisigName.value = null
+        selectedMultisigAddress.value = null
     }
-    if (n != null && mn == null) {
-        signerNativeTokenBalance.value = 0
-       
+    if(n != o){
+        selectedMultisigName.value = null
+        selectedMultisigAddress.value = null
         await fetchAssets(n)
-    } else if (n != null && mn != null) {
+    }
+})
+
+watch(selectedMultisigAddress, async (mn, mo) => {
+    assetOptions.value = [];
+    selectedAssets.value = []
+    //reload asset
+    if(mn == null){
+        signerNativeTokenBalance.value = 0
+        selectedMultisigName.value = null
+        selectedMultisigAddress.value = null
+        await fetchAssets(selectedAddress.value)
+    }
+    if(mn != mo){
         await fetchSignerNativeBalance()
         await fetchAssets(mn)
-        /*  signerTokenBalance.value = await AppState.chainAPI.accountAPI.getAccountInfo() */
     }
-
 })
 
 emitter.on("select-account", (address: string) => {
     selectedAddress.value = address
 })
 
-emitter.on("select-multisig-account", (address: string) => {
-    selectedMultisigAddress.value = address
+emitter.on("select-multisig-account", (node: TreeNode) => {
+    selectedMultisigName.value = node.label
+    selectedMultisigAddress.value = node.value
+})
+
+emitter.on("CLOSE_MULTISIG", () =>{
+    selectedMultisigName.value = null
+    selectedMultisigAddress.value = null
 })
 
 emitter.on("CLOSE_CONFIRM_SEND_MODAL", (emitValue: boolean) => {
