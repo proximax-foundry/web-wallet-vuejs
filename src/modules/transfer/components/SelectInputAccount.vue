@@ -1,8 +1,8 @@
 <template>
-    <div>
+    <div class="w-full">
         <div v-if="!selectedAccountInfo" class="text-blue-primary font-semibold uppercase text-xxs mt-3">Select Account to create / initiate transfer</div>
-        <Dropdown :showClear="true"   v-model=selectedAccountInfo :style="{ 'width': '100%' }" :options=accounts :filter="true"
-            :filterFields="['label','value']" emptyFilterMessage=" "
+        <Dropdown v-model=selectedAccountInfo :style="{ 'width': '100%' }" :options=accounts :filter="true"
+            :filterFields="['label','value']" emptyFilterMessage=" " placeholder="Select Account"
             @change="selectAccount($event.value?.label, $event.value?.value); $emit('update:modelValue', $event.value?.value); $emit('select-account', $event.value?.value);">
             <!-- For the display of  account information -->
             <template #value="slotProps">
@@ -12,7 +12,7 @@
                         <div class='flex flex-col ml-2 text-left'>
                             <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
                                 Selected Account to create / initiate transfer</div>
-                            <div class='mt-1 text-tsm font-bold'>{{ slotProps.value.label }}</div>
+                            <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
                         </div>
                     </div>
                 </div>
