@@ -4,7 +4,6 @@ on:
   push:
     branches: 
       - develop
-      - ci-vuln-scan
   
 jobs:
   # This workflow contains a single job called "build"
@@ -49,15 +48,15 @@ jobs:
       - name: build for testnet
         run: npm run build-staging
       
-      # - name: Archive artifact
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: dist
-      #     path: |
-      #       dist
+      - name: Archive artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: |
+            dist
 
-      # - name: publish to GH Pages as stg for bctestnetwallet
-      #   uses: peaceiris/actions-gh-pages@v3
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_dir: ./dist
+      - name: publish to GH Pages as stg for bctestnetwallet
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
