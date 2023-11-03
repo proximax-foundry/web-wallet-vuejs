@@ -15,7 +15,7 @@
                         <div class="inline-block text-xs">{{ $t('general.insufficientBalance') }}</div>
                     </div>
                     <div class="text-sm font-semibold ">{{ $t('transfer.newTransfer') }}</div>
-                    <div class="flex gap-1">
+                    <div class="flex gap-1 mt-3">
                         <SelectInputAccount />
                         <SelectInputMultisigAccount :selected-address="selectedAddress" />
                     </div>

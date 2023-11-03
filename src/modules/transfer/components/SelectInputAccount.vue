@@ -1,6 +1,6 @@
 <template>
     <div class="w-full">
-        <div v-if="!selectedAccountInfo" class="text-blue-primary font-semibold uppercase text-xxs mt-3">Select Account to create / initiate transfer</div>
+        <div v-if="!selectedAccountInfo" class="text-blue-primary font-semibold uppercase text-xxs">Select Account to create / initiate transfer</div>
         <Dropdown v-model=selectedAccountInfo :style="{ 'width': '100%' }" :options=accounts :filter="true"
             :filterFields="['label','value']" emptyFilterMessage=" "  placeholder="Select Account"
             @change="selectAccount($event.value?.label, $event.value?.value); $emit('update:modelValue', $event.value?.value); $emit('select-account', $event.value?.value);">
