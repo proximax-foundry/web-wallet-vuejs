@@ -15,6 +15,13 @@
         <div class="flex-none">
           <div class="flex border border-gray-300 rounded-md filter shadow-md">
             <div class="flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=2?'bg-yellow-500':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-txs sm:text-sm font-bold" :class="`${ currentPage>=2?'text-white':'text-gray-400' }`">2</div></div>
+            <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('swap.validation')}}</div>
+          </div>
+        </div>
+        <div class="flex-grow self-center md:mx-4 h-0.5 bg-gray-100"></div>
+        <div class="flex-none">
+          <div class="flex border border-gray-300 rounded-md filter shadow-md">
+            <div class="flex w-6 h-6 sm:w-10 sm:h-10" :class="`${ currentPage>=3?'bg-yellow-500':'bg-gray-300' }`"><div class="self-center inline-block text-center w-full text-txs sm:text-sm font-bold" :class="`${ currentPage>=2?'text-white':'text-gray-400' }`">3</div></div>
             <div class="px-4 sm:px-10 self-center text-xxs sm:text-xs hidden md:inline-block lg:hidden xl:inline-block">{{$t('general.certificate')}}</div>
           </div>
         </div>
@@ -75,12 +82,46 @@
           </div>
           <div class="mt-10 text-center">
             <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">{{$t('general.later')}}</button>
+            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()">{{$t('general.continue')}}</button>
+          </div>
+        </div>
+      </div>
+      <div v-if="currentPage==2">
+          <div class="text-lg my-7">
+            <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
+            <div class="font-bold text-left text-xs md:text-sm text-gray-700">Validate your transaction</div>
+            <div class="flex border-b border-gray-300 p-3">
+              <div class="flex h-full justify-center">
+                <div class="self-center inline-block transition-all duration-500 text-xs md:text-sm text-blue-primary">Account Name: </div>
+                <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all">{{$t(selectedAccountName)}}</div>
+              </div>
+            </div>
+            <div class="flex border-b border-gray-300 p-3">
+              <div class="flex h-full justify-center">
+                <div class="self-center inline-block transition-all duration-500 text-xs md:text-sm text-blue-primary">Account Address: </div>
+                <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all">{{$t(siriusAddress)}}</div>
+              </div>
+            </div>
+            <div class="flex border-b border-gray-300 p-3">
+              <div class="flex h-full justify-center">
+                <div class="self-center inline-block transition-all duration-500 text-xs md:text-sm text-blue-primary">Amount: </div>
+                <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all">{{$t(amount)}} {{ $t(selectedToken.name.toUpperCase()) }}</div>
+              </div>
+            </div>
+            <div class="flex border-b border-gray-300 p-3">
+              <div class="flex h-full justify-center">
+                <div class="self-center inline-block transition-all duration-500 text-xs md:text-sm text-blue-primary">MetaMask Address: </div>
+                <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all">{{$t(bscAddress)}}</div>
+              </div>
+            </div>
+          <div class="mt-10 text-center">
+            <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">{{$t('general.later')}}</button>
             <button type="button" class="default-btn focus:outline-none disabled:opacity-50 mt-2" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?$t('swap.swapInProgress'):$t('swap.confirmSwap') }}</button>
             <button class="default-btn focus:outline-none disabled:opacity-50 mt-2" v-if="canCheckStatus" @click="callTocheckSwapStatus">{{$t('swap.checkSwapStatus')}}</button>
           </div>
         </div>
       </div>
-      <div v-if="currentPage==2">
+      <div v-if="currentPage==3">
         <div>
           <h1 class="default-title font-bold mt-5 mb-2">{{$t('general.congratz')}}</h1>
           <div class="text-sm mb-7">{{$t('swap.swapStarted')}}</div>
@@ -790,7 +831,7 @@ export default {
           swapTimestamp.value = '';
           swapId.value = res.data.swapId;
           swapQr.value = SwapUtils.generateQRCode(bscScanUrl + res.data.txHash);
-          currentPage.value = 2;
+          currentPage.value = 3;
         }
         else if(response.status==400){
           const res = await response.json();
@@ -868,6 +909,20 @@ export default {
       SwapUtils.generateoutgoingPdfCert('BSC', swapTimestamp.value, selectedAccountAddress.value, swapId.value, certTransactionHash.value, swapQr.value, siriusTransactionHash.value);
     };
 
+    const validated = () => {
+      try{
+        let validateAddress = ethers.utils.getAddress(bscAddress.value);
+        if(validateAddress && !showAmountErr.value){
+          showAddressErr.value = false;
+          currentPage.value = 2;
+        }
+      }catch(err){
+        showAddressErr.value = true;
+        swapInProgress.value = false;
+        isDisabledCancel.value = false;
+      }
+    };
+
     return {
       selectedAccountBalance,
       minNativeBalanceAmount,
@@ -929,7 +984,8 @@ export default {
       tokenDivisibility,
       tokenList,
       selectedToken,
-      selectedTokenName
+      selectedTokenName,
+      validated
     };
   }
 }
