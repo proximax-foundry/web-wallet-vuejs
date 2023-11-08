@@ -114,6 +114,41 @@
                 <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all">{{$t(bscAddress)}}</div>
               </div>
             </div>
+            <div class="flex border-b border-gray-300 p-3">
+              <div class="flex h-full justify-center">
+                <div class="self-center inline-block transition-all duration-500 text-xs md:text-sm text-blue-primary">{{$t('general.transactionFee')}} ({{$t('swap.bsc')}} BEP20 {{$t('general.network')}}): </div>
+                <div v-if="bscGasStrategy === 'standard'" class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all">
+                  <p class="font-bold text-tsm">{{$t('swap.standard')}}</p>
+                  <div>XPX {{ xpxAmountInStandardGasPrice }}</div>
+                </div>
+                <div v-if="bscGasStrategy === 'fast'" class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all">
+                  <p class="font-bold text-tsm">{{$t('swap.fast')}}</p>
+                  <div>XPX {{ xpxAmountInFastGasPrice }}</div>
+                </div>
+                <div v-if="bscGasStrategy === 'rapid'" class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all">
+                  <p class="font-bold text-tsm">{{$t('swap.rapid')}}</p>
+                  <div>XPX {{ xpxAmountInRapidGasPrice }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="flex border-b border-gray-300 p-3">
+              <div class="flex h-full justify-center">
+                <div class="self-center inline-block transition-all duration-500 text-xs md:text-sm text-blue-primary">{{$t('swap.feesValidDuration')}}: </div>
+                <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all">{{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
+              </div>
+            </div>
+            <div class="flex border-b border-gray-300 p-3">
+              <div class="flex h-full justify-center">
+                <div class="self-center inline-block transition-all duration-500 text-xs md:text-sm text-blue-primary">{{$t('general.transactionFee')}} ({{$t('swap.siriusNetwork')}}): </div>
+                <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all"><span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName}}</div>
+              </div>
+            </div>
+            <div class="flex border-b border-gray-300 p-3">
+              <div class="flex h-full justify-center">
+                <div class="self-center inline-block transition-all duration-500 text-xs md:text-sm text-blue-primary">Total Transaction Fee: </div>
+                <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all">{{minNativeBalanceAmount}} {{currentNativeTokenName}}</div>
+              </div>
+            </div>
           <div class="mt-10 text-center">
             <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">{{$t('general.later')}}</button>
             <button type="button" class="default-btn focus:outline-none disabled:opacity-50 mt-2" :disabled="isDisabledSwap" @click="swap">{{ swapInProgress?$t('swap.swapInProgress'):$t('swap.confirmSwap') }}</button>
