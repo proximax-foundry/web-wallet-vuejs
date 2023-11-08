@@ -133,12 +133,6 @@
             </div>
             <div class="flex border-b border-gray-300 p-3">
               <div class="flex h-full justify-center">
-                <div class="self-center inline-block transition-all duration-500 text-xs md:text-sm text-blue-primary">{{$t('swap.feesValidDuration')}}: </div>
-                <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all">{{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
-              </div>
-            </div>
-            <div class="flex border-b border-gray-300 p-3">
-              <div class="flex h-full justify-center">
                 <div class="self-center inline-block transition-all duration-500 text-xs md:text-sm text-blue-primary">{{$t('general.transactionFee')}} ({{$t('swap.siriusNetwork')}}): </div>
                 <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all"><span>{{ txFeeDisplay }}</span> {{ currentNativeTokenName}}</div>
               </div>
@@ -147,6 +141,12 @@
               <div class="flex h-full justify-center">
                 <div class="self-center inline-block transition-all duration-500 text-xs md:text-sm text-blue-primary">Total Transaction Fee: </div>
                 <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all">{{minNativeBalanceAmount}} {{currentNativeTokenName}}</div>
+              </div>
+            </div>
+            <div class="flex border-b border-gray-300 p-3">
+              <div class="flex h-full justify-center">
+                <div class="self-center inline-block transition-all duration-500 text-xs md:text-sm text-blue-primary">{{$t('swap.feesValidDuration')}}: </div>
+                <div class="flex-grow text-left text-xs md:text-sm ml-3 self-center transition-all duration-500 text-gray-700 break-all">{{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
               </div>
             </div>
           <div class="mt-10 text-center">
