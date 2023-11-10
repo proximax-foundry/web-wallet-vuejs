@@ -15,12 +15,12 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Setup Node 16.x
-        uses: actions/setup-node@v2-beta
+      - name: Setup Node 18.x
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
       
       - name: Cache node modules
         uses: actions/cache@v2
@@ -37,8 +37,8 @@ jobs:
           
       - name: Installing Dependencies
         run: npm install
-      
-      - name: build for testnet
+
+      - name: build for staging
         run: npm run build-staging
       
       - name: Archive artifact
