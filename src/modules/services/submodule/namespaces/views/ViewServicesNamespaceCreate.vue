@@ -267,8 +267,8 @@ const updateNamespaceSelection = (namespaceNameSelected) => {
   }
 };
 
-watch(selectNamespace, n => {
-  if (!n) {
+watch(selectNamespace, newValue => {
+  if (!newValue) {
     disableNamespaceName.value = true;
     disabledDuration.value = true;
     disabledPassword.value = true;
@@ -303,8 +303,8 @@ const createNamespace = () => {
   router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
 };
 
-watch(duration, (n) => {
-  if (parseInt(n) > maxDurationInDays.value) {
+watch(duration, (newValue) => {
+  if (parseInt(newValue) > maxDurationInDays.value) {
     duration.value = `${maxDurationInDays.value}`;
   }
 });
@@ -323,8 +323,8 @@ const totalFee = computed(() => {
   }
 });
 
-watch(totalFee, (n) => {
-  if (balance.value < n) {
+watch(totalFee, (newValue) => {
+  if (balance.value < newValue) {
     disabledPassword.value = true;
     disableSelectNamespace.value = true;
   } else {
@@ -434,40 +434,40 @@ const clearInput = () => {
   selectedMultisigAddress.value = null
 }
 
-watch(selectedAddress, async (n, o) => {
-  if (n == null) {
+watch(selectedAddress, async (newValue, oldValue) => {
+  if (newValue == null) {
     balance.value = 0
     clearInput()
   }
-  else if (n != o) {
+  else if (newValue != oldValue) {
     clearInput()
-    balance.value = await fetchAccountBalance(n)
+    balance.value = await fetchAccountBalance(newValue)
   }
 })
 
-watch(selectedMultisigAddress, async (mn, mo) => {
-  if (mn == null) {
+watch(selectedMultisigAddress, async (multisigNewValue, multisigOldValue) => {
+  if (multisigNewValue == null) {
     multisigBalance.value = 0
     clearInput()
     balance.value = await fetchAccountBalance(selectedAddress.value)
   }
-  else if (mn != mo) {
+  else if (multisigNewValue != multisigOldValue) {
     selectNamespace.value = ''
     namespaceName.value = ''
     nsRef.value.clearLabel();
     showNamespaceNameError.value = false
     setDefaultDuration()
-    multisigBalance.value = await fetchAccountBalance(mn)
+    multisigBalance.value = await fetchAccountBalance(multisigNewValue)
   }
 })
 
-watch(namespaceName, n => {
+watch(namespaceName, newValue => {
   if (selectNamespace.value === '') {
     showNamespaceNameError.value = false;
     namespaceErrorMessage.value = '';
   }
   else {
-    if (n.length == 0) {
+    if (newValue.length == 0) {
       showNamespaceNameError.value = true;
       namespaceErrorMessage.value = t('namespace.validName');
     }

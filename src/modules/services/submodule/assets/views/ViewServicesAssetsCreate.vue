@@ -219,25 +219,25 @@ import { TreeNode } from 'primevue/tree';
       isMutable.value = false;
     };
 
-    watch(selectedAddress, async (n, o) => {
-      if (n == null) {
+    watch(selectedAddress, async (newValue, oldValue) => {
+      if (newValue == null) {
         balance.value = 0
         clearInput()
         selectedMultisigName.value = null
         selectedMultisigAddress.value = null
         multisigPublicAccount.value = null
       }
-      else if (n != o) {
+      else if (newValue != oldValue) {
         clearInput()
         selectedMultisigName.value = null
         selectedMultisigAddress.value = null
         multisigPublicAccount.value = null
-        balance.value = await fetchAccountBalance(n)
+        balance.value = await fetchAccountBalance(newValue)
       }
     })
 
-    watch(selectedMultisigAddress, async (mn, mo) => {
-      if (mn == null) {
+    watch(selectedMultisigAddress, async (multisigNewValue, multisigOldValue) => {
+      if (multisigNewValue == null) {
         multisigBalance.value = 0
         clearInput()
         selectedMultisigName.value = null
@@ -245,9 +245,9 @@ import { TreeNode } from 'primevue/tree';
         multisigPublicAccount.value = null
         balance.value = await fetchAccountBalance(selectedAddress.value)
       }
-      else if (mn != mo) {
+      else if (multisigNewValue != multisigOldValue) {
         clearInput()
-        multisigBalance.value = await fetchAccountBalance(mn)
+        multisigBalance.value = await fetchAccountBalance(multisigNewValue)
       }
     })
 
