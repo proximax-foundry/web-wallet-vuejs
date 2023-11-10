@@ -3,10 +3,11 @@
         <div v-if="!selectedAccountInfo" class="text-blue-primary font-semibold uppercase text-xxs">
             <div v-if="type == 'transfer'">Select Account to create / initiate transfer</div>
             <div v-else-if="type == 'namespace'">Select Account to create namespace</div>
+            <div v-else-if="type == 'asset'">Select Account to create asset</div>
         </div>
         <Dropdown v-model=selectedAccountInfo :style="{ 'width': '100%' }" :options=accounts :filter="true"
-            :filterFields="['label','value']" emptyFilterMessage=" "  placeholder="Select Account"
-            @change="selectAccount($event.value?.label, $event.value?.value); $emit('update:modelValue', $event.value?.value); $emit('select-account', $event.value?.value);">
+            :filterFields="['label','value','publicKey']" emptyFilterMessage=" "  placeholder="Select Account"
+            @change="selectAccount($event.value?.label, $event.value?.value, $event.value?.publicKey); $emit('update:modelValue', $event.value?.value); $emit('select-account', $event.value?.value); $emit('select-account-public-key', $event.value?.publicKey);">
             <!-- For the display of  account information -->
             <template #value="slotProps">
                 <div v-if="slotProps.value" class="account-item-value account-item">
@@ -20,6 +21,11 @@
                         <div v-else-if="type == 'namespace'" class='flex flex-col ml-2 text-left'>
                             <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
                                 Selected Account to create namespace</div>
+                            <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
+                        </div>
+                        <div v-else-if="type == 'asset'" class='flex flex-col ml-2 text-left'>
+                            <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
+                                Selected Account to create asset</div>
                             <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
                         </div>
                     </div>
@@ -52,7 +58,7 @@ const props = defineProps({
 })
 
 defineEmits([
-    'select-account', 'update:modelValue'
+    'select-account', 'select-account-public-key', 'update:modelValue'
 ])
 
 const internalInstance = getCurrentInstance();
@@ -69,7 +75,8 @@ const accounts = computed(() => {
     return [...cosignerAccounts].map((cosignerAcc) => {
         return {
             value: cosignerAcc.address,
-            label: walletState.currentLoggedInWallet.convertAddressToName(cosignerAcc.address, true)
+            label: walletState.currentLoggedInWallet.convertAddressToName(cosignerAcc.address, true),
+            publicKey: cosignerAcc.publicKey
         }
     })
 })
@@ -77,15 +84,18 @@ const accounts = computed(() => {
 const selectedAccountInfo = ref(null)
 
 const selectedImg = ref(null);
-const selectAccount = (accountName: string, accountAddress: string) => {
-    if (accountName == null && accountAddress == null) {
+const selectAccount = (accountName: string, accountAddress: string, accountPublicKey: string) => {
+    if (accountName == null && accountAddress == null && accountPublicKey == null) {
         selectedAccountInfo.value = null
         emitter.emit("select-account", null)
+        emitter.emit("select-account-public-key", null)
         return
     }
     emitter.emit("select-account", accountAddress)
+    emitter.emit("select-account-public-key", accountPublicKey)
     selectedAccountInfo.value.label = accountName;
     selectedAccountInfo.value.value = accountAddress;
+    selectedAccountInfo.value.publicKey = accountPublicKey;
     selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
 };
 

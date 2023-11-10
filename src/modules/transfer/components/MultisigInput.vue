@@ -15,6 +15,12 @@
               >
               {{$t('general.createNamespace')}} From {{ $t("general.multisig") }}
               </div>
+              <div v-else-if="type == 'asset'"
+                class="text-blue-primary font-semibold text-xxs uppercase"
+                style="line-height: 9px"
+              >
+              {{$t('asset.assetCreatedBy')}} {{ $t("general.multisig") }}
+              </div>
               <div class="mt-2 text-tsm font-bold ">
                 {{ selectDefaultName }}
               </div>

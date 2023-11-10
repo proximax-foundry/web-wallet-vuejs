@@ -30,6 +30,11 @@
             <div class='ml-auto lg:col-span-2 col-span-3' v-html="splitCurrency(namespaceRentalFeeCurrency ?? 0)"></div>
             <div class ='ml-1 text-blue-400'>{{ AppState.nativeToken.label }}</div>
         </div>
+        <div v-if="assetRentalFeeCurrency" class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-2">
+            <div class="font-semibold lg:col-span-2 col-span-3">{{$t('general.assetRentalFee')}}</div>
+            <div class='ml-auto lg:col-span-2 col-span-3' v-html="splitCurrency(assetRentalFeeCurrency ?? 0)"></div>
+            <div class ='ml-1 text-blue-400'>{{ AppState.nativeToken.label }}</div>
+        </div>
 
         <div class='border-b-2 border-gray-600 my-2' />
     </div>
@@ -67,6 +72,12 @@
             class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-2">
             <div class='font-semibold lg:col-span-2 col-span-3'>{{ $t('general.namespacerentalFee') }}</div>
             <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(namespaceRentalFeeCurrency ?? 0)"></div>
+            <div class='ml-1 text-blue-400'>{{ AppState.nativeToken.label }}</div>
+        </div>
+        <div v-if="assetRentalFeeCurrency"
+            class="lg:grid lg:grid-cols-5 grid grid-cols-7 justify-between items-center text-gray-200 text-xs pt-2">
+            <div class='font-semibold lg:col-span-2 col-span-3'>{{ $t('general.assetRentalFee') }}</div>
+            <div class="lg:col-span-2 col-span-3 ml-auto" v-html="splitCurrency(assetRentalFeeCurrency ?? 0)"></div>
             <div class='ml-1 text-blue-400'>{{ AppState.nativeToken.label }}</div>
         </div>
     </div>
@@ -138,6 +149,10 @@ defineProps({
         required: true
     },
     namespaceRentalFeeCurrency: {
+        type: String,
+        required: false
+    },
+    assetRentalFeeCurrency: {
         type: String,
         required: false
     }
