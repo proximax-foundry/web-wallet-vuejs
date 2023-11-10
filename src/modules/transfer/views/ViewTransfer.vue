@@ -16,11 +16,11 @@
                     </div>
                     <div class="text-sm font-semibold ">{{ $t('transfer.newTransfer') }}</div>
                     <div class="flex gap-1 mt-3">
-                        <SelectInputAccount />
+                        <SelectInputAccount :type="'transfer'" />
                         <SelectInputMultisigAccount :selected-address="selectedAddress" />
                     </div>
                     <div v-if="selectedMultisigAddress" class="mt-3">
-                        <MultisigInput :select-default-address="selectedMultisigAddress" :select-default-name="selectedMultisigName"/>
+                        <MultisigInput :select-default-address="selectedMultisigAddress" :select-default-name="selectedMultisigName" :type="'transfer'"/>
                     </div>
                     <div class="text-blue-primary font-semibold uppercase mt-3 text-xxs">Transfer to</div>
 

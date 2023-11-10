@@ -1,6 +1,9 @@
 <template>
     <div class="w-full">
-        <div v-if="!selectedAccountInfo" class="text-blue-primary font-semibold uppercase text-xxs">Select Account to create / initiate transfer</div>
+        <div v-if="!selectedAccountInfo" class="text-blue-primary font-semibold uppercase text-xxs">
+            <div v-if="type == 'transfer'">Select Account to create / initiate transfer</div>
+            <div v-else-if="type == 'namespace'">Select Account to create namespace</div>
+        </div>
         <Dropdown v-model=selectedAccountInfo :style="{ 'width': '100%' }" :options=accounts :filter="true"
             :filterFields="['label','value']" emptyFilterMessage=" "  placeholder="Select Account"
             @change="selectAccount($event.value?.label, $event.value?.value); $emit('update:modelValue', $event.value?.value); $emit('select-account', $event.value?.value);">
@@ -9,9 +12,14 @@
                 <div v-if="slotProps.value" class="account-item-value account-item">
                     <div class='flex'>
                         <div v-html="selectedImg" />
-                        <div class='flex flex-col ml-2 text-left'>
+                        <div v-if="type == 'transfer'" class='flex flex-col ml-2 text-left'>
                             <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
                                 Selected Account to create / initiate transfer</div>
+                            <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
+                        </div>
+                        <div v-else-if="type == 'namespace'" class='flex flex-col ml-2 text-left'>
+                            <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
+                                Selected Account to create namespace</div>
                             <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
                         </div>
                     </div>
@@ -35,6 +43,13 @@ import { walletState } from '@/state/walletState';
 import { computed, ref, getCurrentInstance } from 'vue';
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
+
+const props = defineProps({
+    type: {
+        type: String,
+        required: true
+    }
+})
 
 defineEmits([
     'select-account', 'update:modelValue'
