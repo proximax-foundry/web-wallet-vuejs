@@ -82,7 +82,8 @@ dynamic_configuration = {
             "addressRoute": "#/account",
             "hashRoute": "#/tx",
             "namespaceInfoRoute": "#/namespace",
-            "assetInfoRoute": "#/asset"
+            "assetInfoRoute": "#/asset",
+            "payloadInfoRoute": "#/payload"
           }
         }
     },
