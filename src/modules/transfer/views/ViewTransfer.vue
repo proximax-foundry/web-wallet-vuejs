@@ -76,7 +76,7 @@
                     <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"
                         v-model="walletPassword" icon="lock" class="mt-5 mb-3" />
                     <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
-                        :disabled="disableCreate" @click="makeTransfer()">
+                        :disabled="disableCreate" @click="makeTransferPayload()">
                         {{ $t('general.transfer') }}
                     </button>
                     <div class="text-center">
@@ -134,6 +134,8 @@ const selectedMultisigAddress = ref<string | null>(null)
 const selectedMultisigName = ref<string | null>(null)
 
 const selectedAddress = ref<string | null>(null)
+
+const txnPayload = ref<string | null>('')
 
 const toggleContact = ref(false)
 
@@ -337,6 +339,29 @@ const createTransferTxn = async () => {
         }
 
         router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
+        clearInput()
+}
+
+const makeTransferPayload = async () => {
+     txnPayload.value = await TransferUtils.createTransactionPayload(
+            recipientInput.value,
+            nativeAmount.value,
+            message.value,
+            selectedAssets.value.map(asset => {
+                return {
+                    id: asset.id,
+                    amount: parseFloat(asset.amount),
+                    divisibility: asset.divisibility
+                }
+            }),
+            walletPassword.value,
+            selectedAddress.value,
+            selectedMultisigAddress.value,
+            isEncrypted.value,
+            publicKeyInput.value
+        )
+        console.log(txnPayload.value)
+        router.push({ name: "ViewConfirmTransaction", params: { payload: txnPayload.value, selectedAddress: selectedAddress.value, selectedMultisigAddress: selectedMultisigAddress.value, walletPassword: walletPassword.value } })
         clearInput()
 }
 
