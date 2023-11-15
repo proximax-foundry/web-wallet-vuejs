@@ -1,5 +1,5 @@
 
-const nodeEnv = import.meta.env.NODE_ENV??'development'
+const nodeEnv = import.meta.env.VITE_NODE_ENV
 export const ExchangeRoutes =  nodeEnv == 'production'? [] :[
     {
       path: '/exchange/create',

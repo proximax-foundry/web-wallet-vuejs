@@ -3,6 +3,7 @@
         <Sidebar v-model:visible="toggleContact" :baseZIndex="10000" position="full">
             <SelectAccountAndContact :contacts="contacts" @node-select="onNodeSelect" />
         </Sidebar>
+        <ConfirmSendModal :toggleModal="toggleConfirm" />
         <div class='w-10/12 ml-auto mr-auto mt-5'>
             <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8">
                 <div class="xl:col-span-2 p-12">
@@ -14,8 +15,13 @@
                         <div class="inline-block text-xs">{{ $t('general.insufficientBalance') }}</div>
                     </div>
                     <div class="text-sm font-semibold ">{{ $t('transfer.newTransfer') }}</div>
-                    <SelectInputAccount />
-                    <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
+                    <div class="flex gap-1 mt-3">
+                        <SelectInputAccount />
+                        <SelectInputMultisigAccount :selected-address="selectedAddress" />
+                    </div>
+                    <div v-if="selectedMultisigAddress" class="mt-3">
+                        <MultisigInput :select-default-address="selectedMultisigAddress" :select-default-name="selectedMultisigName"/>
+                    </div>
                     <div class="text-blue-primary font-semibold uppercase mt-3 text-xxs">Transfer to</div>
 
                     <div class="flex mt-1 gap-1 items-center">
@@ -90,6 +96,7 @@
 import { ref, getCurrentInstance, computed, watch } from 'vue';
 import SelectInputAccount from '../components/SelectInputAccount.vue';
 import SelectInputMultisigAccount from '../components/SelectInputMultisigAccount.vue';
+import MultisigInput from "../components/MultisigInput.vue"
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { walletState } from '@/state/walletState';
@@ -108,6 +115,7 @@ import { TransferUtils } from '@/util/transferUtils';
 import TransferTxnSummary from '../components/TransferTxnSummary.vue';
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
+import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
 
 const addressPatternShort = "^[0-9A-Za-z]{40}$";
 
@@ -123,9 +131,13 @@ const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
 const selectedMultisigAddress = ref<string | null>(null)
 
+const selectedMultisigName = ref<string | null>(null)
+
 const selectedAddress = ref<string | null>(null)
 
 const toggleContact = ref(false)
+
+const toggleConfirm = ref(false);
 
 const recipientInput = ref('')
 
@@ -278,41 +290,62 @@ const updateAmountToMax = () => {
     nativeAmount.value = maxAmount.value.toString();
 }
 
+const clearInput = () => {
+      selectedAddress.value = null;
+      walletPassword.value = "";
+      recipientInput.value = "";
+      isEncrypted.value = false;
+      message.value = "";
+      nativeAmount.value = "0";
+      emitter.emit("CLEAR_SELECT", 0);
+      selectedAssets.value = [];
+      selectedMultisigAddress.value = null;
+      publicKeyInput.value = "";
+    };
+
 const toast = useToast()
 
 const router = useRouter()
 
-const makeTransfer = async () => {
+const createTransferTxn = async () => {
     const isPasswordCorrect = await TransferUtils.createTransaction(
-        recipientInput.value,
-        nativeAmount.value,
-        message.value,
-        selectedAssets.value.map(asset => {
-            return {
-                id: asset.id,
-                amount: parseFloat(asset.amount),
-                divisibility: asset.divisibility
-            }
-        }),
-        walletPassword.value,
-        selectedAddress.value,
-        selectedMultisigAddress.value,
-        isEncrypted.value,
-        publicKeyInput.value
-    )
-    if (!isPasswordCorrect) {
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: "Password is incorrect",
-            group: 'br-custom',
-            life: 1000
-        });
-        return
+            recipientInput.value,
+            nativeAmount.value,
+            message.value,
+            selectedAssets.value.map(asset => {
+                return {
+                    id: asset.id,
+                    amount: parseFloat(asset.amount),
+                    divisibility: asset.divisibility
+                }
+            }),
+            walletPassword.value,
+            selectedAddress.value,
+            selectedMultisigAddress.value,
+            isEncrypted.value,
+            publicKeyInput.value
+        )
+        if (!isPasswordCorrect) {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: "Password is incorrect",
+                group: 'br-custom',
+                life: 1000
+            });
+            return
+        }
+
+        router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
+        clearInput()
+}
+
+const makeTransfer = () => {
+    if (nativeAmount.value == "0" && selectedAssets.value.length == 0) {
+      toggleConfirm.value = true;
+    } else {
+        createTransferTxn()
     }
-
-    router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
-
 }
 
 const fetchSignerNativeBalance = async () => {
@@ -367,29 +400,62 @@ const fetchAssets = async (address: string) => {
 
 }
 
-
-watch([selectedAddress, selectedMultisigAddress], async ([n, mn]) => {
+watch(selectedAddress, async (n,o) => {
     assetOptions.value = [];
     selectedAssets.value = []
     //reload asset
-    if (n != null && mn == null) {
-        signerNativeTokenBalance.value = 0
+    if(n == null){
+        nativeTokenBalance.value = 0
+        selectedMultisigName.value = null
+        selectedMultisigAddress.value = null
+    }
+    else if(n != o){
+        selectedMultisigName.value = null
+        selectedMultisigAddress.value = null
         await fetchAssets(n)
-    } else if (n != null && mn != null) {
+    }
+})
+
+watch(selectedMultisigAddress, async (mn, mo) => {
+    assetOptions.value = [];
+    selectedAssets.value = []
+    //reload multisig asset
+    if(mn == null){
+        signerNativeTokenBalance.value = 0
+        selectedMultisigName.value = null
+        selectedMultisigAddress.value = null
+        await fetchAssets(selectedAddress.value)
+    }
+    if(mn != mo){
         await fetchSignerNativeBalance()
         await fetchAssets(mn)
-        /*  signerTokenBalance.value = await AppState.chainAPI.accountAPI.getAccountInfo() */
     }
-
 })
 
 emitter.on("select-account", (address: string) => {
     selectedAddress.value = address
 })
 
-emitter.on("select-multisig-account", (address: string) => {
-    selectedMultisigAddress.value = address
+emitter.on("select-multisig-account", (node: TreeNode) => {
+    selectedMultisigName.value = node.label
+    selectedMultisigAddress.value = node.value
 })
+
+emitter.on("CLOSE_MULTISIG", () =>{
+    selectedMultisigName.value = null
+    selectedMultisigAddress.value = null
+})
+
+emitter.on("CLOSE_CONFIRM_SEND_MODAL", (emitValue: boolean) => {
+    toggleConfirm.value = emitValue;
+  });
+emitter.on("CONFIRM_PROCEED_SEND", (emitValue: boolean) => {
+
+  if (emitValue) {
+    toggleConfirm.value = false
+    createTransferTxn()
+  }
+});
 
 const onNodeSelect = (node: TreeNode) => {
     toggleContact.value = false
@@ -407,7 +473,7 @@ const contacts = computed(() => {
         return <{ key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string }[] }[]>[{
             key: '0',
             label: t('general.ownerAcc'),
-            selectable: true,
+            selectable: false,
             children: totalAcc.map((acc, index) => {
                 return {
                     key: "0-" + index.toString(),
@@ -419,7 +485,7 @@ const contacts = computed(() => {
         }, {
             key: '1',
             label: t('general.contact'),
-            selectable: true,
+            selectable: false,
             children: wallet.contacts.map((contact, index) => {
                 return {
                     key: "1-" + index.toString(),
@@ -433,7 +499,7 @@ const contacts = computed(() => {
     return <{ key: string, label: string, selectable: boolean, children: { key: string, label: string, data: string }[] }[]>[{
         key: '0',
         label: t('general.ownerAcc'),
-        selectable: true,
+        selectable: false,
         children: totalAcc.map((acc, index) => {
             return {
                 key: "0-" + index.toString(),

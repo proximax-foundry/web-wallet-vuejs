@@ -1,32 +1,15 @@
 import {
-    Account,
     Address,
     Deadline,
-    EncryptedMessage,
-    // NetworkCurrencyMosaic,
-    // FeeCalculationStrategy,
-    Mosaic,
     MosaicId,
     UInt64,
-    MosaicProperties,
     MosaicSupplyType,
-    // MosaicService,
-    MosaicNonce,
-    PlainMessage,
     TransferTransaction,
-    TransactionHttp,
-    TransactionBuilderFactory,
     PublicAccount,
-    AccountHttp,
-    AccountInfo,
-    FeeCalculationStrategy,
-    NetworkType,
     NamespaceId,
     Transaction,
     TransactionType,
     AggregateTransaction,
-    CosignatureTransaction,
-    QueryParams,
     AddressAliasTransaction,
     AddExchangeOfferTransaction,
     ChainConfigTransaction,
@@ -50,11 +33,7 @@ import {
     SecretProofTransaction,
     InnerTransaction,
     ExchangeOfferType,
-    HashType,
     RestrictionType,
-    AccountRestrictionModification,
-    SignedTransaction,
-    CosignatureSignedTransaction,
     TransactionQueryParams,
     TransactionGroupType,
     TransactionSearch,
@@ -68,7 +47,6 @@ import {
     NamespaceType,
     LinkAction,
     MosaicInfo,
-    AccountRestrictionTransaction,
     RestrictionModificationType,
     MosaicRemoveLevyTransaction,
     MosaicModifyLevyTransaction,
@@ -77,20 +55,16 @@ import {
     MultisigCosignatoryModificationType,
     MetadataQueryParams,
     MetadataEntry,
-    Convert
+    Convert,
+    PlaceSdaExchangeOfferTransaction,
+    RemoveSdaExchangeOfferTransaction
 } from "tsjs-xpx-chain-sdk";
 import { HashType as myHashType } from "./../../../models/const/hashType"
 import { TransactionUtils } from "../../../util/transactionUtils";
 import { Helper } from "../../../util/typeHelper";
-import { DashboardTransaction, Tip,
-    TransferList, DashboardInnerTransaction, TransactionCosigner
-  } from "./transaction";
 import { Wallet } from "@/models/wallet"
 import { Account as myAccount } from "@/models/account";
-import { networkState } from "@/state/networkState";
 import { computed } from "vue";
-import { ChainUtils } from "@/util/chainUtils";
-import { DashboardTip, DashboardTipList, RowDashboardTip, TipType, AmountType, OtherAsset } from "../model/dashboardClasses";
 import { ConfirmedTransferTransaction, UnconfirmedTransferTransaction, PartialTransferTransaction,
     ConfirmedAggregateTransaction, UnconfirmedAggregateTransaction, PartialAggregateTransaction,
     ConfirmedAliasTransaction, UnconfirmedAliasTransaction, PartialAliasTransaction,
@@ -105,14 +79,14 @@ import { ConfirmedTransferTransaction, UnconfirmedTransferTransaction, PartialTr
     ConfirmedRestrictionTransaction, UnconfirmedRestrictionTransaction, PartialRestrictionTransaction,
     ConfirmedSecretTransaction, UnconfirmedSecretTransaction, PartialSecretTransaction, 
     ConfirmedTransaction, UnconfirmedTransaction, PartialTransaction, 
-    SDA, AliasNamespace, TxnExchangeOffer, RestrictionModification, TxnList,
+    SDA, TxnExchangeOffer, RestrictionModification, TxnList,
     InnerAccountTransaction, InnerAliasTransaction, InnerAssetTransaction, InnerChainTransaction, 
     InnerExchangeTransaction, InnerLinkTransaction, InnerLockTransaction, InnerMetadataTransaction, InnerNamespaceTransaction,
     InnerRestrictionTransaction, InnerSecretTransaction, InnerTransaction as MyInnerTxn, InnerTransferTransaction
 } from "../model/transactions/transaction";
 import { Account as MyAccount } from "../../../models/account";
 import { AppState } from "@/state/appState";
-import i18n from "@/i18n";
+import { ConfirmedSdaExchangeTransaction } from "../model/transactions/confirmed/sdaExchange";
 
 const namespaceIdFirstCharacterString = "89ABCDEF";
 const nativeTokenNamespaceId = computed(()=> new NamespaceId(AppState.nativeToken.fullNamespace).toHex());
@@ -2203,6 +2177,55 @@ export class DashboardService {
             formatedTxns.push(txn);
         }
 
+        return formatedTxns;
+    }
+
+    async formatConfirmedSdaExchangeTransaction(txns : Transaction[]) :Promise<ConfirmedSdaExchangeTransaction[]> {
+        let formatedTxns : ConfirmedSdaExchangeTransaction[] = [];
+        for(let i=0; i < txns.length; ++i){
+            let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
+            let txn = ConfirmedTransaction.convertToSubClass(ConfirmedSdaExchangeTransaction, formattedTxn) as ConfirmedSdaExchangeTransaction;
+
+            if(txns[i].type === TransactionType.PLACE_SDA_EXCHANGE_OFFER){
+                let sdaExchangeOfferTxn = txns[i] as PlaceSdaExchangeOfferTransaction;
+                txn.sdaExchange = sdaExchangeOfferTxn.offers.map(offer=> {
+                    return{
+                    sdaIdGet: offer.mosaicIdGet.toHex(),
+                    sdaIdGive: offer.mosaicIdGive.toHex(),
+                    sdaGetNamespace: '',
+                    sdaGiveNamespace: '',
+                    amountGet: offer.mosaicAmountGet.compact() ,
+                    amountGive: offer.mosaicAmountGive.compact(),
+                    duration: offer.duration.compact() }
+                })
+                for(let i = 0 ; i < txn.sdaExchange.length; i ++){
+                    const namespaceNames = await DashboardService.getAssetsName([sdaExchangeOfferTxn.offers[i].mosaicIdGet , sdaExchangeOfferTxn.offers[i].mosaicIdGive ])
+                    txn.sdaExchange[i].sdaGetNamespace = namespaceNames[0].names[0]?.name
+                    txn.sdaExchange[i].sdaGiveNamespace = namespaceNames[1].names[0]?.name  
+                    const sdaIdGetDivisibility = (await DashboardService.getAssetInfo(txn.sdaExchange[i].sdaIdGet)).divisibility
+                    const sdaIdGiveDivisibility = (await DashboardService.getAssetInfo(txn.sdaExchange[i].sdaIdGive)).divisibility
+                    txn.sdaExchange[i].amountGet = txn.sdaExchange[i].amountGet / Math.pow(10,sdaIdGetDivisibility)
+                    txn.sdaExchange[i].amountGive = txn.sdaExchange[i].amountGive / Math.pow(10,sdaIdGiveDivisibility)
+                }
+            }else if(txns[i].type === TransactionType.REMOVE_SDA_EXCHANGE_OFFER){
+                let sdaExchangeOfferTxn = txns[i] as RemoveSdaExchangeOfferTransaction;
+                txn.sdaExchange  = sdaExchangeOfferTxn.offers.map(offer=> {
+                    return{
+                    sdaIdGet: offer.mosaicIdGet.toHex(),
+                    sdaIdGive: offer.mosaicIdGive.toHex(),
+                    sdaGetNamespace: '',
+                    sdaGiveNamespace: '',
+                 }
+                })
+                for(let i = 0 ; i < txn.sdaExchange.length; i ++){
+                    const namespaceNames = await DashboardService.getAssetsName([sdaExchangeOfferTxn.offers[i].mosaicIdGet , sdaExchangeOfferTxn.offers[i].mosaicIdGive ])
+                    txn.sdaExchange[i].sdaGetNamespace = namespaceNames[0].names[0]?.name
+                    txn.sdaExchange[i].sdaGiveNamespace = namespaceNames[1].names[0]?.name
+                }
+            }
+
+            formatedTxns.push(txn);
+        }
         return formatedTxns;
     }
 
