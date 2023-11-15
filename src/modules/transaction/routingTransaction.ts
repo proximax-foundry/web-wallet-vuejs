@@ -10,5 +10,14 @@ export const TransactionRoutes: RouteRecordRaw[] = [
     meta: {
       title: "Sign Transaction",
     }
+  },
+  {
+    path: '/view-confirmation-transaction/:payload/:selectedAddress/:selectedMultisigAddress?/:walletPassword',
+    name: 'ViewConfirmTransaction',
+    props: true,
+    component: () => import('@/modules/transaction/components/ConfirmationTxn.vue'),
+    meta: {
+      title: "Confirmation Transaction",
+    }
   }
 ];
