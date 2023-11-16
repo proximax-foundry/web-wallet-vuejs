@@ -20,7 +20,7 @@ import {useI18n} from 'vue-i18n'
 import SelectMultisigInput from "@/components/SelectMultisigInput.vue"
 import MultisigInput from "@/components/MultisigInput.vue"
 import PasswordInput from '@/components/PasswordInput.vue';
-import SelectInputAccount from "@/components/SelectInputAccount.vue";
+import SelectInputAccount from "@/modules/services/submodule/airdropToken/components/SelectInputAccount.vue";
 import type { Account } from '@/models/account';
 import type { WalletAccount } from '@/models/walletAccount';
 import { parse } from 'csv-parse';

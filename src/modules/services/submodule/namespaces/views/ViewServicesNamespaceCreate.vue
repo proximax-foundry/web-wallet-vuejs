@@ -1,659 +1,535 @@
 <template>
- <div>
-  
-  <div class='w-10/12 ml-auto mr-auto'>
-    <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
-      <div class="xl:col-span-2 p-12">
-        <div class='font-semibold mb-4'>{{$t('general.createNamespace')}}</div>
-        <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
-          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
-        </div>
-        <div v-else-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
-          <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.noCosigner')}}</div>
-        </div>
-        <div class="error error_box" v-if="err!=''">{{ err }}</div>
-        <div class="mt-4">
-          <SelectInputAccount @select-account="changeSelection" v-model="selectedAccAdd" :selectDefault="defaultAcc?defaultAcc.address:''" />
-          <div v-if="getMultiSigCosigner.cosignerList.length > 0">
-            <div class="text-tsm text-left mt-3">{{$t('general.initiateBy')}}:
-              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('general.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{ currentNativeTokenName }})</span>
-              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.cosignerList" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('general.balance')}}: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
-              <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('general.insufficientBalance')}}</div>
-            </div>
-          </div>
-          <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace" ref="nsRef" v-model="selectNamespace" :address="selectedAccAdd" class="mt-5" :disabled="disableSelectNamespace" />
-          <div class="lg:grid lg:grid-cols-2 mt-5">
-            <div class="mb-5 lg:mb-0 lg:mr-2">
-              <TextInputTooltip :disabled="disableNamespaceName" :placeholder="$t('general.name')" :errorMessage="namespaceErrorMessage" v-model="namespaceName"  v-debounce:1000="checkNamespace" icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block" :toolTip="$t('namespace.namespaceNameMsg1') + '<br><br>' + $t('namespace.namespaceNameMsg2') + '<br><br>' + $t('namespace.namespaceNameMsg3')" tabindex="0"/>
-            </div>
-            <div class="mb-5 lg:mb-0 lg:ml-2">
-              <DurationInputClean :disabled="disabledDuration" v-model="duration" :max="maxDurationInDays" :placeholder="$t('namespace.duration')" @set-default-duration="setDefaultDuration" :showError="showDurationErr" :toolTip="$t('namespace.durationMsg')+'<br>' +`${maxDurationInDays === 365 ? '1 ' + $t('general.year') : ''}` +' ('+`${maxDurationInDays}`+ $t('general.day',maxDurationInDays) +').'" />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
-        <TransactionFeeDisplay :namespace-rental-fee-currency="rentalFeeCurrency" :transaction-fee="String(transactionFee)" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="balance" :selected-acc-add="selectedAccAdd"/>
-        <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
-        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="createNamespace">{{$t('namespace.registerNamespace')}}</button>
-        <div class="text-center">
-          <router-link :to="{name: 'ViewDashboard'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
-        </div>
-      </div>
-    </div>
+  <div>
 
-    <div class="sm:grid sm:grid-cols-2 mt-10 lg:mt-16">
-      <div class="mb-8 sm:pr-1">
-        <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">{{$t('general.namespaceQues')}}</a>
-        <div class="text-gray-400 text-tsm my-3 sm:pr-2">{{$t('namespace.namespaceAns')}}</div>
+    <div class='w-10/12 ml-auto mr-auto'>
+      <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8">
+        <div class="xl:col-span-2 p-12">
+          <div class='font-semibold mb-4'>{{ $t('general.createNamespace') }}</div>
+          <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+            <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon
+                icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div>
+            <div class="inline-block text-xs">{{ $t('general.insufficientBalance') }}</div>
+          </div>
+          <div class="error error_box" v-if="err != ''">{{ err }}</div>
+          <div class="mt-4">
+            <div class="flex gap-1 mt-3">
+              <SelectInputAccount :type="'namespace'"/>
+              <SelectInputMultisigAccount :selected-address="selectedAddress" />
+            </div>
+            <div v-if="selectedMultisigAddress" class="mt-3">
+              <MultisigInput :select-default-address="selectedMultisigAddress"
+                :select-default-name="selectedMultisigName" :type="'namespace'"/>
+            </div>
+            <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace"
+              ref="nsRef" v-model="selectNamespace"
+              :address="selectedMultisigAddress ? selectedMultisigAddress : selectedAddress" class="mt-5"
+              :disabled="disableSelectNamespace" />
+            <div class="lg:grid lg:grid-cols-2 mt-5">
+              <div class="mb-5 lg:mb-0 lg:mr-2">
+                <TextInputTooltip :disabled="disableNamespaceName" :placeholder="$t('general.name')"
+                  :errorMessage="namespaceErrorMessage" v-model="namespaceName" v-debounce:1000="checkNamespace"
+                  icon="id-card-alt" :showError="showNamespaceNameError" class="w-full inline-block"
+                  :toolTip="$t('namespace.namespaceNameMsg1') + '<br><br>' + $t('namespace.namespaceNameMsg2') + '<br><br>' + $t('namespace.namespaceNameMsg3')"
+                  tabindex="0" />
+              </div>
+              <div class="mb-5 lg:mb-0 lg:ml-2">
+                <DurationInputClean :disabled="disabledDuration" v-model="duration" :max="maxDurationInDays"
+                  :placeholder="$t('namespace.duration')" @set-default-duration="setDefaultDuration"
+                  :showError="showDurationErr"
+                  :toolTip="$t('namespace.durationMsg') + '<br>' + `${maxDurationInDays === 365 ? '1 ' + $t('general.year') : ''}` + ' (' + `${maxDurationInDays}` + $t('general.day', maxDurationInDays) + ').'" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
+          <TxnSummary :signer-native-token-balance="balance" :namespace-rental-fee-currency="rentalFeeCurrency"
+            :native-token-balance="selectedMultisigAddress ? multisigBalance : balance" :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee"
+            :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact" :total-fee="Number(totalFeeFormatted)" />
+          <div class='text-xs text-white my-5'>{{ $t('general.enterPasswordContinue') }}</div>
+          <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')"
+            :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
+          <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white"
+            :disabled="disableCreate" @click="createNamespace">{{ $t('namespace.registerNamespace') }}</button>
+          <div class="text-center">
+            <router-link :to="{ name: 'ViewDashboard' }"
+              class='content-center text-xs text-white border-b-2 border-white'>{{ $t('general.cancel') }}</router-link>
+          </div>
+        </div>
       </div>
-      <div class="mb-8">
-        <a href="https://t.me/proximaxhelpdesk" target=_new class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">{{$t('general.feedback')}}</a>
-        <div class="text-gray-400 text-tsm my-3">{{$t('general.feedbackDescription')}}</div>
+
+      <div class="sm:grid sm:grid-cols-2 mt-10 lg:mt-16">
+        <div class="mb-8 sm:pr-1">
+          <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new
+            class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">{{ $t('general.namespaceQues')
+            }}</a>
+          <div class="text-gray-400 text-tsm my-3 sm:pr-2">{{ $t('namespace.namespaceAns') }}</div>
+        </div>
+        <div class="mb-8">
+          <a href="https://t.me/proximaxhelpdesk" target=_new
+            class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">{{ $t('general.feedback') }}</a>
+          <div class="text-gray-400 text-tsm my-3">{{ $t('general.feedbackDescription') }}</div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </template>
-
-<script>
-import { computed, ref, watch } from 'vue';
+ 
+<script setup lang="ts">
+import { computed, getCurrentInstance, ref, watch } from 'vue';
 import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextInputTooltip from '@/components/TextInputTooltip.vue';
-import SelectInputAccount from '@/components/SelectInputAccount.vue';
 import SelectInputParentNamespace from '@/modules/services/submodule/namespaces/components/SelectInputParentNamespace.vue';
 import DurationInputClean from '@/modules/services/submodule/namespaces/components/DurationInputClean.vue';
-import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
+import SelectInputAccount from '@/modules/transfer/components/SelectInputAccount.vue';
+import SelectInputMultisigAccount from '@/modules/transfer/components/SelectInputMultisigAccount.vue';
+import MultisigInput from "@/modules/transfer/components/MultisigInput.vue"
+import TxnSummary from "@/components/TxnSummary.vue"
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { Helper } from '@/util/typeHelper';
 import { NamespaceUtils } from '@/util/namespaceUtils';
 import { ChainUtils } from '@/util/chainUtils';
-import { TransactionUtils, isMultiSig, findAcc, findAccWithAddress } from '@/util/transactionUtils';
+import { TransactionUtils } from '@/util/transactionUtils';
 import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
-import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { WalletUtils } from '@/util/walletUtils';
+import { Address } from 'tsjs-xpx-chain-sdk';
+import { TreeNode } from 'primevue/tree';
 
-export default {
-  name: 'ViewServicesNamespaceCreate',
-  components: {
-    PasswordInput,
-    TextInputTooltip,
-    DurationInputClean,
-    SelectInputAccount,
-    SelectInputParentNamespace,
-    TransactionFeeDisplay
-  },
-  setup(){
-    const router = useRouter();
-    const {t} = useI18n();
-    const nsRef = ref(null);
+const router = useRouter();
+const { t } = useI18n();
+const nsRef = ref(null);
+const internalInstance = getCurrentInstance();
+const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
-    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
-    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
+const disableNamespaceName = ref(false);
+const disableSelectNamespace = ref(false);
+const namespaceName = ref('');
+const showDurationErr = ref(false);
+const duration = ref('1');
+const walletPassword = ref('');
+const err = ref('');
+const namespaceErrorMessage = ref(t('namespace.validName'));
+const currentSelectedName = ref('');
+const disabledPassword = ref(false);
+const disabledDuration = ref(false);
+const disabledClear = ref(false);
+const passwdPattern = "^[^ ]{8,}$";
+const showPasswdError = ref(false);
+const maxNamespaceLength = computed(() => {
+  if (networkState.currentNetworkProfileConfig) {
+    return networkState.currentNetworkProfileConfig.maxNameSize;
+  } else {
+    return 0
+  }
+})
+const namespacePattern = `^[0-9a-z]{2,${maxNamespaceLength.value}}$`;
+const showNamespaceNameError = ref(false);
+const maxDurationInDays = computed(() => {
+  if (networkState.currentNetworkProfileConfig) {
+    return Math.floor(UnitConverter.configReturn(networkState.currentNetworkProfileConfig.maxNamespaceDuration, TimeUnit.DAY))
+  } else {
+    return 0
+  }
+})
+const selectNamespace = ref('');
 
-    const disableNamespaceName = ref(false);
-    const disableSelectNamespace = ref(false);
-    const namespaceName = ref('');
-    const showDurationErr = ref(false);
-    const duration = ref('1');
-    const walletPassword = ref('');
-    const err = ref('');
-    const namespaceErrorMessage = ref(t('namespace.validName'));
-    const currentSelectedName = ref('');
-    const disabledPassword = ref(false);
-    const disabledDuration = ref(false);
-    const disabledClear = ref(false);
-    const passwdPattern = "^[^ ]{8,}$";
-    const showPasswdError = ref(false);
-    const maxNamespaceLength = computed(()=>{
-      if(networkState.currentNetworkProfileConfig){
-        return networkState.currentNetworkProfileConfig.maxNameSize;
-      }else{
-        return 0
+const rentalFee = computed(() => {
+  if (selectNamespace.value) {
+    if (selectNamespace.value == '1') {
+      if (Number(duration.value) > 0) {
+        return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock * NamespaceUtils.calculateDuration(Number(duration.value)), AppState.nativeToken.divisibility);
+      } else {
+        return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock, AppState.nativeToken.divisibility);
       }
-    })
-    const namespacePattern = `^[0-9a-z]{2,${maxNamespaceLength.value}}$`;
-    const showNamespaceNameError = ref(false);
-    const maxDurationInDays = computed(()=>{
-      if(networkState.currentNetworkProfileConfig){
-        return Math.floor(UnitConverter.configReturn(networkState.currentNetworkProfileConfig.maxNamespaceDuration, TimeUnit.DAY))
-      }else{
-        return 0
-      }
-    })
-    const selectNamespace = ref('');
-    const cosignerBalanceInsufficient = ref(false);
-    const cosignerAddress = ref('');
-
-    const namespaceOption = computed(() => {
-      let namespace = [];
-      namespace.push({
-        value: '1',
-        label: t('namespace.newRootNamespace'),
-        level: 0,
-        disabled: false,
-      });
-      const namespacesList = NamespaceUtils.listNamespaces(selectedAccAdd.value);
-      if(namespacesList.length > 0){
-        namespace.push.apply(namespace, namespacesList);
-      }
-      return namespace;
-    });
-    const currencyName = computed(() => AppState.nativeToken.label);
-
-    const rentalFee = computed(()=> {
-      if(selectNamespace.value){
-        if(selectNamespace.value == '1'){
-          if(duration.value > 0){
-            return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock * NamespaceUtils.calculateDuration(duration.value), AppState.nativeToken.divisibility);
-          }else{
-            return Helper.convertToExact(networkState.currentNetworkProfileConfig.rootNamespaceRentalFeePerBlock, AppState.nativeToken.divisibility);
-          }
-        }else{
-          return Helper.convertToExact(networkState.currentNetworkProfileConfig.childNamespaceRentalFee, AppState.nativeToken.divisibility);
-        }
-      }else{
-        return 0;
-      }
-    });
-
-    const rentalFeeCurrency = computed(()=> Helper.toCurrencyFormat(rentalFee.value, AppState.nativeToken.divisibility));
-
-     const lockFund = computed(()=> {
-      if(networkState.currentNetworkProfileConfig){
-        return Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility)
-      }else{
-        return 0
-      }
-    })
-    const lockFundCurrency = computed(()=>{
-      if(networkState.currentNetworkProfileConfig){
-        return Helper.amountFormatterSimple(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility)
-      }else{
-        return 0
-      }
-    })
-
-    const lockFundTxFee = computed(()=>{
-        if(networkState.currentNetworkProfile){
-          let networkType = AppState.networkType;
-          return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
-        }
-        return 0;  
-    });
-
-    const lockFundTxFeeCurrency = ref('0.044500');
-    const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
-
-    const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value) && !showNamespaceNameError.value && selectNamespace.value
-    ));
-
-    const defaultAcc = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount(): null
-    const selectedAccName = ref(defaultAcc?defaultAcc.name:'');
-    const selectedAccAdd = ref(defaultAcc?defaultAcc.address:'');
-    const balance = ref(Helper.toCurrencyFormat(defaultAcc?defaultAcc.balance:0, AppState.nativeToken.divisibility));
-    const balanceNumber = ref(defaultAcc?defaultAcc.balance:0);
-
-    const isMultiSigBool =ref(isMultiSig(defaultAcc?defaultAcc.address:''));
-
-    const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
-
-    const showNoBalance = computed(() => {
-      if(isNotCosigner.value){
-        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value);
-      }else{
-        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value + lockFundTotalFee.value);
-      }
-    });
-
-    // validate enough fee to create namespace
-    if(balance.value < rentalFee.value){
-      disabledPassword.value = true;
-      disabledClear.value = true;
-      disabledDuration.value = true;
-      disableNamespaceName.value = true;
-      disableSelectNamespace.value = true;
-    }else{
-      disabledPassword.value = false;
-      disabledClear.value = false;
-      disabledDuration.value = false;
-      disableNamespaceName.value = false;
-      disableSelectNamespace.value = false;
+    } else {
+      return Helper.convertToExact(networkState.currentNetworkProfileConfig.childNamespaceRentalFee, AppState.nativeToken.divisibility);
     }
+  } else {
+    return 0;
+  }
+});
 
-    const accounts = computed( () => {
-      if(walletState.currentLoggedInWallet){
-        if(walletState.currentLoggedInWallet.others){
-          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
-          return concatOther;
-        } else{
-          return walletState.currentLoggedInWallet.accounts;
-        }
-      } else{
-        return [];
-      }
-    });
+const rentalFeeCurrency = computed(() => Helper.toCurrencyFormat(rentalFee.value, AppState.nativeToken.divisibility));
 
-    const transactionFee = ref(0);
-    const transactionFeeExact = ref(0);
+const lockFund = computed(() => {
+  if (networkState.currentNetworkProfileConfig) {
+    return Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility)
+  } else {
+    return 0
+  }
+})
 
-    const getMultiSigCosigner = computed(() => {
-      if(networkState.currentNetworkProfileConfig){
-        let cosigners = MultisigUtils.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
-        let list = [];
-        cosigners.cosignerList.forEach( publicKey => {
-          list.push({
-            publicKey,
-            name: findAcc(publicKey).name,
-            balance: findAcc(publicKey).balance,
-            address: findAcc(publicKey).address
-          });
-        });
+const lockFundTxFee = computed(() => {
+  if (networkState.currentNetworkProfile) {
+    return Helper.convertToExact(TransactionUtils.getLockFundFee(), AppState.nativeToken.divisibility);
+  }
+  return 0;
+});
 
-        cosigners.cosignerList = list;
-        return cosigners;
-      }else{
-        return {hasCosigner:false,cosignerList:[]}
-      }
-      
-    });
+const lockFundTotalFee = computed(() => lockFund.value + lockFundTxFee.value);
 
-    const removeNamespace = () => {
-      selectNamespace.value = '';
+const disableCreate = computed(() => !(
+  walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && !showNamespaceNameError.value && selectNamespace.value
+));
+
+const selectedMultisigAddress = ref<string | null>(null)
+const selectedMultisigName = ref<string | null>(null)
+const selectedAddress = ref<string | null>(null)
+const balance = ref(0);
+const multisigBalance = ref(0)
+
+const fetchAccountBalance = async (address: string) => {
+  if (!AppState.chainAPI) {
+    return
+  }
+  if (!address) {
+    return
+  }
+  try {
+    const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
+    const findIndex = accInfo.mosaics.findIndex(asset => asset.id.toHex() == AppState.nativeToken.assetId)
+    if (findIndex != -1) {
+      return accInfo.mosaics[findIndex].amount.compact() / Math.pow(10, AppState.nativeToken.divisibility)
     }
-
-    const changeSelection = (address) => {
-      let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
-      if(!account){
-        account = walletState.currentLoggedInWallet.others.find(account => account.address == address);
-      }
-      selectNamespace.value = '';
-      nsRef.value.clearLabel();
-      selectedAccName.value = account.name;
-      selectedAccAdd.value = account.address;
-      balance.value = Helper.toCurrencyFormat(account.balance, AppState.nativeToken.divisibility);
-      balanceNumber.value = account.balance;
-      currentSelectedName.value = account.name;
+    else {
+      return 0
     }
+  }
+  catch (e) {
+    return 0
+  }
+}
 
-    const updateNamespaceSelection = (namespaceNameSelected) => {
-      let fee = 0;
-      if(namespaceNameSelected == '1'){
-        //root
-        disabledDuration.value = false;
-        if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
-          fee = NamespaceUtils.getRootNamespaceTransactionFee(namespaceName.value);
-          transactionFee.value = Helper.convertToCurrency(fee, AppState.nativeToken.divisibility);
-          transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
-        }
-      }else{
-        duration.value = '0';
-        //subnamespace
-        disabledDuration.value = true;
-        if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
-          fee = NamespaceUtils.getSubNamespaceTransactionFee( namespaceNameSelected, namespaceName.value);
-          transactionFee.value = Helper.convertToCurrency(fee, AppState.nativeToken.divisibility);
-          transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
-        }
-      }
-    };
-
-    watch(selectNamespace,n=>{
-      if(!n){
-        disableNamespaceName.value = true;
-        disabledDuration.value = true;
-        disabledPassword.value = true;
-      }else{
-        disableNamespaceName.value = false;
-        disabledDuration.value = false;
-        disabledPassword.value = false;
-      }
-    },{immediate:true})
-
-    const clearNamespaceSelection = () => {
-      duration.value = '0';
-    };
-
-    const createNamespace = () => {
-      let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
-      if(!verifyPassword){
-        err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
-        return
-      }
-      if(cosigner.value){
-        // for multisig
-        if(selectNamespace.value==='1'){
-          NamespaceUtils.createRootNamespaceMultisig(cosigner.value, walletPassword.value, namespaceName.value, duration.value, selectedAccAdd.value);
-        }else{
-          NamespaceUtils.createSubNamespaceMultisig(cosigner.value, walletPassword.value, namespaceName.value, selectNamespace.value, selectedAccAdd.value);
-        }
-      }else{
-        if(selectNamespace.value==='1'){
-          NamespaceUtils.createRootNamespace(selectedAccAdd.value, walletPassword.value, namespaceName.value, duration.value);
-        }else{
-          NamespaceUtils.createSubNamespace(selectedAccAdd.value, walletPassword.value, namespaceName.value, selectNamespace.value);
-        }
-      }
-      router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
-    };
-
-    watch(duration, (n) => {
-      if(parseInt(n) > maxDurationInDays.value){
-        duration.value = `${maxDurationInDays.value}`;
-      }
-    });
-
-    const setDefaultDuration = () => {
-      duration.value = '1';
+const showNoBalance = computed(() => {
+  if (!selectedAddress.value) {
+    return
+  }
+  if(selectedMultisigAddress.value) {
+    if(multisigBalance.value < rentalFee.value){
+      return true
     }
+    else if(balance.value < (transactionFeeExact.value + lockFundTotalFee.value)){
+      return true
+    }
+    else{
+      return false
+    }
+  } else {
+    return balance.value < (rentalFee.value + transactionFeeExact.value);
+  }
+});
 
-    // calculate fees
-    const totalFee = computed(() => {
-      // if multisig
-      if(isMultiSig(selectedAccAdd.value)){
-        return parseFloat(lockFundTotalFee.value) + transactionFeeExact.value;
-      }else{
-        return rentalFee.value + transactionFeeExact.value;
-      }
-    });
+// validate enough fee to create namespace
+if (balance.value < rentalFee.value) {
+  disabledPassword.value = true;
+  disabledClear.value = true;
+  disabledDuration.value = true;
+  disableNamespaceName.value = true;
+  disableSelectNamespace.value = true;
+} else {
+  disabledPassword.value = false;
+  disabledClear.value = false;
+  disabledDuration.value = false;
+  disableNamespaceName.value = false;
+  disableSelectNamespace.value = false;
+}
 
-    watch(totalFee, (n) => {
-      if(balance.value < n && !isNotCosigner.value){
-        disabledPassword.value = true;
-        disableSelectNamespace.value = true;
-      }else{
-        disabledPassword.value = false;
-        disableSelectNamespace.value = false;
-      }
-    });
+const transactionFee = ref(0);
+const transactionFeeExact = ref(0);
 
-    const totalFeeFormatted = computed(() => {
-      return Helper.amountFormatterSimple(totalFee.value, 0);
-    });
+const removeNamespace = () => {
+  selectNamespace.value = '';
+}
 
-    watch(isNotCosigner, (n) => {
-      if(n){
-        disabledPassword.value = true;
-        disableSelectNamespace.value = true;
-      }else{
-        disabledPassword.value = false;
-        disableSelectNamespace.value = false;
-      }
-    });
+const updateNamespaceSelection = (namespaceNameSelected) => {
+  let fee = 0;
+  if (namespaceNameSelected == '1') {
+    //root
+    disabledDuration.value = false;
+    if (namespaceName.value.trim().length > 0 && !showNamespaceNameError.value) {
+      fee = NamespaceUtils.getRootNamespaceTransactionFee(namespaceName.value);
+      transactionFee.value = Number(Helper.convertToCurrency(fee, AppState.nativeToken.divisibility));
+      transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
+    }
+  } else {
+    duration.value = '0';
+    //subnamespace
+    disabledDuration.value = true;
+    if (namespaceName.value.trim().length > 0 && !showNamespaceNameError.value) {
+      fee = NamespaceUtils.getSubNamespaceTransactionFee(namespaceNameSelected, namespaceName.value);
+      transactionFee.value = Number(Helper.convertToCurrency(fee, AppState.nativeToken.divisibility));
+      transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
+    }
+  }
+};
 
-    const cosigner = computed(() => {
-      if(getMultiSigCosigner.value.cosignerList.length > 0){
-        if(getMultiSigCosigner.value.cosignerList.length > 1){
-          return cosignerAddress.value;
-        }else{
-          return findAcc(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
-        }
-      }else{
-        return '';
-      }
-    });
+watch(selectNamespace, newValue => {
+  if (!newValue) {
+    disableNamespaceName.value = true;
+    disabledDuration.value = true;
+    disabledPassword.value = true;
+  } else {
+    disableNamespaceName.value = false;
+    disabledDuration.value = false;
+    disabledPassword.value = false;
+  }
+}, { immediate: true })
 
-    cosignerAddress.value = getMultiSigCosigner.value.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
-    
-    watch(getMultiSigCosigner,n=>{
-      if(n.cosignerList.length>0){
-        cosignerAddress.value = n.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
-      }
-    })
+const createNamespace = () => {
+  let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword.value)
+  if (!verifyPassword) {
+    err.value = t('general.walletPasswordInvalid', { name: walletState.currentLoggedInWallet.name })
+    return
+  }
+  if (selectedMultisigAddress.value) {
+    // for multisig
+    if (selectNamespace.value === '1') {
+      NamespaceUtils.createRootNamespaceMultisig(selectedAddress.value, walletPassword.value, namespaceName.value, Number(duration.value), selectedMultisigAddress.value);
+    } else {
+      NamespaceUtils.createSubNamespaceMultisig(selectedAddress.value, walletPassword.value, namespaceName.value, selectNamespace.value, selectedMultisigAddress.value);
+    }
+  }
+  else {
+    if (selectNamespace.value === '1') {
+      NamespaceUtils.createRootNamespace(selectedAddress.value, walletPassword.value, namespaceName.value, Number(duration.value));
+    } else {
+      NamespaceUtils.createSubNamespace(selectedAddress.value, walletPassword.value, namespaceName.value, selectNamespace.value);
+    }
+  }
+  router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
+};
 
-    const checkCosignBalance = computed(() => {
-      let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
-      return Helper.toCurrencyFormat(cosignBalance);
-    })
+watch(duration, (newValue) => {
+  if (parseInt(newValue) > maxDurationInDays.value) {
+    duration.value = `${maxDurationInDays.value}`;
+  }
+});
 
-    const reservedRootNamespace = computed(()=>{
-      if(networkState.currentNetworkProfileConfig){
-        return networkState.currentNetworkProfileConfig.reservedRootNamespaceNames.split(",").map(ns => ns.trim());
-      }else{
-        return []
-      }
-    })
+const setDefaultDuration = () => {
+  duration.value = '1';
+}
 
-    const isReservedRootNamespace = ()=>{
-      if(selectNamespace.value === "1" && reservedRootNamespace.value.includes(namespaceName.value.trim())){
+// calculate fees
+const totalFee = computed(() => {
+  // if multisig
+  if (selectedMultisigAddress.value) {
+    return lockFundTotalFee.value + transactionFeeExact.value;
+  } else {
+    return rentalFee.value + transactionFeeExact.value;
+  }
+});
+
+watch(totalFee, (newValue) => {
+  if (balance.value < newValue) {
+    disabledPassword.value = true;
+    disableSelectNamespace.value = true;
+  } else {
+    disabledPassword.value = false;
+    disableSelectNamespace.value = false;
+  }
+});
+
+const totalFeeFormatted = computed(() => {
+  return Helper.amountFormatterSimple(totalFee.value, 0);
+});
+
+
+const reservedRootNamespace = computed(() => {
+  if (networkState.currentNetworkProfileConfig) {
+    return networkState.currentNetworkProfileConfig.reservedRootNamespaceNames.split(",").map(ns => ns.trim());
+  } else {
+    return []
+  }
+})
+
+const isReservedRootNamespace = () => {
+  if (selectNamespace.value === "1" && reservedRootNamespace.value.includes(namespaceName.value.trim())) {
+    showNamespaceNameError.value = true;
+    namespaceErrorMessage.value = t('namespace.reservedName');
+
+    return true;
+  }
+  return false;
+}
+
+const notRootNamespaceOwner = async () => {
+  if (selectNamespace.value === "1" && namespaceName.value.trim()) {
+    try {
+      let namespaceInfo = await ChainUtils.getNamespaceInfo(Helper.createNamespaceId(namespaceName.value));
+
+      if (selectedMultisigAddress.value) {
+        if (namespaceInfo.owner.address.plain() !== selectedMultisigAddress.value) {
           showNamespaceNameError.value = true;
-          namespaceErrorMessage.value = t('namespace.reservedName');
+          namespaceErrorMessage.value = t('namespace.nameRegistered');
 
           return true;
+        }
       }
+      else {
+        if (namespaceInfo.owner.address.plain() !== selectedAddress.value) {
+          showNamespaceNameError.value = true;
+          namespaceErrorMessage.value = t('namespace.nameRegistered');
+
+          return true;
+        }
+      }
+    } catch (error) {
       return false;
     }
+  }
+  return false;
+}
 
-    const notRootNamespaceOwner = async ()=>{
-      if(selectNamespace.value === "1" && namespaceName.value.trim()){
-        try {
-          let namespaceInfo = await ChainUtils.getNamespaceInfo(Helper.createNamespaceId(namespaceName.value));
-        
-          if(namespaceInfo.owner.address.plain !== selectedAccAdd.value){
-            showNamespaceNameError.value = true;
-            namespaceErrorMessage.value = t('namespace.nameRegistered');
-
-            return true;
-          }
-        } catch (error) {
-          return false;
-        }
-      }
-      return false;
+const checkNamespace = async () => {
+  if (namespaceName.value.trim()) {
+    if (isReservedRootNamespace()) {
+      return;
     }
-    if (isMultiSigBool.value) {
-      let cosigner = getMultiSigCosigner.value.cosignerList
-      if (cosigner.length > 0) {
-        cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
-        if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
-          disabledPassword.value = true;
-          disableSelectNamespace.value = true;
-          cosignerBalanceInsufficient.value = true;
-        } else {
-          disabledPassword.value = false;
-          disableSelectNamespace.value = false;
-          cosignerBalanceInsufficient.value = false;
-        }
-      } else {
-        disabledPassword.value = true;
-        disableSelectNamespace.value = true;
-      }
-    }
-    watch(selectedAccAdd, (n, o) => {
-      isMultiSigBool.value = isMultiSig(n);
-      if (isMultiSigBool.value) {
-        let cosigner = getMultiSigCosigner.value.cosignerList
-      if (cosigner.length > 0) {
-        cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
-        if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
-          disabledPassword.value = true;
-          disableSelectNamespace.value = true;
-          cosignerBalanceInsufficient.value = true;
-        } else {
-          disabledPassword.value = false;
-          disableSelectNamespace.value = false;
-          cosignerBalanceInsufficient.value = false;
-        }
-      } else {
-        disabledPassword.value = true;
-        disableSelectNamespace.value = true;
-        cosignerBalanceInsufficient.value = true;
-      }
-    } else{
-        disabledPassword.value = false;
-        disableSelectNamespace.value = false;
-        cosignerBalanceInsufficient.value = false;
-    }
-  });
-    watch(cosignerAddress, (n, o) => {
-    if (n != o) {
-        if (
-        accounts.value.find((element) => element.address == n).balance <
-        lockFundTotalFee.value
-      ) {
-        cosignerBalanceInsufficient.value = true;
-        disabledPassword.value = true;
-        disableSelectNamespace.value = true;
-      } else {
-        cosignerBalanceInsufficient.value = false;
-        disabledPassword.value = false;
-        disableSelectNamespace.value = false;
-      }
-      
-    }
-  });
-    const checkNamespace = async () =>{
-      if(namespaceName.value.trim()){
-        if(isReservedRootNamespace()){
-          return;
-        }
-        else{
-          showNamespaceNameError.value = namespaceName.value.match(namespacePattern)? false:true;
-          if(showNamespaceNameError.value){
-            namespaceErrorMessage.value = t('namespace.validName');
-          }
-          else{
-            let isNotOwner = await notRootNamespaceOwner();
-            
-            if(isNotOwner){
-              return;
-            }
-
-            let fee = 0;
-
-            if(selectNamespace.value == '1'){
-              
-              //root
-              if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
-                fee = NamespaceUtils.getRootNamespaceTransactionFee( namespaceName.value);
-                transactionFee.value = Helper.convertToCurrency(fee, AppState.nativeToken.divisibility);
-                transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
-              }
-            }else{
-              //sub
-              if(namespaceName.value.trim().length > 0 && !showNamespaceNameError.value){
-                fee = NamespaceUtils.getSubNamespaceTransactionFee(namespaceName.value, selectNamespace.value);
-                transactionFee.value = Helper.convertToCurrency(fee, AppState.nativeToken.divisibility);
-                transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    watch(namespaceName,n=>{
-      if(n.length==0){
-        showNamespaceNameError.value = true;
+    else {
+      showNamespaceNameError.value = namespaceName.value.match(namespacePattern) ? false : true;
+      if (showNamespaceNameError.value) {
         namespaceErrorMessage.value = t('namespace.validName');
       }
-    })
+      else {
+        let isNotOwner = await notRootNamespaceOwner();
 
-    return {
-      Helper,
-      accounts,
-      currentSelectedName,
-      selectedAccName,
-      selectedAccAdd,
-      balance,
-      showNoBalance,
-      err,
-      showNamespaceNameError,
-      namespaceErrorMessage,
-      checkNamespace,
-      namespaceName,
-      disableNamespaceName,
-      walletPassword,
-      disableCreate,
-      showPasswdError,
-      changeSelection,
-      disableSelectNamespace,
-      disabledPassword,
-      disabledClear,
-      disabledDuration,
-      duration,
-      showDurationErr,
-      isMultiSigBool,
-      rentalFee,
-      rentalFeeCurrency,
-      lockFundTxFee,
-      lockFundCurrency,
-      currencyName,
-      lockFundTxFeeCurrency,
-      lockFundTotalFee,
-      totalFeeFormatted,
-      selectNamespace,
-      namespaceOption,
-      createNamespace,
-      transactionFee,
-      updateNamespaceSelection,
-      clearNamespaceSelection,
-      getMultiSigCosigner,
-      cosignerBalanceInsufficient,
-      cosignerAddress,
-      isNotCosigner,
-      walletState,
-      currentNativeTokenName,
-      nsRef,
-      maxDurationInDays,
-      removeNamespace,
-      setDefaultDuration,
-      cosigner,
-      defaultAcc,
-      checkCosignBalance
+        if (isNotOwner) {
+          return;
+        }
+
+        let fee = 0;
+
+        if (selectNamespace.value == '1') {
+
+          //root
+          if (namespaceName.value.trim().length > 0 && !showNamespaceNameError.value) {
+            fee = NamespaceUtils.getRootNamespaceTransactionFee(namespaceName.value);
+            transactionFee.value = Number(Helper.convertToCurrency(fee, AppState.nativeToken.divisibility));
+            transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
+          }
+        } else {
+          //sub
+          if (namespaceName.value.trim().length > 0 && !showNamespaceNameError.value) {
+            fee = NamespaceUtils.getSubNamespaceTransactionFee(namespaceName.value, selectNamespace.value);
+            transactionFee.value = Number(Helper.convertToCurrency(fee, AppState.nativeToken.divisibility));
+            transactionFeeExact.value = Helper.convertToExact(fee, AppState.nativeToken.divisibility);
+          }
+        }
+      }
     }
-  },
-
+  }
 }
+
+const clearInput = () => {
+  namespaceName.value = ''
+  selectNamespace.value = ''
+  nsRef.value.clearLabel();
+  showNamespaceNameError.value = false
+  setDefaultDuration()
+  selectedMultisigName.value = null
+  selectedMultisigAddress.value = null
+}
+
+watch(selectedAddress, async (newValue, oldValue) => {
+  if (newValue == null) {
+    balance.value = 0
+    clearInput()
+  }
+  else if (newValue != oldValue) {
+    clearInput()
+    balance.value = await fetchAccountBalance(newValue)
+  }
+})
+
+watch(selectedMultisigAddress, async (multisigNewValue, multisigOldValue) => {
+  if (multisigNewValue == null) {
+    multisigBalance.value = 0
+    clearInput()
+    balance.value = await fetchAccountBalance(selectedAddress.value)
+  }
+  else if (multisigNewValue != multisigOldValue) {
+    selectNamespace.value = ''
+    namespaceName.value = ''
+    nsRef.value.clearLabel();
+    showNamespaceNameError.value = false
+    setDefaultDuration()
+    multisigBalance.value = await fetchAccountBalance(multisigNewValue)
+  }
+})
+
+watch(namespaceName, newValue => {
+  if (selectNamespace.value === '') {
+    showNamespaceNameError.value = false;
+    namespaceErrorMessage.value = '';
+  }
+  else {
+    if (newValue.length == 0) {
+      showNamespaceNameError.value = true;
+      namespaceErrorMessage.value = t('namespace.validName');
+    }
+  }
+})
+
+emitter.on("select-account", (address: string) => {
+  selectedAddress.value = address
+})
+
+emitter.on("select-multisig-account", (node: TreeNode) => {
+  selectedMultisigName.value = node.label
+  selectedMultisigAddress.value = node.value
+})
+emitter.on("CLOSE_MULTISIG", () => {
+  selectedMultisigName.value = null
+  selectedMultisigAddress.value = null
+})
+
 </script>
 <style scoped lang="scss">
-
 .slide-enter-active {
-   -moz-transition-duration: 1s;
-   -webkit-transition-duration: 1s;
-   -o-transition-duration: 1s;
-   transition-duration: 1s;
-   -moz-transition-timing-function: ease-in;
-   -webkit-transition-timing-function: ease-in;
-   -o-transition-timing-function: ease-in;
-   transition-timing-function: ease-in;
+  -moz-transition-duration: 1s;
+  -webkit-transition-duration: 1s;
+  -o-transition-duration: 1s;
+  transition-duration: 1s;
+  -moz-transition-timing-function: ease-in;
+  -webkit-transition-timing-function: ease-in;
+  -o-transition-timing-function: ease-in;
+  transition-timing-function: ease-in;
 }
 
 .slide-leave-active {
-   -moz-transition-duration: 1s;
-   -webkit-transition-duration: 1s;
-   -o-transition-duration: 1s;
-   transition-duration: 1s;
-   -moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-   -webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-   -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-   transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+  -moz-transition-duration: 1s;
+  -webkit-transition-duration: 1s;
+  -o-transition-duration: 1s;
+  transition-duration: 1s;
+  -moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+  -webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+  -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+  transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
 }
 
-.slide-enter-to, .slide-leave-from {
+.slide-enter-to,
+.slide-leave-from {
   max-height: 1000px;
   overflow: hidden;
 }
 
-.slide-enter-from, .slide-leave-to {
-   overflow: hidden;
-   max-height: 0;
+.slide-enter-from,
+.slide-leave-to {
+  overflow: hidden;
+  max-height: 0;
 }
 
-.optionDiv:hover{
+.optionDiv:hover {
   background: #D9EBFF;
 }
 
 ::deep(.p-inputtext) {
-      font-size: 1rem;
-      text-align: left;
-      padding: 0.5rem;
-    }
+  font-size: 1rem;
+  text-align: left;
+  padding: 0.5rem;
+}
 </style>

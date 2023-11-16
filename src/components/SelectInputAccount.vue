@@ -8,7 +8,6 @@
         optionLabel="label"
         emptyFilterMessage=" "
         @change="selectAccount($event.value.label, $event.value.value);$emit('update:modelValue', $event.value.value);$emit('select-account', $event.value.value);"
-        class="h-16 mt-0"
       >
         <!-- For the display of the main transfer account information -->
         <template #value="slotProps">
@@ -16,8 +15,7 @@
               <div class='flex'>
                 <div v-html="selectedImg"/>
                 <div class='flex flex-col ml-2 text-left'>
-                  <div v-if="initiateBy" class='text-blue-primary font-semibold text-xxs uppercase'  style="line-height: 9px;">{{ $t('general.initiateBy') }}</div>
-                  <div v-else class='text-blue-primary font-semibold text-xxs uppercase'  style="line-height: 9px;">{{$t('transfer.transferFrom')}} OR Select Signing Account to initiate Multisig</div>
+                  <div class='text-blue-primary font-semibold text-xxs uppercase'  style="line-height: 9px;">{{$t('transfer.transferFrom')}}</div>
                   <div class='mt-2 text-base font-bold'>{{slotProps.value.label}}</div>
                 </div>
               </div>
@@ -63,12 +61,11 @@ setup(p){
         concatOther.forEach(account => {
           accountList.push({
             value: account.address,
-            label: walletState.currentLoggedInWallet.convertAddressToName(account.address,true),
-            isMultiSig: account.getDirectParentMultisig().length ? true : false,
+            label: walletState.currentLoggedInWallet.convertAddressToName(account.address,true)
           });
         });
         
-        return accountList.filter(acc => acc.isMultiSig == false);
+        return accountList;
       }else{
         return []
       }
