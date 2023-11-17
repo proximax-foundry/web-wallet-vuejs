@@ -483,7 +483,8 @@ export default {
       newValue.value=""
       walletPassword.value=""
       TransactionState.transactionPayload = signedAggregateTransaction.payload
-      router.push({ name: "ViewConfirmTransaction", params: { selectedAddress: targetPublicAccount.value.address.plain()} })
+      TransactionState.selectedAddress = targetPublicAccount.value.address.plain()
+      router.push({ name: "ViewConfirmTransaction" })
     }
     const aggregateFee = ref(0);
     const totalFee = computed(()=>{

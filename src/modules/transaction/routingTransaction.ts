@@ -12,7 +12,7 @@ export const TransactionRoutes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/view-confirmation-transaction/:selectedAddress',
+    path: '/view-confirmation-transaction',
     name: 'ViewConfirmTransaction',
     props: true,
     component: () => import('@/modules/transaction/components/ConfirmationTxn.vue'),

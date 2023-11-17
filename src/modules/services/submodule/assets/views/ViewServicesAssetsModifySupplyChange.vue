@@ -350,7 +350,8 @@ export default {
       }
       TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
       TransactionState.transactionPayload = txnPayload.txnPayload
-      router.push({ name: "ViewConfirmTransaction", params: { selectedAddress: selectedAccAdd.value  } })
+      TransactionState.selectedAddress = selectedAccAdd.value
+      router.push({ name: "ViewConfirmTransaction" })
     };
 
     watch(selectIncreaseDecrease, (n) => {

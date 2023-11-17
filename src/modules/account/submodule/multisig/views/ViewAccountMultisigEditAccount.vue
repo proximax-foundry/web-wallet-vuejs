@@ -338,7 +338,8 @@ export default {
         clear();
         TransactionState.lockHashPayload = modifyStatus.hashLockTxnPayload
         TransactionState.transactionPayload = modifyStatus.txnPayload
-        router.push({ name: "ViewConfirmTransaction", params: { selectedAddress: p.address  } })
+        TransactionState.selectedAddress = p.address
+        router.push({ name: "ViewConfirmTransaction" })
       }
     };
 

@@ -34,37 +34,34 @@ import { TransactionUtils } from '@/util/transactionUtils';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
-    const props = defineProps({
-        selectedAddress: {
-            type: String,
-            required: true
-        }
-    })
+const router = useRouter()
 
-    const router = useRouter()
+const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
+const payloadExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.payloadInfoRoute);
 
-    const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
-    const payloadExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.payloadInfoRoute);
+const goPayloadExplorer = (payload:string)=>{
+  window.open(explorerBaseURL.value + payloadExplorerURL.value + "/" + payload, "_blank");
+}
 
-    const goPayloadExplorer = (payload:string)=>{
-      window.open(explorerBaseURL.value + payloadExplorerURL.value + "/" + payload, "_blank");
+const hashLockTxnPayload = computed(() =>{
+    if(TransactionState.lockHashPayload){
+        return TransactionState.lockHashPayload.toString()
     }
-
-    const hashLockTxnPayload = computed(() =>{
-        if(TransactionState.lockHashPayload){
-            return TransactionState.lockHashPayload.toString()
-        }
-        else{
-            return null
-        }
-    })
-
-    const txnPayload = computed(() =>{
-        return TransactionState.transactionPayload.toString()
-    })
-
-    const makeTransaction = async () => {
-        await TransactionUtils.createConfirmTransaction(txnPayload.value,hashLockTxnPayload.value)
-        router.push({ name: "ViewAccountPendingTransactions", params: { address: props.selectedAddress } })
+    else{
+        return null
     }
+})
+
+const txnPayload = computed(() =>{
+    return TransactionState.transactionPayload.toString()
+})
+
+const selectedAddress = computed(() =>{
+    return TransactionState.selectedAddress.toString()
+})
+
+const makeTransaction = async () => {
+    await TransactionUtils.createConfirmTransaction(txnPayload.value,hashLockTxnPayload.value)
+    router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
+}
 </script>

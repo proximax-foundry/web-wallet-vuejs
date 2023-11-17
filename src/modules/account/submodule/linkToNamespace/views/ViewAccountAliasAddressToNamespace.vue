@@ -397,7 +397,8 @@ export default {
         clearInput();
         TransactionState.lockHashPayload = payloadTxn.hashLockTxnPayload
         TransactionState.transactionPayload = payloadTxn.txnPayload
-        router.push({ name: "ViewConfirmTransaction", params: { selectedAddress: p.address  } })
+        TransactionState.selectedAddress = p.address
+        router.push({ name: "ViewConfirmTransaction" })
       }
     }
 
