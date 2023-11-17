@@ -90,6 +90,8 @@ import {useI18n} from 'vue-i18n'
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
+import { WalletUtils } from "@/util/walletUtils";
+import { TransactionState } from "@/state/transactionState";
 export default {
   name: 'ViewConvertAccountMultisig',
   components: {
@@ -329,17 +331,25 @@ export default {
       maxNumDeleteUser.value = 0;
     };
     const convertAccount = async() => {
-      let convertstatus = await MultisigUtils.convertAccount(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.value.name, passwd.value);
-      if(!convertstatus){
+      const wallet = walletState.currentLoggedInWallet;
+      const verify = WalletUtils.verifyWalletPassword(
+        wallet.name,
+        networkState.chainNetworkName,
+        passwd.value
+      );
+      if(!verify){
         passwordErr.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
+        let convertstatus = await MultisigUtils.convertAccountPayload(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.value.name, passwd.value);
         passwordErr.value = '';
         // toggleAnounceNotification.value = true;
         // var audio = new Audio(require('@/assets/audio/ding.ogg'));
         // audio.play();
         clear();
-        router.push({ name: "ViewAccountPendingTransactions",params:{address:p.address} })
+        TransactionState.lockHashPayload = convertstatus.hashLockTxnPayload
+        TransactionState.transactionPayload = convertstatus.txnPayload
+        router.push({ name: "ViewConfirmTransaction", params: { txnPayload: TransactionState.transactionPayload.toString(), hashLockTxnPayload: TransactionState.lockHashPayload?TransactionState.lockHashPayload.toString():null, selectedAddress: p.address  } })
       } 
     };
     

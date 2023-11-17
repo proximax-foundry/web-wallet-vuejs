@@ -118,6 +118,8 @@ import AccountComponent from "@/modules/account/components/AccountComponent.vue"
 import { TransactionUtils, findAcc } from '@/util/transactionUtils';
 import { AppState } from '@/state/appState';
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
+import { WalletUtils } from "@/util/walletUtils";
+import { TransactionState } from "@/state/transactionState";
 export default {
   name: 'ViewMultisigEditAccount',
   components: {
@@ -320,17 +322,23 @@ export default {
         signer.push({address: walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey).address})
       })
       console.log(signer)
-      let modifyStatus = await MultisigUtils.modifyMultisigAccount(selectedCosignPublicKey.value,coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value,acc.value, passwd.value);
-       console.log(modifyStatus);
-      if(!modifyStatus){
+      const verify = WalletUtils.verifyWalletPassword(
+        wallet.name,
+        networkState.chainNetworkName,
+        passwd.value
+      );
+      if(!verify){
         passwordErr.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
+        let modifyStatus = await MultisigUtils.modifyMultisigAccountPayload(selectedCosignPublicKey.value,coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value,acc.value, passwd.value);
         passwordErr.value = '';
         /* var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play(); */
         clear();
-        router.push({ name: "ViewAccountPendingTransactions",params:{address:p.address} })
+        TransactionState.lockHashPayload = modifyStatus.hashLockTxnPayload
+        TransactionState.transactionPayload = modifyStatus.txnPayload
+        router.push({ name: "ViewConfirmTransaction", params: { txnPayload: TransactionState.transactionPayload.toString(), hashLockTxnPayload: TransactionState.lockHashPayload?TransactionState.lockHashPayload.toString():null, selectedAddress: p.address  } })
       }
     };
 
