@@ -77,6 +77,7 @@ import { AppState } from '@/state/appState';
 import { isMultiSig, TransactionUtils, findAcc, findAccWithAddress } from '@/util/transactionUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { useI18n } from 'vue-i18n';
+import { TransactionState } from '@/state/transactionState'
 
 export default {
   name: 'ViewServicesNamespaceExtend',
@@ -295,12 +296,15 @@ export default {
         err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
         return
       }
+      let txnPayload = {}
       if(cosigner.value){
-        NamespaceUtils.extendNamespaceMultisig(cosigner.value, walletPassword.value, selectNamespace.value, duration.value, selectedAccAdd.value);
+        txnPayload = NamespaceUtils.extendNamespaceMultisigPayload(cosigner.value, walletPassword.value, selectNamespace.value, duration.value, selectedAccAdd.value);
       }else{
-        NamespaceUtils.extendNamespace(selectedAccAdd.value, walletPassword.value, selectNamespace.value, duration.value);
+        txnPayload = NamespaceUtils.extendNamespacePayload(selectedAccAdd.value, walletPassword.value, selectNamespace.value, duration.value);
       }
-      router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
+      TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
+      TransactionState.transactionPayload = txnPayload.txnPayload
+      router.push({ name: "ViewConfirmTransaction", params: { txnPayload: TransactionState.transactionPayload.toString(), hashLockTxnPayload: TransactionState.lockHashPayload?TransactionState.lockHashPayload.toString():null, selectedAddress: selectedAccAdd.value  } })
     };
 
     const getMultiSigCosigner = computed(()=>{
@@ -336,14 +340,16 @@ export default {
       
     })
 
-    
+    const checkCosignBalance = computed(() => {
+      let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
+      return Helper.toCurrencyFormat(cosignBalance);
+    })
 
     const showNoBalance = computed(() => {
-      if(isNotCosigner.value){
-        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value);
+      if(cosignerAddress.value.length <= 0){
+        return balanceNumber.value < (transactionFeeExact.value);
       }else{
-        // console.log(balanceNumber.value)
-        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value + lockFundTotalFee.value);
+        return Number(checkCosignBalance.value) < (transactionFeeExact.value + lockFundTotalFee.value);
       }
     });
 
@@ -370,12 +376,6 @@ export default {
         return '';
       }
     });
-
-
-    const checkCosignBalance = computed(() => {
-      let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
-      return Helper.toCurrencyFormat(cosignBalance);
-    })
 
     return {
       namespaceSelect,
