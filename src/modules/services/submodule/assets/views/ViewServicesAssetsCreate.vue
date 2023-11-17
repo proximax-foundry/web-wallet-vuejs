@@ -75,6 +75,7 @@ import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { Address, PublicAccount } from 'tsjs-xpx-chain-sdk';
 import { TreeNode } from 'primevue/tree';
+import { TransactionState } from '@/state/transactionState';
 
     const router = useRouter();
 
@@ -275,13 +276,19 @@ import { TreeNode } from 'primevue/tree';
         err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
         return
       }
+      let txnPayload = {
+        hashLockTxnPayload:'',
+        txnPayload:''
+      }
       if(selectedMultisigAddress.value){
-        AssetsUtils.createAssetMultiSig( selectedAddress.value, walletPassword.value, multisigPublicAccount.value, Number(supply.value), isMutable.value, isTransferable.value, Number(divisibility.value)); 
+        txnPayload = AssetsUtils.createAssetMultiSigPayload( selectedAddress.value, walletPassword.value, multisigPublicAccount.value, Number(supply.value), isMutable.value, isTransferable.value, Number(divisibility.value)); 
       }else{
-        AssetsUtils.createAsset( selectedAddress.value, walletPassword.value, ownerPublicAccount.value, Number(supply.value), isMutable.value, isTransferable.value, Number(divisibility.value));
+        txnPayload = AssetsUtils.createAssetPayload( selectedAddress.value, walletPassword.value, ownerPublicAccount.value, Number(supply.value), isMutable.value, isTransferable.value, Number(divisibility.value));
       }
       clearInput();
-      router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAddress.value} })
+      TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
+      TransactionState.transactionPayload = txnPayload.txnPayload
+      router.push({ name: "ViewConfirmTransaction", params: { txnPayload: TransactionState.transactionPayload.toString(), hashLockTxnPayload: TransactionState.lockHashPayload?TransactionState.lockHashPayload.toString():null, selectedAddress: selectedAddress.value  } })
     };
 
     emitter.on("select-account", (address: string) => {
