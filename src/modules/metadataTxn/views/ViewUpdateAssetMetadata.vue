@@ -133,6 +133,7 @@ import { ThemeStyleConfig } from '@/models/stores';
 import { toSvg } from 'jdenticon';
 import UTF8 from 'utf-8';
 import { useRouter } from 'vue-router';
+import { TransactionState } from "@/state/transactionState";
 export default { 
   name: "ViewUpdateAssetMetadata",
   props:{
@@ -500,15 +501,18 @@ export default {
       if(targetAccIsMultisig.value){
         let lockHashTx = TransactionUtils.lockFundTx(signedAggregateTransaction)
         let signedLockHashTransaction = signerAcc.preV2Sign(lockHashTx, networkState.currentNetworkProfile.generationHash);
-        TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedLockHashTransaction,signedAggregateTransaction) 
-      }else{
-        TransactionUtils.announceTransaction(signedAggregateTransaction)
+        TransactionState.lockHashPayload = signedLockHashTransaction.payload
+        //TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedLockHashTransaction,signedAggregateTransaction) 
       }
+      /*else{
+        TransactionUtils.announceTransaction(signedAggregateTransaction)
+      }*/
       inputScopedMetadataKey.value=""
       oldValue.value = ""
       newValue.value=""
       walletPassword.value=""
-      router.push({ name: "ViewAccountPendingTransactions",params:{address:targetPublicAccount.value.address.plain()} })
+      TransactionState.transactionPayload = signedAggregateTransaction.payload
+      router.push({ name: "ViewConfirmTransaction", params: { txnPayload: TransactionState.transactionPayload.toString(), hashLockTxnPayload: TransactionState.lockHashPayload?TransactionState.lockHashPayload.toString():null, selectedAddress: targetPublicAccount.value.address.plain()} })
       
     }
 
