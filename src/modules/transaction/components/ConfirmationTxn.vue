@@ -2,11 +2,18 @@
     <div>
         <div class='w-10/12 ml-auto mr-auto mt-5'>
             <div class="border filter shadow-lg mt-8">
-                <div class="text-lg font-semibold m-7">Confirmation Transaction</div>
+                <div v-if="hashLockTxnPayload">
+                    <div class="text-lg font-semibold m-7">Hash Lock Transaction</div>
+                    <div class="flex justify-center px-12">
+                        <div class="mb-3 border rounded-lg border-gray-900 w-full p-2 flex items-center justify-center break-all">{{ hashLockTxnPayload }}</div>
+                    </div>
+                    <div class="flex justify-center text-blue-primary font-semibold uppercase ml-3.5 mt-3 text-sm xl:text-md xl:ml-0 cursor-pointer" @click="goPayloadExplorer(hashLockTxnPayload)">Click to view Hash Lock Transaction Details in Explorer</div>
+                    </div>
+                <div class="text-lg font-semibold m-7">Confirm Transaction</div>
                 <div class="flex justify-center px-12">
-                    <div class="mb-3 border rounded-lg border-gray-900 w-full p-2 flex items-center justify-center break-all">{{ payload }}</div>
+                    <div class="mb-3 border rounded-lg border-gray-900 w-full p-2 flex items-center justify-center break-all">{{ txnPayload }}</div>
                 </div>
-                <div class="flex justify-center text-blue-primary font-semibold uppercase ml-3.5 mt-3 text-sm xl:text-md xl:ml-0 cursor-pointer" @click="goPayloadExplorer(payload)">Click to view Transaction Details in Explorer</div>
+                <div class="flex justify-center text-blue-primary font-semibold uppercase ml-3.5 mt-3 text-sm xl:text-md xl:ml-0 cursor-pointer" @click="goPayloadExplorer(txnPayload)">Click to view Transaction Details in Explorer</div>
                 <div class="flex justify-center my-3">
                     <router-link :to="{ name: 'ViewDashboard' }" class="text-black font-bold text-xs pt-3 mr-4 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50">
                     {{ $t('general.cancel') }}
@@ -27,19 +34,15 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
     const props = defineProps({
-        payload: {
+        txnPayload: {
             type: String,
             required: true
         },
-        selectedAddress: {
-            type: String,
-            required: true
-        },
-        selectedMultisigAddress: {
+        hashLockTxnPayload: {
             type: String,
             required: false
         },
-        walletPassword: {
+        selectedAddress: {
             type: String,
             required: true
         }
@@ -55,7 +58,7 @@ import { useRouter } from 'vue-router';
     }
 
     const makeTransaction = async () => {
-        await TransferUtils.createConfirmTransaction(props.payload,props.selectedAddress,props.selectedMultisigAddress,props.walletPassword)
+        await TransferUtils.createConfirmTransaction(props.txnPayload,props.hashLockTxnPayload)
         router.push({ name: "ViewAccountPendingTransactions", params: { address: props.selectedAddress } })
     }
 </script>
