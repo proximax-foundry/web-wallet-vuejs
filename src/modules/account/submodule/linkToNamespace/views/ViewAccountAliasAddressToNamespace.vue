@@ -92,6 +92,7 @@ import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { useRouter } from 'vue-router';
 import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
+import { TransactionState } from "@/state/transactionState";
 export default {
   name: 'ViewAccountAliasAddressToNamespace',
 
@@ -391,10 +392,12 @@ export default {
         let acc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address)? walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address) : walletState.currentLoggedInWallet.others.find(acc=>acc.address==p.address) 
         err.value = "";  
         recordAction.value = selectAction.value
-        accountUtils.linkNamespaceToAddress(selectedCosignPublicKey.value,isMultiSig.value,acc,walletPassword.value,selectNamespace.value, selectAction.value, namespaceAddress.value)
+        let payloadTxn = accountUtils.linkNamespaceToAddressPayload(selectedCosignPublicKey.value,isMultiSig.value,acc,walletPassword.value,selectNamespace.value, selectAction.value, namespaceAddress.value)
           
         clearInput();
-        router.push({ name: "ViewAccountPendingTransactions",params:{address:p.address} })
+        TransactionState.lockHashPayload = payloadTxn.hashLockTxnPayload
+        TransactionState.transactionPayload = payloadTxn.txnPayload
+        router.push({ name: "ViewConfirmTransaction", params: { txnPayload: TransactionState.transactionPayload.toString(), hashLockTxnPayload: TransactionState.lockHashPayload?TransactionState.lockHashPayload.toString():null, selectedAddress: p.address  } })
       }
     }
 

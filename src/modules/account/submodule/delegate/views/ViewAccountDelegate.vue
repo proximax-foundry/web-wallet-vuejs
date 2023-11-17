@@ -94,6 +94,7 @@ import { AppState } from '@/state/appState';
 import { TransactionUtils, findAcc } from '@/util/transactionUtils';
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import {MultisigUtils} from '@/util/multisigUtils'
+import { TransactionState } from "@/state/transactionState";
 export default {
   name: 'ViewAccountDelegate',
   components: {
@@ -339,19 +340,25 @@ export default {
         AccPublicKey.value = account.publicKey;
          
         }
+      let txnPayload = {
+        hashLockTxnPayload:'',
+        txnPayload:''
+      }
       if (WalletUtils.verifyWalletPassword(walletName,networkState.chainNetworkName,walletPassword.value)) {
         if (delegateAcc.value !== "0".repeat(64)) { //unlink
-          accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
+          txnPayload = accountUtils.createDelegateTransactionPayload(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
           walletPassword.value=""
           err.value=""
         } else if (AccPublicKey.value != "") { //link
-          accountUtils.createDelegateTransaction(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
+          txnPayload = accountUtils.createDelegateTransactionPayload(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
           walletPassword.value=""
           err.value=""
         } else {
           
         }
-        router.push({ name: "ViewAccountPendingTransactions",params:{address:p.address} })
+        TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
+        TransactionState.transactionPayload = txnPayload.txnPayload
+        router.push({ name: "ViewConfirmTransaction", params: { txnPayload: TransactionState.transactionPayload.toString(), hashLockTxnPayload: TransactionState.lockHashPayload?TransactionState.lockHashPayload.toString():null, selectedAddress: p.address  } })
       } else {
         err.value = t('general.walletPasswordInvalid',{name : walletName});
       }
