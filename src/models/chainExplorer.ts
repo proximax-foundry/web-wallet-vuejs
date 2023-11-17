@@ -21,7 +21,7 @@ export class ChainExplorer{
         chainExplorer.hashRoute = "#/result/hash";
         chainExplorer.namespaceInfoRoute = "#/result/namespaceInfo";
         chainExplorer.assetInfoRoute = "#/result/assetInfo";
-        chainExplorer.payloadInfoRoute = "#/result/payloadInfo"
+        chainExplorer.payloadInfoRoute = "#/payload"
         return chainExplorer;
     }
 

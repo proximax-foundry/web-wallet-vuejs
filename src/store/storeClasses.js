@@ -100,7 +100,7 @@ export class ChainExplorer{
         this.hashRoute = "#/result/hash";
         this.namespaceInfoRoute = "#/result/namespaceInfo";
         this.assetInfoRoute = "#/result/assetInfo";
-        this.payloadInfoRoute = "#/result/payloadInfo";
+        this.payloadInfoRoute = "#/payload";
     }
 
     serialize(){
