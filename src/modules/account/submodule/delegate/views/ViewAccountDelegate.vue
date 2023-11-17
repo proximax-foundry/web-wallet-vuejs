@@ -358,7 +358,7 @@ export default {
         }
         TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
         TransactionState.transactionPayload = txnPayload.txnPayload
-        router.push({ name: "ViewConfirmTransaction", params: { txnPayload: TransactionState.transactionPayload.toString(), hashLockTxnPayload: TransactionState.lockHashPayload?TransactionState.lockHashPayload.toString():null, selectedAddress: p.address  } })
+        router.push({ name: "ViewConfirmTransaction", params: { selectedAddress: p.address  } })
       } else {
         err.value = t('general.walletPasswordInvalid',{name : walletName});
       }

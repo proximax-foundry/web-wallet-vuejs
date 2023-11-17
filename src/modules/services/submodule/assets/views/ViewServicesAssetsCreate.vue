@@ -288,7 +288,7 @@ import { TransactionState } from '@/state/transactionState';
       clearInput();
       TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
       TransactionState.transactionPayload = txnPayload.txnPayload
-      router.push({ name: "ViewConfirmTransaction", params: { txnPayload: TransactionState.transactionPayload.toString(), hashLockTxnPayload: TransactionState.lockHashPayload?TransactionState.lockHashPayload.toString():null, selectedAddress: selectedAddress.value  } })
+      router.push({ name: "ViewConfirmTransaction", params: { selectedAddress: selectedAddress.value  } })
     };
 
     emitter.on("select-account", (address: string) => {

@@ -483,7 +483,7 @@ export default {
       newValue.value=""
       walletPassword.value=""
       TransactionState.transactionPayload = signedAggregateTransaction.payload
-      router.push({ name: "ViewConfirmTransaction", params: { txnPayload: TransactionState.transactionPayload.toString(), hashLockTxnPayload: TransactionState.lockHashPayload?TransactionState.lockHashPayload.toString():null, selectedAddress: targetPublicAccount.value.address.plain()} })
+      router.push({ name: "ViewConfirmTransaction", params: { selectedAddress: targetPublicAccount.value.address.plain()} })
     }
     const aggregateFee = ref(0);
     const totalFee = computed(()=>{

@@ -29,19 +29,12 @@
 
 <script setup lang="ts">
 import { networkState } from '@/state/networkState';
+import { TransactionState } from '@/state/transactionState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
     const props = defineProps({
-        txnPayload: {
-            type: String,
-            required: true
-        },
-        hashLockTxnPayload: {
-            type: String,
-            required: false
-        },
         selectedAddress: {
             type: String,
             required: true
@@ -57,8 +50,21 @@ import { useRouter } from 'vue-router';
       window.open(explorerBaseURL.value + payloadExplorerURL.value + "/" + payload, "_blank");
     }
 
+    const hashLockTxnPayload = computed(() =>{
+        if(TransactionState.lockHashPayload){
+            return TransactionState.lockHashPayload.toString()
+        }
+        else{
+            return null
+        }
+    })
+
+    const txnPayload = computed(() =>{
+        return TransactionState.transactionPayload.toString()
+    })
+
     const makeTransaction = async () => {
-        await TransactionUtils.createConfirmTransaction(props.txnPayload,props.hashLockTxnPayload)
+        await TransactionUtils.createConfirmTransaction(txnPayload.value,hashLockTxnPayload.value)
         router.push({ name: "ViewAccountPendingTransactions", params: { address: props.selectedAddress } })
     }
 </script>
