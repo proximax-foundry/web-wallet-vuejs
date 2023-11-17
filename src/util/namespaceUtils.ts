@@ -244,11 +244,25 @@ export class NamespaceUtils {
     return signedTx.hash;
   }
 
+  static createRootNamespacePayload = (selectedAddress: string, walletPassword: string,  namespaceName: string, duration: number) => {
+    let registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction( namespaceName, duration);
+    const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
+    let signedTx = account.preV2Sign(registerRootNamespaceTransaction, networkState.currentNetworkProfile.generationHash);
+    return {txnPayload : signedTx.payload, hashLockTxnPayload: null};
+  }
+
   static createSubNamespace = (selectedAddress: string, walletPassword: string, subNamespace: string, rootNamespace: string) => {
     let registerSubNamespaceTransaction = NamespaceUtils.subNamespaceTransaction( rootNamespace, subNamespace);
     const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
     let signedTx = account.preV2Sign(registerSubNamespaceTransaction, networkState.currentNetworkProfile.generationHash);
     TransactionUtils.announceTransaction(signedTx);
+  }
+
+  static createSubNamespacePayload = (selectedAddress: string, walletPassword: string, subNamespace: string, rootNamespace: string) => {
+    let registerSubNamespaceTransaction = NamespaceUtils.subNamespaceTransaction( rootNamespace, subNamespace);
+    const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
+    let signedTx = account.preV2Sign(registerSubNamespaceTransaction, networkState.currentNetworkProfile.generationHash);
+    return {txnPayload : signedTx.payload, hashLockTxnPayload: null};
   }
 
   static createRootNamespaceMultisig = (selectedAddress: string, walletPassword: string, namespaceName: string, duration: number, multiSigAddress:string) => {
@@ -270,6 +284,28 @@ export class NamespaceUtils {
     TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedHashlock,aggregateBondedTxSigned );
   }
 
+  static createRootNamespaceMultisigPayload = (selectedAddress: string, walletPassword: string, namespaceName: string, duration: number, multiSigAddress:string) => {
+    let buildTransactions = AppState.buildTxn;
+    let registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction(namespaceName, duration);
+    const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
+
+    const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
+    const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
+    const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
+
+    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType);
+    const innerTxn = [registerRootNamespaceTransaction.toAggregateV1(multisigPublicAccount)];
+    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
+    const aggregateBondedTxSigned = account.preV2Sign(aggregateBondedTx, networkState.currentNetworkProfile.generationHash);
+
+    let hashLockTx = TransactionUtils.lockFundTx(aggregateBondedTxSigned)
+    let signedHashlock = account.preV2Sign(hashLockTx, networkState.currentNetworkProfile.generationHash);
+    return {
+      txnPayload : aggregateBondedTxSigned.payload,
+      hashLockTxnPayload : signedHashlock.payload
+    }
+  }
+
   static createSubNamespaceMultisig = (selectedAddress: string, walletPassword: string, subNamespace: string, rootNamespace: string, multiSigAddress:string) => {
     let buildTransactions = AppState.buildTxn;
     let registerSubNamespaceTransaction = NamespaceUtils.subNamespaceTransaction( rootNamespace, subNamespace);
@@ -287,6 +323,28 @@ export class NamespaceUtils {
     let hashLockTx = TransactionUtils.lockFundTx(aggregateBondedTxSigned)
     let signedHashlock = account.preV2Sign(hashLockTx, networkState.currentNetworkProfile.generationHash);
     TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedHashlock,aggregateBondedTxSigned );
+  }
+
+  static createSubNamespaceMultisigPayload = (selectedAddress: string, walletPassword: string, subNamespace: string, rootNamespace: string, multiSigAddress:string) => {
+    let buildTransactions = AppState.buildTxn;
+    let registerSubNamespaceTransaction = NamespaceUtils.subNamespaceTransaction( rootNamespace, subNamespace);
+    const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
+
+    const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
+    const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
+    const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
+
+    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType);
+    const innerTxn = [registerSubNamespaceTransaction.toAggregateV1(multisigPublicAccount)];
+    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
+    const aggregateBondedTxSigned = account.preV2Sign(aggregateBondedTx, networkState.currentNetworkProfile.generationHash);
+
+    let hashLockTx = TransactionUtils.lockFundTx(aggregateBondedTxSigned)
+    let signedHashlock = account.preV2Sign(hashLockTx, networkState.currentNetworkProfile.generationHash);
+    return {
+      txnPayload : aggregateBondedTxSigned.payload,
+      hashLockTxnPayload : signedHashlock.payload
+    }
   }
 
   static extendNamespace = (selectedAddress: string, walletPassword: string, namespaceName: string, duration: number) => {

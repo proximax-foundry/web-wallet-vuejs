@@ -44,7 +44,7 @@
         <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
           <TxnSummary :signer-native-token-balance="balance" :namespace-rental-fee-currency="rentalFeeCurrency"
             :native-token-balance="selectedMultisigAddress ? multisigBalance : balance" :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee"
-            :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact" :total-fee="Number(totalFeeFormatted)" />
+            :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact" :total-fee="totalFee" />
           <div class='text-xs text-white my-5'>{{ $t('general.enterPasswordContinue') }}</div>
           <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')"
             :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
@@ -98,6 +98,7 @@ import { useI18n } from 'vue-i18n';
 import { WalletUtils } from '@/util/walletUtils';
 import { Address } from 'tsjs-xpx-chain-sdk';
 import { TreeNode } from 'primevue/tree';
+import { TransactionState } from '@/state/transactionState';
 
 const router = useRouter();
 const { t } = useI18n();
@@ -285,22 +286,28 @@ const createNamespace = () => {
     err.value = t('general.walletPasswordInvalid', { name: walletState.currentLoggedInWallet.name })
     return
   }
+  let txnPayload = {
+    hashLockTxnPayload:'',
+    txnPayload:''
+  }
   if (selectedMultisigAddress.value) {
     // for multisig
     if (selectNamespace.value === '1') {
-      NamespaceUtils.createRootNamespaceMultisig(selectedAddress.value, walletPassword.value, namespaceName.value, Number(duration.value), selectedMultisigAddress.value);
+      txnPayload = NamespaceUtils.createRootNamespaceMultisigPayload(selectedAddress.value, walletPassword.value, namespaceName.value, Number(duration.value), selectedMultisigAddress.value);
     } else {
-      NamespaceUtils.createSubNamespaceMultisig(selectedAddress.value, walletPassword.value, namespaceName.value, selectNamespace.value, selectedMultisigAddress.value);
+      txnPayload = NamespaceUtils.createSubNamespaceMultisigPayload(selectedAddress.value, walletPassword.value, namespaceName.value, selectNamespace.value, selectedMultisigAddress.value);
     }
   }
   else {
     if (selectNamespace.value === '1') {
-      NamespaceUtils.createRootNamespace(selectedAddress.value, walletPassword.value, namespaceName.value, Number(duration.value));
+      txnPayload = NamespaceUtils.createRootNamespacePayload(selectedAddress.value, walletPassword.value, namespaceName.value, Number(duration.value));
     } else {
-      NamespaceUtils.createSubNamespace(selectedAddress.value, walletPassword.value, namespaceName.value, selectNamespace.value);
+      txnPayload = NamespaceUtils.createSubNamespacePayload(selectedAddress.value, walletPassword.value, namespaceName.value, selectNamespace.value);
     }
   }
-  router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
+  TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
+  TransactionState.transactionPayload = txnPayload.txnPayload
+  router.push({ name: "ViewConfirmTransaction", params: { txnPayload: TransactionState.transactionPayload.toString(), hashLockTxnPayload: TransactionState.lockHashPayload?TransactionState.lockHashPayload.toString():null, selectedAddress: selectedAddress.value  } })
 };
 
 watch(duration, (newValue) => {
@@ -317,7 +324,7 @@ const setDefaultDuration = () => {
 const totalFee = computed(() => {
   // if multisig
   if (selectedMultisigAddress.value) {
-    return lockFundTotalFee.value + transactionFeeExact.value;
+    return Math.round((lockFundTotalFee.value + transactionFeeExact.value) * 100) / 100;
   } else {
     return rentalFee.value + transactionFeeExact.value;
   }
@@ -332,11 +339,6 @@ watch(totalFee, (newValue) => {
     disableSelectNamespace.value = false;
   }
 });
-
-const totalFeeFormatted = computed(() => {
-  return Helper.amountFormatterSimple(totalFee.value, 0);
-});
-
 
 const reservedRootNamespace = computed(() => {
   if (networkState.currentNetworkProfileConfig) {
