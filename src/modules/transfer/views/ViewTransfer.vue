@@ -116,6 +116,8 @@ import TransferTxnSummary from '../components/TransferTxnSummary.vue';
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
+import { WalletUtils } from '@/util/walletUtils';
+import { TransactionState } from '@/state/transactionState'
 
 const addressPatternShort = "^[0-9A-Za-z]{40}$";
 
@@ -134,8 +136,6 @@ const selectedMultisigAddress = ref<string | null>(null)
 const selectedMultisigName = ref<string | null>(null)
 
 const selectedAddress = ref<string | null>(null)
-
-const txnPayload = ref<string | null>('')
 
 const toggleContact = ref(false)
 
@@ -343,7 +343,20 @@ const createTransferTxn = async () => {
 }
 
 const makeTransferPayload = async () => {
-     txnPayload.value = await TransferUtils.createTransactionPayload(
+    // verify password
+    let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword.value)
+
+    if (!verify) {
+        toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: "Password is incorrect",
+                group: 'br-custom',
+                life: 1000
+            });
+            return
+    }
+     let txnPayload = await TransferUtils.createTransferTxnPayload(
             recipientInput.value,
             nativeAmount.value,
             message.value,
@@ -360,8 +373,10 @@ const makeTransferPayload = async () => {
             isEncrypted.value,
             publicKeyInput.value
         )
-        console.log(txnPayload.value)
-        router.push({ name: "ViewConfirmTransaction", params: { payload: txnPayload.value, selectedAddress: selectedAddress.value, selectedMultisigAddress: selectedMultisigAddress.value, walletPassword: walletPassword.value } })
+        TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
+        TransactionState.transactionPayload = txnPayload.txnPayload
+        router.push({ name: "ViewConfirmTransaction", params: { txnPayload: TransactionState.transactionPayload.toString(), hashLockTxnPayload: TransactionState.lockHashPayload?TransactionState.lockHashPayload.toString():null, selectedAddress: selectedAddress.value  } })
+        
         clearInput()
 }
 
