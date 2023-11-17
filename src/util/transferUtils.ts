@@ -138,18 +138,6 @@ export class TransferUtils {
     return true
   }
 
-  static createConfirmTransaction = async (txnPayload: string, hashLockTxnPayload: string) => {
-    const hash = networkState.currentNetworkProfile.generationHash
-    if (!hashLockTxnPayload) { // normal transaction
-      let signTxn = SignedTransaction.createFromPayload(txnPayload, hash)
-      TransactionUtils.announceTransaction(signTxn)
-    } else { // aggregate  bonded transaction
-      const hashLockTransactionSigned = SignedTransaction.createFromPayload(hashLockTxnPayload, hash)
-      const aggregateBondedTransactionSigned = SignedTransaction.createFromPayload(txnPayload, hash)
-      TransactionUtils.announceLF_AND_addAutoAnnounceABT(hashLockTransactionSigned, aggregateBondedTransactionSigned)
-    }
-  }
-
   static createTransferTxnPayload = async (recipientAddress: string, nativeTokenAmount: string, messageText: string, mosaicsSent: { amount: number, id: string,divisibility:number }[],walletPassword: string, selectedAddress: string, selectedMultisigAddress: string, isEncrypted: boolean, recipientPublicKey: string): Promise<{txnPayload:string, hashLockTxnPayload?: string}> => {
     const hash = networkState.currentNetworkProfile.generationHash
 

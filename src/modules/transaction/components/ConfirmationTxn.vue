@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import { networkState } from '@/state/networkState';
-import { TransferUtils } from '@/util/transferUtils';
+import { TransactionUtils } from '@/util/transactionUtils';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -58,7 +58,7 @@ import { useRouter } from 'vue-router';
     }
 
     const makeTransaction = async () => {
-        await TransferUtils.createConfirmTransaction(props.txnPayload,props.hashLockTxnPayload)
+        await TransactionUtils.createConfirmTransaction(props.txnPayload,props.hashLockTxnPayload)
         router.push({ name: "ViewAccountPendingTransactions", params: { address: props.selectedAddress } })
     }
 </script>

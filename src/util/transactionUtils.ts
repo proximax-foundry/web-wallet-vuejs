@@ -577,6 +577,17 @@ export class TransactionUtils {
 
     return addresses;
   }
+  static createConfirmTransaction = async (txnPayload: string, hashLockTxnPayload: string) => {
+    const hash = networkState.currentNetworkProfile.generationHash
+    if (!hashLockTxnPayload) { // normal transaction
+      let signTxn = SignedTransaction.createFromPayload(txnPayload, hash)
+      TransactionUtils.announceTransaction(signTxn)
+    } else { // aggregate  bonded transaction
+      const hashLockTransactionSigned = SignedTransaction.createFromPayload(hashLockTxnPayload, hash)
+      const aggregateBondedTransactionSigned = SignedTransaction.createFromPayload(txnPayload, hash)
+      TransactionUtils.announceLF_AND_addAutoAnnounceABT(hashLockTransactionSigned, aggregateBondedTransactionSigned)
+    }
+  }
 }
 
 export const isMultiSig = (address) => {
