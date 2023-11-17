@@ -12,7 +12,7 @@ export const TransactionRoutes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/view-confirmation-transaction/:payload/:selectedAddress/:selectedMultisigAddress?/:walletPassword',
+    path: '/view-confirmation-transaction/:txnPayload/:hashLockTxnPayload?/:selectedAddress',
     name: 'ViewConfirmTransaction',
     props: true,
     component: () => import('@/modules/transaction/components/ConfirmationTxn.vue'),
