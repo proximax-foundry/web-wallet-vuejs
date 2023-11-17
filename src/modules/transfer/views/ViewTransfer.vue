@@ -16,11 +16,11 @@
                     </div>
                     <div class="text-sm font-semibold ">{{ $t('transfer.newTransfer') }}</div>
                     <div class="flex gap-1 mt-3">
-                        <SelectInputAccount />
+                        <SelectInputAccount :type="'transfer'" />
                         <SelectInputMultisigAccount :selected-address="selectedAddress" />
                     </div>
                     <div v-if="selectedMultisigAddress" class="mt-3">
-                        <MultisigInput :select-default-address="selectedMultisigAddress" :select-default-name="selectedMultisigName"/>
+                        <MultisigInput :select-default-address="selectedMultisigAddress" :select-default-name="selectedMultisigName" :type="'transfer'"/>
                     </div>
                     <div class="text-blue-primary font-semibold uppercase mt-3 text-xxs">Transfer to</div>
 
@@ -68,7 +68,7 @@
 
                 </div>
                 <div class='bg-navy-primary py-6 px-6 xl:col-span-1'>
-                    <TransferTxnSummary :signer-native-token-balance="signerNativeTokenBalance"
+                    <TxnSummary :signer-native-token-balance="signerNativeTokenBalance"
                         :native-amount="nativeAmount" :native-token-balance="nativeTokenBalance" :lock-fund="lockFund"
                         :lock-fund-tx-fee="lockFundTxFee" :selected-multisig-address="selectedMultisigAddress"
                         :txn-fee="txnFee" :total-fee="totalFee" :selected-assets="selectedAssets" />
@@ -112,7 +112,7 @@ import { TransactionUtils } from '@/util/transactionUtils';
 import TextAreaInput from '../components/TextAreaInput.vue';
 import FieldValidationInput from '../components/FieldValidationInput.vue';
 import { TransferUtils } from '@/util/transferUtils';
-import TransferTxnSummary from '../components/TransferTxnSummary.vue';
+import TxnSummary from '@/components/TxnSummary.vue';
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";

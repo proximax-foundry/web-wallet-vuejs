@@ -3,11 +3,23 @@
         <div class="flex">
             <div v-html="selectedImg" />
             <div class="flex flex-col ml-2 text-left">
-              <div
+              <div v-if="type == 'transfer'"
                 class="text-blue-primary font-semibold text-xxs uppercase"
                 style="line-height: 9px"
               >
               {{$t('transfer.transferFrom')}} {{ $t("general.multisig") }}
+              </div>
+              <div v-else-if="type == 'namespace'"
+                class="text-blue-primary font-semibold text-xxs uppercase"
+                style="line-height: 9px"
+              >
+              {{$t('general.createNamespace')}} From {{ $t("general.multisig") }}
+              </div>
+              <div v-else-if="type == 'asset'"
+                class="text-blue-primary font-semibold text-xxs uppercase"
+                style="line-height: 9px"
+              >
+              {{$t('asset.assetCreatedBy')}} {{ $t("general.multisig") }}
               </div>
               <div class="mt-2 text-tsm font-bold ">
                 {{ selectDefaultName }}
@@ -31,6 +43,10 @@ const p = defineProps({
     required: true,
   },
   selectDefaultName: {
+    type: String,
+    required: true,
+  },
+  type: {
     type: String,
     required: true,
   }
