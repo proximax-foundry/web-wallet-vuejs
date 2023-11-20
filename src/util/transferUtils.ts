@@ -9,7 +9,6 @@ import {
   PublicAccount,
   Password,
   Message,
-  SignedTransaction,
 } from "tsjs-xpx-chain-sdk";
 
 import { networkState } from "@/state/networkState";
