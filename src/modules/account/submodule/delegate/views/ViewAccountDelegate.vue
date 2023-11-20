@@ -340,24 +340,43 @@ export default {
         AccPublicKey.value = account.publicKey;
          
         }
-      let txnPayload = {
-        hashLockTxnPayload:'',
-        txnPayload:''
-      }
+      let delegatePayload = {}
+      const txBuilder = AppState.buildTxn
       if (WalletUtils.verifyWalletPassword(walletName,networkState.chainNetworkName,walletPassword.value)) {
         if (delegateAcc.value !== "0".repeat(64)) { //unlink
-          txnPayload = accountUtils.createDelegateTransactionPayload(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, delegateAcc.value, LinkAction.Unlink);
+          const delegateUnlinkTransaction = txBuilder.accountLinkBuilder() 
+          .remoteAccountKey(delegateAcc.value)
+          .linkAction(LinkAction.Unlink)
+          .build() 
+          if(isMultisig.value){
+            let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address 
+            delegatePayload = TransactionUtils.signConfirmTransaction(selectedCosignAddress,acc.value.address,walletPassword.value,delegateUnlinkTransaction)
+          }
+          else{
+            delegatePayload = TransactionUtils.signConfirmTransaction(acc.value.address,null,walletPassword.value,delegateUnlinkTransaction)
+          }
           walletPassword.value=""
           err.value=""
         } else if (AccPublicKey.value != "") { //link
-          txnPayload = accountUtils.createDelegateTransactionPayload(selectedCosignPublicKey.value,isMultisig.value,acc.value, walletPassword.value, AccPublicKey.value, LinkAction.Link);
+          const delegateLinkTransaction = txBuilder.accountLinkBuilder() 
+          .remoteAccountKey(AccPublicKey.value)
+          .linkAction(LinkAction.Link)
+          .build()
+          console.log(acc.value.address) 
+          if(isMultisig.value){
+            let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address 
+            delegatePayload = TransactionUtils.signConfirmTransaction(selectedCosignAddress,acc.value.address,walletPassword.value,delegateLinkTransaction)
+          }
+          else{
+            delegatePayload = TransactionUtils.signConfirmTransaction(acc.value.address,null,walletPassword.value,delegateLinkTransaction)
+          }
           walletPassword.value=""
           err.value=""
         } else {
           
         }
-        TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
-        TransactionState.transactionPayload = txnPayload.txnPayload
+        TransactionState.lockHashPayload = delegatePayload.hashLockTxnPayload
+        TransactionState.transactionPayload = delegatePayload.txnPayload
         TransactionState.selectedAddress = p.address
         router.push({ name: "ViewConfirmTransaction"})
       } else {

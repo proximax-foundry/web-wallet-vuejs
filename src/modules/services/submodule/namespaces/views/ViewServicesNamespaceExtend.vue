@@ -296,14 +296,15 @@ export default {
         err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
         return
       }
-      let txnPayload = {}
+      let namespaceExtendPayload = {}
+      const extendNamespaceTx = NamespaceUtils.rootNamespaceTransaction(selectNamespace.value, duration.value);
       if(cosigner.value){
-        txnPayload = NamespaceUtils.extendNamespaceMultisigPayload(cosigner.value, walletPassword.value, selectNamespace.value, duration.value, selectedAccAdd.value);
+        namespaceExtendPayload = TransactionUtils.signConfirmTransaction(cosigner.value,selectedAccAdd.value,walletPassword.value,extendNamespaceTx)
       }else{
-        txnPayload = NamespaceUtils.extendNamespacePayload(selectedAccAdd.value, walletPassword.value, selectNamespace.value, duration.value);
+        namespaceExtendPayload = TransactionUtils.signConfirmTransaction(selectedAccAdd.value,null,walletPassword.value,extendNamespaceTx)
       }
-      TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
-      TransactionState.transactionPayload = txnPayload.txnPayload
+      TransactionState.lockHashPayload = namespaceExtendPayload.hashLockTxnPayload
+      TransactionState.transactionPayload = namespaceExtendPayload.txnPayload
       TransactionState.selectedAddress = selectedAccAdd.value
       router.push({ name: "ViewConfirmTransaction" })
     };

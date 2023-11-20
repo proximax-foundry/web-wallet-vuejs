@@ -278,7 +278,7 @@ export default {
         return
       }
       let assetId;
-      let txnPayload = {}
+      let assetLinkPayload = {}
       if(selectAction.value=='link'){ 
         assetId = selectAsset.value;
       }else{
@@ -288,13 +288,14 @@ export default {
         }
         assetId = account.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
       }
+      const linkAssetToNamespaceTx = AssetsUtils.linkAssetToNamespaceTransaction(assetId, selectNamespace.value, selectAction.value);
       if(cosigner.value){
-        txnPayload = AssetsUtils.linkedNamespaceToAssetMultiSigPayload(cosigner.value, walletPassword.value, assetId, selectNamespace.value, selectAction.value, selectedAccAdd.value);
+        assetLinkPayload = TransactionUtils.signConfirmTransaction(cosigner.value,selectedAccAdd.value,walletPassword.value,linkAssetToNamespaceTx)
       }else{
-        txnPayload = AssetsUtils.linkedNamespaceToAssetPayload(selectedAccAdd.value, walletPassword.value, assetId, selectNamespace.value, selectAction.value );
+        assetLinkPayload = TransactionUtils.signConfirmTransaction(selectedAccAdd.value,null,walletPassword.value,linkAssetToNamespaceTx)
       }
-      TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
-      TransactionState.transactionPayload = txnPayload.txnPayload
+      TransactionState.lockHashPayload = assetLinkPayload.hashLockTxnPayload
+      TransactionState.transactionPayload = assetLinkPayload.txnPayload
       TransactionState.selectedAddress = selectedAccAdd.value
       router.push({ name: "ViewConfirmTransaction" })
     };

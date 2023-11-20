@@ -100,7 +100,7 @@ import MultisigInput from "../components/MultisigInput.vue"
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { walletState } from '@/state/walletState';
-import { Address, PublicAccount } from 'tsjs-xpx-chain-sdk';
+import { Address, EncryptedMessage, Message, Mosaic, MosaicId, Password, PlainMessage, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
 import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import { useI18n } from 'vue-i18n';
 import { TreeNode } from 'primevue/tree';
@@ -118,6 +118,7 @@ import { useRouter } from 'vue-router';
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
 import { WalletUtils } from '@/util/walletUtils';
 import { TransactionState } from '@/state/transactionState'
+import { WalletAccount } from '@/models/walletAccount';
 
 const addressPatternShort = "^[0-9A-Za-z]{40}$";
 
@@ -356,29 +357,68 @@ const makeTransferPayload = async () => {
             });
             return
     }
-     let txnPayload = await TransferUtils.createTransferTxnPayload(
-            recipientInput.value,
-            nativeAmount.value,
-            message.value,
-            selectedAssets.value.map(asset => {
+    else{
+        let xpxAmount = parseFloat(nativeAmount.value) * Math.pow(10, AppState.nativeToken.divisibility);
+
+        let mosaics = [];
+        let mosaicsSent = selectedAssets.value.map(asset => {
                 return {
                     id: asset.id,
                     amount: parseFloat(asset.amount),
                     divisibility: asset.divisibility
                 }
-            }),
-            walletPassword.value,
-            selectedAddress.value,
-            selectedMultisigAddress.value,
-            isEncrypted.value,
-            publicKeyInput.value
-        )
-        TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
-        TransactionState.transactionPayload = txnPayload.txnPayload
+            })
+        if (xpxAmount > 0) {
+        mosaics.push(new Mosaic(new MosaicId(AppState.nativeToken.assetId), UInt64.fromUint(Number(xpxAmount))));
+        }
+        if (mosaicsSent.length > 0) {
+        mosaicsSent.forEach((mosaicSentInfo) => {
+            if (mosaicSentInfo.amount > 0) {
+            mosaics.push(
+                new Mosaic(
+                new MosaicId(mosaicSentInfo.id),
+                UInt64.fromUint(Number(mosaicSentInfo.amount * Math.pow(10, mosaicSentInfo.divisibility)))
+                )
+            );
+            }
+        });
+    }
+        let transactionBuilder = AppState.buildTxn
+
+        let initiatorAcc: WalletAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedAddress.value)
+
+        let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword.value), initiatorAcc.encrypted, initiatorAcc.iv)
+
+        // sending encrypted message
+
+        let msg :Message;
+
+        if (isEncrypted.value &&  message.value.length>0) {
+        try {
+            const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(recipientInput.value))
+            msg = EncryptedMessage.create(message.value, accountInfo.publicAccount, privateKey);
+        } catch (error) {
+            msg = EncryptedMessage.create(message.value, PublicAccount.createFromPublicKey(publicKeyInput.value,AppState.networkType) , privateKey)
+        }
+        } else {
+        msg = PlainMessage.create(message.value);
+        }
+
+        let transferTransaction = transactionBuilder.transferBuilder()
+        .recipient(Address.createFromRawAddress(recipientInput.value))
+        .mosaics(mosaics)
+        .message(msg)
+        .build()
+
+        let transferPayload = TransactionUtils.signConfirmTransaction(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,transferTransaction)
+
+        TransactionState.lockHashPayload = transferPayload.hashLockTxnPayload
+        TransactionState.transactionPayload = transferPayload.txnPayload
         TransactionState.selectedAddress = selectedAddress.value
         router.push({ name: "ViewConfirmTransaction" })
         
         clearInput()
+    }
 }
 
 const makeTransfer = () => {

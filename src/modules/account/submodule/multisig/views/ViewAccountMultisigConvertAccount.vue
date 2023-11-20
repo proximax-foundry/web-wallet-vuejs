@@ -82,7 +82,11 @@ import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import {
+Account,
   Address,
+    MultisigCosignatoryModification,
+    MultisigCosignatoryModificationType,
+    Password,
     PublicAccount
 } from "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
@@ -341,14 +345,78 @@ export default {
         passwordErr.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
-        let convertstatus = await MultisigUtils.convertAccountPayload(coSign.value, numApproveTransaction.value, numDeleteUser.value, acc.value.name, passwd.value);
+        let multisigPayload = {}
+        const multisigCosignatory = [];
+  
+        const accountDetails = wallet.accounts.find(
+          (element) => element.name === acc.value.name
+        );
+        if (!accountDetails) {
+          throw new Error("Account not found");
+        }
+    
+        const privateKey = WalletUtils.decryptPrivateKey(
+          new Password(passwd.value),
+          accountDetails.encrypted,
+          accountDetails.iv
+        );
+        const accountToConvert = Account.createFromPrivateKey(
+          privateKey,
+          AppState.networkType,1
+        );
+        if (!AppState.chainAPI) {
+          throw new Error("Service unavailable");
+        }
+        let cosignatory = null;
+        for (const cosignKey of coSign.value) {
+          if (cosignKey.length == 64) {
+            cosignatory = PublicAccount.createFromPublicKey(
+              cosignKey,
+              AppState.networkType
+            );
+          } else if (cosignKey.length == 40 || cosignKey.length == 46) {
+            const address = Address.createFromRawAddress(cosignKey);
+    
+            try {
+              const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(
+                address
+              );
+              cosignatory = PublicAccount.createFromPublicKey(
+                accInfo.publicKey,
+                AppState.networkType
+              );
+            } catch (error) {
+              console.log(error);
+            }
+          }
+          if (cosignatory) {
+            multisigCosignatory.push(
+              new MultisigCosignatoryModification(
+                MultisigCosignatoryModificationType.Add,
+                cosignatory
+              )
+            );
+          }
+        }
+        if (!AppState.buildTxn) {
+          throw new Error("Service unavailable");
+        }
+        const txBuilder = AppState.buildTxn;
+        const convertIntoMultisigTransaction = txBuilder
+          .modifyMultisigAccountBuilder()
+          .minApprovalDelta(numApproveTransaction.value)
+          .minRemovalDelta(numDeleteUser.value)
+          .modifications(multisigCosignatory)
+          .build();
+
+        multisigPayload = TransactionUtils.signConfirmTransaction(acc.value.address,accountToConvert.address.plain(),passwd.value,convertIntoMultisigTransaction)
         passwordErr.value = '';
         // toggleAnounceNotification.value = true;
         // var audio = new Audio(require('@/assets/audio/ding.ogg'));
         // audio.play();
         clear();
-        TransactionState.lockHashPayload = convertstatus.hashLockTxnPayload
-        TransactionState.transactionPayload = convertstatus.txnPayload
+        TransactionState.lockHashPayload = multisigPayload.hashLockTxnPayload
+        TransactionState.transactionPayload = multisigPayload.txnPayload
         TransactionState.selectedAddress = p.address
         router.push({ name: "ViewConfirmTransaction" })
       } 

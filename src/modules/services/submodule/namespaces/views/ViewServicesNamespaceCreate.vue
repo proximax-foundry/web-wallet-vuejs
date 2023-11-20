@@ -286,27 +286,19 @@ const createNamespace = () => {
     err.value = t('general.walletPasswordInvalid', { name: walletState.currentLoggedInWallet.name })
     return
   }
-  let txnPayload = {
-    hashLockTxnPayload:'',
-    txnPayload:''
+  let namespacePayload : {
+    txnPayload: string,
+    hashLockTxnPayload?: string
+  },{} = {}
+  if (selectNamespace.value === '1') {
+    let registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction(namespaceName.value, Number(duration.value));
+    namespacePayload = TransactionUtils.signConfirmTransaction(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,registerRootNamespaceTransaction)
+  } else {
+    let registerSubNamespaceTransaction = NamespaceUtils.subNamespaceTransaction(selectNamespace.value, namespaceName.value);
+    namespacePayload = TransactionUtils.signConfirmTransaction(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,registerSubNamespaceTransaction)
   }
-  if (selectedMultisigAddress.value) {
-    // for multisig
-    if (selectNamespace.value === '1') {
-      txnPayload = NamespaceUtils.createRootNamespaceMultisigPayload(selectedAddress.value, walletPassword.value, namespaceName.value, Number(duration.value), selectedMultisigAddress.value);
-    } else {
-      txnPayload = NamespaceUtils.createSubNamespaceMultisigPayload(selectedAddress.value, walletPassword.value, namespaceName.value, selectNamespace.value, selectedMultisigAddress.value);
-    }
-  }
-  else {
-    if (selectNamespace.value === '1') {
-      txnPayload = NamespaceUtils.createRootNamespacePayload(selectedAddress.value, walletPassword.value, namespaceName.value, Number(duration.value));
-    } else {
-      txnPayload = NamespaceUtils.createSubNamespacePayload(selectedAddress.value, walletPassword.value, namespaceName.value, selectNamespace.value);
-    }
-  }
-  TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
-  TransactionState.transactionPayload = txnPayload.txnPayload
+  TransactionState.lockHashPayload = namespacePayload.hashLockTxnPayload
+  TransactionState.transactionPayload = namespacePayload.txnPayload
   TransactionState.selectedAddress = selectedAddress.value
   router.push({ name: "ViewConfirmTransaction" })
 };

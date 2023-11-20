@@ -342,14 +342,15 @@ export default {
         err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
         return
       }
-      let txnPayload = {}
+      let assetModifyPayload = {}
+      let createAssetAggregateTransaction = AssetsUtils.assetSupplyChangeTransaction(selectAsset.value, selectIncreaseDecrease.value, Number(supply.value), assetDivisibility.value);
       if(cosigner.value){
-        txnPayload = AssetsUtils.changeAssetSupplyMultiSigPayload(cosigner.value, walletPassword.value, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value, selectedAccAdd.value);
+        assetModifyPayload = TransactionUtils.signConfirmTransaction(cosigner.value,selectedAccAdd.value,walletPassword.value,createAssetAggregateTransaction)
       }else{
-        txnPayload = AssetsUtils.changeAssetSupplyPayload(selectedAccAdd.value, walletPassword.value, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value);
+        assetModifyPayload = TransactionUtils.signConfirmTransaction(selectedAccAdd.value,null,walletPassword.value,createAssetAggregateTransaction)
       }
-      TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
-      TransactionState.transactionPayload = txnPayload.txnPayload
+      TransactionState.lockHashPayload = assetModifyPayload.hashLockTxnPayload
+      TransactionState.transactionPayload = assetModifyPayload.txnPayload
       TransactionState.selectedAddress = selectedAccAdd.value
       router.push({ name: "ViewConfirmTransaction" })
     };

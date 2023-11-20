@@ -73,7 +73,7 @@ import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
-import { Address, PublicAccount } from 'tsjs-xpx-chain-sdk';
+import { Address, MosaicSupplyType, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
 import { TreeNode } from 'primevue/tree';
 import { TransactionState } from '@/state/transactionState';
 
@@ -276,18 +276,24 @@ import { TransactionState } from '@/state/transactionState';
         err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
         return
       }
-      let txnPayload = {
-        hashLockTxnPayload:'',
-        txnPayload:''
-      }
+      let assetPayload : {
+        txnPayload: string,
+        hashLockTxnPayload?: string
+      },{} = {}
       if(selectedMultisigAddress.value){
-        txnPayload = AssetsUtils.createAssetMultiSigPayload( selectedAddress.value, walletPassword.value, multisigPublicAccount.value, Number(supply.value), isMutable.value, isTransferable.value, Number(divisibility.value)); 
+        const assetDefinition = AppState.buildTxn.mosaicDefinition(multisigPublicAccount.value, isMutable.value, isTransferable.value, Number(divisibility.value));
+        const assetDefinitionTx = assetDefinition.toAggregateV1(multisigPublicAccount.value);
+        let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase
+        const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(multisigPublicAccount.value);
+        const innerTxn = [assetDefinitionTx,assetSupplyChangeTx];
+        assetPayload = TransactionUtils.signConfirmTransaction(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,null,innerTxn)
       }else{
-        txnPayload = AssetsUtils.createAssetPayload( selectedAddress.value, walletPassword.value, ownerPublicAccount.value, Number(supply.value), isMutable.value, isTransferable.value, Number(divisibility.value));
+        let createAssetAggregateTransaction = AssetsUtils.createAssetTransaction( ownerPublicAccount.value, Number(supply.value), isMutable.value, isTransferable.value, Number(divisibility.value));
+        assetPayload = TransactionUtils.signConfirmTransaction(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,createAssetAggregateTransaction)
       }
       clearInput();
-      TransactionState.lockHashPayload = txnPayload.hashLockTxnPayload
-      TransactionState.transactionPayload = txnPayload.txnPayload
+      TransactionState.lockHashPayload = assetPayload.hashLockTxnPayload
+      TransactionState.transactionPayload = assetPayload.txnPayload
       TransactionState.selectedAddress = selectedAddress.value
       router.push({ name: "ViewConfirmTransaction" })
     };
