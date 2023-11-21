@@ -296,7 +296,8 @@ export default {
       err.value || 
       (showAddressError.value.every(value => value == false)) == false || 
       numDeleteUser.value == 0 || 
-      numApproveTransaction.value == 0
+      numApproveTransaction.value == 0 ||
+      acc.value.balance < totalFee.value
     );
     const addCoSigButton = computed(() => {
       if(!acc.value){
