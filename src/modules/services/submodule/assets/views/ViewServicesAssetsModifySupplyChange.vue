@@ -99,6 +99,7 @@ import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
 import { TransactionState } from '@/state/transactionState'
 import { isMultiSig, TransactionUtils, findAcc, findAccWithAddress } from '@/util/transactionUtils';
+import { MosaicId, MosaicSupplyType, UInt64 } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesAssetsModifySupplyChange',
@@ -343,7 +344,9 @@ export default {
         return
       }
       let assetModifyPayload = {}
-      let createAssetAggregateTransaction = AssetsUtils.assetSupplyChangeTransaction(selectAsset.value, selectIncreaseDecrease.value, Number(supply.value), assetDivisibility.value);
+      const buildTransactions = AppState.buildTxn;
+      let supplyChangeType = (selectIncreaseDecrease.value == 'increase')?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
+      let createAssetAggregateTransaction = buildTransactions.buildMosaicSupplyChange(new MosaicId(selectAsset.value), supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(assetDivisibility.value, Number(supply.value))));
       if(cosigner.value){
         assetModifyPayload = TransactionUtils.signConfirmTransaction(cosigner.value,selectedAccAdd.value,walletPassword.value,createAssetAggregateTransaction)
       }else{

@@ -78,6 +78,7 @@ import { isMultiSig, TransactionUtils, findAcc, findAccWithAddress } from '@/uti
 import { WalletUtils } from '@/util/walletUtils';
 import { useI18n } from 'vue-i18n';
 import { TransactionState } from '@/state/transactionState'
+import { UInt64 } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesNamespaceExtend',
@@ -297,7 +298,8 @@ export default {
         return
       }
       let namespaceExtendPayload = {}
-      const extendNamespaceTx = NamespaceUtils.rootNamespaceTransaction(selectNamespace.value, duration.value);
+      let buildTransactions = AppState.buildTxn;
+      const extendNamespaceTx = buildTransactions.registerRootNamespace(selectNamespace.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value))));
       if(cosigner.value){
         namespaceExtendPayload = TransactionUtils.signConfirmTransaction(cosigner.value,selectedAccAdd.value,walletPassword.value,extendNamespaceTx)
       }else{

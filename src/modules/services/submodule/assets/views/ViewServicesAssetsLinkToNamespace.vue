@@ -97,6 +97,7 @@ import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
 import { TransactionState } from '@/state/transactionState'
 import { isMultiSig, TransactionUtils, findAcc, findAccWithAddress } from '@/util/transactionUtils';
+import { AliasActionType, MosaicId, NamespaceId } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesAssetsLinkToNamespace',
@@ -288,7 +289,9 @@ export default {
         }
         assetId = account.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
       }
-      const linkAssetToNamespaceTx = AssetsUtils.linkAssetToNamespaceTransaction(assetId, selectNamespace.value, selectAction.value);
+      const buildTransactions = AppState.buildTxn;
+      let aliasActionType = (selectAction.value == 'link')?AliasActionType.Link:AliasActionType.Unlink;
+      const linkAssetToNamespaceTx = buildTransactions.assetAlias(aliasActionType, new NamespaceId(selectNamespace.value), new MosaicId(assetId));
       if(cosigner.value){
         assetLinkPayload = TransactionUtils.signConfirmTransaction(cosigner.value,selectedAccAdd.value,walletPassword.value,linkAssetToNamespaceTx)
       }else{

@@ -96,7 +96,7 @@ import { TimeUnit } from '@/models/const/timeUnit';
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { WalletUtils } from '@/util/walletUtils';
-import { Address } from 'tsjs-xpx-chain-sdk';
+import { Address, UInt64 } from 'tsjs-xpx-chain-sdk';
 import { TreeNode } from 'primevue/tree';
 import { TransactionState } from '@/state/transactionState';
 
@@ -290,11 +290,12 @@ const createNamespace = () => {
     txnPayload: string,
     hashLockTxnPayload?: string
   },{} = {}
+  let buildTransactions = AppState.buildTxn;
   if (selectNamespace.value === '1') {
-    let registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction(namespaceName.value, Number(duration.value));
+    let registerRootNamespaceTransaction = buildTransactions.registerRootNamespace(namespaceName.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value))));
     namespacePayload = TransactionUtils.signConfirmTransaction(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,registerRootNamespaceTransaction)
   } else {
-    let registerSubNamespaceTransaction = NamespaceUtils.subNamespaceTransaction(selectNamespace.value, namespaceName.value);
+    let registerSubNamespaceTransaction = buildTransactions.registersubNamespace(selectNamespace.value, namespaceName.value);
     namespacePayload = TransactionUtils.signConfirmTransaction(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,registerSubNamespaceTransaction)
   }
   TransactionState.lockHashPayload = namespacePayload.hashLockTxnPayload
