@@ -301,10 +301,8 @@ export class Helper {
         , decimals).toNumber();
     }
 
-    static safeSumCeilDecimals(value1: number, value2: number, decimals: number): number{
-        return math.ceil(
-            math.bignumber(math.sum(math.bignumber(value1), math.bignumber(value2)).toString())
-        , decimals).toNumber();
+    static safeSum(value: Array<number>): number{
+        return math.number(math.sum(math.bignumber(value)));
     }
 
     static bigNumber(value: number): math.BigNumber{

@@ -319,7 +319,8 @@ const setDefaultDuration = () => {
 const totalFee = computed(() => {
   // if multisig
   if (selectedMultisigAddress.value) {
-    return Helper.safeSumCeilDecimals(lockFundTotalFee.value, transactionFeeExact.value, AppState.nativeToken.divisibility);
+    let totalArray = [lockFund.value, lockFundTxFee.value, transactionFeeExact.value]
+    return Helper.safeSum(totalArray);
   } else {
     return rentalFee.value + transactionFeeExact.value;
   }
