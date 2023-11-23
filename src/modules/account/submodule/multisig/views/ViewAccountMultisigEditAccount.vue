@@ -108,7 +108,7 @@ import TextInputClean from '@/components/TextInputClean.vue'
 import {MultisigUtils} from '@/util/multisigUtils'
 import { walletState } from '@/state/walletState';
 import {
-    PublicAccount,Address
+    PublicAccount,Address, MultisigCosignatoryModification, MultisigCosignatoryModificationType
 } from "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
 import {useI18n} from 'vue-i18n'
@@ -118,6 +118,8 @@ import AccountComponent from "@/modules/account/components/AccountComponent.vue"
 import { TransactionUtils, findAcc } from '@/util/transactionUtils';
 import { AppState } from '@/state/appState';
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
+import { WalletUtils } from "@/util/walletUtils";
+import { TransactionState } from "@/state/transactionState";
 export default {
   name: 'ViewMultisigEditAccount',
   components: {
@@ -320,17 +322,92 @@ export default {
         signer.push({address: walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey).address})
       })
       console.log(signer)
-      let modifyStatus = await MultisigUtils.modifyMultisigAccount(selectedCosignPublicKey.value,coSign.value, removeCosign.value, numApproveTransaction.value, numDeleteUser.value,acc.value, passwd.value);
-       console.log(modifyStatus);
-      if(!modifyStatus){
+      const verify = WalletUtils.verifyWalletPassword(
+        wallet.name,
+        networkState.chainNetworkName,
+        passwd.value
+      );
+      if(!verify){
         passwordErr.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
+
+        let multisigPayload = {}
+        const multisigCosignatory = [];
+  
+        const cosignatory = [];
+        for (const [index, cosignKey] of coSign.value.entries()) {
+          if (cosignKey.length == 64) {
+            cosignatory[index] = PublicAccount.createFromPublicKey(
+              cosignKey,
+              AppState.networkType
+            );
+          } else if (cosignKey.length == 40 || cosignKey.length == 46) {
+            // option to accept address
+            const address = Address.createFromRawAddress(cosignKey);
+            try {
+              const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(
+                address
+              );
+              cosignatory[index] = PublicAccount.createFromPublicKey(
+                accInfo.publicKey,
+                AppState.networkType
+              );
+            } catch (error) {
+              console.log(error);
+            }
+          }
+    
+          multisigCosignatory.push(
+            new MultisigCosignatoryModification(
+              MultisigCosignatoryModificationType.Add,
+              cosignatory[index]
+            )
+          );
+        }
+    
+        removeCosign.value.forEach((element, index) => {
+          cosignatory[coSign.value.length + index] = PublicAccount.createFromPublicKey(
+            element,
+            AppState.networkType
+          );
+          multisigCosignatory.push(
+            new MultisigCosignatoryModification(
+              MultisigCosignatoryModificationType.Remove,
+              cosignatory[coSign.value.length + index]
+            )
+          );
+        });
+        const findAcc = acc.value.multisigInfo.find(
+          (element) => element.level === 0
+        );
+        if (!findAcc) {
+          throw new Error("Account not found");
+        }
+        const relativeNumApproveTransaction =
+          numApproveTransaction.value - findAcc.minApproval;
+        const relativeNumDeleteUser = numDeleteUser.value - findAcc.minRemoval;
+        if (!AppState.buildTxn) {
+          throw new Error("Service unavailable");
+        }
+        const txBuilder = AppState.buildTxn;
+        const modifyMultisigTransaction = txBuilder
+          .modifyMultisigAccountBuilder()
+          .minApprovalDelta(relativeNumApproveTransaction)
+          .minRemovalDelta(relativeNumDeleteUser)
+          .modifications(multisigCosignatory)
+          .build();
+
+        let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address
+        multisigPayload = TransactionUtils.signTxnWithPassword(selectedCosignAddress,acc.value.address,passwd.value,modifyMultisigTransaction)
         passwordErr.value = '';
         /* var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play(); */
         clear();
-        router.push({ name: "ViewAccountPendingTransactions",params:{address:p.address} })
+        TransactionState.lockHashPayload = multisigPayload.hashLockTxnPayload
+        TransactionState.transactionPayload = multisigPayload.txnPayload
+        TransactionState.selectedAddress = p.address
+        router.push({ name: "ViewConfirmTransaction" })
       }
     };
 

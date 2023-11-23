@@ -7,6 +7,7 @@ export class ChainExplorer{
     hashRoute: string = "";
     namespaceInfoRoute: string = "";
     assetInfoRoute: string = "";
+    payloadInfoRoute: string = "";
 
     constructor(url){
         this.url = url;
@@ -20,6 +21,7 @@ export class ChainExplorer{
         chainExplorer.hashRoute = "#/result/hash";
         chainExplorer.namespaceInfoRoute = "#/result/namespaceInfo";
         chainExplorer.assetInfoRoute = "#/result/assetInfo";
+        chainExplorer.payloadInfoRoute = "#/payload"
         return chainExplorer;
     }
 
@@ -31,7 +33,8 @@ export class ChainExplorer{
             addressRoute: this.addressRoute,
             hashRoute: this.hashRoute,
             namespaceInfoRoute: this.namespaceInfoRoute,
-            assetInfoRoute: this.assetInfoRoute
+            assetInfoRoute: this.assetInfoRoute,
+            payloadInfoRoute: this.payloadInfoRoute
         };
     }
 }

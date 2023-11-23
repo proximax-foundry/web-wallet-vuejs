@@ -44,7 +44,7 @@
         <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
           <TxnSummary :signer-native-token-balance="balance" :namespace-rental-fee-currency="rentalFeeCurrency"
             :native-token-balance="selectedMultisigAddress ? multisigBalance : balance" :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee"
-            :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact" :total-fee="Number(totalFeeFormatted)" />
+            :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact" :total-fee="totalFee" />
           <div class='text-xs text-white my-5'>{{ $t('general.enterPasswordContinue') }}</div>
           <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')"
             :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
@@ -96,8 +96,9 @@ import { TimeUnit } from '@/models/const/timeUnit';
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { WalletUtils } from '@/util/walletUtils';
-import { Address } from 'tsjs-xpx-chain-sdk';
 import type {TreeNode } from "primevue/treenode"
+import { Address, UInt64 } from 'tsjs-xpx-chain-sdk';
+import { TransactionState } from '@/state/transactionState';
 
 const router = useRouter();
 const { t } = useI18n();
@@ -248,6 +249,7 @@ const removeNamespace = () => {
 const updateNamespaceSelection = (namespaceNameSelected) => {
   let fee = 0;
   if (namespaceNameSelected == '1') {
+    duration.value = '1';
     //root
     disabledDuration.value = false;
     if (namespaceName.value.trim().length > 0 && !showNamespaceNameError.value) {
@@ -285,22 +287,22 @@ const createNamespace = () => {
     err.value = t('general.walletPasswordInvalid', { name: walletState.currentLoggedInWallet.name })
     return
   }
-  if (selectedMultisigAddress.value) {
-    // for multisig
-    if (selectNamespace.value === '1') {
-      NamespaceUtils.createRootNamespaceMultisig(selectedAddress.value, walletPassword.value, namespaceName.value, Number(duration.value), selectedMultisigAddress.value);
-    } else {
-      NamespaceUtils.createSubNamespaceMultisig(selectedAddress.value, walletPassword.value, namespaceName.value, selectNamespace.value, selectedMultisigAddress.value);
-    }
+  let namespacePayload : {
+    txnPayload: string,
+    hashLockTxnPayload?: string
+  },{} = {}
+  let buildTransactions = AppState.buildTxn;
+  if (selectNamespace.value === '1') {
+    let registerRootNamespaceTransaction = buildTransactions.registerRootNamespace(namespaceName.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value))));
+    namespacePayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,registerRootNamespaceTransaction)
+  } else {
+    let registerSubNamespaceTransaction = buildTransactions.registersubNamespace(selectNamespace.value, namespaceName.value);
+    namespacePayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,registerSubNamespaceTransaction)
   }
-  else {
-    if (selectNamespace.value === '1') {
-      NamespaceUtils.createRootNamespace(selectedAddress.value, walletPassword.value, namespaceName.value, Number(duration.value));
-    } else {
-      NamespaceUtils.createSubNamespace(selectedAddress.value, walletPassword.value, namespaceName.value, selectNamespace.value);
-    }
-  }
-  router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
+  TransactionState.lockHashPayload = namespacePayload.hashLockTxnPayload
+  TransactionState.transactionPayload = namespacePayload.txnPayload
+  TransactionState.selectedAddress = selectedAddress.value
+  router.push({ name: "ViewConfirmTransaction" })
 };
 
 watch(duration, (newValue) => {
@@ -317,7 +319,8 @@ const setDefaultDuration = () => {
 const totalFee = computed(() => {
   // if multisig
   if (selectedMultisigAddress.value) {
-    return lockFundTotalFee.value + transactionFeeExact.value;
+    let totalArray = [lockFund.value, lockFundTxFee.value, transactionFeeExact.value]
+    return Helper.safeSum(totalArray);
   } else {
     return rentalFee.value + transactionFeeExact.value;
   }
@@ -332,11 +335,6 @@ watch(totalFee, (newValue) => {
     disableSelectNamespace.value = false;
   }
 });
-
-const totalFeeFormatted = computed(() => {
-  return Helper.amountFormatterSimple(totalFee.value, 0);
-});
-
 
 const reservedRootNamespace = computed(() => {
   if (networkState.currentNetworkProfileConfig) {
