@@ -399,7 +399,7 @@ export default {
           .build();
 
         let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address
-        multisigPayload = TransactionUtils.signConfirmTransaction(selectedCosignAddress,acc.value.address,passwd.value,modifyMultisigTransaction)
+        multisigPayload = TransactionUtils.signTxnWithPassword(selectedCosignAddress,acc.value.address,passwd.value,modifyMultisigTransaction)
         passwordErr.value = '';
         /* var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play(); */

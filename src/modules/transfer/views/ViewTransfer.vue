@@ -410,7 +410,7 @@ const makeTransferPayload = async () => {
         .message(msg)
         .build()
 
-        let transferPayload = TransactionUtils.signConfirmTransaction(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,transferTransaction)
+        let transferPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,transferTransaction)
 
         TransactionState.lockHashPayload = transferPayload.hashLockTxnPayload
         TransactionState.transactionPayload = transferPayload.txnPayload

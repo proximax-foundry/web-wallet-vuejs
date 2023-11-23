@@ -1,9 +1,9 @@
 import { reactive } from "vue";
 
 interface transactionStateInterface {
-    lockHashPayload: String
-    transactionPayload: String
-    selectedAddress: String
+    lockHashPayload: string
+    transactionPayload: string
+    selectedAddress: string
 }
 
 export const TransactionState = reactive<transactionStateInterface>({

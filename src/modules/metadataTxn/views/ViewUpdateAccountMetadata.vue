@@ -468,9 +468,9 @@ export default {
       if(targetAccIsMultisig.value){
         let cosignerAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosigner.value).address
         let innerTxn = [accountMetadataTransaction.toAggregateV1(targetPublicAccount.value)]
-        metadataPayload = TransactionUtils.signConfirmTransaction(cosignerAddress,selectedAddress,walletPassword.value,null,innerTxn)
+        metadataPayload = TransactionUtils.signTxnWithPassword(cosignerAddress,selectedAddress,walletPassword.value,null,innerTxn)
       }else{
-        metadataPayload = TransactionUtils.signConfirmTransaction(selectedAddress,null,walletPassword.value,aggregateTx)
+        metadataPayload = TransactionUtils.signTxnWithPassword(selectedAddress,null,walletPassword.value,aggregateTx)
       }
       inputScopedMetadataKey.value=""
       oldValue.value = ""

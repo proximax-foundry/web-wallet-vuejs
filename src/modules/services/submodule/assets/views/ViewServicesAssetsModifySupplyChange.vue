@@ -348,9 +348,9 @@ export default {
       let supplyChangeType = (selectIncreaseDecrease.value == 'increase')?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
       let createAssetAggregateTransaction = buildTransactions.buildMosaicSupplyChange(new MosaicId(selectAsset.value), supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(assetDivisibility.value, Number(supply.value))));
       if(cosigner.value){
-        assetModifyPayload = TransactionUtils.signConfirmTransaction(cosigner.value,selectedAccAdd.value,walletPassword.value,createAssetAggregateTransaction)
+        assetModifyPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,createAssetAggregateTransaction)
       }else{
-        assetModifyPayload = TransactionUtils.signConfirmTransaction(selectedAccAdd.value,null,walletPassword.value,createAssetAggregateTransaction)
+        assetModifyPayload = TransactionUtils.signTxnWithPassword(selectedAccAdd.value,null,walletPassword.value,createAssetAggregateTransaction)
       }
       TransactionState.lockHashPayload = assetModifyPayload.hashLockTxnPayload
       TransactionState.transactionPayload = assetModifyPayload.txnPayload

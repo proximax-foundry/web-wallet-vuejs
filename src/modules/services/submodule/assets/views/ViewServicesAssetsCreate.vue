@@ -286,14 +286,14 @@ import { TransactionState } from '@/state/transactionState';
         let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase
         const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(multisigPublicAccount.value);
         const innerTxn = [assetDefinitionTx,assetSupplyChangeTx];
-        assetPayload = TransactionUtils.signConfirmTransaction(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,null,innerTxn)
+        assetPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,null,innerTxn)
       }else{
         const assetDefinition = AppState.buildTxn.mosaicDefinition(ownerPublicAccount.value, isMutable.value, isTransferable.value, Number(divisibility.value));
         const assetDefinitionTx = assetDefinition.toAggregateV1(ownerPublicAccount.value);
         let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase;
         const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(ownerPublicAccount.value);
         let createAssetAggregateTransaction = AppState.buildTxn.aggregateComplete([assetDefinitionTx, assetSupplyChangeTx]);
-        assetPayload = TransactionUtils.signConfirmTransaction(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,createAssetAggregateTransaction)
+        assetPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,createAssetAggregateTransaction)
       }
       clearInput();
       TransactionState.lockHashPayload = assetPayload.hashLockTxnPayload

@@ -409,7 +409,7 @@ export default {
           .modifications(multisigCosignatory)
           .build();
 
-        multisigPayload = TransactionUtils.signConfirmTransaction(acc.value.address,accountToConvert.address.plain(),passwd.value,convertIntoMultisigTransaction)
+        multisigPayload = TransactionUtils.signTxnWithPassword(acc.value.address,accountToConvert.address.plain(),passwd.value,convertIntoMultisigTransaction)
         passwordErr.value = '';
         // toggleAnounceNotification.value = true;
         // var audio = new Audio(require('@/assets/audio/ding.ogg'));

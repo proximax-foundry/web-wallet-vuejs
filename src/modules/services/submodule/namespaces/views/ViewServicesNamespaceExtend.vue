@@ -301,9 +301,9 @@ export default {
       let buildTransactions = AppState.buildTxn;
       const extendNamespaceTx = buildTransactions.registerRootNamespace(selectNamespace.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value))));
       if(cosigner.value){
-        namespaceExtendPayload = TransactionUtils.signConfirmTransaction(cosigner.value,selectedAccAdd.value,walletPassword.value,extendNamespaceTx)
+        namespaceExtendPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,extendNamespaceTx)
       }else{
-        namespaceExtendPayload = TransactionUtils.signConfirmTransaction(selectedAccAdd.value,null,walletPassword.value,extendNamespaceTx)
+        namespaceExtendPayload = TransactionUtils.signTxnWithPassword(selectedAccAdd.value,null,walletPassword.value,extendNamespaceTx)
       }
       TransactionState.lockHashPayload = namespaceExtendPayload.hashLockTxnPayload
       TransactionState.transactionPayload = namespaceExtendPayload.txnPayload

@@ -45,7 +45,7 @@ const goPayloadExplorer = (payload:string)=>{
 
 const hashLockTxnPayload = computed(() =>{
     if(TransactionState.lockHashPayload){
-        return TransactionState.lockHashPayload.toString()
+        return TransactionState.lockHashPayload
     }
     else{
         return null
@@ -53,15 +53,22 @@ const hashLockTxnPayload = computed(() =>{
 })
 
 const txnPayload = computed(() =>{
-    return TransactionState.transactionPayload.toString()
+    return TransactionState.transactionPayload
 })
 
 const selectedAddress = computed(() =>{
-    return TransactionState.selectedAddress.toString()
+    return TransactionState.selectedAddress
 })
 
+const clearTransactionState = () => {
+    TransactionState.lockHashPayload = ''
+    TransactionState.transactionPayload = ''
+    TransactionState.selectedAddress = ''
+}
+
 const makeTransaction = async () => {
-    await TransactionUtils.createConfirmTransaction(txnPayload.value,hashLockTxnPayload.value)
+    await TransactionUtils.confirmAnnounceTransaction(txnPayload.value,hashLockTxnPayload.value)
     router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
+    clearTransactionState()
 }
 </script>

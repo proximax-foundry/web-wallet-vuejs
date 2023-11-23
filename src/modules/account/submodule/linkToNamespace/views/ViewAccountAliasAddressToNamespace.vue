@@ -404,10 +404,10 @@ export default {
         recordAction.value = selectAction.value
         if(isMultiSig.value){
           let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address 
-          accountAliasPayload = TransactionUtils.signConfirmTransaction(selectedCosignAddress,acc.address,walletPassword.value,namespaceTransaction)
+          accountAliasPayload = TransactionUtils.signTxnWithPassword(selectedCosignAddress,acc.address,walletPassword.value,namespaceTransaction)
         }
         else{
-          accountAliasPayload = TransactionUtils.signConfirmTransaction(acc.address,null,walletPassword.value,namespaceTransaction)
+          accountAliasPayload = TransactionUtils.signTxnWithPassword(acc.address,null,walletPassword.value,namespaceTransaction)
         }
         clearInput();
         TransactionState.lockHashPayload = accountAliasPayload.hashLockTxnPayload

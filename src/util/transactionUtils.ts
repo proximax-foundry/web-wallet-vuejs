@@ -580,19 +580,19 @@ export class TransactionUtils {
 
     return addresses;
   }
-  static signConfirmTransaction = (selectedAddress: string, selectedMultisigAddress: string, walletPassword: string, transaction?: Transaction, innerTransactions?: InnerTransaction[]):{txnPayload:string, hashLockTxnPayload?: string} => {
-    const hash = networkState.currentNetworkProfile.generationHash
+  static signTxnWithPassword = (selectedAddress: string, selectedMultisigAddress: string, walletPassword: string, transaction?: Transaction, innerTransactions?: InnerTransaction[]):{txnPayload:string, hashLockTxnPayload?: string} => {
+    const genHash = networkState.currentNetworkProfile.generationHash
 
     let transactionBuilder = AppState.buildTxn
 
     const accAddress = Address.createFromRawAddress(selectedAddress);
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
-    const encryptedPassword = WalletUtils.createPassword(walletPassword);
-    let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
+    const passwordInstance = WalletUtils.createPassword(walletPassword);
+    let privateKey = WalletUtils.decryptPrivateKey(passwordInstance, accountDetails.encrypted, accountDetails.iv);
     const account = Account.createFromPrivateKey(privateKey, AppState.networkType,1);    
 
     if (!selectedMultisigAddress) { // no cosigner, normal transaction
-      const signedTransaction = account.preV2Sign(transaction, hash);
+      const signedTransaction = account.preV2Sign(transaction, genHash);
       return {txnPayload : signedTransaction.payload};
     } else { // there is a cosigner, aggregate  bonded transaction
       let innerTxn: InnerTransaction[] = []
@@ -607,10 +607,10 @@ export class TransactionUtils {
         innerTxn = [transaction.toAggregateV1(multisigPublicAccount)];
       }
       const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)
-      const aggregateBondedTransactionSigned = account.preV2Sign(aggregateBondedTransaction, hash);
+      const aggregateBondedTransactionSigned = account.preV2Sign(aggregateBondedTransaction, genHash);
 
       const hashLockTransaction = TransactionUtils.lockFundTx(aggregateBondedTransactionSigned)
-      const hashLockTransactionSigned = account.preV2Sign(hashLockTransaction, hash)
+      const hashLockTransactionSigned = account.preV2Sign(hashLockTransaction, genHash)
       return {
         txnPayload : aggregateBondedTransactionSigned.payload,
         hashLockTxnPayload : hashLockTransactionSigned.payload
@@ -618,14 +618,14 @@ export class TransactionUtils {
     }
   }
 
-  static createConfirmTransaction = async (txnPayload: string, hashLockTxnPayload: string) => {
-    const hash = networkState.currentNetworkProfile.generationHash
-    if (!hashLockTxnPayload) { // normal transaction
-      let signTxn = SignedTransaction.createFromPayload(txnPayload, hash)
+  static confirmAnnounceTransaction = async (signedTxnPayload: string, signedHashLockTxnPayload: string) => {
+    const genHash = networkState.currentNetworkProfile.generationHash
+    if (!signedHashLockTxnPayload) { // normal transaction
+      let signTxn = SignedTransaction.createFromPayload(signedTxnPayload, genHash)
       TransactionUtils.announceTransaction(signTxn)
     } else { // aggregate  bonded transaction
-      const hashLockTransactionSigned = SignedTransaction.createFromPayload(hashLockTxnPayload, hash)
-      const aggregateBondedTransactionSigned = SignedTransaction.createFromPayload(txnPayload, hash)
+      const hashLockTransactionSigned = SignedTransaction.createFromPayload(signedHashLockTxnPayload, genHash)
+      const aggregateBondedTransactionSigned = SignedTransaction.createFromPayload(signedTxnPayload, genHash)
       TransactionUtils.announceLF_AND_addAutoAnnounceABT(hashLockTransactionSigned, aggregateBondedTransactionSigned)
     }
   }

@@ -293,9 +293,9 @@ export default {
       let aliasActionType = (selectAction.value == 'link')?AliasActionType.Link:AliasActionType.Unlink;
       const linkAssetToNamespaceTx = buildTransactions.assetAlias(aliasActionType, new NamespaceId(selectNamespace.value), new MosaicId(assetId));
       if(cosigner.value){
-        assetLinkPayload = TransactionUtils.signConfirmTransaction(cosigner.value,selectedAccAdd.value,walletPassword.value,linkAssetToNamespaceTx)
+        assetLinkPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,linkAssetToNamespaceTx)
       }else{
-        assetLinkPayload = TransactionUtils.signConfirmTransaction(selectedAccAdd.value,null,walletPassword.value,linkAssetToNamespaceTx)
+        assetLinkPayload = TransactionUtils.signTxnWithPassword(selectedAccAdd.value,null,walletPassword.value,linkAssetToNamespaceTx)
       }
       TransactionState.lockHashPayload = assetLinkPayload.hashLockTxnPayload
       TransactionState.transactionPayload = assetLinkPayload.txnPayload

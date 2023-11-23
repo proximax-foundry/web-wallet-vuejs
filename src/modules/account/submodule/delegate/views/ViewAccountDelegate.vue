@@ -350,10 +350,10 @@ export default {
           .build() 
           if(isMultisig.value){
             let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address 
-            delegatePayload = TransactionUtils.signConfirmTransaction(selectedCosignAddress,acc.value.address,walletPassword.value,delegateUnlinkTransaction)
+            delegatePayload = TransactionUtils.signTxnWithPassword(selectedCosignAddress,acc.value.address,walletPassword.value,delegateUnlinkTransaction)
           }
           else{
-            delegatePayload = TransactionUtils.signConfirmTransaction(acc.value.address,null,walletPassword.value,delegateUnlinkTransaction)
+            delegatePayload = TransactionUtils.signTxnWithPassword(acc.value.address,null,walletPassword.value,delegateUnlinkTransaction)
           }
           walletPassword.value=""
           err.value=""
@@ -365,10 +365,10 @@ export default {
           console.log(acc.value.address) 
           if(isMultisig.value){
             let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address 
-            delegatePayload = TransactionUtils.signConfirmTransaction(selectedCosignAddress,acc.value.address,walletPassword.value,delegateLinkTransaction)
+            delegatePayload = TransactionUtils.signTxnWithPassword(selectedCosignAddress,acc.value.address,walletPassword.value,delegateLinkTransaction)
           }
           else{
-            delegatePayload = TransactionUtils.signConfirmTransaction(acc.value.address,null,walletPassword.value,delegateLinkTransaction)
+            delegatePayload = TransactionUtils.signTxnWithPassword(acc.value.address,null,walletPassword.value,delegateLinkTransaction)
           }
           walletPassword.value=""
           err.value=""
