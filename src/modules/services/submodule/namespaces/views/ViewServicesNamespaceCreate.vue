@@ -249,6 +249,7 @@ const removeNamespace = () => {
 const updateNamespaceSelection = (namespaceNameSelected) => {
   let fee = 0;
   if (namespaceNameSelected == '1') {
+    duration.value = '1';
     //root
     disabledDuration.value = false;
     if (namespaceName.value.trim().length > 0 && !showNamespaceNameError.value) {
@@ -318,7 +319,7 @@ const setDefaultDuration = () => {
 const totalFee = computed(() => {
   // if multisig
   if (selectedMultisigAddress.value) {
-    return Math.round((lockFundTotalFee.value + transactionFeeExact.value) * 100) / 100;
+    return Helper.safeSumCeilDecimals(lockFundTotalFee.value, transactionFeeExact.value, AppState.nativeToken.divisibility);
   } else {
     return rentalFee.value + transactionFeeExact.value;
   }
