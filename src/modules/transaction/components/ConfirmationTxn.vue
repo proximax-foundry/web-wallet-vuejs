@@ -68,7 +68,8 @@ const clearTransactionState = () => {
 
 const makeTransaction = async () => {
     await TransactionUtils.confirmAnnounceTransaction(txnPayload.value,hashLockTxnPayload.value)
-    router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
+    const selectedAccAddress = selectedAddress.value
     clearTransactionState()
+    router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAccAddress } })
 }
 </script>
