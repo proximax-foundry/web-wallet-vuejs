@@ -73,8 +73,9 @@ import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
-import { Address, PublicAccount } from 'tsjs-xpx-chain-sdk';
+import { Address, MosaicSupplyType, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
 import { TreeNode } from 'primevue/tree';
+import { TransactionState } from '@/state/transactionState';
 
     const router = useRouter();
 
@@ -275,13 +276,30 @@ import { TreeNode } from 'primevue/tree';
         err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
         return
       }
+      let assetPayload : {
+        txnPayload: string,
+        hashLockTxnPayload?: string
+      },{} = {}
       if(selectedMultisigAddress.value){
-        AssetsUtils.createAssetMultiSig( selectedAddress.value, walletPassword.value, multisigPublicAccount.value, Number(supply.value), isMutable.value, isTransferable.value, Number(divisibility.value)); 
+        const assetDefinition = AppState.buildTxn.mosaicDefinition(multisigPublicAccount.value, isMutable.value, isTransferable.value, Number(divisibility.value));
+        const assetDefinitionTx = assetDefinition.toAggregateV1(multisigPublicAccount.value);
+        let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase
+        const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(multisigPublicAccount.value);
+        const innerTxn = [assetDefinitionTx,assetSupplyChangeTx];
+        assetPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,null,innerTxn)
       }else{
-        AssetsUtils.createAsset( selectedAddress.value, walletPassword.value, ownerPublicAccount.value, Number(supply.value), isMutable.value, isTransferable.value, Number(divisibility.value));
+        const assetDefinition = AppState.buildTxn.mosaicDefinition(ownerPublicAccount.value, isMutable.value, isTransferable.value, Number(divisibility.value));
+        const assetDefinitionTx = assetDefinition.toAggregateV1(ownerPublicAccount.value);
+        let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase;
+        const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(ownerPublicAccount.value);
+        let createAssetAggregateTransaction = AppState.buildTxn.aggregateComplete([assetDefinitionTx, assetSupplyChangeTx]);
+        assetPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,createAssetAggregateTransaction)
       }
       clearInput();
-      router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAddress.value} })
+      TransactionState.lockHashPayload = assetPayload.hashLockTxnPayload
+      TransactionState.transactionPayload = assetPayload.txnPayload
+      TransactionState.selectedAddress = selectedAddress.value
+      router.push({ name: "ViewConfirmTransaction" })
     };
 
     emitter.on("select-account", (address: string) => {

@@ -79,7 +79,7 @@ import { accountUtils } from "@/util/accountUtils";
 import { walletState } from "@/state/walletState";
 import { WalletUtils } from "@/util/walletUtils";
 import { useToast } from "primevue/usetoast";
-import { Address, PublicAccount } from "tsjs-xpx-chain-sdk";
+import { Address, AliasActionType, NamespaceId, PublicAccount } from "tsjs-xpx-chain-sdk";
 import { ref, computed, watch } from "vue";
 import { Helper } from "@/util/typeHelper";
 import { useI18n } from 'vue-i18n'
@@ -92,6 +92,7 @@ import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { useRouter } from 'vue-router';
 import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
+import { TransactionState } from "@/state/transactionState";
 export default {
   name: 'ViewAccountAliasAddressToNamespace',
 
@@ -388,13 +389,31 @@ export default {
         err.value = t('general.walletPasswordInvalid',{name : walletName}) ;  
         walletPassword.value = "";
       } else {
+        let accountAliasPayload = {}
+        const transactionBuilder = AppState.buildTxn
+        const tempLinkType = (selectAction.value == 'Link') ? AliasActionType.Link : AliasActionType.Unlink;
+        const namespaceId = new NamespaceId(selectNamespace.value);
+        const linkNamespaceAdd = Address.createFromRawAddress(namespaceAddress.value);
+        const namespaceTransaction = transactionBuilder.addressAliasBuilder()
+        .actionType(tempLinkType)
+        .namespaceId(namespaceId)
+        .address(linkNamespaceAdd)
+        .build()
         let acc = walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address)? walletState.currentLoggedInWallet.accounts.find(acc=>acc.address==p.address) : walletState.currentLoggedInWallet.others.find(acc=>acc.address==p.address) 
         err.value = "";  
         recordAction.value = selectAction.value
-        accountUtils.linkNamespaceToAddress(selectedCosignPublicKey.value,isMultiSig.value,acc,walletPassword.value,selectNamespace.value, selectAction.value, namespaceAddress.value)
-          
+        if(isMultiSig.value){
+          let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address 
+          accountAliasPayload = TransactionUtils.signTxnWithPassword(selectedCosignAddress,acc.address,walletPassword.value,namespaceTransaction)
+        }
+        else{
+          accountAliasPayload = TransactionUtils.signTxnWithPassword(acc.address,null,walletPassword.value,namespaceTransaction)
+        }
         clearInput();
-        router.push({ name: "ViewAccountPendingTransactions",params:{address:p.address} })
+        TransactionState.lockHashPayload = accountAliasPayload.hashLockTxnPayload
+        TransactionState.transactionPayload = accountAliasPayload.txnPayload
+        TransactionState.selectedAddress = p.address
+        router.push({ name: "ViewConfirmTransaction" })
       }
     }
 

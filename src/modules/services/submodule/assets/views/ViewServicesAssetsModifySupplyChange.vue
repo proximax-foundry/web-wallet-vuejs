@@ -97,7 +97,9 @@ import Tooltip from 'primevue/tooltip';
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
+import { TransactionState } from '@/state/transactionState'
 import { isMultiSig, TransactionUtils, findAcc, findAccWithAddress } from '@/util/transactionUtils';
+import { MosaicId, MosaicSupplyType, UInt64 } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesAssetsModifySupplyChange',
@@ -282,11 +284,16 @@ export default {
     })
     const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
 
+    const checkCosignBalance = computed(() => {
+      let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
+      return Helper.toCurrencyFormat(cosignBalance);
+    })
+
     const showNoBalance = computed(() => {
-      if(isNotCosigner.value){
+      if(cosignerAddress.value.length <= 0){
         return balanceNumber.value < (transactionFeeExact.value);
       }else{
-        return balanceNumber.value < (transactionFeeExact.value + lockFundTotalFee.value);
+        return Number(checkCosignBalance.value) < (transactionFeeExact.value + lockFundTotalFee.value);
       }
     });
 
@@ -336,12 +343,19 @@ export default {
         err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
         return
       }
+      let assetModifyPayload = {}
+      const buildTransactions = AppState.buildTxn;
+      let supplyChangeType = (selectIncreaseDecrease.value == 'increase')?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
+      let createAssetAggregateTransaction = buildTransactions.buildMosaicSupplyChange(new MosaicId(selectAsset.value), supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(assetDivisibility.value, Number(supply.value))));
       if(cosigner.value){
-        AssetsUtils.changeAssetSupplyMultiSig(cosigner.value, walletPassword.value, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value, selectedAccAdd.value);
+        assetModifyPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,createAssetAggregateTransaction)
       }else{
-        AssetsUtils.changeAssetSupply(selectedAccAdd.value, walletPassword.value, selectAsset.value, selectIncreaseDecrease.value, supply.value, assetDivisibility.value);
+        assetModifyPayload = TransactionUtils.signTxnWithPassword(selectedAccAdd.value,null,walletPassword.value,createAssetAggregateTransaction)
       }
-      router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
+      TransactionState.lockHashPayload = assetModifyPayload.hashLockTxnPayload
+      TransactionState.transactionPayload = assetModifyPayload.txnPayload
+      TransactionState.selectedAddress = selectedAccAdd.value
+      router.push({ name: "ViewConfirmTransaction" })
     };
 
     watch(selectIncreaseDecrease, (n) => {
@@ -414,12 +428,6 @@ export default {
         setFormInput(false);
       }
     });
-
-
-    const checkCosignBalance = computed(() => {
-      let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
-      return Helper.toCurrencyFormat(cosignBalance);
-    })
 
     return{
       currentNativeTokenName,

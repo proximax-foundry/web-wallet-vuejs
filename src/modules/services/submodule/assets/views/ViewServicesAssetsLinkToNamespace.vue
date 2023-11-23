@@ -95,7 +95,9 @@ import Tooltip from 'primevue/tooltip';
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
+import { TransactionState } from '@/state/transactionState'
 import { isMultiSig, TransactionUtils, findAcc, findAccWithAddress } from '@/util/transactionUtils';
+import { AliasActionType, MosaicId, NamespaceId } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesAssetsLinkToNamespace',
@@ -161,11 +163,16 @@ export default {
 
     const isMultiSigBool = ref(isMultiSig(selectedAccAdd.value));
 
+    const checkCosignBalance = computed(() => {
+      let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
+      return Helper.toCurrencyFormat(cosignBalance);
+    })
+
     const showNoBalance = computed(() => {
-      if(isNotCosigner.value){
+      if(cosignerAddress.value.length <= 0){
         return balanceNumber.value < (transactionFeeExact.value);
       }else{
-        return balanceNumber.value < (transactionFeeExact.value + lockFundTotalFee.value);
+        return Number(checkCosignBalance.value) < (transactionFeeExact.value + lockFundTotalFee.value);
       }
     });
 
@@ -274,6 +281,7 @@ export default {
         return
       }
       let assetId;
+      let assetLinkPayload = {}
       if(selectAction.value=='link'){ 
         assetId = selectAsset.value;
       }else{
@@ -283,12 +291,18 @@ export default {
         }
         assetId = account.namespaces.find(namespace => namespace.name === selectNamespace.value).linkedId;
       }
+      const buildTransactions = AppState.buildTxn;
+      let aliasActionType = (selectAction.value == 'link')?AliasActionType.Link:AliasActionType.Unlink;
+      const linkAssetToNamespaceTx = buildTransactions.assetAlias(aliasActionType, new NamespaceId(selectNamespace.value), new MosaicId(assetId));
       if(cosigner.value){
-        AssetsUtils.linkedNamespaceToAssetMultiSig(cosigner.value, walletPassword.value, assetId, selectNamespace.value, selectAction.value, selectedAccAdd.value);
+        assetLinkPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,linkAssetToNamespaceTx)
       }else{
-        AssetsUtils.linkedNamespaceToAsset(selectedAccAdd.value, walletPassword.value, assetId, selectNamespace.value, selectAction.value );
+        assetLinkPayload = TransactionUtils.signTxnWithPassword(selectedAccAdd.value,null,walletPassword.value,linkAssetToNamespaceTx)
       }
-      router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
+      TransactionState.lockHashPayload = assetLinkPayload.hashLockTxnPayload
+      TransactionState.transactionPayload = assetLinkPayload.txnPayload
+      TransactionState.selectedAddress = selectedAccAdd.value
+      router.push({ name: "ViewConfirmTransaction" })
     };
 
     watch(selectAction, (n) => {
@@ -318,7 +332,6 @@ export default {
 
     const setFormInput = (isValidate) => {
       disabledPassword.value = isValidate;
-      disabledSupply.value = isValidate;
       disabledSelectAction.value = isValidate;
     };
 
@@ -351,11 +364,6 @@ export default {
         setFormInput(false);
       }
     });
-
-    const checkCosignBalance = computed(() => {
-      let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
-      return Helper.toCurrencyFormat(cosignBalance);
-    })
 
     return{
       currentNativeTokenName,

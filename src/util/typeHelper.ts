@@ -301,6 +301,10 @@ export class Helper {
         , decimals).toNumber();
     }
 
+    static safeSum(value: Array<number>): number{
+        return math.number(math.sum(math.bignumber(value)));
+    }
+
     static bigNumber(value: number): math.BigNumber{
         return math.bignumber(value);
     }

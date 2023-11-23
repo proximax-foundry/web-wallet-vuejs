@@ -76,7 +76,7 @@
                     <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"
                         v-model="walletPassword" icon="lock" class="mt-5 mb-3" />
                     <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
-                        :disabled="disableCreate" @click="makeTransfer()">
+                        :disabled="disableCreate" @click="makeTransferPayload()">
                         {{ $t('general.transfer') }}
                     </button>
                     <div class="text-center">
@@ -100,7 +100,7 @@ import MultisigInput from "../components/MultisigInput.vue"
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { walletState } from '@/state/walletState';
-import { Address, PublicAccount } from 'tsjs-xpx-chain-sdk';
+import { Address, EncryptedMessage, Message, Mosaic, MosaicId, Password, PlainMessage, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
 import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import { useI18n } from 'vue-i18n';
 import { TreeNode } from 'primevue/tree';
@@ -116,6 +116,9 @@ import TxnSummary from '@/components/TxnSummary.vue';
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
 import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue";
+import { WalletUtils } from '@/util/walletUtils';
+import { TransactionState } from '@/state/transactionState'
+import { WalletAccount } from '@/models/walletAccount';
 
 const addressPatternShort = "^[0-9A-Za-z]{40}$";
 
@@ -338,6 +341,84 @@ const createTransferTxn = async () => {
 
         router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
         clearInput()
+}
+
+const makeTransferPayload = async () => {
+    // verify password
+    let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword.value)
+
+    if (!verify) {
+        toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: "Password is incorrect",
+                group: 'br-custom',
+                life: 1000
+            });
+            return
+    }
+    else{
+        let xpxAmount = parseFloat(nativeAmount.value) * Math.pow(10, AppState.nativeToken.divisibility);
+
+        let mosaics = [];
+        let mosaicsSent = selectedAssets.value.map(asset => {
+                return {
+                    id: asset.id,
+                    amount: parseFloat(asset.amount),
+                    divisibility: asset.divisibility
+                }
+            })
+        if (xpxAmount > 0) {
+        mosaics.push(new Mosaic(new MosaicId(AppState.nativeToken.assetId), UInt64.fromUint(Number(xpxAmount))));
+        }
+        if (mosaicsSent.length > 0) {
+        mosaicsSent.forEach((mosaicSentInfo) => {
+            if (mosaicSentInfo.amount > 0) {
+            mosaics.push(
+                new Mosaic(
+                new MosaicId(mosaicSentInfo.id),
+                UInt64.fromUint(Number(mosaicSentInfo.amount * Math.pow(10, mosaicSentInfo.divisibility)))
+                )
+            );
+            }
+        });
+    }
+        let transactionBuilder = AppState.buildTxn
+
+        let initiatorAcc: WalletAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedAddress.value)
+
+        let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword.value), initiatorAcc.encrypted, initiatorAcc.iv)
+
+        // sending encrypted message
+
+        let msg :Message;
+
+        if (isEncrypted.value &&  message.value.length>0) {
+        try {
+            const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(recipientInput.value))
+            msg = EncryptedMessage.create(message.value, accountInfo.publicAccount, privateKey);
+        } catch (error) {
+            msg = EncryptedMessage.create(message.value, PublicAccount.createFromPublicKey(publicKeyInput.value,AppState.networkType) , privateKey)
+        }
+        } else {
+        msg = PlainMessage.create(message.value);
+        }
+
+        let transferTransaction = transactionBuilder.transferBuilder()
+        .recipient(Address.createFromRawAddress(recipientInput.value))
+        .mosaics(mosaics)
+        .message(msg)
+        .build()
+
+        let transferPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,transferTransaction)
+
+        TransactionState.lockHashPayload = transferPayload.hashLockTxnPayload
+        TransactionState.transactionPayload = transferPayload.txnPayload
+        TransactionState.selectedAddress = selectedAddress.value
+        router.push({ name: "ViewConfirmTransaction" })
+        
+        clearInput()
+    }
 }
 
 const makeTransfer = () => {
