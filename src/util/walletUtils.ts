@@ -1137,7 +1137,10 @@ export class WalletUtils {
 
             walletAccount.multisigInfo = multisigInfos;
         } catch (error) {
-            console.log("Multisig not found for " + walletAccount.address);
+            // console.log("Multisig not found for " + walletAccount.address);
+            let multisigInfo: MultisigInfo[] = [];
+            multisigInfo.push(new MultisigInfo(walletAccount.publicKey, 0, [], [], 0, 0));
+            walletAccount.multisigInfo = multisigInfo;
         }
     }
 
