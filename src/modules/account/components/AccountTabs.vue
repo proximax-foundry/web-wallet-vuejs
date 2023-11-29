@@ -12,7 +12,7 @@
 <script lang='ts'>
 import { AppState } from '@/state/appState';
 import { walletState } from '@/state/walletState'
-import { Address } from 'tsjs-xpx-chain-sdk';
+import { AccountType, Address } from 'tsjs-xpx-chain-sdk';
 import { onMounted, ref } from 'vue';
 export default {
     name:"AccountTabs"
@@ -39,10 +39,10 @@ const checkAccType = async () => {
   try {
     let accInfo = await AppState.chainAPI!.accountAPI.getAccountInfo(Address.createFromRawAddress(props.address));
     switch (accInfo.accountType) {
-      case 2:
+      case AccountType.Remote:
         showTabs.value = false;
         break;
-      case 3:
+      case AccountType.Remote_Unlinked:
         showTabs.value = false;
         break;
       default:
