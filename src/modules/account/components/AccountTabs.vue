@@ -28,23 +28,23 @@ const props = defineProps({
 const showTabs = ref(true);
 
 onMounted(async () => {
-  let accInfo = await AppState.chainAPI!.accountAPI.getAccountInfo(Address.createFromRawAddress(props.address));
-  switch (accInfo.accountType) {
-    case 2:
-      showTabs.value = false;
-      break;
-    case 3:
-      showTabs.value = false;
-      break;
-    default:
-      showTabs.value = true;
-      break;
+  try {
+    let accInfo = await AppState.chainAPI!.accountAPI.getAccountInfo(Address.createFromRawAddress(props.address));
+    switch (accInfo.accountType) {
+      case 2:
+        showTabs.value = false;
+        break;
+      case 3:
+        showTabs.value = false;
+        break;
+      default:
+        showTabs.value = true;
+        break;
+    }
+  } catch (error) {
+      console.log('Error retrieving account type')
+      showTabs.value = false
   }
 
-  let account = walletState.currentLoggedInWallet.others.find(acc => acc.address == props.address)
-  if (account) {
-    // If it is delegate account, show the tabs
-    showTabs.value = true;
-  }
 })
 </script>
