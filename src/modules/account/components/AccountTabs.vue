@@ -25,9 +25,17 @@ const props = defineProps({
     selected: String
 })
 
-const showTabs = ref(true);
+const showTabs = ref(false);
 
-onMounted(async () => {
+onMounted(()=>{
+  checkAccType()
+})
+
+const checkAccType = async () => {
+  if (!AppState.isReady) {
+    setTimeout(checkAccType, 1000);
+    return
+  }
   try {
     let accInfo = await AppState.chainAPI!.accountAPI.getAccountInfo(Address.createFromRawAddress(props.address));
     switch (accInfo.accountType) {
@@ -42,9 +50,8 @@ onMounted(async () => {
         break;
     }
   } catch (error) {
-      console.log('Error retrieving account type')
-      showTabs.value = false
+    console.log('Error retrieving account type')
+    showTabs.value = false
   }
-
-})
+}
 </script>
