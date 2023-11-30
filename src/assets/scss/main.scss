@@ -223,7 +223,7 @@ body{
   box-shadow: 0 0 4pt 2pt #CDE3FC;
 }
 
-.navbar{
+/* .navbar{
   background: var(--blue);
   background: linear-gradient(180deg, #2C71BF 0%, #215590 80%);
   padding-top: 3px;
@@ -245,9 +245,9 @@ body{
     background:var(--white);
     color: var(--black) !important;
   }
-}
+} */
 
-@screen md {
+/* @screen md {
   .navbar{
     a.router-link-active, a:hover{
       background: linear-gradient(180deg, #2C71BF 0%, #215590 80%) !important;
@@ -262,29 +262,29 @@ body{
     }
   }
 }
+ */
 
-
-/*  .p-datatable-table{
+ .p-datatable-table{
   border-collapse: separate !important;
   border-spacing: 0px 10px;
-} */
+}
 
 
 
 
 
-/*  .p-datatable-wrapper{
+ .p-datatable-wrapper{
   margin-bottom: 20px;
   overflow-x: auto;
+}
+
+/* .p-link{
+  @apply text-gray-400 p-2 mt-5;
 } */
 
-.p-link{
-  @apply text-gray-400 p-2 mt-5;
-}
-
-.p-highlight{
+/* .p-highlight{
   @apply text-white inline bg-blue-primary rounded-sm px-3;
-}
+} */
 
  .p-datatable-tbody{
   td{
@@ -298,7 +298,7 @@ body{
     @apply py-4 border-gray-200 border-b;
   }
 }
-
+/* 
 .p-confirm-popup {
   background: #ffffff;
   color: #495057;
@@ -423,7 +423,7 @@ body{
 .p-dialog-mask.p-component-overlay {
   background-color: rgba(0, 0, 0, 0.4);
 }
-
+ */
 
 
 .p-toast {

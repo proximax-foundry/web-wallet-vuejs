@@ -15,7 +15,7 @@
                         <div class="inline-block text-xs">{{ $t('general.insufficientBalance') }}</div>
                     </div>
                     <div class="text-sm font-semibold ">{{ $t('transfer.newTransfer') }}</div>
-                    <div class="flex gap-1 mt-3">
+                    <div class="flex gap-1 mt-3 items-center">
                         <SelectInputAccount :type="'transfer'" />
                         <SelectInputMultisigAccount :selected-address="selectedAddress" />
                     </div>
@@ -24,7 +24,7 @@
                     </div>
                     <div class="text-blue-primary font-semibold uppercase mt-3 text-xxs">Transfer to</div>
 
-                    <div class="flex mt-1 gap-1 items-center">
+                    <div class="flex mt-1 gap-1">
                         <FieldValidationInput :placeholder="$t('transfer.transferPlaceholder')" v-model="recipientInput"
                             v-debounce:1000="checkRecipient" :showError="showAddressError" />
                         <div @click="toggleContact = !toggleContact"

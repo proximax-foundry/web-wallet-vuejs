@@ -107,7 +107,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/scss/multiselect.scss";
+
 .selectPlugin::deep{
   .multiselect-input{
     min-height: 18px;

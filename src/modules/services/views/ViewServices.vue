@@ -1,21 +1,31 @@
 <template>
-  <div class="lg:ml-60 mt-10 lg:mt-16 flex-grow px-5 pt-5">
-    <div class="w-11/12 ml-auto mr-auto mt-3 py-3">
+  <div class=" mt-10 px-5 pt-5">
+    <div class="w-11/12 mx-auto mt-3 py-3">
       <div>Services</div>
-      <div class='border ml-auto mr-auto mt-6 filter shadow-lg'>
-        <div class='flex  flex-wrap items-center justify-around p-3 gap-4'>
-          <router-link  v-if="nodeEnv != 'production'" :to="{ name: 'ViewServicesPortfolio' }" class='w-40 '>
+      <div class='border mt-6  filter shadow-lg'>
+        <div class='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5   p-3 gap-2'>
+          <router-link :to="{ name: 'ViewServicesAssetsCreate' }" class='mx-auto'>
+            <img src="@/assets/img/navi/icon-asset.svg" 
+              class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
+            <div class='text-center text-xs font-semibold'>Assets</div>
+          </router-link>
+          <router-link :to="{ name: 'ViewServicesNamespaceCreate' }" class='mx-auto '>
+            <img src="@/assets/img/navi/icon-namespace.svg"
+              class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
+            <div class='text-center text-xs font-semibold'>Namespace</div>
+          </router-link>
+          <router-link  v-if="nodeEnv != 'production'" :to="{ name: 'ViewServicesPortfolio' }" class='mx-auto '>
             <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg"
               class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
             <div class='text-center text-xs font-semibold'>Portfolio</div>
           </router-link>
-          <router-link :to="{ name: 'ViewServicesAirdropToken' }" class='w-40 '>
-            <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg"
+          <router-link :to="{ name: 'ViewServicesAirdropToken' }" class='mx-auto '>
+            <img src="@/assets/img/navi/icon-airdrop.svg"
               class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
             <div class='text-center text-xs font-semibold'>Airdrop Token Utility</div>
           </router-link>
-          <div class="w-40"  v-if="nodeEnv != 'production'" @click="toggle">
-            <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg"
+          <div class="mx-auto" v-if="nodeEnv != 'production'" @click="toggle">
+            <img src="@/assets/img/navi/icon-exchange.svg"
               class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
             <div class='text-center text-xs font-semibold'>SDA Exchange</div>
           </div>
@@ -33,14 +43,12 @@
 </template>
 
 <script setup lang="ts">
-import { AppState } from "@/state/appState";
 import Menu from 'primevue/menu';
 import { useRouter } from 'vue-router'
 import { ref} from "vue";
 const nodeEnv =  import.meta.env.VITE_NODE_ENV
-const networkType = AppState.networkType
 const menu = ref();
-const toggle = (event) => {
+const toggle = (event :Event) => {
   menu.value.toggle(event);
 };
 

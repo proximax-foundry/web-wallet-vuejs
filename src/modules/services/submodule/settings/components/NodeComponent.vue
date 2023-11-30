@@ -121,7 +121,6 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-@import "@/assets/scss/multiselect.scss";
 
 .text_input{
   @apply w-full flex border-0 outline-none border-white drop-shadow-none filter focus:outline-none text-tsm text-gray-600 font-bold bg-white;

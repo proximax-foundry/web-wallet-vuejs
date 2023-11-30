@@ -116,7 +116,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/scss/multiselect.scss";
+
 .selectPlugin::deep{
   border-bottom: 1px solid #E5E7EB;
   .multiselect-input{
