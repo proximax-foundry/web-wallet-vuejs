@@ -356,6 +356,9 @@ const init = () => {
 
 init()
 
+watch(acc, ()=>{
+  init();
+})
 
 emitter.on("revealPK", (e) => {
   showPK.value = e;
