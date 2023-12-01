@@ -294,7 +294,7 @@ const linkedAccountKey = ref('')
 const linkedNamespace = ref([])
 
 const getLinkedAccountKey = async () => {
-  if (acc) {
+  if (acc.value) {
     const account = await AppState.chainAPI.accountAPI.getAccountsInfo([Address.createFromRawAddress(acc.value.address)]);
     linkedAccountKey.value = account[0].linkedAccountKey;
   }
