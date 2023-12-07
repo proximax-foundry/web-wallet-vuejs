@@ -1,4 +1,5 @@
 <template>
+  
     <transition
       enter-active-class="animate__animated animate__fadeInDown"
       leave-active-class="animate__animated animate__fadeOutUp"
@@ -18,9 +19,7 @@
 <script>
 import { computed, getCurrentInstance, toRefs } from "vue";
 import { walletState } from '@/state/walletState';
-import { networkState } from '@/state/networkState';
-import { WalletUtils } from '@/util/walletUtils';
-import { Account } from '@/models/account';
+
 import { ref } from "vue";
 import { useI18n } from 'vue-i18n';
 export default {

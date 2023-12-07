@@ -9,7 +9,7 @@ export const AddressbookRoutes = [
   },
 
   {
-    path: '/edit-contact/:contactAddress',
+    path: '/edit-contact/:contactAddress/:contactPublicKey',
     name: 'ViewServicesAddressBookEditContact',
     props: true,
     component: () => import('@/modules/services/submodule/addressbook/views/ViewServicesAddressBookEditContact.vue'),

@@ -13,7 +13,7 @@
       class="fixed inset-y-0 left-0 z-30 w-64 flex flex-col justify-between overflow-y-auto transition duration-300 transform bg-navy-primary rounded-r-xl lg:translate-x-0 lg:static lg:inset-0"
     >
       <div class="w-full">
-        <div class="flex justify-center">
+        <div class="flex justify-center" @click="isOpen=false">
           <router-link :to="{ name: 'ViewDashboard' }">
             <img
               src="@/assets/img/sirius-logo-whitetext.svg"
@@ -24,6 +24,7 @@
         <!-- <div class="text-white text-xs ml-6 font-semibold">CREATE NEW</div> -->
 
           <router-link
+          @click="isOpen=false"
             class="flex items-center px-12  py-2 mt-4"
             :class="[
               $route.name === 'transfer'
@@ -38,6 +39,7 @@
           </router-link>
 
           <router-link
+          @click="isOpen=false"
             class="flex items-center px-12  py-2 mt-4"
             :class="[
               $route.name === 'swap'
@@ -52,6 +54,7 @@
           </router-link>
 
           <router-link
+          @click="isOpen=false"
             class="flex items-center px-12  py-2 mt-4"
             :class="[
               $route.name === 'services'
@@ -65,6 +68,7 @@
             <span class="mx-4">Services</span>
           </router-link>
           <router-link
+          @click="isOpen=false"
           :class="[
               $route.name === 'view-all-accounts'
                 ? 'bg-gray-600 bg-opacity-25 text-gray-100 border-gray-100'
@@ -78,6 +82,7 @@
           </router-link>
 
           <router-link
+          @click="isOpen=false"
             class="flex items-center px-12  py-2 mt-4"
             to="/address-book"
             :class="[
@@ -92,6 +97,7 @@
           </router-link>
 
           <router-link
+          @click="isOpen=false"
             class="flex items-center px-12  py-2 mt-4"
             :class="[
               $route.name === 'settings'

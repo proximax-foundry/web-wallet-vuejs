@@ -39,12 +39,11 @@
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import PendingDataTable from "@/modules/account/components/PendingDataTable.vue";
 import { DashboardService } from "@/modules/dashboard/service/dashboardService";
-import { AppState } from "@/state/appState";
 import { listenerState } from "@/state/listenerState";
 import { walletState } from "@/state/walletState";
 import { Helper } from "@/util/typeHelper";
 import { TransactionMapping } from "tsjs-xpx-chain-sdk";
-import { computed, ref, watch, watchEffect } from "vue";
+import { computed, ref, watch } from "vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { TransactionUtils } from "@/util/transactionUtils";
 
@@ -161,60 +160,18 @@ let loadInQueueTransactions = () => {
 };
 watch(
   [
-    () => listenerState.unconfirmedTransactions,
-    () => listenerState.autoAnnounceSignedTransaction,
-    () => listenerState.aggregateBondedTxLength,
-    ()=>listenerState.confirmedTransactions
+     listenerState.unconfirmedTransactions,
+   listenerState.autoAnnounceSignedTransaction,
+   ()=>listenerState.aggregateBondedTxLength,
+   listenerState.confirmedTransactions
   ],
-  async (n, o) => {
-    if (n[0] != o[0]) {
-      loadUnconfirmedTransactions();
-    }
-    if(n[1]!=o[1]){
+  async ()=> {
+      await loadUnconfirmedTransactions();
+      await loadPartialTransactions();
+      await loadUnconfirmedTransactions();
       loadInQueueTransactions();
-    }
-    if ( n[2] != o[2]) {
-      loadPartialTransactions();
-     
-    }if(n[3]!=o[3]){
-      loadUnconfirmedTransactions();
-    }
+
   },{immediate:true,deep:true}
 );
-/*  const txnStates = [
-        listenerState.unconfirmedTransactions,
-        listenerState.autoAnnounceSignedTransaction,
-        listenerState.confirmedTransactions,
-        
-    ] */
-/*  watch([...txnStates],()=>{
-        init()
-    }) */
 
-/*  const aggregateBondedTxLength = computed(()=> listenerState.aggregateBondedTxLength);
-    watch(aggregateBondedTxLength,()=>{
-        init()
-    })
-    const init = async()=>{
-        await loadUnconfirmedTransactions()
-        await loadPartialTransactions()
-        loadInQueueTransactions()
-    }
-    if(AppState.isReady){  
-      init();
-    }
-    else{
-      let readyWatcher = watch(AppState, (value) => {
-        if(value.isReady){
-          init();
-          readyWatcher();
-        }
-      });
-    }
-
-    watchEffect(() => {
-      setInterval(() => {
-        init()
-      }, 1000)
-    }) */
 </script>
