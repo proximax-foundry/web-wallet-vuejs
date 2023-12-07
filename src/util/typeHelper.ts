@@ -308,6 +308,10 @@ export class Helper {
     static bigNumber(value: number): math.BigNumber{
         return math.bignumber(value);
     }
+
+    static samplePubAcc(): PublicAccount{
+        return PublicAccount.createFromPublicKey("0".repeat(64), NetworkType.TEST_NET);
+    }
 }
 
 export interface LooseObject {

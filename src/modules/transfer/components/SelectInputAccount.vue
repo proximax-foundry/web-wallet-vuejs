@@ -4,6 +4,7 @@
             <div v-if="type == 'transfer'">Select Account to create / initiate transfer</div>
             <div v-else-if="type == 'namespace'">Select Account to create namespace</div>
             <div v-else-if="type == 'asset'">Select Account to create asset</div>
+            <div v-else>Select Account to {{ label }}</div>
         </div>
         <Dropdown v-model=selectedAccountInfo :style="{ 'width': '100%' }" :options=accounts :filter="true"
             :filterFields="['label','value','publicKey']" emptyFilterMessage=" "  placeholder="Select Account"
@@ -26,6 +27,11 @@
                         <div v-else-if="type == 'asset'" class='flex flex-col ml-2 text-left'>
                             <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
                                 Selected Account to create asset</div>
+                            <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
+                        </div>
+                        <div v-else class='flex flex-col ml-2 text-left'>
+                            <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
+                                Selected Account to {{ label }}</div>
                             <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
                         </div>
                     </div>
@@ -54,6 +60,10 @@ const props = defineProps({
     type: {
         type: String,
         required: true
+    },
+    label:{
+        type: String,
+        required: false
     }
 })
 
