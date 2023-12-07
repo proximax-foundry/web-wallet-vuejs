@@ -29,6 +29,14 @@ export const ServiceRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/view-harvester-txn',
+    name: 'ViewHarvesterTxn',
+    component: () => import('@/modules/services/submodule/harvester/views/ViewHarvesterTxn.vue'),
+    meta: {
+      title: "Harvester Transaction",
+    }
+  },
+  {
     path: '/services',
     name: 'ViewServices',
     component: () => import('@/modules/services/views/ViewServices.vue'),

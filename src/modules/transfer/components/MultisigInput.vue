@@ -21,6 +21,12 @@
               >
               {{$t('asset.assetCreatedBy')}} {{ $t("general.multisig") }}
               </div>
+              <div v-else
+                class="text-blue-primary font-semibold text-xxs uppercase"
+                style="line-height: 9px"
+              >
+              {{ label }}
+              </div>
               <div class="mt-2 text-tsm font-bold ">
                 {{ selectDefaultName }}
               </div>
@@ -49,6 +55,10 @@ const p = defineProps({
   type: {
     type: String,
     required: true,
+  },
+  label:{
+    type: String,
+    required: false,
   }
 });
 const internalInstance = getCurrentInstance();

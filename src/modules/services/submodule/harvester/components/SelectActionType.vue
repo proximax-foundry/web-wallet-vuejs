@@ -1,0 +1,55 @@
+<template>
+  <div>
+    <div class="border border-gray-200 px-2 py-1 h-14 rounded-md">
+      <div class="uppercase text-gray-500 text-txs text-left mb-2">{{ title }}</div>
+      <div class="flex items-center">
+        <input id="add" type="radio" name="linkType" :value="modelValue" :disabled="disabled" class="h-5 w-5" @change="$emit('update:modelValue', 'add')" :checked="modelValue=='link'" /><label for="add" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Add</label>
+        <input id="remove" type="radio" name="linkType" :value="modelValue" :disabled="disabled" class="h-5 w-5" @change="$emit('update:modelValue', 'remove')" :checked="modelValue=='unlink'" /><label for="remove" class="cursor-pointer font-bold ml-4 mr-5 text-tsm">Remove</label>
+      </div>
+    </div>
+    <div class="h-3 mb-2"><div class="error error-text text-left" v-if="textErr || showError">{{ errorMessage }}</div></div>
+  </div>
+</template>
+
+<script>
+import { ref } from 'vue';
+export default{
+  props: {
+    placeholder: String,
+    errorMessage: String,
+    showError: Boolean,
+    modelValue: String,
+    title: String,
+    disabled: Boolean,
+  },
+
+  emits:[
+    'update:modelValue'
+  ],
+
+  name: 'SelectLinkType',
+
+  data() {
+    return {
+      inputText: "",
+      borderColor: 'border border-gray-300',
+      textErr: false,
+    };
+  },
+
+  watch:{
+    showError: function(val){
+      if(val){
+        this.borderColor = 'border-2 border-red-primary';
+        this.textErr = true;
+      }else{
+        this.borderColor = 'border-2 border-gray-300';
+        this.textErr = false;
+      }
+    }
+  },
+
+}
+</script>
+<style lang="scss" scoped>
+</style>
