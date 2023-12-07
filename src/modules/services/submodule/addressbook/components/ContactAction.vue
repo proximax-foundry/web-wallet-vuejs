@@ -97,7 +97,7 @@ const { address, publicKey, name } = defineProps<{
   name: string;
   group: string;
   address: string;
-  publicKey: string;
+  publicKey?: string;
 }>();
 
 const toggleModal = ref(false);
