@@ -10,31 +10,8 @@
     </div>
   </div>
 </template>
-<script>
+<script setup lang="ts">
 import ContactDataTable from '@/modules/services/submodule/addressbook/components/ContactDataTable.vue';
-import { getCurrentInstance, ref } from "vue";
 
 
-export default {
-  name: 'ViewServicesAddressBook',
-
-  components: {
-    ContactDataTable,
-  },
-
-  setup() {
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
-
-    emitter.on('REFRESH_CONTACT_LIST', status => {
-      if(status){
-        // refresh list
-        setTimeout(()=> {
-          refreshList();
-        }, 1000);
-      }
-    });
-
-  },
-}
 </script>

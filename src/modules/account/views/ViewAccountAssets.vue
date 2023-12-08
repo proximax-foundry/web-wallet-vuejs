@@ -58,21 +58,11 @@
                     </Column>
                     <Column header="Actions ">
                         <template #body="{ data }">
-                            <img src="@/modules/dashboard/img/icon-more-options.svg"
-                                class="w-4 h-4 cursor-pointer ml-2 mt-0.5"  @click="showMenu(data.i)"  @mouseover="hoverOverMenu(data.i)" @mouseout="hoverOutMenu">
-                            <div v-if="isMenuShow[data.i]" class="mt-5  w-36 absolute rounded-sm shadow-lg bg-white focus:outline-none z-10 text-left " >
-                    <div class="my-2" >
-                        <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsModifySupplyChange', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.modifySupply')}}</router-link>
-                        <router-link v-if="data.isCreator" :to="{ name: 'ViewServicesAssetsLinkToNamespace', params: {assetId: data.id, address: address} }" class="block hover:bg-gray-100 transition duration-200 p-2 z-20">{{$t('general.linkToNamespace')}}</router-link>
-                        <router-link :to="{ name: 'ViewAssetMetadata', params: {assetId: data.id, address: address} }">
-                            <div class="block hover:bg-gray-100 transition duration-200 p-2 z-20 cursor-pointer">View Metadata</div>
-                            </router-link>
-                    </div>
-                </div>
+                    <AssetAction  :address="address" :id="data.id" :is-creator="data.isCreator" />
+                      
                             </template>
                     </Column>
                 </DataTable>
-                <!-- <AssetDataTable :assets="mosaics" :address="address" /> -->
                 <div class="flex my-3 px-6 flex-col w-full ml-auto mr-auto gap-2 sm:flex-row sm:items-center">
                     <router-link :to="{ name: 'ViewTransferCreate' }"
                         class=" bg-blue-primary px-5 py-2 text-gray-100 text-xs font-bold rounded-md flex items-center justify-center "><img
@@ -94,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { effectScope, getCurrentInstance, ref, watch } from "vue";
+import { effectScope,  ref, watch } from "vue";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import { Helper } from '@/util/typeHelper';
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
@@ -103,6 +93,7 @@ import { Address, MosaicId } from "tsjs-xpx-chain-sdk";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import { networkState } from "@/state/networkState";
+import AssetAction from "../components/AssetAction.vue";
 
 const p = defineProps({
     address: String
@@ -149,34 +140,6 @@ const explorerLink = (assetId: string) => {
     }
     return networkState.currentNetworkProfile.chainExplorer.url + '/' + networkState.currentNetworkProfile.chainExplorer.assetInfoRoute + '/' + assetId
 }
-
-const isMenuShow = ref([]);
-
-const currentMenu = ref(0); 
-const showMenu = (i) => {
-    currentMenu.value = i;
-    isMenuShow.value[i] = !isMenuShow.value[i];
-} 
-const internalInstance = getCurrentInstance(); 
-const emitter = internalInstance.appContext.config.globalProperties.emitter; 
-    // emitted from App.vue when click on any part of the page
-emitter.on('PAGE_CLICK', () => {
-    var k = 0;
-    while(k < isMenuShow.value.length){
-    if(k != currentMenu.value){
-        isMenuShow.value[k] = false;
-    }
-    k++;
-    }
-});
-
-const hoverOverMenu = (i) => {
-    currentMenu.value = i;
-};
-
-const hoverOutMenu = () => {
-    currentMenu.value = -1;
-};
 
 
 const fetchAssets = async () => {

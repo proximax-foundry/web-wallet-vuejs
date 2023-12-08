@@ -1,15 +1,6 @@
 export const AssetsRoutes = [
   {
-    path: '/assets/:address?',
-    name: 'ViewServicesAssets',
-    props: true,
-    component: () => import('@/modules/services/submodule/assets/views/ViewServicesAssets.vue'),
-    meta: {
-      title: "Assets",
-    }
-  },
-  {
-    path: '/create-asset',
+    path: '/create-asset', 
     name: 'ViewServicesAssetsCreate',
     component: () => import('@/modules/services/submodule/assets/views/ViewServicesAssetsCreate.vue'),
     meta: {

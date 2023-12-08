@@ -92,7 +92,7 @@ import { ref } from "vue";
 import Menu from "primevue/menu";
 import { useRouter } from "vue-router";
 import { walletState } from "@/state/walletState";
-import Dialog from 'primevue/dialog'
+import Dialog from "primevue/dialog";
 const { address, publicKey, name } = defineProps<{
   name: string;
   group: string;
@@ -128,8 +128,10 @@ const toggle = (event: Event) => {
 };
 
 const deleteContact = () => {
-
-  walletState.currentLoggedInWallet.contacts = walletState.currentLoggedInWallet.contacts.filter(contact=>contact.name!= name)
+  walletState.currentLoggedInWallet.contacts =
+    walletState.currentLoggedInWallet.contacts.filter(
+      (contact) => contact.name != name
+    );
   walletState.wallets.saveMyWalletOnlytoLocalStorage(
     walletState.currentLoggedInWallet
   );
