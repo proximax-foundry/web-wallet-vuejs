@@ -34,7 +34,7 @@
     "mathjs": "^11.7.0",
     "mitt": "^3.0.0",
     "primeicons": "^6.0.1",
-    "primevue": "^3.23.0",
+    "primevue": "3.37.0",
     "qrcode-generator": "^1.4.4",
     "rxjs": "^7.8.1",
     "sass": "^1.62.1",
