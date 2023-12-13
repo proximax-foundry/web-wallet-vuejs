@@ -22,7 +22,7 @@ import { ref, getCurrentInstance, toRefs, watch, PropType } from 'vue';
 import { walletState } from '@/state/walletState';
 import {  PublicAccount } from 'tsjs-xpx-chain-sdk';
 import { AppState } from '@/state/appState';
-import { TreeNode } from 'primevue/tree';
+import type {TreeNode } from "primevue/treenode"
 
 const isSelected = ref(false)
 

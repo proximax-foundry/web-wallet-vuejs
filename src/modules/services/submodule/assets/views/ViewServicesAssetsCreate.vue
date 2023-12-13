@@ -74,7 +74,7 @@ import { WalletUtils } from '@/util/walletUtils';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { Address, PublicAccount } from 'tsjs-xpx-chain-sdk';
-import { TreeNode } from 'primevue/tree';
+import type { TreeNode } from 'primevue/treenode';
 
     const router = useRouter();
 

@@ -256,11 +256,11 @@ const checkTxnStatus = async () => {
   }
 };
 
-const doTxnCheckingInterval = ref<NodeJS.Timer>();
+const doTxnCheckingInterval = ref();
 
-const doConfirmedTxnCheckingInterval = ref<NodeJS.Timer>();
+const doConfirmedTxnCheckingInterval = ref();
 
-const doRecheckAssetsNamesInterval = ref<NodeJS.Timer>();
+const doRecheckAssetsNamesInterval = ref();
 
 const targetBlockSeconds = computed(() => {
   return UnitConverter.configReturn(

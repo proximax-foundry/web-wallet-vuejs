@@ -219,7 +219,7 @@ export default {
 
       let namespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespace(targetNamespace.value);
       targetPublicAccount.value = namespaceInfo.owner;
-      txnBuilder.targetPublicKey(targetPublicAccount);
+      txnBuilder.targetPublicKey(targetPublicAccount.value);
 
        if(!walletState.currentLoggedInWallet){
           return
@@ -321,7 +321,7 @@ export default {
 
     const buildAggregateTxn = ()=>{
       if(metadataTxn){
-        aggregateTxn = aggregateTxnBuilder.innerTransactions([metadataTxn.toAggregateV1(targetPublicAccount)]).build();
+        aggregateTxn = aggregateTxnBuilder.innerTransactions([metadataTxn.toAggregateV1(targetPublicAccount.value)]).build();
       }
     }
 

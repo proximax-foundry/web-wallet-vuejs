@@ -97,7 +97,7 @@ import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { WalletUtils } from '@/util/walletUtils';
 import { Address } from 'tsjs-xpx-chain-sdk';
-import { TreeNode } from 'primevue/tree';
+import type {TreeNode } from "primevue/treenode"
 
 const router = useRouter();
 const { t } = useI18n();

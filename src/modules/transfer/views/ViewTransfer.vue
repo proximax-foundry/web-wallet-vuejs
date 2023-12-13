@@ -103,7 +103,7 @@ import { walletState } from '@/state/walletState';
 import { Address, PublicAccount } from 'tsjs-xpx-chain-sdk';
 import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import { useI18n } from 'vue-i18n';
-import { TreeNode } from 'primevue/tree';
+import type {TreeNode } from "primevue/treenode"
 import SelectInputAsset from '../components/SelectInputAsset.vue';
 import TransferInputClean from "@/modules/transfer/components/TransferInputClean.vue"
 import PasswordInput from "@/components/PasswordInput.vue";
