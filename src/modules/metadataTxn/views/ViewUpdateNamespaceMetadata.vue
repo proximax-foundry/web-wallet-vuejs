@@ -99,7 +99,7 @@
                     Update Namespace Metadata
                 </button>
                 <div class="text-center">
-                <router-link :to="{name: 'ViewServicesNamespace'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
+                <router-link :to="{name: 'ViewDashboard'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
                 </div>
             </div>
         </div>
@@ -220,7 +220,7 @@ export default {
 
       let namespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespace(targetNamespace.value);
       targetPublicAccount.value = namespaceInfo.owner;
-      txnBuilder.targetPublicKey(targetPublicAccount);
+      txnBuilder.targetPublicKey(targetPublicAccount.value);
 
        if(!walletState.currentLoggedInWallet){
           return
@@ -322,7 +322,7 @@ export default {
 
     const buildAggregateTxn = ()=>{
       if(metadataTxn){
-        aggregateTxn = aggregateTxnBuilder.innerTransactions([metadataTxn.toAggregateV1(targetPublicAccount)]).build();
+        aggregateTxn = aggregateTxnBuilder.innerTransactions([metadataTxn.toAggregateV1(targetPublicAccount.value)]).build();
       }
     }
 

@@ -73,8 +73,8 @@ import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
+import type { TreeNode } from 'primevue/treenode';
 import { Address, MosaicSupplyType, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
-import { TreeNode } from 'primevue/tree';
 import { TransactionState } from '@/state/transactionState';
 
     const router = useRouter();

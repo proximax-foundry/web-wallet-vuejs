@@ -96,8 +96,8 @@ import { TimeUnit } from '@/models/const/timeUnit';
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
 import { WalletUtils } from '@/util/walletUtils';
+import type {TreeNode } from "primevue/treenode"
 import { Address, UInt64 } from 'tsjs-xpx-chain-sdk';
-import { TreeNode } from 'primevue/tree';
 import { TransactionState } from '@/state/transactionState';
 
 const router = useRouter();

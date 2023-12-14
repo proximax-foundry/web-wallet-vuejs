@@ -352,11 +352,8 @@ import {
           });
         });
       }
-      let hasCosigner = false;
-      if (filteredCosignerList.length > 0) {
-        hasCosigner = true;
-      }
-      return { hasCosigner: hasCosigner, cosignerList: filteredCosignerList };
+     
+      return { hasCosigner: filteredCosignerList.length > 0, cosignerList: filteredCosignerList };
     }
   
     /* static enableACT (account: WalletAccount|OtherAccount, addedCosigners : string[],signersInWallet? : number) :boolean{

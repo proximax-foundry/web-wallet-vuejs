@@ -1,254 +1,543 @@
 <template>
-  <loading v-model:active="isLoading" :can-cancel="false"
-        :is-full-page="true" />
-  <div class="flex flex-col justify-between md:min-h-screen bg-navy-primary" @click="clickEvent" ref="mainFrame">
-    <Toast position="top-left" group="tl" />
-    <Toast position="top-right" group="tr" />
-    <Toast position="center" group="center" />
-    <Toast position="bottom-left" group="bl" />
-    <Toast position="bottom-right" group="br" style="word-break: break-all;" />
-    <Toast position="top-right" group="tr-wait">
-      <template #message="slotProps">
-        <div style="width: 100%" class="grid grid-cols-12">
-          <div class="col-span-2">
-            <i class="pi pi-spin pi-spinner" style="font-size: 2.5rem"></i>
-          </div>
-          <div class="col-span-10">
-            <div class="font-semibold">{{slotProps.message.summary}}</div>
-          </div>
-          <div class="col-span-12">
-            <div class="text-sm">{{slotProps.message.detail}}</div>
-            <div class="mt-1 text-xs">{{slotProps.message.detail2}}</div>
-            <div :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 1}rem`" v-if="slotProps.message.url">
-              <a :href="slotProps.message.url" target="_blank">
-              {{slotProps.message.detail3}}
-              </a>
-            </div>
-            <div :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 1}rem`" v-else>{{slotProps.message.detail3}}</div>
-          </div> 
-        </div>
-      </template>
-    </Toast>
-    <Toast position="top-right" group="tr-custom">
-      <template #message="slotProps">
-        <div style="width: 100%" class="grid grid-cols-12">
-          <div class="col-span-2">
-            <i v-if="slotProps.message.severity === 'success'" class="pi pi-check-circle" style="font-size: 2.5rem"></i>
-            <i v-else-if="slotProps.message.severity === 'error'" class="pi pi-times-circle" style="font-size: 2.5rem"></i>
-            <i v-else-if="slotProps.message.severity === 'info'" class="pi pi-info-circle" style="font-size: 2.5rem"></i>
-            <i v-else-if="slotProps.message.severity === 'warn'" class="pi pi-exclamation-circle" style="font-size: 2.5rem"></i>
-          </div>
-          <div class="col-span-10">
-            <div class="font-semibold">{{slotProps.message.summary}}</div>
-          </div>
-          <div class="col-span-12">
-            <div class="text-sm">{{slotProps.message.detail}}</div>
-            <div class="mt-1 text-xs">{{slotProps.message.detail2}}</div>
-            <div :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 1}rem`" v-if="slotProps.message.url">
-              <a :href="slotProps.message.url" target="_blank">
-              {{slotProps.message.detail3}}
-              </a>
-            </div>
-            <div :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 1}rem`" v-else>{{slotProps.message.detail3}}</div>
-          </div> 
-        </div>
-      </template>
-    </Toast>
-    <Toast position="bottom-right" group="br-custom">
-      <template #message="slotProps">
-        <div style="width: 100%" class="grid grid-cols-12">
-          <div class="col-span-2">
-            <i v-if="slotProps.message.severity === 'success'" class="pi pi-check-circle" style="font-size: 2.5rem"></i>
-            <i v-else-if="slotProps.message.severity === 'error'" class="pi pi-times-circle" style="font-size: 2.5rem"></i>
-            <i v-else-if="slotProps.message.severity === 'info'" class="pi pi-info-circle" style="font-size: 2.5rem"></i>
-            <i v-else-if="slotProps.message.severity === 'warn'" class="pi pi-exclamation-circle" style="font-size: 2.5rem"></i>
-          </div>
-          <div class="col-span-10">
-            <div class="font-semibold">{{slotProps.message.summary}}</div>
-          </div>
-          <div class="col-span-12">
-            <div class="text-sm">{{slotProps.message.detail}}</div>
-            <div class="mt-1 text-xs">{{slotProps.message.detail2}}</div>
-            <div :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 1}rem`" v-if="slotProps.message.url">
-              <a :href="slotProps.message.url" target="_blank">
-              {{slotProps.message.detail3}}
-              </a>
-            </div>
-            <div :style="`font-size: ${slotProps.message.detail3RemSize ? slotProps.message.detail3RemSize : 1}rem`" v-else>{{slotProps.message.detail3}}</div>
-            <div :style="`font-size: ${slotProps.message.detail4 && slotProps.message.detail4.length > 64 ? 0.4 : 0.5}rem`" >{{slotProps.message.detail4}}</div>
-          </div> 
-        </div>
-      </template>
-    </Toast>
-    <ConfirmDialog></ConfirmDialog>
-    <headerComponent></headerComponent>
-    <div :class="login?`flex min-full-screen`:`min-h-screen sm:flex sm:items-center sm:justify-center`">
-      <NavigationMenu v-if="login" class="lg:mt-16 flex-shrink-0 bg-navy-primary text-left text-xs bg-navi z-20 overflow-y-auto fixed inset-y-0 left-0 transform lg:-translate-x-0 transition duration-200 ease-in-out" :class="`${isShowNavi?'-translate-x-0':'-translate-x-full'}`"></NavigationMenu>
-      <div :class="`${ login?'inline-block flex-grow overflow-hidden':'sm:w-full'}`">
-        <div :class="`${ login?'flex flex-col min-full-screen bg-white':''}`">
-          <router-view class="lg:ml-60 mt-12 lg:mt-16 flex-grow" v-if="currentRouteName=='ViewDashboard' || currentRouteName=='ViewTransactionStatus'"></router-view>
-          <router-view class="mt-24 lg:mt-16 flex-grow" v-else-if="currentRouteName=='ViewWallets'" ></router-view>
-          <router-view class="lg:ml-60 mt-10 lg:mt-16 flex-grow px-5 pt-5" v-else-if="login" :key="this.$route.path"></router-view>
-          <router-view class="mt-12 sm:mt-0 flex-grow px-2 pt-5 sm:p-0" v-else></router-view>
-          <footer class="md:ml-60 md:h-9 mt-10 text-center sm:text-justify sm:flex text-txs md:text-xs sm:justify-between text-gray-700 px-10 flex-grow-0" v-if="login">
-            <div class="ml-2 sm:ml-0">{{$t('home.copyright',{date: lastActiveYear})}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-blue-primary hover:underline">{{$t('home.helpdesk')}}</a> </div>
-            <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span> {{$t('home.version')}}{{ versioning }}</span></div>
-          </footer>
-        </div>
-      </div>
-    </div>
-    <div v-if="!login" class="w-full items-center px-2" :class="`${ overflowScreen?'relative':'2xl:absolute bottom-0' }`">
-      <footer class="mx-auto h-12 mt-20 text-center  lg:flex text-txs lg:text-xs lg:justify-between container text-white pb-5">
-        <div class="ml-2 sm:ml-0">{{$t('home.copyright',{date: lastActiveYear})}} <a href="https://t.me/proximaxhelpdesk" target=_new class="text-white hover:underline">{{$t('home.helpdesk')}}</a></div>
-        <div class="mr-2 sm:mr-0 py-2 sm:py-0"><span> {{$t('home.version')}} {{ versioning }}</span></div>
-      </footer>
-    </div>
-  </div>
+  <loading
+    v-model:active="isLoading"
+    :can-cancel="false"
+    :is-full-page="true"
+  />
+  <ConfirmDialog></ConfirmDialog>
+  <ToastComponent />
+  <BaseLayout v-if="walletState.isLogin">
+    <RouterView />
+  </BaseLayout>
+  <HomeLayoutVue v-else>
+    <RouterView />
+  </HomeLayoutVue>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, getCurrentInstance, provide, watch, ref, reactive, onUnmounted, onMounted } from "vue";
-import packageData from "../package.json";
-import headerComponent from '@/components/headerComponent.vue'
-import NavigationMenu from '@/components/NavigationMenu.vue'
-import ConfirmDialog from 'primevue/confirmdialog';
-import Toast from 'primevue/toast';
-import { walletState } from "@/state/walletState";
-import { useRouter } from 'vue-router';
-import { AppState } from '@/state/appState'
+<script setup lang="ts">
 import Loading from "vue-loading-overlay";
+import ConfirmDialog from "primevue/confirmdialog";
 import "vue-loading-overlay/dist/css/index.css";
+import { RouterView, useRouter } from "vue-router";
+import { AppState } from "./state/appState";
+import { computed, watch, ref } from "vue";
+import { walletState } from "./state/walletState";
+import BaseLayout from "./components/BaseLayout.vue";
+import { WalletStateUtils } from "./state/utils/walletStateUtils";
+import { AppStateUtils } from "./state/utils/appStateUtils";
+import { ListenerStateUtils } from "./state/utils/listenerStateUtils";
+import { networkState } from "./state/networkState";
+import { WalletUtils } from "./util/walletUtils";
+import { UnitConverter } from "./util/unitConverter";
+import { TimeUnit } from "./models/const/timeUnit";
+import { NotificationUtils } from "./util/notificationUtils";
+import { TransactionGroupType } from "tsjs-xpx-chain-sdk";
+import { AnnounceType, listenerState } from "./state/listenerState";
+import type { ToastMessageOptions } from "primevue/toast";
+import { useToast } from "primevue/usetoast";
+import { useI18n } from "vue-i18n";
+import ding from "@/assets/audio/ding.ogg";
+import HomeLayoutVue from "./components/HomeLayout.vue";
+import ToastComponent from "./modules/transfer/components/ToastComponent.vue";
+import { faStopwatch } from "@fortawesome/free-solid-svg-icons";
 
-export default defineComponent({
-  name: 'App',
-  components: {
-    headerComponent,
-    NavigationMenu,
-    ConfirmDialog,
-    Toast,
-    Loading
-  },
+const isLoading = computed(() => !AppState.isReady);
 
-  setup() {
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance!.appContext.config.globalProperties.emitter;
-    watch(AppState ,n=>{
-      if(n.isReady && walletState.currentLoggedInWallet){
-        let address  = sessionStorage.getItem('defaultAcc')
-        let findAcc = walletState.currentLoggedInWallet.accounts.find(account=>account.address == address)
-        //validations
-        if(!address || !findAcc){
-          let address = walletState.currentLoggedInWallet.accounts[0].address
-          sessionStorage.setItem('defaultAcc',address)
-          return
-        }
-        walletState.currentLoggedInWallet.setDefaultAccountByAddress(address)
-      }
-    })
-    
+const router = useRouter();
 
-    const overflowScreen = ref(false);
-    const mainFrame = ref(null);
-    let contentHeight = ref(0);
+const { t } = useI18n();
 
-    const isOverflow = () => {
-      if(window.innerWidth > 768){
-        if(window.innerHeight < contentHeight.value){
-          overflowScreen.value = true;
-        }else{
-          overflowScreen.value = false;
-        }
-      }else{
-        if(window.innerHeight < (contentHeight.value + 90)){
-          overflowScreen.value = true;
-        }else{
-          overflowScreen.value = false;
-        }
-      }
+const toast = useToast();
+
+interface failedTxn {
+  txnHash: string;
+  accPubKey: string | string[];
+  announced?: boolean;
+  status: string;
+  statusMsg: string;
+  relatedAddress: string[];
+  checkedNum: number;
+}
+
+const setFailedTxns = (failedTxn: failedTxn) => {
+  const rawTxn = sessionStorage.getItem("allFailedTransactions");
+
+  if (rawTxn) {
+    let existingFailedTxns: failedTxn[] = JSON.parse(rawTxn);
+    let findFailedTxnsHashAndPubKey = existingFailedTxns.find(
+      (x) =>
+        x.txnHash === failedTxn.txnHash && x.accPubKey === failedTxn.accPubKey
+    );
+    if (!findFailedTxnsHashAndPubKey) {
+      existingFailedTxns.push(failedTxn);
+      sessionStorage.setItem(
+        "allFailedTransactions",
+        JSON.stringify(existingFailedTxns)
+      );
     }
+  } else {
+    sessionStorage.setItem(
+      "allFailedTransactions",
+      JSON.stringify([failedTxn])
+    );
+  }
+};
 
-    const screenResizeHandler = () => {
-      isOverflow();
-    };
-    screenResizeHandler();
+const checkTxnStatus = async () => {
+  if (!AppState.chainAPI) {
+    return;
+  }
+  let endStatuses = ["failed", TransactionGroupType.CONFIRMED];
+  let txnsHash1 = AppState.txnActivityLog
+    .filter((x) => x.checkedNum < 10 && !endStatuses.includes(x.status))
+    .map((x) => x.txnHash);
+  let txnsHash2 = AppState.txnCosignLog
+    .filter((x) => x.checkedNum < 10 && !endStatuses.includes(x.status))
+    .map((x) => x.txnHash);
+  let txnsHash3 = AppState.txnSwapLog
+    .filter((x) => x.checkedNum < 10 && !endStatuses.includes(x.status))
+    .map((x) => x.txnHash);
+  let allTransasctionHash = txnsHash1.concat(txnsHash2, txnsHash3);
 
-    onUnmounted(() => {
-      window.removeEventListener("resize", screenResizeHandler);
-    });
+  if (allTransasctionHash.length === 0) {
+    return;
+  }
 
-    onMounted(() => {
-      contentHeight.value = mainFrame.value.clientHeight;
-      isOverflow();
-      window.addEventListener("resize", screenResizeHandler);
-    });
+  let dataPerRequest = 50;
 
-    const isLoading = computed(()=>{ return !AppState.isReady});
+  let numOfRequest = Math.ceil(allTransasctionHash.length / dataPerRequest);
 
-    const navigationSideBar = reactive({
-      isOpen: false,
-      inNavi: false,
-    });
+  let requests = [];
 
-    provide('navigationSideBar', navigationSideBar);
+  for (let i = 0; i < numOfRequest; ++i) {
+    let startIndex = i * dataPerRequest;
+    let endIndex = (i + 1) * dataPerRequest;
 
-    const router = useRouter();
-    // chainNetwork.updateAvailableNetworks();
-    const currentRouteName = computed(() => {
-      return router.currentRoute.value.name;
-    });
+    let requestData = allTransasctionHash.slice(startIndex, endIndex);
 
-    const lastActiveYear = BUILD_YEAR;
-    const versioning = ref('0.0.1');
-
-    versioning.value = packageData.version;
-
-
-    // emitter for drop down menu in viewAllAccounts and Services page
-    const clickEvent = () => {
-      emitter.emit("PAGE_CLICK");
-    };
-
-    const login = computed(() =>walletState.isLogin);
-
-    const isShowNavi = computed(() => {
-      return navigationSideBar.isOpen
-    });
-
-    // emitted from App.vue when click on any part of the page
-    emitter.on('PAGE_CLICK', () => {
-      if(!navigationSideBar.inNavi){
-        navigationSideBar.isOpen =false;
-      }
-    });
-
-    return{
-      login,
-      clickEvent,
-      versioning,
-      currentRouteName,
-      isShowNavi,
-      isLoading,
-      overflowScreen,
-      mainFrame,
-      lastActiveYear
+    try {
+      requests.push(
+        AppState.chainAPI.transactionAPI.getTransactionsStatuses(requestData)
+      );
+    } catch (error) {
+      continue;
     }
   }
+
+  let tempTransactionStatuses = await Promise.all(requests);
+
+  let transactionStatuses = tempTransactionStatuses.flat();
+
+  let txnsHashFound: string[] = [];
+  let txnHashesConfirmed: string[] = [];
+  let displayedTxn: string[] = [];
+
+  for (let i = 0; i < transactionStatuses.length; ++i) {
+    const transactionStatus = transactionStatuses[i];
+    if (!transactionStatus.hash) {
+      continue;
+    }
+    txnsHashFound.push(transactionStatus.hash);
+
+    if (txnsHash1.includes(transactionStatus.hash)) {
+      let txnActivity = AppState.txnActivityLog.find(
+        (x) => x.txnHash === transactionStatus.hash
+      );
+      if (!txnActivity) {
+        continue;
+      }
+      if (
+        txnActivity.status !== transactionStatus.group &&
+        transactionStatus.group
+      ) {
+        txnActivity.status = transactionStatus.group;
+
+        if (txnActivity.status === "failed") {
+          txnActivity.statusMsg = transactionStatus.status;
+          setFailedTxns(txnActivity);
+        } else if (txnActivity.status === TransactionGroupType.CONFIRMED) {
+          txnHashesConfirmed.push(txnActivity.txnHash);
+          listenerState.allConfirmedTransactionsHash.push(txnActivity.txnHash);
+        }
+
+        displayedTxn.push(transactionStatus.hash);
+        addTxnToastMessage(
+          txnActivity.status,
+          transactionStatus.hash,
+          txnActivity.statusMsg
+        );
+      }
+    } else if (txnsHash2.includes(transactionStatus.hash)) {
+      let txnCosign = AppState.txnCosignLog.find(
+        (x) => x.txnHash === transactionStatus.hash
+      );
+      if (!txnCosign) {
+        continue;
+      }
+      if (
+        txnCosign.status !== transactionStatus.group &&
+        transactionStatus.group
+      ) {
+        txnCosign.status = transactionStatus.group;
+
+        if (txnCosign.status === "failed") {
+          txnCosign.statusMsg = transactionStatus.status;
+          setFailedTxns(txnCosign);
+        } else if (txnCosign.status === TransactionGroupType.CONFIRMED) {
+          txnHashesConfirmed.push(txnCosign.txnHash);
+          listenerState.allConfirmedTransactionsHash.push(txnCosign.txnHash);
+        }
+
+        if (!displayedTxn.includes(transactionStatus.hash)) {
+          addTxnToastMessage(
+            txnCosign.status,
+            transactionStatus.hash,
+            txnCosign.statusMsg
+          );
+        }
+      }
+    } else {
+      let txnSwap = AppState.txnSwapLog.find(
+        (x) => x.txnHash === transactionStatus.hash
+      );
+      if (!txnSwap) {
+        continue;
+      }
+      if (
+        txnSwap.status !== transactionStatus.group &&
+        transactionStatus.group
+      ) {
+        txnSwap.status = transactionStatus.group;
+
+        if (txnSwap.status === "failed") {
+          txnSwap.statusMsg = transactionStatus.status;
+          setFailedTxns(txnSwap);
+        } else if (txnSwap.status === TransactionGroupType.CONFIRMED) {
+          txnHashesConfirmed.push(txnSwap.txnHash);
+          listenerState.allConfirmedTransactionsHash.push(txnSwap.txnHash);
+        }
+
+        addTxnToastMessage(
+          txnSwap.status,
+          transactionStatus.hash,
+          txnSwap.statusMsg,
+          "swap"
+        );
+      }
+    }
+  }
+
+  if (txnHashesConfirmed.length) {
+    ListenerStateUtils.fireRecountConfirmed();
+  }
+  WalletUtils.transactionConfirmed(txnHashesConfirmed);
+
+  let txnsHashNotFound = allTransasctionHash.filter(
+    (x) => !txnsHashFound.includes(x)
+  );
+
+  for (let i = 0; i < txnsHashNotFound.length; ++i) {
+    if (txnsHash1.includes(txnsHashNotFound[i])) {
+      let txnActivity = AppState.txnActivityLog.find(
+        (x) => x.txnHash === txnsHashNotFound[i]
+      );
+      txnActivity!.checkedNum = txnActivity!.checkedNum + 1;
+    } else if (txnsHash2.includes(txnsHashNotFound[i])) {
+      let txnCosign = AppState.txnCosignLog.find(
+        (x) => x.txnHash === txnsHashNotFound[i]
+      );
+      txnCosign!.checkedNum = txnCosign!.checkedNum + 1;
+    } else {
+      let txnSwap = AppState.txnSwapLog.find(
+        (x) => x.txnHash === txnsHashNotFound[i]
+      );
+      txnSwap!.checkedNum = txnSwap!.checkedNum + 1;
+    }
+  }
+};
+
+const doTxnCheckingInterval = ref();
+
+const doConfirmedTxnCheckingInterval = ref();
+
+const doRecheckAssetsNamesInterval = ref();
+
+const targetBlockSeconds = computed(() => {
+  return UnitConverter.configReturn(
+    networkState.currentNetworkProfileConfig!.blockGenerationTargetTime,
+    TimeUnit.SECOND
+  );
 });
+
+const doTxnChecking = () => {
+  doTxnCheckingInterval.value = setInterval(
+    checkTxnStatus,
+    targetBlockSeconds.value * 1000
+  );
+};
+
+const doLogin = async () => {
+  await WalletUtils.refreshAllAccountDetails(
+    walletState.currentLoggedInWallet!,
+    networkState.currentNetworkProfile!
+  );
+};
+
+const doLogout = () => {
+  try {
+    if (doRecheckAssetsNamesInterval.value) {
+      clearInterval(doRecheckAssetsNamesInterval.value);
+    }
+
+    if (doConfirmedTxnCheckingInterval.value) {
+      clearInterval(doConfirmedTxnCheckingInterval.value);
+    }
+
+    if (doTxnCheckingInterval.value) {
+      clearInterval(doTxnCheckingInterval.value);
+    }
+  } catch (error) {}
+};
+
+const logout = () => {
+  doLogout();
+  WalletStateUtils.doLogout();
+  AppStateUtils.doLogout();
+  ListenerStateUtils.reset();
+  router.push({ name: "Home" });
+};
+
+const doAutoAnnounce = async () => {
+  let currentBlockHeight =
+    await AppState.chainAPI.chainAPI.getBlockchainHeight();
+
+  for (let i = 0; i < listenerState.autoAnnounceSignedTransaction.length; ++i) {
+    let letAnnouce = false;
+
+    let currentAutoAnnounceTx = listenerState.autoAnnounceSignedTransaction[i];
+
+    if (currentAutoAnnounceTx.announced) {
+      continue;
+    }
+
+    if (
+      currentAutoAnnounceTx.announceAtBlock &&
+      currentBlockHeight >= currentAutoAnnounceTx.announceAtBlock
+    ) {
+      letAnnouce = true;
+    } else if (
+      currentAutoAnnounceTx.hashAnnounceBlock &&
+      currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock
+    ) {
+      if (
+        currentBlockHeight >
+        currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock +
+          currentAutoAnnounceTx.hashAnnounceBlock.annouceAfterBlockNum
+      ) {
+        letAnnouce = true;
+      }
+    } else if (currentAutoAnnounceTx.hashAnnounceBlock) {
+      try {
+        let txnStatusInfo =
+          await AppState.chainAPI.transactionAPI.getTransactionStatus(
+            currentAutoAnnounceTx.hashAnnounceBlock.trackHash
+          );
+
+        if (txnStatusInfo.group === TransactionGroupType.CONFIRMED) {
+          currentAutoAnnounceTx.hashAnnounceBlock.hashFound = true;
+          currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock =
+            txnStatusInfo.height.compact();
+
+          if (
+            currentBlockHeight >
+            currentAutoAnnounceTx.hashAnnounceBlock.hashFoundAtBlock +
+              currentAutoAnnounceTx.hashAnnounceBlock.annouceAfterBlockNum
+          ) {
+            letAnnouce = true;
+          }
+        }
+      } catch (error) {
+        currentAutoAnnounceTx.checkCount += 1;
+      }
+    }
+
+    if (letAnnouce) {
+      if (currentAutoAnnounceTx.type === AnnounceType.NORMAL) {
+        await AppState.chainAPI.transactionAPI.announce(
+          currentAutoAnnounceTx.signedTransaction
+        );
+      } else {
+        await AppState.chainAPI.transactionAPI.announceAggregateBonded(
+          currentAutoAnnounceTx.signedTransaction
+        );
+      }
+
+      currentAutoAnnounceTx.announced = true;
+    }
+  }
+
+  let remainingTransactionsToAnnounce =
+    listenerState.autoAnnounceSignedTransaction.filter(
+      (autoTx) => !autoTx.announced
+    );
+
+  listenerState.autoAnnounceSignedTransaction = remainingTransactionsToAnnounce;
+
+  if (listenerState.autoAnnounceSignedTransaction.length) {
+    setTimeout(doAutoAnnounce, 15000);
+  } else {
+    AppState.isPendingTxnAnnounce = false;
+  }
+};
+
+const doConfirmedTxnChecking = () => {
+  doConfirmedTxnCheckingInterval.value = setInterval(
+    WalletUtils.checkConfirmedTxnChecking,
+    60000
+  ); // 1 minute
+};
+watch(
+  [() => AppState.isPendingTxnAnnounce, () => AppState.isReady],
+  async (n) => {
+    if (n[0] && n[1]) {
+      doAutoAnnounce();
+    } else {
+      toast.removeGroup("tr-wait");
+    }
+  },
+  { immediate: true }
+);
+
+const doRecheckAssetsNames = () => {
+  doRecheckAssetsNamesInterval.value = setInterval(
+    WalletUtils.recheckAssetsNames,
+    60000 * 5
+  ); // 5 minute
+};
+watch(
+  [() => walletState.isLogin, () => AppState.isReady],
+  async ([loginState, readyState], o) => {
+    if (!loginState && !(o[0] ?? false)) {
+      return;
+    }
+    if (!loginState) {
+      logout();
+      return;
+    }
+
+    if (loginState && readyState) {
+      await doLogin();
+      doTxnChecking();
+      doConfirmedTxnChecking();
+      doRecheckAssetsNames();
+    }
+  },
+  { immediate: true }
+);
+
+const createTxnHashExplorerLink = (txnHash: string) => {
+  return `${networkState.currentNetworkProfile!.chainExplorer.url}/${
+    networkState.currentNetworkProfile!.chainExplorer.hashRoute
+  }/${txnHash}`;
+};
+
+interface myToastMessageOptions extends ToastMessageOptions {
+  detail2?: string;
+  detail3?: string;
+  detail4?: string;
+  url?: string;
+}
+
+const modifiedToast = (data: myToastMessageOptions) => {
+  return toast.add(data);
+};
+const addTxnToastMessage = (
+  status: string,
+  txnHash: string,
+  statusMessage: string,
+  extraData = ""
+) => {
+  let txnHashExplorerLink = createTxnHashExplorerLink(txnHash);
+
+  if (status === "failed") {
+    modifiedToast({
+      severity: "error",
+      summary: t("transaction.txError"),
+      detail: "Transaction Failed with error",
+      detail2: "Transaction Hash: ",
+      detail3: txnHash.slice(0, 20) + "...",
+      detail4: statusMessage,
+      group: "br-custom",
+      life: 10000,
+    });
+  } else if (status === TransactionGroupType.UNCONFIRMED) {
+    modifiedToast({
+      severity: "warn",
+      summary: t("transaction.txAdded", 1),
+      detail: t("transaction.txUnconfirmed", 1),
+      detail2: "Transaction Hash: ",
+      detail3: txnHash.slice(0, 20) + "...",
+      url: txnHashExplorerLink,
+      group: "br-custom",
+      life: 5000,
+    });
+  } else if (status === TransactionGroupType.PARTIAL) {
+    modifiedToast({
+      severity: "warn",
+      summary: t("transaction.partialAdded", 1),
+      detail: "Transaction Hash: ",
+      detail3: txnHash.slice(0, 20) + "...",
+      url: txnHashExplorerLink,
+      group: "br-custom",
+      life: 6000,
+    });
+  } else if (status === TransactionGroupType.CONFIRMED) {
+    if (extraData === "swap") {
+      modifiedToast({
+        severity: "success",
+        summary: t("transaction.swapTx", 1),
+        detail: "Transaction Hash: ",
+        detail3: txnHash.slice(0, 20) + "...",
+        url: txnHashExplorerLink,
+        group: "br-custom",
+        life: 8000,
+      });
+    } else {
+      modifiedToast({
+        severity: "success",
+        summary: t("transaction.txConfirmed", 1),
+        detail: "Transaction Hash: ",
+        detail3: txnHash.slice(0, 20) + "...",
+        url: txnHashExplorerLink,
+        group: "br-custom",
+        life: 8000,
+      });
+      let verifySwitch = sessionStorage.getItem("soundSetting");
+      if (verifySwitch === "true") {
+        beep();
+      }
+    }
+  }
+};
+
+const beep = () => {
+  return new Promise<void>((resolve, reject) => {
+    /*volume = volume || 100;*/
+
+    try {
+      let sound = new Audio(ding);
+
+      // Set volume
+      /*sound.volume = volume / 100;*/
+
+      sound.onended = () => {
+        resolve();
+      };
+
+      sound.play();
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 </script>
-
-<style>
-#app {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.full-screen{
-  height:calc(100vh - 4rem) !important;
-}
-
-.min-full-screen{
-  min-height:calc(100vh) !important;
-}
-
-
-</style>

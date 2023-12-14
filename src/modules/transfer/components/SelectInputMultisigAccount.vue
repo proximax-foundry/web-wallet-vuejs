@@ -1,6 +1,6 @@
 <template>
     <div>
-        <button v-if="accounts.length && !isSelected && selectedAddress" class=' border rounded-md cursor-pointer flex flex-col justify-center  p-1.5' 
+        <button v-if="accounts.length && !isSelected && selectedAddress" class=' border rounded-md cursor-pointer flex flex-col justify-center py-1  px-1.5 ' 
         @click="isSelected = true">
             <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
             <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.select') }}</div>
@@ -22,7 +22,7 @@ import { ref, getCurrentInstance, toRefs, watch, PropType } from 'vue';
 import { walletState } from '@/state/walletState';
 import {  PublicAccount } from 'tsjs-xpx-chain-sdk';
 import { AppState } from '@/state/appState';
-import { TreeNode } from 'primevue/tree';
+import type {TreeNode } from "primevue/treenode"
 
 const isSelected = ref(false)
 

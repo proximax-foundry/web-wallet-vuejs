@@ -299,6 +299,3 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
-@import "@/assets/scss/transactions-data-table.scss";
-</style>
