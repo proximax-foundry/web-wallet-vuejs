@@ -56,13 +56,12 @@ import {useI18n} from 'vue-i18n'
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { Helper } from '@/util/typeHelper';
-import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { AddHarvesterTransactionBuilder, Address, HarvesterInfo, 
   PublicAccount, RemoveHarvesterTransactionBuilder } from 'tsjs-xpx-chain-sdk';
-import { TreeNode } from 'primevue/tree';
+import type { TreeNode } from 'primevue/treenode';
 import { TransactionState } from '@/state/transactionState';
 
 const toast = useToast();
