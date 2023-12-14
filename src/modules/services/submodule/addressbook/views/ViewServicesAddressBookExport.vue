@@ -39,7 +39,7 @@
             :options="contactGroups"
             option-label="label"
             placeholder="Group"
-            class="w-60 inline-block mr-2 text-xs"
+            class="w-60 mr-2 text-xs"
           />
           <div class="flex gap-3 items-center">
             <div
