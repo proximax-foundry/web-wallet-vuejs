@@ -224,15 +224,15 @@ body{
 }
 
 
- .p-datatable-table{
+/*  .p-datatable-table{
   border-collapse: separate !important;
   border-spacing: 0px 10px;
-}
+} */
 
- .p-datatable-wrapper{
+/*  .p-datatable-wrapper{
   margin-bottom: 20px;
   overflow-x: auto;
-}
+} */
 
  .p-datatable-tbody{
   td{
@@ -483,3 +483,29 @@ body{
 @font-face {font-family: "Password";
   src: url("../font/password.ttf") format("truetype"), /* chrome firefox opera Safari, Android, iOS 4.2+*/
 }
+
+
+
+
+
+.p-dropdown {
+  border: 1px solid #ced4da;
+}
+
+.p-link{
+  @apply text-gray-400 
+}
+
+.p-highlight{
+  @apply text-white bg-blue-primary rounded-sm ;
+}
+
+ .p-datatable-tbody{
+  td{
+    @apply text-gray-600 py-5 text-left text-xs border-b border-t border-gray-200;
+  }
+}
+
+
+
+
