@@ -87,7 +87,6 @@
                 <font-awesome-icon v-if="linkedAccountKey!='' && linkedAccountKey!='0'.repeat(64)" title="Unlink account" icon="unlink"  class="ml-2 w-4 h-4 text-blue-primary cursor-pointer"></font-awesome-icon>
                 <font-awesome-icon v-else title="Delegate account" icon="link"  class="ml-2 w-4 h-4 text-blue-primary cursor-pointer"></font-awesome-icon>
               </router-link>
-
           </div>
         </div>
         <div class='my-6 gray-line'></div>
@@ -296,7 +295,8 @@ const linkedNamespace = ref([])
 
 const getLinkedAccountKey = async () => {
   if (acc.value) {
-    linkedAccountKey.value = acc.value.linkedPublicKey;
+    const account = await AppState.chainAPI.accountAPI.getAccountsInfo([Address.createFromRawAddress(acc.value.address)]);
+    linkedAccountKey.value = account[0].linkedAccountKey;
   }
 }
 
@@ -326,8 +326,7 @@ const findAccountAddress = publicKey => {
     return ''
   }
   let account = walletState.currentLoggedInWallet.accounts.find(acc => acc.publicKey == publicKey) || walletState.currentLoggedInWallet.others.find(acc => acc.publicKey == publicKey)
-  return account ? account.address : ''
-
+  return account ? account.address : undefined
 }
 
 const loadData = async () => {
@@ -357,6 +356,9 @@ const init = () => {
 
 init()
 
+watch(acc, ()=>{
+  init();
+})
 
 emitter.on("revealPK", (e) => {
   showPK.value = e;

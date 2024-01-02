@@ -5,10 +5,7 @@ module.exports = {
     './src/**/*.jsx',
   ],
   theme: {
-    inset:{
-      '0': 0,
-      auto: 'auto',
-    },
+   
     fontSize: {
       xxs: ['9px', '12px'],
       xs: ['12px', '14px'],

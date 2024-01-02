@@ -99,7 +99,7 @@
                     Update Asset Metadata
                 </button>
                 <div class="text-center">
-                <router-link :to="{name: 'ViewServicesAssets'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
+                <router-link :to="{name: 'ViewDashboard'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
                 </div>
             </div>
         </div>
@@ -133,6 +133,7 @@ import { ThemeStyleConfig } from '@/models/stores';
 import { toSvg } from 'jdenticon';
 import UTF8 from 'utf-8';
 import { useRouter } from 'vue-router';
+import { TransactionState } from "@/state/transactionState";
 export default { 
   name: "ViewUpdateAssetMetadata",
   props:{
@@ -473,6 +474,10 @@ export default {
       }
       
       let tempHexData = ''
+      let assetMetadataPayload : {
+        txnPayload: string,
+        hashLockTxnPayload?: string
+      },{} = {}
       if(scopedMetadataKeyType.value==1){ //utf8
         let hexValue = Convert.utf8ToHex(inputScopedMetadataKey.value)
         tempHexData = hexValue + "00".repeat((16-hexValue.length)/2)
@@ -487,28 +492,23 @@ export default {
       .oldValue(oldValue.value)
       .calculateDifferences()
       .build()
-      let aggregateTx = targetAccIsMultisig.value?
-      aggregateTxnBuilder.innerTransactions([mosaicMetadataTransaction.toAggregateV1(targetPublicAccount.value)]).build():
-      AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([mosaicMetadataTransaction.toAggregateV1(targetPublicAccount.value)]).build()
-      let signer = targetAccIsMultisig.value? 
-      walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosigner.value):
-      walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == targetPublicAccount.value.publicKey) 
-      let encryptedPassword = WalletUtils.createPassword(walletPassword.value);
-      let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, signer.encrypted, signer.iv);
-      let signerAcc = Account.createFromPrivateKey(privateKey, AppState.networkType,1);
-      let signedAggregateTransaction = signerAcc.preV2Sign(aggregateTx, networkState.currentNetworkProfile.generationHash);
+      let aggregateTx = AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([mosaicMetadataTransaction.toAggregateV1(targetPublicAccount.value)]).build()
+      let selectedAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == targetPublicAccount.value.publicKey).address 
       if(targetAccIsMultisig.value){
-        let lockHashTx = TransactionUtils.lockFundTx(signedAggregateTransaction)
-        let signedLockHashTransaction = signerAcc.preV2Sign(lockHashTx, networkState.currentNetworkProfile.generationHash);
-        TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedLockHashTransaction,signedAggregateTransaction) 
+        let cosignerAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosigner.value).address
+        let innerTxn = [mosaicMetadataTransaction.toAggregateV1(targetPublicAccount.value)]
+        assetMetadataPayload = TransactionUtils.signTxnWithPassword(cosignerAddress,selectedAddress,walletPassword.value,null,innerTxn)
       }else{
-        TransactionUtils.announceTransaction(signedAggregateTransaction)
+        assetMetadataPayload = TransactionUtils.signTxnWithPassword(selectedAddress,null,walletPassword.value,aggregateTx)
       }
       inputScopedMetadataKey.value=""
       oldValue.value = ""
       newValue.value=""
       walletPassword.value=""
-      router.push({ name: "ViewAccountPendingTransactions",params:{address:targetPublicAccount.value.address.plain()} })
+      TransactionState.lockHashPayload = assetMetadataPayload.hashLockTxnPayload
+      TransactionState.transactionPayload = assetMetadataPayload.txnPayload
+      TransactionState.selectedAddress = targetPublicAccount.value.address.plain()
+      router.push({ name: "ViewConfirmTransaction" })
       
     }
 

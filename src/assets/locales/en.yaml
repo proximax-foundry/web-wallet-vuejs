@@ -350,7 +350,7 @@ home:
   assetDescription: Create your own unique token
   beginnerGuide: Beginner's Guide
   contactTeam: Contact our support team
-  copyright: Copyright © 2023. All Rights Reserved.
+  copyright: Copyright © {date}. All Rights Reserved.
   gettingStarted: Getting Started
   helpdesk: Helpdesk
   home: Home

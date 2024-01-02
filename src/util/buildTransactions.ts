@@ -48,7 +48,10 @@ import {
     EmptyMessage,
     TransactionHash,
     AggregateCompleteV1TransactionBuilder,
-    AggregateBondedV1TransactionBuilder
+    AggregateBondedV1TransactionBuilder,
+    HarvesterTransaction,
+    AddHarvesterTransactionBuilder,
+    RemoveHarvesterTransactionBuilder
 } from 'tsjs-xpx-chain-sdk';
 import { WalletUtils } from "./walletUtils";
 import { Helper } from "./typeHelper";
@@ -343,6 +346,28 @@ export class BuildTransactions {
             .targetMosaicId(targetId)
             .calculateDifferences()
             .build();
+    }
+
+    addHarvester(harvesterKey: PublicAccount): HarvesterTransaction {
+        return this.transactionBuilderFactory.addHarvester()
+            .deadline(Deadline.create())
+            .harvesterKey(harvesterKey)
+            .build();
+    }
+
+    addHarvesterBuilder(): AddHarvesterTransactionBuilder {
+        return this.transactionBuilderFactory.addHarvester();
+    }
+
+    removeHarvester(harvesterKey: PublicAccount): HarvesterTransaction {
+        return this.transactionBuilderFactory.removeHarvester()
+            .deadline(Deadline.create())
+            .harvesterKey(harvesterKey)
+            .build();
+    }
+
+    removeHarvesterBuilder(): RemoveHarvesterTransactionBuilder {
+        return this.transactionBuilderFactory.removeHarvester();
     }
 
     getFeeStrategy(): FeeCalculationStrategy {

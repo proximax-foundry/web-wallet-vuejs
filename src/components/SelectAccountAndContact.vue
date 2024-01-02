@@ -7,7 +7,8 @@
 
 <script setup lang="ts">
     import {defineComponent, ref } from 'vue';
-    import type { TreeExpandedKeys, TreeNode } from "primevue/tree";
+    import type { TreeExpandedKeys,  } from "primevue/tree";
+    import type {TreeNode } from "primevue/treenode"
 
     defineComponent({
         name: 'SelectAccountAndContact'

@@ -22,7 +22,7 @@
         <div>
           <div class="text-tsm">{{ $t('addressBook.selectExportContacts') }}</div>
           <div class="mt-4">
-            <MultiSelect v-model="nameFilters" :options="list" optionLabel="name" placeholder="Contacts" class="w-60 inline-block mr-2" />
+            <MultiSelect v-model="nameFilters" :options="list" optionLabel="name" placeholder="Contacts" class="w-60  mr-2" />
           </div>
         </div>
         <div @click="exportCSV($event)"

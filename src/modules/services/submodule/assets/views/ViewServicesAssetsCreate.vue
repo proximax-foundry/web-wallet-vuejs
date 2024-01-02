@@ -7,31 +7,30 @@
         <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
           <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
         </div>
-        <div v-else-if="isNotCosigner" class="rounded-md bg-yellow-200 w-full p-2 flex items-center justify-center">
-          <div class="rounded-full w-5 h-5 bg-yellow-100 inline-block relative mr-2"><font-awesome-icon icon="exclamation" class="text-yellow-500 h-3 w-3 absolute" style="top: 5px; left:7px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.noCosigner')}}</div>
-        </div>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="mt-4">
-          <SelectInputAccount @select-account="changeSelection" v-model="selectedAccAdd" :selectDefault="defaultAcc?defaultAcc.address:''" />
-          <div v-if="getMultiSigCosigner.cosignerList.length > 0">
-            <div class="text-tsm text-left mt-3">{{$t('general.initiateBy')}}:
-              <span class="font-bold" v-if="getMultiSigCosigner.cosignerList.length == 1">{{ getMultiSigCosigner.cosignerList[0].name }} ({{$t('general.balance')}}: {{ Helper.amountFormatterSimple(getMultiSigCosigner.cosignerList[0].balance, 0) }} {{currentNativeTokenName}})</span>
-              <span class="font-bold" v-else><select v-model="cosignerAddress"><option v-for="(cosigner, item) in getMultiSigCosigner.cosignerList" :value="cosigner.address" :key="item">{{ cosigner.name }} ({{$t('general.balance')}}: {{ cosigner.balance }} {{ currentNativeTokenName }})</option></select></span>
-              <div v-if="cosignerBalanceInsufficient" class="error">- {{$t('general.insufficientBalance')}}</div>
+          <div class="flex gap-1 mt-3">
+              <SelectInputAccount :type="'asset'"/>
+              <SelectInputMultisigAccount :selected-address="selectedAddress" />
             </div>
-          </div>
+            <div v-if="selectedMultisigAddress" class="mt-3">
+              <MultisigInput :select-default-address="selectedMultisigAddress"
+                :select-default-name="selectedMultisigName" :type="'asset'"/>
+            </div>
           <div class="lg:grid lg:grid-cols-2 mt-5">
-            <div class="lg:mr-2"><SupplyInputClean :disabled="showNoBalance||isNotCosigner||disabledInput" v-model="supply" :balance="Number.MAX_VALUE" :placeholder="$t('general.supply')" type="text" @show-error="updateSupplyErr"  :decimal="Number(divisibility)" :toolTip="$t('asset.supplyMsg1') +' <br><br>' + $t('asset.supplyMsg2') + '<br>' + $t('asset.supplyMsg3')" /></div>
-            <div class="lg:ml-2"><NumberInputClean :disabled="showNoBalance||isNotCosigner||disabledInput" v-model="divisibility" :max="6" :placeholder="$t('general.divisibility')" :showError="showDivisibilityErr"  :toolTip="$t('asset.divisibilityMsg1') +' <br><br>' + $t('asset.divisibilityMsg2') + '<br>' + $t('asset.divisibilityMsg3')" /></div>
+            <div class="lg:mr-2"><SupplyInputClean :disabled="showNoBalance||disabledInput" v-model="supply" :balance="Number.MAX_VALUE" :placeholder="$t('general.supply')" type="text" @show-error="updateSupplyErr"  :decimal="Number(divisibility)" :toolTip="$t('asset.supplyMsg1') +' <br><br>' + $t('asset.supplyMsg2') + '<br>' + $t('asset.supplyMsg3')" /></div>
+            <div class="lg:ml-2"><NumberInputClean :disabled="showNoBalance||disabledInput" v-model="divisibility" :max="6" :placeholder="$t('general.divisibility')" :showError="showDivisibilityErr"  :toolTip="$t('asset.divisibilityMsg1') +' <br><br>' + $t('asset.divisibilityMsg2') + '<br>' + $t('asset.divisibilityMsg3')" /></div>
           </div>
           <div class="lg:grid lg:grid-cols-2">
-            <div class="mb-5 lg:mb-0 lg:mr-2"><CheckInput :disabled="showNoBalance||isNotCosigner||disabledInput" v-model="isTransferable" :title="$t('general.transferable')" :toolTip="$t('asset.transferableMsg')" @click="!showNoBalance?(isTransferable = !isTransferable):''"/></div>
-            <div class="mb-5 lg:mb-0 lg:ml-2"><CheckInput :disabled="showNoBalance||isNotCosigner||disabledInput" v-model="isMutable" :title="$t('general.supplyMutable')" :toolTip="$t('asset.supplyMutableMsg')" @click="!showNoBalance?(isMutable = !isMutable):''" /></div>
+            <div class="mb-5 lg:mb-0 lg:mr-2"><CheckInput :disabled="showNoBalance||disabledInput" v-model="isTransferable" :title="$t('general.transferable')" :toolTip="$t('asset.transferableMsg')" @click="!showNoBalance?(isTransferable = !isTransferable):''"/></div>
+            <div class="mb-5 lg:mb-0 lg:ml-2"><CheckInput :disabled="showNoBalance||disabledInput" v-model="isMutable" :title="$t('general.supplyMutable')" :toolTip="$t('asset.supplyMutableMsg')" @click="!showNoBalance?(isMutable = !isMutable):''" /></div>
           </div>
         </div>
       </div>
       <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
-        <TransactionFeeDisplay :asset-rental-fee-currency="rentalFeeCurrency" :transaction-fee="String(transactionFee)" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="balance" :selected-acc-add="selectedAccAdd"/>
+        <TxnSummary :signer-native-token-balance="balance" :asset-rental-fee-currency="rentalFeeCurrency"
+            :native-token-balance="selectedMultisigAddress ? multisigBalance : balance" :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee"
+            :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact" :total-fee="Number(totalFeeFormatted)"/>
         <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="createAsset">{{$t('asset.createAssets')}}</button>
@@ -55,56 +54,42 @@
 </div>
 </template>
 
-<script>
-import { computed, ref, watch } from 'vue';
+<script setup lang="ts">
+import { computed, getCurrentInstance, ref, watch } from 'vue';
 import { useRouter } from "vue-router";
-import SelectInputAccount from '@/components/SelectInputAccount.vue';
+import SelectInputAccount from '@/modules/transfer/components/SelectInputAccount.vue';
+import SelectInputMultisigAccount from '@/modules/transfer/components/SelectInputMultisigAccount.vue';
+import MultisigInput from "@/modules/transfer/components/MultisigInput.vue"
 import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
 import CheckInput from '@/components/CheckInput.vue';
 import NumberInputClean from '@/modules/services/submodule/assets/components/NumberInputClean.vue';
-import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
+import TxnSummary from '@/components/TxnSummary.vue';
 import {useI18n} from 'vue-i18n'
-import { ChainProfileConfig } from "@/models/stores/";
-import { Wallet } from "@/models/wallet";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
-import { Currency } from "@/models/currency";
 import { Helper } from '@/util/typeHelper';
-import { ChainUtils } from '@/util/chainUtils';
 import { AssetsUtils } from '@/util/assetsUtils';
 import { WalletUtils } from '@/util/walletUtils';
-import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
-import { TransactionUtils, isMultiSig, findAcc, findAccWithAddress } from '@/util/transactionUtils';
-import { UnitConverter } from '@/util/unitConverter';
-import { TimeUnit } from '@/models/const/timeUnit';
+import { TransactionUtils } from '@/util/transactionUtils';
+import type { TreeNode } from 'primevue/treenode';
+import { Address, MosaicSupplyType, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
+import { TransactionState } from '@/state/transactionState';
 
-export default {
-  name: 'ViewServicesAssetsCreate',
-  components: {
-    CheckInput,
-    PasswordInput,
-    SupplyInputClean,
-    NumberInputClean,
-    SelectInputAccount,
-    TransactionFeeDisplay,
-  },
-  setup(){
     const router = useRouter();
 
-    const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
-    const currentNativeTokenDivisibility = computed(()=> AppState.nativeToken.divisibility);
+    const internalInstance = getCurrentInstance();
+    const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showSupplyErr = ref(false);
     const walletPassword = ref('');
     const {t} = useI18n();
     const err = ref('');
-    const currentSelectedName = ref('');
     const divisibility = ref('0');
     const showDivisibilityErr = ref(false);
     const isTransferable = ref(false);
     const isMutable = ref(false);
-    const disabledPassword = computed(() => showNoBalance.value||isNotCosigner.value||disableAllInput.value);
+    const disabledPassword = computed(() => showNoBalance.value||disableAllInput.value);
     const disabledInput = computed(() => disableAllInput.value)
     const disabledClear = ref(false);
     const disabledDuration = ref(false);
@@ -114,28 +99,21 @@ export default {
     const passwdPattern = "^[^ ]{8,}$";
     const showPasswdError = ref(false);
     const durationCheckDisabled = ref(false);
-    const cosignerBalanceInsufficient = ref(false);
-    const cosignerAddress = ref('');
     const supply = ref('0');
     const disableAllInput = ref(false);
 
-    const currencyName = computed(() => AppState.nativeToken.label);
-
-    const maxDuration = computed(()=>{
-      return networkState.currentNetworkProfileConfig ? 
-      Math.floor(UnitConverter.configReturn(networkState.currentNetworkProfileConfig.maxNamespaceDuration, TimeUnit.DAY)) : 0;
-    });
-    const ownerPublicAccount = ref('')
+    const ownerPublicAccount = ref<PublicAccount | null>()
+    const multisigPublicAccount = ref<PublicAccount | null>()
     try {
       ownerPublicAccount.value = WalletUtils.createPublicAccount(walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount().publicKey:'', AppState.networkType)
     } catch (error) {
       console.log(error)
     }
-    const transactionFee = ref('')
+    const transactionFee = ref('0')
     const transactionFeeExact = ref(0)
     try {
-      transactionFee.value =  Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value), AppState.nativeToken.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value), AppState.nativeToken.divisibility);
+      transactionFee.value =  Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, Number(supply.value), isMutable.value, isTransferable.value, Number(divisibility.value)), AppState.nativeToken.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, Number(supply.value), isMutable.value, isTransferable.value, Number(divisibility.value)), AppState.nativeToken.divisibility);
     } catch (error) {
       console.log(error)
     }
@@ -151,19 +129,12 @@ export default {
       if(networkState.currentNetworkProfileConfig){
         return Helper.convertToCurrency(networkState.currentNetworkProfileConfig.mosaicRentalFee, AppState.nativeToken.divisibility) 
       }else{
-        return 0
+        return '0'
       }
     })
    const lockFund = computed(()=>{
       if(networkState.currentNetworkProfileConfig){
         return Helper.convertToExact(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility)
-      }else{
-        return 0
-      }
-    })
-    const lockFundCurrency = computed(()=> {
-      if(networkState.currentNetworkProfileConfig){
-        return Helper.convertToCurrency(networkState.currentNetworkProfileConfig.lockedFundsPerAggregate, AppState.nativeToken.divisibility)
       }else{
         return 0
       }
@@ -178,67 +149,57 @@ export default {
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (divisibility.value != '') && (supply.value > 0) && (!showSupplyErr.value) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value)
+      walletPassword.value.match(passwdPattern) && (divisibility.value != null) && (Number(supply.value) > 0) && (!showSupplyErr.value) && (!showDurationErr.value) && (!showNoBalance.value)
     ));
 
-    const defaultAcc = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount(): null
-    const selectedAccName = ref(defaultAcc?defaultAcc.name:'');
-    const selectedAccAdd = ref(defaultAcc?defaultAcc.address:'');
-    const balance = ref(Helper.toCurrencyFormat(defaultAcc?defaultAcc.balance:0, AppState.nativeToken.divisibility));
-    const balanceNumber = ref(defaultAcc?defaultAcc.balance:0);
-    const isMultiSigBool =ref(isMultiSig(defaultAcc?defaultAcc.address:''));
+    const selectedMultisigAddress = ref<string | null>(null)
+    const selectedMultisigName = ref<string | null>(null)
+    const selectedAddress = ref<string | null>(null)
+    const balance = ref(0);
+    const multisigBalance = ref(0)
 
-    const accounts = computed( () => {
-      if(walletState.currentLoggedInWallet){
-        if(walletState.currentLoggedInWallet.others){
-          const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
-          return concatOther;
-        } else{
-          return walletState.currentLoggedInWallet.accounts;
+    const fetchAccountBalance = async (address: string) => {
+      if (!AppState.chainAPI) {
+        return
+      }
+      if (!address) {
+        return
+      }
+      try {
+        const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
+        const findIndex = accInfo.mosaics.findIndex(asset => asset.id.toHex() == AppState.nativeToken.assetId)
+        if (findIndex != -1) {
+          return accInfo.mosaics[findIndex].amount.compact() / Math.pow(10, AppState.nativeToken.divisibility)
         }
-      } else{
-        return [];
+        else {
+          return 0
+        }
       }
-    });
-
-    const getMultiSigCosigner = computed(() => {
-      if(networkState.currentNetworkProfileConfig){
-        let cosigners = MultisigUtils.getCosignerInWallet(accounts.value.find(account => account.address == selectedAccAdd.value)?accounts.value.find(account => account.address == selectedAccAdd.value).publicKey:'');
-        let list = [];
-        cosigners.cosignerList.forEach( publicKey => {
-          list.push({
-            publicKey,
-            name: findAcc(publicKey).name,
-            balance: findAcc(publicKey).balance,
-            address: findAcc(publicKey).address
-          });
-        });
-
-        cosigners.cosignerList = list;
-        return cosigners;
-      }else{
-        return {hasCosigner:false,cosignerList:[]}
+      catch (e) {
+        return 0
       }
-      
-    });
-
-    const isNotCosigner = computed(() => getMultiSigCosigner.value.cosignerList.length == 0 && isMultiSig(selectedAccAdd.value));
+    }
 
     const showNoBalance = computed(() => {
-      if (!isMultiSig(selectedAccAdd.value)){
-        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value) 
+      if (!selectedAddress.value) {
+        return
       }
-      else if(isNotCosigner.value){
-        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value) 
-      }else{
-        return balanceNumber.value < (rentalFee.value + transactionFeeExact.value + lockFundTotalFee.value)
+      if(selectedMultisigAddress.value) {
+        if(multisigBalance.value < (rentalFee.value)){
+          return true
+        }
+        else if(balance.value < (transactionFeeExact.value + lockFundTotalFee.value)){
+          return true
+        }
+        else{
+          return false
+        }
+      } else {
+        return balance.value < (rentalFee.value + transactionFeeExact.value) 
       }
     });
 
-    if(balanceNumber.value < (rentalFee.value + transactionFee.value)){
-      if(!isNotCosigner.value){
-        // showNoBalance.value = true;
-      }
+    if(balance.value < (rentalFee.value + transactionFeeExact.value)){
       disabledClear.value = true;
       disabledDuration.value = true;
       durationCheckDisabled.value = true;
@@ -248,61 +209,54 @@ export default {
       durationCheckDisabled.value = false;
     }
 
-    const moreThanOneAccount = computed(()=>{
-      return accounts.value.length > 1;
-    });
-
-    const changeSelection = (address) => {
-      let account = walletState.currentLoggedInWallet.accounts.find(account => account.address == address);
-      if(!account){
-        account = walletState.currentLoggedInWallet.others.find(account => account.address == address);
-      }
-      selectedAccName.value = account.name;
-      selectedAccAdd.value = address;
-      balance.value = Helper.toCurrencyFormat(account.balance, AppState.nativeToken.divisibility);
-      balanceNumber.value = account.balance;
-      // showNoBalance.value = ((account.balance < (rentalFee.value + transactionFeeExact.value)) && !isNotCosigner.value) ?true:false;
-      currentSelectedName.value = account.name;
-      ownerPublicAccount.value = WalletUtils.createPublicAccount(account.publicKey, AppState.networkType);
-    }
-
     const clearInput = () => {
       walletPassword.value = '';
       divisibility.value = '0';
       supply.value = '0';
       duration.value = '1';
       durationOption.value = 'month';
-      disabledDuration.value = '';
+      disabledDuration.value = false;
       isTransferable.value = false;
       isMutable.value = false;
     };
 
-    /*
-
-    watch(durationOption, () => {
-      duration.value = '1';
-    });
-
-    watch(disabledDuration, (n) => {
-      (n)?duration.value = '':duration.value = '1';
-    });
-
-    watch(duration, (n) =>{
-      if(durationOption.value=='year' && n > 10){
-        showDurationErr.value = true;
-      }else if(durationOption.value=='month' && n > 120){
-        showDurationErr.value = true;
-      }else{
-        showDurationErr.value = false;
+    watch(selectedAddress, async (newValue, oldValue) => {
+      if (newValue == null) {
+        balance.value = 0
+        clearInput()
+        selectedMultisigName.value = null
+        selectedMultisigAddress.value = null
+        multisigPublicAccount.value = null
       }
-    });
-    */
+      else if (newValue != oldValue) {
+        clearInput()
+        selectedMultisigName.value = null
+        selectedMultisigAddress.value = null
+        multisigPublicAccount.value = null
+        balance.value = await fetchAccountBalance(newValue)
+      }
+    })
+
+    watch(selectedMultisigAddress, async (multisigNewValue, multisigOldValue) => {
+      if (multisigNewValue == null) {
+        multisigBalance.value = 0
+        clearInput()
+        selectedMultisigName.value = null
+        selectedMultisigAddress.value = null
+        multisigPublicAccount.value = null
+        balance.value = await fetchAccountBalance(selectedAddress.value)
+      }
+      else if (multisigNewValue != multisigOldValue) {
+        clearInput()
+        multisigBalance.value = await fetchAccountBalance(multisigNewValue)
+      }
+    })
 
     // calculate fees
     const totalFee = computed(() => {
       // if multisig
-      if(isMultiSig(selectedAccAdd.value)){
-        return parseFloat(lockFundTotalFee.value) + transactionFeeExact.value;
+      if(selectedMultisigAddress){
+        return lockFundTotalFee.value + transactionFeeExact.value;
       }else{
         return rentalFee.value + transactionFeeExact.value;
       }
@@ -310,23 +264,6 @@ export default {
 
     const totalFeeFormatted = computed(() => {
       return Helper.amountFormatterSimple(totalFee.value, 0);
-    });
-
-
-    watch(totalFee, (n) => {
-      if(balanceNumber.value < n && !isNotCosigner.value){
-        showNoBalance.value = true;
-      }else{
-        showNoBalance.value = false;
-      }
-    });
-
-    watch(isNotCosigner, (n) => {
-      if(n){
-        showNoBalance.value = true;
-      }else{
-        showNoBalance.value = false;
-      }
     });
 
     const updateSupplyErr = (bolError) => {
@@ -339,147 +276,50 @@ export default {
         err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
         return
       }
-      if(cosigner.value){
-        AssetsUtils.createAssetMultiSig( cosigner.value, walletPassword.value, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value); 
+      let assetPayload : {
+        txnPayload: string,
+        hashLockTxnPayload?: string
+      },{} = {}
+      if(selectedMultisigAddress.value){
+        const assetDefinition = AppState.buildTxn.mosaicDefinition(multisigPublicAccount.value, isMutable.value, isTransferable.value, Number(divisibility.value));
+        const assetDefinitionTx = assetDefinition.toAggregateV1(multisigPublicAccount.value);
+        let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase
+        const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(multisigPublicAccount.value);
+        const innerTxn = [assetDefinitionTx,assetSupplyChangeTx];
+        assetPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,null,innerTxn)
       }else{
-        AssetsUtils.createAsset( selectedAccAdd.value, walletPassword.value, ownerPublicAccount.value, supply.value, isMutable.value, isTransferable.value, divisibility.value);
+        const assetDefinition = AppState.buildTxn.mosaicDefinition(ownerPublicAccount.value, isMutable.value, isTransferable.value, Number(divisibility.value));
+        const assetDefinitionTx = assetDefinition.toAggregateV1(ownerPublicAccount.value);
+        let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase;
+        const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(ownerPublicAccount.value);
+        let createAssetAggregateTransaction = AppState.buildTxn.aggregateComplete([assetDefinitionTx, assetSupplyChangeTx]);
+        assetPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,createAssetAggregateTransaction)
       }
       clearInput();
-      router.push({ name: "ViewAccountPendingTransactions",params:{address:selectedAccAdd.value} })
+      TransactionState.lockHashPayload = assetPayload.hashLockTxnPayload
+      TransactionState.transactionPayload = assetPayload.txnPayload
+      TransactionState.selectedAddress = selectedAddress.value
+      router.push({ name: "ViewConfirmTransaction" })
     };
 
-    const cosigner = computed(() => {
-      if(getMultiSigCosigner.value.cosignerList.length > 0){
-        if(getMultiSigCosigner.value.cosignerList.length > 1){
-          return cosignerAddress.value;
-        }else{
-          return findAcc(getMultiSigCosigner.value.cosignerList[0].publicKey).address;
-        }
-      }else{
-        return '';
-      }
-    });
-
-    cosignerAddress.value = getMultiSigCosigner.value.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
-    
-    watch(getMultiSigCosigner,n=>{
-      if(n.cosignerList.length>0){
-        cosignerAddress.value = n.cosignerList.length>0?getMultiSigCosigner.value.cosignerList[0].address:''
-      }
+    emitter.on("select-account", (address: string) => {
+      selectedAddress.value = address
     })
 
-    const checkCosignBalance = computed(() => {
-      let cosignBalance = findAccWithAddress(cosignerAddress.value)?findAccWithAddress(cosignerAddress.value).balance:0;
-      return Helper.toCurrencyFormat(cosignBalance);
+    emitter.on("select-account-public-key", (publicKey: string) =>{
+      ownerPublicAccount.value = WalletUtils.createPublicAccount(publicKey,AppState.networkType)
     })
 
-    if (isMultiSigBool.value) {
-      let cosigner = getMultiSigCosigner.value.cosignerList
-      if (cosigner.length > 0) {
-        cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
-        if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
-          disableAllInput.value = true;
-          cosignerBalanceInsufficient.value = true;
-        } else {
-          disableAllInput.value = false;
-          cosignerBalanceInsufficient.value = false;
-        }
-      } else {
-        disableAllInput.value = true;
-      }
-    }
-    watch(selectedAccAdd, (n, o) => {
-      isMultiSigBool.value = isMultiSig(n);
-      if (isMultiSigBool.value) {
-        let cosigner = getMultiSigCosigner.value.cosignerList
-      if (cosigner.length > 0) {
-        cosignerAddress.value = walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==cosigner[0].publicKey).address 
-        if (findAccWithAddress(cosignerAddress.value).balance < lockFundTotalFee.value ) {
-          disableAllInput.value = true;
-          cosignerBalanceInsufficient.value = true;
-        } else {
-          disableAllInput.value = false;
-          cosignerBalanceInsufficient.value = false;
-        }
-      } else {
-        disableAllInput.value = true;
-        cosignerBalanceInsufficient.value = true;
-      }
-    } else {
-      disableAllInput.value = false;
-      cosignerBalanceInsufficient.value = false;
-    }
-  });
-    watch(cosignerAddress, (n, o) => {
-    if (n != o) {
-        if (
-        accounts.value.find((element) => element.address == n).balance <
-        lockFundTotalFee.value
-      ) {
-        cosignerBalanceInsufficient.value = true;
-        disableAllInput.value = true;
-      } else {
-        cosignerBalanceInsufficient.value = false;
-        disableAllInput.value = false
-      }
-      
-    }
-  });
+    emitter.on("select-multisig-account", (node: TreeNode) => {
+      selectedMultisigName.value = node.label
+      selectedMultisigAddress.value = node.value
+      multisigPublicAccount.value = WalletUtils.createPublicAccount(node.publicKey,AppState.networkType)
+    })
+    emitter.on("CLOSE_MULTISIG", () => {
+      selectedMultisigName.value = null
+      selectedMultisigAddress.value = null
+    })
 
-    return {
-      findAcc,
-      accounts,
-      moreThanOneAccount,
-      currentSelectedName,
-      selectedAccName,
-      selectedAccAdd,
-      isTransferable,
-      isMutable,
-      balance,
-      balanceNumber,
-      showNoBalance,
-      showSupplyErr,
-      showDivisibilityErr,
-      err,
-      walletPassword,
-      disableCreate,
-      clearInput,
-      showPasswdError,
-      changeSelection,
-      supply,
-      divisibility,
-      transactionFee,
-      disabledPassword,
-      disabledClear,
-      createAsset,
-      disabledDuration,
-      durationOption,
-      duration,
-      showDurationErr,
-      durationCheckDisabled,
-      isMultiSigBool,
-      rentalFeeCurrency,
-      lockFundCurrency,
-      currencyName,
-      lockFundTxFee,
-      lockFundTotalFee,
-      totalFeeFormatted,
-      getMultiSigCosigner,
-      cosignerBalanceInsufficient,
-      cosignerAddress,
-      isNotCosigner,
-      currentNativeTokenName,
-      currentNativeTokenDivisibility,
-      walletState,
-      networkState,
-      Helper,
-      updateSupplyErr,
-      defaultAcc,
-      checkCosignBalance,
-      disabledInput
-    }
-  },
-}
 </script>
 <style scoped>
 /* Chrome, Safari, Edge, Opera */

@@ -27,7 +27,7 @@
   }>()
 
 
- const modelValue = defineModel()
+ const modelValue = defineModel<string>()
  
 </script>
 

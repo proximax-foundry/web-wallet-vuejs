@@ -301,8 +301,16 @@ export class Helper {
         , decimals).toNumber();
     }
 
+    static safeSum(value: Array<number>): number{
+        return math.number(math.sum(math.bignumber(value)));
+    }
+
     static bigNumber(value: number): math.BigNumber{
         return math.bignumber(value);
+    }
+
+    static samplePubAcc(): PublicAccount{
+        return PublicAccount.createFromPublicKey("0".repeat(64), NetworkType.TEST_NET);
     }
 }
 
