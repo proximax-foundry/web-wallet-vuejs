@@ -46,6 +46,7 @@ import { TransactionMapping } from "tsjs-xpx-chain-sdk";
 import { computed, ref, watch } from "vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { TransactionUtils } from "@/util/transactionUtils";
+import { AppState } from "@/state/appState";
 
 const props = defineProps({
   address: String,
@@ -160,15 +161,15 @@ let loadInQueueTransactions = () => {
 };
 watch(
   [
-     listenerState.unconfirmedTransactions,
+   AppState.txnActivityLog,
+   AppState.txnCosignLog,
+   AppState.txnSwapLog,
    listenerState.autoAnnounceSignedTransaction,
-   ()=>listenerState.aggregateBondedTxLength,
-   listenerState.confirmedTransactions
+   ()=>listenerState.aggregateBondedTxLength
   ],
   async ()=> {
       await loadUnconfirmedTransactions();
       await loadPartialTransactions();
-      await loadUnconfirmedTransactions();
       loadInQueueTransactions();
 
   },{immediate:true,deep:true}
