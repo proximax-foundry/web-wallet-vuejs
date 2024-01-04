@@ -35,6 +35,12 @@
               class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
             <div class='text-center text-xs font-semibold'>Harvester Transaction</div>
           </router-link>
+          <router-link :to="{ name: 'ViewWallets' }" class='mx-auto '>
+           <!--  <img src="@/assets/img/icon-wallet.svg"
+              class="ml-auto mr-auto mt-4 mb-3 h-18 w-18"> -->
+              <font-awesome-icon icon="fa-solid fa-wallet" class="ml-auto mr-auto mt-4 mb-3 h-20 w-20"/>
+            <div class='text-center text-xs font-semibold'>Wallets</div>
+          </router-link>
         </div>
       </div>
     </div>
