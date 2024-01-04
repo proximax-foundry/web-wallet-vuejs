@@ -22,7 +22,20 @@
           </router-link>
         </div>
         <!-- <div class="text-white text-xs ml-6 font-semibold">CREATE NEW</div> -->
+        <router-link
+          @click="isOpen=false"
+            class="flex items-center px-12  py-2 mt-4"
+            :class="[
+              $route.name === 'transfer'
+                ? 'bg-gray-600 bg-opacity-25 text-gray-100 border-gray-100'
+                : 'border-gray-900 text-white hover:bg-gray-600 hover:bg-opacity-25 hover:text-gray-100',
+            ]"
+            to="/dashboard"
+          >
+            <font-awesome-icon icon="fa-solid fa-home" />
 
+            <span class="mx-4">Dashboard</span>
+          </router-link>
           <router-link
           @click="isOpen=false"
             class="flex items-center px-12  py-2 mt-4"
