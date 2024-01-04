@@ -13,7 +13,7 @@
             class="mx-auto px-6 flex text-txs lg:text-xs justify-between container pb-5 items-center"
           >
             <div class="ml-2 sm:ml-0">
-              {{ $t('home.copyright') }}
+              {{ $t('home.copyright', {date: lastActiveYear}) }}
               <a
                 href="https://t.me/proximaxhelpdesk"
                 target="_new"
@@ -36,4 +36,5 @@ import NavigationMenu from './NavigationMenu.vue'
 import packageData from '../../package.json'
 
 const version = packageData.version
+const lastActiveYear = BUILD_YEAR;
 </script>
