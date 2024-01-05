@@ -10,7 +10,7 @@
         class="mx-auto text-center flex text-txs lg:text-xs justify-between container text-black-primary pb-5 items-center"
       >
         <div class="ml-2 sm:ml-0 text-white">
-          {{ $t('home.copyright') }}
+          {{ $t('home.copyright', {date: lastActiveYear}) }}
           <a
             href="https://t.me/proximaxhelpdesk"
             target="_new"
@@ -31,4 +31,5 @@ import HeaderComponent from '@/components/HeaderComponent.vue'
 import packageData from '../../package.json'
 
 const version = packageData.version
+const lastActiveYear = BUILD_YEAR;
 </script>

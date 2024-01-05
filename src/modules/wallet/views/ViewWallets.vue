@@ -1,6 +1,6 @@
 <template>
 
-     <div :class="`${isLogin?'lg:ml-60':''} p-1 text-gray-700`">
+     <div class=" p-1 text-gray-700">
         <h1 :class="`${isLogin?'':'text-white'} text-lg mt-10 xl:mb-5 md:text-xl sm:mb-5  text-center`">{{$t('wallet.myWallets')}}</h1>
         <div :class="`${isLogin?'':'text-white'} text-sm md:px-5 xl:px-5 xl:mt-0 text-center`">{{$t('wallet.walletsAvailable')}}</div>
         <div class="mt-4" :key="item" v-for="item in wallets">

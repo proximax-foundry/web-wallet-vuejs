@@ -55,7 +55,9 @@ watch(selectedAddress, (n) => {
         const allAccounts = [...walletState.currentLoggedInWallet.accounts, ...walletState.currentLoggedInWallet.others]
         const findAcc = allAccounts.find(acc => acc.publicKey == x.publicKey)
         return {
-            label: findAcc?  walletState.currentLoggedInWallet.convertAddressToName(findAcc.address) : PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain() ,
+            label: findAcc?  walletState.currentLoggedInWallet.convertAddressToName(findAcc.address) : 
+                walletState.currentLoggedInWallet.convertAddressToName(PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain())?
+                walletState.currentLoggedInWallet.convertAddressToName(PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain()) : PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain(),
             value: PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain(),
             publicKey: x.publicKey
         }

@@ -30,10 +30,16 @@
             <div class='text-center text-xs font-semibold'>SDA Exchange</div>
           </div>
           <Menu ref="menu" id="overlay_menu" :model="items" :popup="true" />
-          <router-link :to="{ name: 'ViewHarvesterTxn' }" class='w-40 '>
+          <router-link :to="{ name: 'ViewHarvesterTxn' }" class='mx-auto '>
             <img src="@/modules/services/submodule/portfolio/img/icon-portfolio.svg"
               class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
             <div class='text-center text-xs font-semibold'>Harvester Transaction</div>
+          </router-link>
+          <router-link :to="{ name: 'ViewWallets' }" class='mx-auto '>
+           <!--  <img src="@/assets/img/icon-wallet.svg"
+              class="ml-auto mr-auto mt-4 mb-3 h-18 w-18"> -->
+              <font-awesome-icon icon="fa-solid fa-wallet" class="ml-auto mr-auto mt-4 mb-3 h-20 w-20"/>
+            <div class='text-center text-xs font-semibold'>Wallets</div>
           </router-link>
         </div>
       </div>
