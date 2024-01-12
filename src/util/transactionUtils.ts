@@ -28,6 +28,7 @@ import {
   TransferTransaction,
   NetworkType,
   Password,
+  TransactionMapping,
 } from "tsjs-xpx-chain-sdk";
 import { AppState } from "@/state/appState";
 import { ChainConfigUtils } from "./chainConfigUtils";
@@ -580,7 +581,7 @@ export class TransactionUtils {
 
     return addresses;
   }
-  static signTxnWithPassword = (selectedAddress: string, selectedMultisigAddress: string, walletPassword: string, transaction?: Transaction, innerTransactions?: InnerTransaction[]):{txnPayload:string, hashLockTxnPayload?: string} => {
+  static signTxnWithPassword = (selectedAddress: string, selectedMultisigAddress: string, walletPassword: string, transaction: string|string[]):{txnPayload:string, hashLockTxnPayload?: string} => {
     const genHash = networkState.currentNetworkProfile.generationHash
 
     let transactionBuilder = AppState.buildTxn
@@ -591,20 +592,24 @@ export class TransactionUtils {
     let privateKey = WalletUtils.decryptPrivateKey(passwordInstance, accountDetails.encrypted, accountDetails.iv);
     const account = Account.createFromPrivateKey(privateKey, AppState.networkType,1);    
 
-    if (!selectedMultisigAddress) { // no cosigner, normal transaction
-      const signedTransaction = account.preV2Sign(transaction, genHash);
+    if (!selectedMultisigAddress && typeof transaction === "string")  { // no cosigner, normal transaction
+      let txn = TransactionMapping.createFromPayload(transaction)
+      const signedTransaction = account.preV2Sign(txn, genHash);
       return {txnPayload : signedTransaction.payload};
     } else { // there is a cosigner, aggregate  bonded transaction
-      let innerTxn: InnerTransaction[] = []
-      if(innerTransactions){
-        innerTxn = innerTransactions
+      let innerTxn = []
+      if(typeof transaction !== "string"){
+        for(let i=0; i<transaction.length; ++i){
+          innerTxn.push(TransactionMapping.createFromPayload(transaction[i]))
+        }
       }
       else{
+        let txn = TransactionMapping.createFromPayload(transaction)
         const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedMultisigAddress);
         const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === selectedMultisigAddress);
         const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
         const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType);
-        innerTxn = [transaction.toAggregateV1(multisigPublicAccount)];
+        innerTxn = [txn.toAggregateV1(multisigPublicAccount)];
       }
       const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)
       const aggregateBondedTransactionSigned = account.preV2Sign(aggregateBondedTransaction, genHash);

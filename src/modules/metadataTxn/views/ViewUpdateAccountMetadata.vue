@@ -450,6 +450,7 @@ export default {
         txnPayload: string,
         hashLockTxnPayload?: string
       },{} = {}
+      let unsignedTxnPayload: string
       if(scopedMetadataKeyType.value==1){ //utf8
         let hexValue = Convert.utf8ToHex(inputScopedMetadataKey.value)
         tempHexData = hexValue + "00".repeat((16-hexValue.length)/2)
@@ -463,22 +464,24 @@ export default {
       .oldValue(oldValue.value)
       .calculateDifferences()
       .build()
-      let aggregateTx = AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([accountMetadataTransaction.toAggregateV1(targetPublicAccount.value)]).build()
+      let aggregateTxPayload = AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([accountMetadataTransaction.toAggregateV1(targetPublicAccount.value)]).build().serialize()
       let selectedAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == targetPublicAccount.value.publicKey).address 
       if(targetAccIsMultisig.value){
         let cosignerAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosigner.value).address
-        let innerTxn = [accountMetadataTransaction.toAggregateV1(targetPublicAccount.value)]
-        metadataPayload = TransactionUtils.signTxnWithPassword(cosignerAddress,selectedAddress,walletPassword.value,null,innerTxn)
+        unsignedTxnPayload = accountMetadataTransaction.toAggregateV1(targetPublicAccount.value).serialize()
+        TransactionState.selectedAddress = cosignerAddress
+        TransactionState.selectedMultisigAddress = selectedAddress
+        //metadataPayload = TransactionUtils.signTxnWithPassword(cosignerAddress,selectedAddress,walletPassword.value,null,innerTxn)
       }else{
-        metadataPayload = TransactionUtils.signTxnWithPassword(selectedAddress,null,walletPassword.value,aggregateTx)
+        unsignedTxnPayload = aggregateTxPayload
+        TransactionState.selectedAddress = selectedAddress
+        //metadataPayload = TransactionUtils.signTxnWithPassword(selectedAddress,null,walletPassword.value,aggregateTxPayload)
       }
       inputScopedMetadataKey.value=""
       oldValue.value = ""
       newValue.value=""
       walletPassword.value=""
-      TransactionState.lockHashPayload = metadataPayload.hashLockTxnPayload
-      TransactionState.transactionPayload = metadataPayload.txnPayload
-      TransactionState.selectedAddress = targetPublicAccount.value.address.plain()
+      TransactionState.unsignedTransactionPayload = unsignedTxnPayload
       router.push({ name: "ViewConfirmTransaction" })
     }
     const aggregateFee = ref(0);

@@ -62,6 +62,10 @@
                             {{ $t('transfer.enableEncryption') }}
                         </label>
                     </div>
+                    <div v-if="isEncrypted">
+                        <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"
+                            v-model="walletPassword" icon="lock" class="mt-5 mb-3" />
+                    </div>
                     <FieldValidationInput v-if="!showAddressError && requirePublicKey && isEncrypted && currentBytes > 0"
                         placeholder="Recipient Public Key" v-model="publicKeyInput" v-debounce:1000="checkPublicKey"
                         :showError="showPublicKeyError" />
@@ -72,9 +76,6 @@
                         :native-amount="nativeAmount" :native-token-balance="nativeTokenBalance" :lock-fund="lockFund"
                         :lock-fund-tx-fee="lockFundTxFee" :selected-multisig-address="selectedMultisigAddress"
                         :txn-fee="txnFee" :total-fee="totalFee" :selected-assets="selectedAssets" />
-                    <div class='font-semibold text-xs text-white mb-1.5'>{{ $t('general.enterPasswordContinue') }}</div>
-                    <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"
-                        v-model="walletPassword" icon="lock" class="mt-5 mb-3" />
                     <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
                         :disabled="disableCreate" @click="makeTransferPayload()">
                         {{ $t('general.transfer') }}
@@ -170,8 +171,8 @@ const signerNativeTokenBalance = ref(0)
 
 const disableCreate = computed(() => {
     return !(
-        walletPassword.value.match(passwdPattern) &&
-        !showAddressError.value
+        isEncrypted.value? walletPassword.value.match(passwdPattern): true
+        && !showAddressError.value
         && !showBalanceErr.value
         && currentBytes.value < messageLimit.value
         && canEncrypt.value
@@ -310,52 +311,34 @@ const toast = useToast()
 
 const router = useRouter()
 
-const createTransferTxn = async () => {
-    const isPasswordCorrect = await TransferUtils.createTransaction(
-            recipientInput.value,
-            nativeAmount.value,
-            message.value,
-            selectedAssets.value.map(asset => {
-                return {
-                    id: asset.id,
-                    amount: parseFloat(asset.amount),
-                    divisibility: asset.divisibility
-                }
-            }),
-            walletPassword.value,
-            selectedAddress.value,
-            selectedMultisigAddress.value,
-            isEncrypted.value,
-            publicKeyInput.value
-        )
-        if (!isPasswordCorrect) {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: "Password is incorrect",
-                group: 'br-custom',
-                life: 1000
-            });
-            return
-        }
+const verifyPassword = () => {
+    if (isEncrypted.value){
+        let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword.value)
 
-        router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
-        clearInput()
+        if (!verify) {
+            toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: "Password is incorrect",
+                    group: 'br-custom',
+                    life: 1000
+                });
+            return false
+        }
+        else{
+            return true
+        }
+    }
+    else{
+        return true
+    }
 }
 
 const makeTransferPayload = async () => {
-    // verify password
-    let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword.value)
+    let verifyResult = verifyPassword()
 
-    if (!verify) {
-        toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: "Password is incorrect",
-                group: 'br-custom',
-                life: 1000
-            });
-            return
+    if (!verifyResult) {
+        return
     }
     else{
         let xpxAmount = parseFloat(nativeAmount.value) * Math.pow(10, AppState.nativeToken.divisibility);
@@ -387,13 +370,12 @@ const makeTransferPayload = async () => {
 
         let initiatorAcc: WalletAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedAddress.value)
 
-        let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword.value), initiatorAcc.encrypted, initiatorAcc.iv)
-
         // sending encrypted message
 
         let msg :Message;
 
         if (isEncrypted.value &&  message.value.length>0) {
+        let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword.value), initiatorAcc.encrypted, initiatorAcc.iv)
         try {
             const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(recipientInput.value))
             msg = EncryptedMessage.create(message.value, accountInfo.publicAccount, privateKey);
@@ -409,23 +391,14 @@ const makeTransferPayload = async () => {
         .mosaics(mosaics)
         .message(msg)
         .build()
+        .serialize()
 
-        let transferPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,transferTransaction)
-
-        TransactionState.lockHashPayload = transferPayload.hashLockTxnPayload
-        TransactionState.transactionPayload = transferPayload.txnPayload
+        TransactionState.unsignedTransactionPayload = transferTransaction
         TransactionState.selectedAddress = selectedAddress.value
+        TransactionState.selectedMultisigAddress = selectedMultisigAddress.value
         router.push({ name: "ViewConfirmTransaction" })
         
         clearInput()
-    }
-}
-
-const makeTransfer = () => {
-    if (nativeAmount.value == "0" && selectedAssets.value.length == 0) {
-      toggleConfirm.value = true;
-    } else {
-        createTransferTxn()
     }
 }
 
@@ -526,17 +499,6 @@ emitter.on("CLOSE_MULTISIG", () =>{
     selectedMultisigName.value = null
     selectedMultisigAddress.value = null
 })
-
-emitter.on("CLOSE_CONFIRM_SEND_MODAL", (emitValue: boolean) => {
-    toggleConfirm.value = emitValue;
-  });
-emitter.on("CONFIRM_PROCEED_SEND", (emitValue: boolean) => {
-
-  if (emitValue) {
-    toggleConfirm.value = false
-    createTransferTxn()
-  }
-});
 
 const onNodeSelect = (node: TreeNode) => {
     toggleContact.value = false
