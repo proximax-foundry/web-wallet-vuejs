@@ -53,12 +53,14 @@
             <div class="text-xxs border-t-2 text-center py-1 uppercase">{{$t('multisig.ofCosignatories',{value:maxNumDeleteUser})}}</div>
           </div>
         </div>
+        <div class="pl-6">
+          <div class='text-xs font-semibold my-3'>{{$t('general.enterPasswordContinue')}}</div>
+          <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
+        </div>
       </div>
       <div class='bg-navy-primary p-6 lg:col-span-1'>
         <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig-already="isMultisig" :on-partial="onPartial" :transaction-fee="String(aggregateFee)" :total-fee-formatted="totalFeeFormatted" :lock-fund-currency-convert="lockFundCurrency" :lock-fund-tx-fee-convert="String(lockFundTxFee)" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
         <div class="mt-5"/>
-        <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
         <div class="mt-3"><button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="convertAccount()" :disabled="disableSend">{{$t('multisig.updateCosignatories')}}</button></div>
         <div class="text-center">
           <router-link :to="{name: 'ViewMultisigHome',params:{address:address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
@@ -346,7 +348,6 @@ export default {
         passwordErr.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
-        let multisigPayload = {}
         const multisigCosignatory = [];
   
         const accountDetails = wallet.accounts.find(
@@ -410,15 +411,14 @@ export default {
           .modifications(multisigCosignatory)
           .build();
 
-        multisigPayload = TransactionUtils.signTxnWithPassword(acc.value.address,accountToConvert.address.plain(),passwd.value,convertIntoMultisigTransaction)
         passwordErr.value = '';
         // toggleAnounceNotification.value = true;
         // var audio = new Audio(require('@/assets/audio/ding.ogg'));
         // audio.play();
         clear();
-        TransactionState.lockHashPayload = multisigPayload.hashLockTxnPayload
-        TransactionState.transactionPayload = multisigPayload.txnPayload
-        TransactionState.selectedAddress = p.address
+        TransactionState.unsignedTransactionPayload = convertIntoMultisigTransaction.serialize()
+        TransactionState.selectedAddress = acc.value.address
+        TransactionState.selectedMultisigAddress = accountToConvert.address.plain()
         router.push({ name: "ViewConfirmTransaction" })
       } 
     };

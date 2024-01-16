@@ -45,9 +45,6 @@
           <TxnSummary :signer-native-token-balance="balance" :namespace-rental-fee-currency="rentalFeeCurrency"
             :native-token-balance="selectedMultisigAddress ? multisigBalance : balance" :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee"
             :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact" :total-fee="totalFee" />
-          <div class='text-xs text-white my-5'>{{ $t('general.enterPasswordContinue') }}</div>
-          <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')"
-            :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
           <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white"
             :disabled="disableCreate" @click="createNamespace">{{ $t('namespace.registerNamespace') }}</button>
           <div class="text-center">
@@ -111,7 +108,6 @@ const disableSelectNamespace = ref(false);
 const namespaceName = ref('');
 const showDurationErr = ref(false);
 const duration = ref('1');
-const walletPassword = ref('');
 const err = ref('');
 const namespaceErrorMessage = ref(t('namespace.validName'));
 const currentSelectedName = ref('');
@@ -174,7 +170,7 @@ const lockFundTxFee = computed(() => {
 const lockFundTotalFee = computed(() => lockFund.value + lockFundTxFee.value);
 
 const disableCreate = computed(() => !(
-  walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && !showNamespaceNameError.value && selectNamespace.value
+  namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && !showNamespaceNameError.value && selectNamespace.value
 ));
 
 const selectedMultisigAddress = ref<string | null>(null)
@@ -282,26 +278,16 @@ watch(selectNamespace, newValue => {
 }, { immediate: true })
 
 const createNamespace = () => {
-  let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword.value)
-  if (!verifyPassword) {
-    err.value = t('general.walletPasswordInvalid', { name: walletState.currentLoggedInWallet.name })
-    return
-  }
-  let namespacePayload : {
-    txnPayload: string,
-    hashLockTxnPayload?: string
-  },{} = {}
   let buildTransactions = AppState.buildTxn;
   if (selectNamespace.value === '1') {
-    let registerRootNamespaceTransaction = buildTransactions.registerRootNamespace(namespaceName.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value))));
-    namespacePayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,registerRootNamespaceTransaction)
+    let unsignedRegisterRootNamespaceTransaction = buildTransactions.registerRootNamespace(namespaceName.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value)))).serialize();
+    TransactionState.unsignedTransactionPayload = unsignedRegisterRootNamespaceTransaction
   } else {
-    let registerSubNamespaceTransaction = buildTransactions.registersubNamespace(selectNamespace.value, namespaceName.value);
-    namespacePayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,registerSubNamespaceTransaction)
+    let unsignedRegisterSubNamespaceTransaction = buildTransactions.registersubNamespace(selectNamespace.value, namespaceName.value).serialize();
+    TransactionState.unsignedTransactionPayload = unsignedRegisterSubNamespaceTransaction
   }
-  TransactionState.lockHashPayload = namespacePayload.hashLockTxnPayload
-  TransactionState.transactionPayload = namespacePayload.txnPayload
   TransactionState.selectedAddress = selectedAddress.value
+  TransactionState.selectedMultisigAddress = selectedMultisigAddress.value
   router.push({ name: "ViewConfirmTransaction" })
 };
 

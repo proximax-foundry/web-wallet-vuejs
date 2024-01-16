@@ -598,17 +598,17 @@ export class TransactionUtils {
       return {txnPayload : signedTransaction.payload};
     } else { // there is a cosigner, aggregate  bonded transaction
       let innerTxn = []
+      const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedMultisigAddress);
+      const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === selectedMultisigAddress);
+      const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
+      const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType);
       if(typeof transaction !== "string"){
         for(let i=0; i<transaction.length; ++i){
-          innerTxn.push(TransactionMapping.createFromPayload(transaction[i]))
+          innerTxn.push(TransactionMapping.createFromPayload(transaction[i]).toAggregateV1(multisigPublicAccount))
         }
       }
       else{
         let txn = TransactionMapping.createFromPayload(transaction)
-        const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedMultisigAddress);
-        const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === selectedMultisigAddress);
-        const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
-        const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType);
         innerTxn = [txn.toAggregateV1(multisigPublicAccount)];
       }
       const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)

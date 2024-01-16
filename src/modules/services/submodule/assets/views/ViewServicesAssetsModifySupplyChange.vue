@@ -67,8 +67,6 @@
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
         <TransactionFeeDisplay :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="balance" :selected-acc-add="selectedAccAdd"/>
-        <div class='text-xs text-white mt-5 mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableModify" @click="modifyAsset">{{$t('asset.modifyAssetSupply')}}</button>
         <div class="text-center">
           <router-link :to="{name: 'ViewDashboard'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
@@ -121,7 +119,6 @@ export default {
     let maxAmount = 900000000000000;
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const showSupplyErr = ref(false);
-    const walletPassword = ref('');
     const err = ref('');
     const disabledPassword = ref(false);
     const disabledSupply = ref(false);
@@ -158,7 +155,7 @@ export default {
 
 
     const disableModify = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (supply.value > 0) && !showSupplyErr.value && !showNoBalance.value & !isNotCosigner.value
+      (supply.value > 0) && !showSupplyErr.value && !showNoBalance.value & !isNotCosigner.value
     ));
 
     
@@ -338,23 +335,16 @@ export default {
     
 
     const modifyAsset = () => {
-      let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
-      if(!verifyPassword){
-        err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
-        return
-      }
-      let assetModifyPayload = {}
       const buildTransactions = AppState.buildTxn;
       let supplyChangeType = (selectIncreaseDecrease.value == 'increase')?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
-      let createAssetAggregateTransaction = buildTransactions.buildMosaicSupplyChange(new MosaicId(selectAsset.value), supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(assetDivisibility.value, Number(supply.value))));
+      let unsignedAssetAggregateTransaction = buildTransactions.buildMosaicSupplyChange(new MosaicId(selectAsset.value), supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(assetDivisibility.value, Number(supply.value))));
       if(cosigner.value){
-        assetModifyPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,createAssetAggregateTransaction)
+        TransactionState.selectedAddress = cosigner.value
+        TransactionState.selectedMultisigAddress = selectedAccAdd.value
       }else{
-        assetModifyPayload = TransactionUtils.signTxnWithPassword(selectedAccAdd.value,null,walletPassword.value,createAssetAggregateTransaction)
+        TransactionState.selectedAddress = selectedAccAdd.value
       }
-      TransactionState.lockHashPayload = assetModifyPayload.hashLockTxnPayload
-      TransactionState.transactionPayload = assetModifyPayload.txnPayload
-      TransactionState.selectedAddress = selectedAccAdd.value
+      TransactionState.unsignedTransactionPayload = unsignedAssetAggregateTransaction.serialize()
       router.push({ name: "ViewConfirmTransaction" })
     };
 
@@ -442,7 +432,6 @@ export default {
       totalFeeFormatted,
       showSupplyErr,
       err,
-      walletPassword,
       disableModify,
       showPasswdError,
       supply,

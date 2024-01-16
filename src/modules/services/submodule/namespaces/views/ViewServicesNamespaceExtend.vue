@@ -43,8 +43,6 @@
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
         <TransactionFeeDisplay :namespace-rental-fee-currency="rentalFeeCurrency" :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="balance" :selected-acc-add="selectedAccAdd"/>
-        <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="extendNamespace">{{$t('general.extendDuration')}}</button>
         <div class="text-center">
           <router-link :to="{name: 'ViewDashboard'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
@@ -98,7 +96,6 @@ export default {
     const namespaceSelect = ref(null);
     const showDurationErr = ref(false);
     const duration = ref("1");
-    const walletPassword = ref('');
     const err = ref('');
     const disabledPassword = ref(false);
     const disabledDuration = ref(false);
@@ -179,7 +176,7 @@ export default {
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value)
+      (!showDurationErr.value) && (!showNoBalance.value) && (!isNotCosigner.value)
     ));
 
     const selectedAccName = ref('');
@@ -292,22 +289,15 @@ export default {
     });
 
     const extendNamespace = () => {
-      let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
-      if(!verifyPassword){
-        err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
-        return
-      }
-      let namespaceExtendPayload = {}
       let buildTransactions = AppState.buildTxn;
-      const extendNamespaceTx = buildTransactions.registerRootNamespace(selectNamespace.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value))));
+      const unsignedExtendNamespaceTx = buildTransactions.registerRootNamespace(selectNamespace.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value)))).serialize();
       if(cosigner.value){
-        namespaceExtendPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,extendNamespaceTx)
+        TransactionState.selectedAddress = cosigner.value
+        TransactionState.selectedMultisigAddress = selectedAccAdd.value
       }else{
-        namespaceExtendPayload = TransactionUtils.signTxnWithPassword(selectedAccAdd.value,null,walletPassword.value,extendNamespaceTx)
+        TransactionState.selectedAddress = selectedAccAdd.value
       }
-      TransactionState.lockHashPayload = namespaceExtendPayload.hashLockTxnPayload
-      TransactionState.transactionPayload = namespaceExtendPayload.txnPayload
-      TransactionState.selectedAddress = selectedAccAdd.value
+      TransactionState.unsignedTransactionPayload = unsignedExtendNamespaceTx
       router.push({ name: "ViewConfirmTransaction" })
     };
 
@@ -388,7 +378,6 @@ export default {
       balance,
       showNoBalance,
       err,
-      walletPassword,
       disableCreate,
       showPasswdError,
       disabledPassword,

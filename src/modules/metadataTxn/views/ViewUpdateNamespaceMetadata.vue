@@ -93,9 +93,7 @@
             </div>
             <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
               <TransactionFeeDisplay :transaction-fee="String(transactionFee)" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="String(lockFundCurrency)" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
-                <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
-                <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="walletPassword" icon="lock" class="mt-5 mb-3" />
-                <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto" @click="updateMetadata()" :disabled="disableAddBtn">
+                <button type="submit" class="w-full blue-btn px-3 py-3 mt-3 disabled:opacity-50 disabled:cursor-auto" @click="updateMetadata()" :disabled="disableAddBtn">
                     Update Namespace Metadata
                 </button>
                 <div class="text-center">
@@ -358,7 +356,6 @@ export default {
 
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const {t} = useI18n();
-    const walletPassword = ref("");
     const err = ref("");
     const walletName = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.name:''
     const lockFund = computed(() =>{ 
@@ -420,7 +417,7 @@ export default {
     })
     
     const disableAddBtn = computed(()=>{
-        return (showScopedKeyErr.value==true ||inputScopedMetadataKey.value==''||newValue.value==''||!walletPassword.value.match(passwdPattern)||showBalanceErr.value==true)
+        return (showScopedKeyErr.value==true ||inputScopedMetadataKey.value==''||newValue.value==''||showBalanceErr.value==true)
     })
 
     const accounts = computed(()=>{
@@ -490,16 +487,9 @@ export default {
       if(!walletState.currentLoggedInWallet){
         return
       }
-      if(!WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)){
-        err.value = t('general.walletPasswordInvalid',{name: walletName})
-        return
-      }
       
       let tempHexData = ''
-      let namespaceMetadataPayload : {
-        txnPayload: string,
-        hashLockTxnPayload?: string
-      },{} = {}
+      let unsignedTxnPayload: string | string[]
       if(scopedMetadataKeyType.value==1){ //utf8
         let hexValue = Convert.utf8ToHex(inputScopedMetadataKey.value)
         tempHexData = hexValue + "00".repeat((16-hexValue.length)/2)
@@ -514,22 +504,21 @@ export default {
       .oldValue(oldValue.value)
       .calculateDifferences()
       .build()
-      let aggregateTx = AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([namespaceMetadataTransaction.toAggregateV1(targetPublicAccount.value)]).build()
+      let aggregateTx = AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([namespaceMetadataTransaction.toAggregateV1(targetPublicAccount.value)]).build().serialize()
       let selectedAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == targetPublicAccount.value.publicKey).address 
       if(targetAccIsMultisig.value){
         let cosignerAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosigner.value).address
-        let innerTxn = [namespaceMetadataTransaction.toAggregateV1(targetPublicAccount.value)]
-        namespaceMetadataPayload = TransactionUtils.signTxnWithPassword(cosignerAddress,selectedAddress,walletPassword.value,null,innerTxn)
+        unsignedTxnPayload = namespaceMetadataTransaction.toAggregateV1(targetPublicAccount.value).serialize()
+        TransactionState.selectedAddress = cosignerAddress
+        TransactionState.selectedMultisigAddress = selectedAddress
       }else{
-        namespaceMetadataPayload = TransactionUtils.signTxnWithPassword(selectedAddress,null,walletPassword.value,aggregateTx)
+        unsignedTxnPayload = aggregateTx
+        TransactionState.selectedAddress = selectedAddress
       }
       inputScopedMetadataKey.value=""
       oldValue.value = ""
       newValue.value=""
-      walletPassword.value=""
-      TransactionState.lockHashPayload = namespaceMetadataPayload.hashLockTxnPayload
-      TransactionState.transactionPayload = namespaceMetadataPayload.txnPayload
-      TransactionState.selectedAddress = targetPublicAccount.value.address.plain()
+      TransactionState.unsignedTransactionPayload = unsignedTxnPayload
       router.push({ name: "ViewConfirmTransaction" })
     }
 
@@ -656,7 +645,6 @@ export default {
       findAcc,
       totalFee,
       err,
-      walletPassword,
       showPasswdError,
       accounts,
       updateMetadata,

@@ -29,8 +29,6 @@
         <TxnSummary :signer-native-token-balance="balance"
             :native-token-balance="selectedMultisigAddress ? multisigBalance : balance" :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee"
             :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact" :total-fee="Number(totalFeeFormatted)"/>
-        <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableSubmit" @click="createTxn">Create harvester transaction</button>
         <div class="text-center">
           <router-link :to="{name: 'ViewServices'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
@@ -69,7 +67,6 @@ const router = useRouter();
 
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance.appContext.config.globalProperties.emitter;
-const walletPassword = ref('');
 const {t} = useI18n();
 const err = ref('');
 const disabledPassword = computed(() => showNoBalance.value||disableAllInput.value);
@@ -140,7 +137,6 @@ const checkHarvester = ()=>{
   const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
   const disableSubmit = computed(() => (
-    !walletPassword.value.match(passwdPattern) || 
     harvesterKey.value == "" || showHarvesterError.value  || showNoBalance.value
   ));
 
@@ -231,15 +227,7 @@ const checkHarvester = ()=>{
   });
 
   const createTxn = async () => {
-    let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
-    if(!verifyPassword){
-      err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
-      return
-    }
-    let txnObj : {
-      txnPayload: string,
-      hashLockTxnPayload?: string
-    },{} = {}
+    let unsignedTxnPayload: string | string[]
 
     let txnBuilder: AddHarvesterTransactionBuilder | RemoveHarvesterTransactionBuilder;
 
@@ -274,15 +262,15 @@ const checkHarvester = ()=>{
     if(selectedMultisigAddress.value){
       const txn = txnBuilder.harvesterKey(multisigPublicAccount.value).build();
       const innerTxn = txn.toAggregateV1(multisigPublicAccount.value);
-      const innerTxns = [innerTxn];
-      txnObj = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,null,innerTxns)
+      const innerTxns = [innerTxn.serialize()];
+      unsignedTxnPayload = innerTxns
     }else{
       const txn = txnBuilder.harvesterKey(ownerPublicAccount.value).build();
-      txnObj = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,txn)
+      unsignedTxnPayload = txn.serialize()
     }
-    TransactionState.lockHashPayload = txnObj.hashLockTxnPayload
-    TransactionState.transactionPayload = txnObj.txnPayload
+    TransactionState.unsignedTransactionPayload = unsignedTxnPayload
     TransactionState.selectedAddress = selectedAddress.value
+    TransactionState.selectedMultisigAddress = selectedMultisigAddress.value
     router.push({ name: "ViewConfirmTransaction" })
   };
 
