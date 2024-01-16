@@ -63,6 +63,7 @@
                         </label>
                     </div>
                     <div v-if="isEncrypted">
+                        <div class='text-xs font-semibold my-3'>{{$t('general.enterPasswordContinue')}}</div>
                         <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"
                             v-model="walletPassword" icon="lock" class="mt-5 mb-3" />
                     </div>
