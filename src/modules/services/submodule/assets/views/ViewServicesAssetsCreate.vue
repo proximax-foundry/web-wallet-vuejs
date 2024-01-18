@@ -270,7 +270,7 @@ import { TransactionState } from '@/state/transactionState';
       showSupplyErr.value = bolError;
     }
 
-    const createAsset = () => {
+    const createAsset = async() => {
       let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
       if(!verifyPassword){
         err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
@@ -286,7 +286,8 @@ import { TransactionState } from '@/state/transactionState';
         let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase
         const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(multisigPublicAccount.value);
         const innerTxn = [assetDefinitionTx,assetSupplyChangeTx];
-        assetPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,null,innerTxn)
+        const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
+        assetPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,null,innerTxn, new UInt64(nodeTime.sendTimeStamp))
       }else{
         const assetDefinition = AppState.buildTxn.mosaicDefinition(ownerPublicAccount.value, isMutable.value, isTransferable.value, Number(divisibility.value));
         const assetDefinitionTx = assetDefinition.toAggregateV1(ownerPublicAccount.value);

@@ -403,9 +403,9 @@ export class TransactionUtils {
     return typeName;
   }
 
-  static aggregateBondedTx(innerTX: InnerTransaction[]): AggregateTransaction {
+  static aggregateBondedTx(innerTX: InnerTransaction[], currentNodeTime?: UInt64): AggregateTransaction {
     let txBuilder = AppState.buildTxn;
-    return txBuilder.aggregateBonded(innerTX);
+    return txBuilder.aggregateBonded(innerTX, currentNodeTime);
   }
 
   static lockFundTx(
@@ -580,7 +580,7 @@ export class TransactionUtils {
 
     return addresses;
   }
-  static signTxnWithPassword = (selectedAddress: string, selectedMultisigAddress: string, walletPassword: string, transaction?: Transaction, innerTransactions?: InnerTransaction[]):{txnPayload:string, hashLockTxnPayload?: string} => {
+  static signTxnWithPassword = (selectedAddress: string, selectedMultisigAddress: string, walletPassword: string, transaction?: Transaction, innerTransactions?: InnerTransaction[], currentNodeTime?: UInt64):{txnPayload:string, hashLockTxnPayload?: string} => {
     const genHash = networkState.currentNetworkProfile.generationHash
 
     let transactionBuilder = AppState.buildTxn
@@ -606,7 +606,7 @@ export class TransactionUtils {
         const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType);
         innerTxn = [transaction.toAggregateV1(multisigPublicAccount)];
       }
-      const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)
+      const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn, currentNodeTime)
       const aggregateBondedTransactionSigned = account.preV2Sign(aggregateBondedTransaction, genHash);
 
       const hashLockTransaction = TransactionUtils.lockFundTx(aggregateBondedTransactionSigned)

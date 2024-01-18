@@ -291,7 +291,7 @@ export default {
       block.value = n;
     });
 
-    const extendNamespace = () => {
+    const extendNamespace = async() => {
       let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
       if(!verifyPassword){
         err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
@@ -301,7 +301,8 @@ export default {
       let buildTransactions = AppState.buildTxn;
       const extendNamespaceTx = buildTransactions.registerRootNamespace(selectNamespace.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value))));
       if(cosigner.value){
-        namespaceExtendPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,extendNamespaceTx)
+        const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime(); 
+        namespaceExtendPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,extendNamespaceTx, undefined, new UInt64(nodeTime.sendTimeStamp))
       }else{
         namespaceExtendPayload = TransactionUtils.signTxnWithPassword(selectedAccAdd.value,null,walletPassword.value,extendNamespaceTx)
       }

@@ -274,7 +274,7 @@ export default {
     }
    
 
-    const linkNamespace = () => {
+    const linkNamespace = async() => {
       let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
       if(!verifyPassword){
         err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
@@ -295,7 +295,8 @@ export default {
       let aliasActionType = (selectAction.value == 'link')?AliasActionType.Link:AliasActionType.Unlink;
       const linkAssetToNamespaceTx = buildTransactions.assetAlias(aliasActionType, new NamespaceId(selectNamespace.value), new MosaicId(assetId));
       if(cosigner.value){
-        assetLinkPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,linkAssetToNamespaceTx)
+        const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
+        assetLinkPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,linkAssetToNamespaceTx, undefined, new UInt64(nodeTime.sendTimeStamp))
       }else{
         assetLinkPayload = TransactionUtils.signTxnWithPassword(selectedAccAdd.value,null,walletPassword.value,linkAssetToNamespaceTx)
       }

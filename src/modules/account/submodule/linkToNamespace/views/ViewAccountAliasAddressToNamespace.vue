@@ -128,7 +128,7 @@ import { networkState } from "@/state/networkState";
 import { accountUtils } from "@/util/accountUtils";
 import { walletState } from "@/state/walletState";
 import { WalletUtils } from "@/util/walletUtils";
-import { Address } from "tsjs-xpx-chain-sdk";
+import { Address, UInt64 } from "tsjs-xpx-chain-sdk";
 import { ref, computed, watch } from "vue";
 import { Helper } from "@/util/typeHelper";
 import { useI18n } from "vue-i18n";
@@ -447,7 +447,7 @@ watch(namespaceAddress, (namespaceAddressValue) => {
   }
 });
 const router = useRouter();
-const aliasAddressToNamespace = () => {
+const aliasAddressToNamespace = async() => {
   if (
     !WalletUtils.verifyWalletPassword(
       walletName,
@@ -468,6 +468,9 @@ const aliasAddressToNamespace = () => {
           (acc) => acc.address == address
         );
     err.value = "";
+
+    const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
+
     accountUtils.linkNamespaceToAddress(
       selectedCosignPublicKey.value,
       walletCosignerList.value.hasCosigner,
@@ -475,7 +478,8 @@ const aliasAddressToNamespace = () => {
       walletPassword.value,
       selectedNamespace.value?.value,
       selectedAction.value.value,
-      namespaceAddress.value
+      namespaceAddress.value,
+      new UInt64(nodeTime.sendTimeStamp)
     );
 
     router.push({
