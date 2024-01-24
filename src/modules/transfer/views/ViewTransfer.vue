@@ -173,7 +173,7 @@ const disableCreate = computed(() => {
         walletPassword.value.match(passwdPattern) &&
         !showAddressError.value
         && !showBalanceErr.value
-        && currentBytes.value < messageLimit.value
+        && currentBytes.value <= messageLimit.value
         && canEncrypt.value
     );
 });
