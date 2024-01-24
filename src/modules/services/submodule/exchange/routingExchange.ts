@@ -1,6 +1,7 @@
+import { networkState } from '@/state/networkState';
 
-const nodeEnv = import.meta.env.VITE_NODE_ENV
-export const ExchangeRoutes =  nodeEnv == 'production'? [] :[
+/* const nodeEnv = import.meta.env.VITE_NODE_ENV */
+export const ExchangeRoutes = networkState.currentNetworkProfileConfig?.supportedEntities.find(entity=>entity.type==16746)? [] :[
     {
       path: '/exchange/create',
       name: 'ViewExchangeCreate',
