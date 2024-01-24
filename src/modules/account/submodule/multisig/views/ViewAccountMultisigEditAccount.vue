@@ -24,7 +24,9 @@
           </div>
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>
-           <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
+           <div class=" error error_box mb-5" v-if="gotError">
+            <div v-for="item, index in err" :key="index" v-if="item !=''">{{ item }}</div>
+           </div>
            <div class=" error error_box mb-5" v-if="passwordErr!=''">{{ passwordErr }}</div>
         </div>
         <div class="mt-4"></div>
@@ -99,7 +101,7 @@
 </template>
 
 <script>
-import { computed, ref, watch, getCurrentInstance } from 'vue';
+import { computed, ref, watch, getCurrentInstance, reactive } from 'vue';
 import { useRouter } from "vue-router";
 import PasswordInput from '@/components/PasswordInput.vue'
 import TextInput from '@/components/TextInput.vue'
@@ -139,7 +141,19 @@ export default {
     const router = useRouter(); 
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const err = ref('');
+    const err = reactive({
+      publicKey: '',
+      multisig: '',
+      numApproveTransaction: '',
+      numDeleteUser:'',
+
+    })
+    const gotError = computed(() => 
+      err.multisig != '' || 
+      err.numApproveTransaction != '' || 
+      err.numDeleteUser != '' || 
+      err.publicKey != ''
+    );
     const passwordErr = ref('');
     const fundStatus = ref(false);
     
@@ -266,7 +280,7 @@ export default {
       !isMultisig.value || 
       onPartial.value || 
       !passwd.value.match(passwdPattern) || 
-      err.value || 
+      gotError.value || 
       showAddressError.value.indexOf(true) != -1 || 
       numDeleteUser.value < 0 || 
       numApproveTransaction.value < 0
@@ -313,7 +327,10 @@ export default {
       numDeleteUser.value = acc.value.multisigInfo.find(acc=> acc.level === 0).minRemoval;
       selectMainCosign.value = '';
       selectOtherCosign.value = [];
-      err.value = '';
+      err.multisig = '';
+      err.numApproveTransaction = '';
+      err.numDeleteUser = '';
+      err.publicKey = '';
     };
 
     const modifyAccount = async() => {
@@ -421,7 +438,7 @@ export default {
           if((coSign.value[i]==acc.value.publicKey) && (duplicateOwner == false)){
             duplicateOwner = true
             showAddressError.value[i] = true;
-            err.value = t('multisig.selectedAccErr')
+            err.multisig = t('multisig.selectedAccErr')
           }
           else if(!coSign.value[i].match(publicKeyPattern) && (coSign.value[i].length == 64)){
             showAddressError.value[i] = true;
@@ -430,17 +447,17 @@ export default {
             const unique = Array.from(new Set(n));
             // check newly added cosigner address
             if(unique.length != n.length){
-              err.value = t('multisig.duplicatedCosigner');
+              err.multisig = t('multisig.duplicatedCosigner');
             }else{
               // check already added cosigner address
               for(let j = 0; j < cosignaturies.value.length; j++){
                 if (coSign.value[i] == cosignaturies.value[j]){
                   duplicateCosign = true
-                  err.value = t('multisig.duplicatedCosigner');
+                  err.multisig = t('multisig.duplicatedCosigner');
                 }
               }
               if (duplicateCosign == false && duplicateOwner == false){
-                err.value = '';
+                err.multisig = '';
               }
             }
           }
@@ -450,7 +467,7 @@ export default {
       }}
       // there is no cosign left
       else{
-        err.value = '';
+        err.multisig = '';
       }
     }, {deep:true});
     watch(() => [...showAddressError.value], (n) => {
@@ -548,11 +565,11 @@ export default {
               coSign.value[index] = result.publicKey
             }
             else{
-              err.value = t('multisig.noPublicKey')
+              err.publicKey = t('multisig.noPublicKey')
             }
           })
         } catch (error) {
-          err.value = t('multisig.noPublicKey')
+          err.publicKey = t('multisig.noPublicKey')
         }
       }
 
@@ -668,17 +685,17 @@ export default {
     watch(numApproveTransaction, (n) => {
       updateAggregateFee()
       if(maxNumApproveTransaction.value == 0 && n > 1){
-        err.value = approveTransactionErrMsg;
+        err.numApproveTransaction = approveTransactionErrMsg;
       }else if((n > maxNumApproveTransaction.value) && (n !=1 && maxNumApproveTransaction.value != 0 )){
-        err.value = approveTransactionErrMsg;
+        err.numApproveTransaction = approveTransactionErrMsg;
       }else if(maxNumApproveTransaction.value>0 && n<=0){
-        err.value = t('multisig.approvalAtLeastOne')
+        err.numApproveTransaction = t('multisig.approvalAtLeastOne')
       }else{
         // check again for num delete user
         if((numDeleteUser.value > maxNumDeleteUser.value) && (numDeleteUser.value !=1 && maxNumDeleteUser.value != 0 )){
-          err.value = deleteUserErrorMsg;
+          err.numApproveTransaction = deleteUserErrorMsg;
         }else{
-          err.value = '';
+          err.numApproveTransaction = '';
         }
       }
     });
@@ -690,17 +707,17 @@ export default {
     watch(numDeleteUser, (n) => {
       updateAggregateFee()
       if(maxNumDeleteUser.value == 0 && n > 1){
-        err.value = deleteUserErrorMsg;
+        err.numDeleteUser = deleteUserErrorMsg;
       }else if((n > maxNumDeleteUser.value) && (n !=1 && maxNumDeleteUser.value != 0 )){
-        err.value = deleteUserErrorMsg;
+        err.numDeleteUser = deleteUserErrorMsg;
       }else if(maxNumDeleteUser.value>0 && n<=0){
-        err.value = t('multisig.deletionAtLeastOne')
+        err.numDeleteUser = t('multisig.deletionAtLeastOne')
       }else{
         // check again for num approval transaction
         if((numApproveTransaction.value > maxNumApproveTransaction.value) && (numApproveTransaction.value !=1 && maxNumApproveTransaction.value != 0 )){
-          err.value = approveTransactionErrMsg;
+          err.numDeleteUser = approveTransactionErrMsg;
         }else{
-          err.value = '';
+          err.numDeleteUser = '';
         }
       }
     });
