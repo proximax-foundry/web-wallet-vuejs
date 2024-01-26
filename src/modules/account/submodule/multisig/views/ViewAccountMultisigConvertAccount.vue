@@ -7,9 +7,7 @@
       <div class="lg:col-span-2 py-6 pr-6">
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>
-           <div class=" error error_box mb-5" v-if="gotError">
-            <div v-for="item, index in err" :key="index" v-if="item !=''">{{ item }}</div>
-           </div>
+           <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
            <div class=" error error_box mb-5" v-if="passwordErr!=''">{{ passwordErr }}</div>
         </div>
         <div class="mt-4"></div>
@@ -98,7 +96,6 @@ import { AppState } from '@/state/appState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { WalletUtils } from "@/util/walletUtils";
 import { TransactionState } from "@/state/transactionState";
-import { reactive } from 'vue';
 export default {
   name: 'ViewConvertAccountMultisig',
   components: {
@@ -118,19 +115,7 @@ export default {
     const router = useRouter();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    const err = reactive({
-      publicKey: '',
-      multisig: '',
-      numApproveTransaction: '',
-      numDeleteUser:'',
-
-    })
-    const gotError = computed(() => 
-      err.multisig != '' || 
-      err.numApproveTransaction != '' || 
-      err.numDeleteUser != '' || 
-      err.publicKey != ''
-    );
+    const err = ref('');
     const passwordErr = ref('');
     const fundStatus = ref(false);
     
@@ -292,11 +277,11 @@ export default {
               coSign.value[index] = result.publicKey
             }
             else{
-              err.publicKey = t('multisig.noPublicKey')
+              err.value = t('multisig.noPublicKey')
             }
           })
         } catch (error) {
-          err.publicKey = t('multisig.noPublicKey')
+          err.value = t('multisig.noPublicKey')
         }
       }
 
@@ -314,7 +299,7 @@ export default {
       onPartial.value || 
       !passwd.value.match(passwdPattern) || 
       coSign.value.length == 0  ||  
-      gotError.value || 
+      err.value || 
       (showAddressError.value.every(value => value == false)) == false || 
       numDeleteUser.value == 0 || 
       numApproveTransaction.value == 0 ||
@@ -447,7 +432,7 @@ export default {
           if((coSign.value[i]==acc.value.publicKey) && (duplicateOwner == false)){
             duplicateOwner = true
             showAddressError.value[i] = true;
-            err.multisig = t('multisig.selectedAccErr')
+            err.value = t('multisig.selectedAccErr')
           }
           else if(!coSign.value[i].match(publicKeyPattern) && (coSign.value[i].length == 64)){
             showAddressError.value[i] = true;
@@ -455,10 +440,10 @@ export default {
             showAddressError.value[i] = false;
             const unique = Array.from(new Set(n));
             if(unique.length != n.length){
-              err.multisig = t('multisig.duplicatedCosigner');
+              err.value = t('multisig.duplicatedCosigner');
             }else{
               if(duplicateOwner == false){
-                err.multisig = '';
+                err.value = '';
               }
             }
           }
@@ -468,7 +453,7 @@ export default {
       }}
       // there is no cosign left
       else{
-        err.multisig = '';
+        err.value = '';
       }
     }, {deep:true});
 
@@ -518,17 +503,17 @@ export default {
     watch(numApproveTransaction, (n) => {
       updateAggregateFee()
       if(maxNumApproveTransaction.value == 0 && n > 1){
-        err.numApproveTransaction = approveTransactionErrMsg;
+        err.value = approveTransactionErrMsg;
       }else if((n > maxNumApproveTransaction.value) && (n !=1 && maxNumApproveTransaction.value != 0 )){
-        err.numApproveTransaction = approveTransactionErrMsg;
+        err.value = approveTransactionErrMsg;
       }else if(maxNumApproveTransaction.value>0 && n<=0){
-        err.numApproveTransaction = t('multisig.approvalAtLeastOne')
+        err.value = t('multisig.approvalAtLeastOne')
       }else{
         // check again for num delete user
         if((numDeleteUser.value > maxNumDeleteUser.value) && (numDeleteUser.value !=1 && maxNumDeleteUser.value != 0 )){
-          err.numApproveTransaction = deleteUserErrorMsg;
+          err.value = deleteUserErrorMsg;
         }else{
-          err.numApproveTransaction = '';
+          err.value = '';
         }
       }
     });
@@ -540,17 +525,17 @@ export default {
     watch(numDeleteUser, (n) => {
       updateAggregateFee()
       if(maxNumDeleteUser.value == 0 && n > 1){
-        err.numDeleteUser = deleteUserErrorMsg;
+        err.value = deleteUserErrorMsg;
       }else if((n > maxNumDeleteUser.value) && (n !=1 && maxNumDeleteUser.value != 0 )){
-        err.numDeleteUser = deleteUserErrorMsg;
+        err.value = deleteUserErrorMsg;
       }else if(maxNumDeleteUser.value>0 && n<=0){
-        err.numDeleteUser = t('multisig.deletionAtLeastOne')
+        err.value = t('multisig.deletionAtLeastOne')
       }else{
         // check again for num approval transaction
         if((numApproveTransaction.value > maxNumApproveTransaction.value) && (numApproveTransaction.value !=1 && maxNumApproveTransaction.value != 0 )){
-          err.numDeleteUser = approveTransactionErrMsg;
+          err.value = approveTransactionErrMsg;
         }else{
-          err.numDeleteUser = '';
+          err.value = '';
         }
       }
     });
@@ -592,7 +577,6 @@ export default {
       currentNativeTokenName,
       contactName,
       err,
-      gotError,
       disableSend,
       numApproveTransaction,
       numDeleteUser,
