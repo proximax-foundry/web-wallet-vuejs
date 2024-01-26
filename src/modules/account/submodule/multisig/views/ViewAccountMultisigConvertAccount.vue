@@ -7,7 +7,7 @@
       <div class="lg:col-span-2 py-6 pr-6">
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>
-           <div class=" error error_box mb-5" v-if="err!=''">{{ err }}</div>
+           <div class=" error error_box mb-5 whitespace-pre" v-if="err!=''">{{ err }}</div>
            <div class=" error error_box mb-5" v-if="passwordErr!=''">{{ passwordErr }}</div>
         </div>
         <div class="mt-4"></div>
@@ -500,20 +500,21 @@ export default {
     }
     let deleteUserErrorMsg = t('multisig.deletionExceedMax');
     let approveTransactionErrMsg = t('multisig.approvalExceedMax');
+    let numApproveTxnError = ''
     watch(numApproveTransaction, (n) => {
       updateAggregateFee()
       if(maxNumApproveTransaction.value == 0 && n > 1){
-        err.value = approveTransactionErrMsg;
+        numApproveTxnError = approveTransactionErrMsg;
       }else if((n > maxNumApproveTransaction.value) && (n !=1 && maxNumApproveTransaction.value != 0 )){
-        err.value = approveTransactionErrMsg;
+        numApproveTxnError = approveTransactionErrMsg;
       }else if(maxNumApproveTransaction.value>0 && n<=0){
-        err.value = t('multisig.approvalAtLeastOne')
+        numApproveTxnError = t('multisig.approvalAtLeastOne')
       }else{
         // check again for num delete user
         if((numDeleteUser.value > maxNumDeleteUser.value) && (numDeleteUser.value !=1 && maxNumDeleteUser.value != 0 )){
-          err.value = deleteUserErrorMsg;
+          numApproveTxnError = deleteUserErrorMsg;
         }else{
-          err.value = '';
+          numApproveTxnError = '';
         }
       }
     });
@@ -522,23 +523,33 @@ export default {
         e.preventDefault();
       }
     }
+    let numDeleteUserError = ''
     watch(numDeleteUser, (n) => {
       updateAggregateFee()
       if(maxNumDeleteUser.value == 0 && n > 1){
-        err.value = deleteUserErrorMsg;
+        numDeleteUserError = deleteUserErrorMsg;
       }else if((n > maxNumDeleteUser.value) && (n !=1 && maxNumDeleteUser.value != 0 )){
-        err.value = deleteUserErrorMsg;
+        numDeleteUserError = deleteUserErrorMsg;
       }else if(maxNumDeleteUser.value>0 && n<=0){
-        err.value = t('multisig.deletionAtLeastOne')
+        numDeleteUserError = t('multisig.deletionAtLeastOne')
       }else{
         // check again for num approval transaction
         if((numApproveTransaction.value > maxNumApproveTransaction.value) && (numApproveTransaction.value !=1 && maxNumApproveTransaction.value != 0 )){
-          err.value = approveTransactionErrMsg;
+          numDeleteUserError = approveTransactionErrMsg;
         }else{
-          err.value = '';
+          numDeleteUserError = '';
         }
       }
     });
+    watch([numApproveTransaction, numDeleteUser],() => {
+      if (numApproveTxnError != ''  && numDeleteUserError != ''){
+        err.value = numApproveTxnError + '\n' + numDeleteUserError
+      }else if (numApproveTxnError != ''){
+        err.value = numApproveTxnError
+      }else{
+        err.value = numDeleteUserError
+      }
+    })
     const disabledPassword = computed(() => (onPartial.value || isMultisig.value ));
    
     // check if onPartial
