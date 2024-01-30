@@ -415,6 +415,9 @@ export default {
               aliasName = othersAccount.name;
           }
         }
+        if(aliasName==='invalid'){
+          aliasName = "cosigner-"+address.slice(-4)
+        }
         return aliasName ? aliasName : t('general.cosigner');
     }
 
