@@ -423,7 +423,7 @@ export default {
       } 
     };
     
-    watch(() => [...coSign.value], (n) => {
+    watch(() => [...coSign.value], async (n) => {
       let duplicateOwner = false
       if (coSign.value.length > 0)
       {
@@ -443,7 +443,13 @@ export default {
               err.value = t('multisig.duplicatedCosigner');
             }else{
               if(duplicateOwner == false){
-                err.value = '';
+                const validAcc = await checkValidAcc(coSign.value[i])
+                if(validAcc){
+                  err.value = '';
+                }else{
+                  showAddressError.value[i] = true;
+                  err.value = t('multisig.noPublicKey')
+                }
               }
             }
           }
@@ -579,6 +585,22 @@ export default {
     const totalFeeFormatted = computed(() => {
       return Helper.amountFormatterSimple(totalFee.value, 0);
     });
+
+    const checkValidAcc = async (publicKey) => {
+      const acc = PublicAccount.createFromPublicKey(publicKey,AppState.networkType)
+      try{
+        const isValidAcc = await AppState.chainAPI.accountAPI.getAccountInfo(acc.address) ? true : false
+        if(isValidAcc){
+          return true
+        }
+        else{
+          return false
+        }
+      }
+      catch(e){
+        return false
+      }
+    }
 
     return {
       networkState,
