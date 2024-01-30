@@ -141,7 +141,7 @@ const checkHarvester = ()=>{
 
   const disableSubmit = computed(() => (
     !walletPassword.value.match(passwdPattern) || 
-    harvesterKey.value == "" || showHarvesterError.value  || showNoBalance.value
+    harvesterKey.value == "" || showHarvesterError.value  || showNoBalance.value || selectedAddress.value == null || actionType.value == "" 
   ));
 
   const selectedMultisigAddress = ref<string | null>(null)
