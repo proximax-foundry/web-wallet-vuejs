@@ -25,6 +25,10 @@
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>
            <div class=" error error_box mb-5 whitespace-pre" v-if="err!=''">{{ err }}</div>
+           <div v-if="inputPkNotExist!=''" class="flex gap-2 bg-yellow-50 py-2 rounded-md px-2 my-3 mb-5">
+              <img src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+              <div class="text-xs font-bold pt-1">{{ inputPkNotExist }}</div>
+           </div>
            <div class=" error error_box mb-5" v-if="passwordErr!=''">{{ passwordErr }}</div>
         </div>
         <div class="mt-4"></div>
@@ -140,6 +144,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref('');
+    const inputPkNotExist = ref('')
     const passwordErr = ref('');
     const fundStatus = ref(false);
     
@@ -314,6 +319,7 @@ export default {
       selectMainCosign.value = '';
       selectOtherCosign.value = [];
       err.value = '';
+      inputPkNotExist.value = '';
     };
 
     const modifyAccount = async() => {
@@ -411,9 +417,10 @@ export default {
       }
     };
 
-    watch(() => [...coSign.value], (n) => {
+    watch(() => [...coSign.value], async (n) => {
       let duplicateCosign = false
       let duplicateOwner = false
+      inputPkNotExist.value = ''
       if (coSign.value.length > 0)
       {      
         for(var i = 0; i < coSign.value.length; i++){
@@ -441,6 +448,12 @@ export default {
               }
               if (duplicateCosign == false && duplicateOwner == false){
                 err.value = '';
+                const validAcc = await checkValidAcc(coSign.value[i])
+                if(!validAcc){
+                  inputPkNotExist.value = "Input public key does not exist"
+                }else{
+                  inputPkNotExist.value = ''
+                }
               }
             }
           }
@@ -805,6 +818,22 @@ export default {
       let cosignBalance = findAcc(selectedCosignPublicKey.value)?findAcc(selectedCosignPublicKey.value).balance:0;
       return Helper.toCurrencyFormat(cosignBalance,3);
     })
+
+    const checkValidAcc = async (publicKey) => {
+      const acc = PublicAccount.createFromPublicKey(publicKey,AppState.networkType)
+      try{
+        const isValidAcc = await AppState.chainAPI.accountAPI.getAccountInfo(acc.address) ? true : false
+        if(isValidAcc){
+          return true
+        }
+        else{
+          return false
+        }
+      }
+      catch(e){
+        return false
+      }
+    }
     
     return {
       cosignerName,
@@ -861,7 +890,8 @@ export default {
       accBalance,
       getMultiSigCosigner,
       checkCosignBalance,
-      passwordErr
+      passwordErr,
+      inputPkNotExist
     };
   },
 }

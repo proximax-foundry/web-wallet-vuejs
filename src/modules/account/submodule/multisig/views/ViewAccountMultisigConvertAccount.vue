@@ -8,6 +8,10 @@
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>
            <div class=" error error_box mb-5 whitespace-pre" v-if="err!=''">{{ err }}</div>
+           <div v-if="inputPkNotExist!=''" class="flex gap-2 bg-yellow-50 py-2 rounded-md px-2 my-3 mb-5">
+              <img src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+              <div class="text-xs font-bold pt-1">{{ inputPkNotExist }}</div>
+           </div>
            <div class=" error error_box mb-5" v-if="passwordErr!=''">{{ passwordErr }}</div>
         </div>
         <div class="mt-4"></div>
@@ -116,6 +120,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref('');
+    const inputPkNotExist = ref('');
     const passwordErr = ref('');
     const fundStatus = ref(false);
     
@@ -334,6 +339,7 @@ export default {
       maxNumApproveTransaction.value = 0;
       numDeleteUser.value = 1;
       maxNumDeleteUser.value = 0;
+      inputPkNotExist.value = '';
     };
     const convertAccount = async() => {
       const wallet = walletState.currentLoggedInWallet;
@@ -423,8 +429,9 @@ export default {
       } 
     };
     
-    watch(() => [...coSign.value], (n) => {
+    watch(() => [...coSign.value], async (n) => {
       let duplicateOwner = false
+      inputPkNotExist.value = ''
       if (coSign.value.length > 0)
       {
         for(var i = 0; i < coSign.value.length; i++){
@@ -444,6 +451,12 @@ export default {
             }else{
               if(duplicateOwner == false){
                 err.value = '';
+                const validAcc = await checkValidAcc(coSign.value[i])
+                if(!validAcc){
+                  inputPkNotExist.value = "Input public key does not exist"
+                }else{
+                  inputPkNotExist.value = ''
+                }
               }
             }
           }
@@ -580,6 +593,22 @@ export default {
       return Helper.amountFormatterSimple(totalFee.value, 0);
     });
 
+    const checkValidAcc = async (publicKey) => {
+      const acc = PublicAccount.createFromPublicKey(publicKey,AppState.networkType)
+      try{
+        const isValidAcc = await AppState.chainAPI.accountAPI.getAccountInfo(acc.address) ? true : false
+        if(isValidAcc){
+          return true
+        }
+        else{
+          return false
+        }
+      }
+      catch(e){
+        return false
+      }
+    }
+
     return {
       networkState,
       toggleContact,
@@ -620,7 +649,8 @@ export default {
       totalFeeFormatted,
       selectedAccAdd,
       accBalance,
-      passwordErr
+      passwordErr,
+      inputPkNotExist
     };
   },
 }
