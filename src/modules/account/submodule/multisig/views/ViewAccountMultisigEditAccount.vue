@@ -25,7 +25,10 @@
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>
            <div class=" error error_box mb-5 whitespace-pre" v-if="err!=''">{{ err }}</div>
-           <div class="error error_box mb-5" v-if="publicKeyNotExist!=''">{{ publicKeyNotExist }}</div>
+           <div v-if="inputPkNotExist!=''" class="flex gap-2 bg-yellow-50 py-2 rounded-md px-2 my-3 mb-5">
+              <img src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+              <div class="text-xs font-bold pt-1">{{ inputPkNotExist }}</div>
+           </div>
            <div class=" error error_box mb-5" v-if="passwordErr!=''">{{ passwordErr }}</div>
         </div>
         <div class="mt-4"></div>
@@ -141,7 +144,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref('');
-    const publicKeyNotExist = ref('')
+    const inputPkNotExist = ref('')
     const passwordErr = ref('');
     const fundStatus = ref(false);
     
@@ -316,7 +319,7 @@ export default {
       selectMainCosign.value = '';
       selectOtherCosign.value = [];
       err.value = '';
-      publicKeyNotExist.value = '';
+      inputPkNotExist.value = '';
     };
 
     const modifyAccount = async() => {
@@ -417,7 +420,7 @@ export default {
     watch(() => [...coSign.value], async (n) => {
       let duplicateCosign = false
       let duplicateOwner = false
-      publicKeyNotExist.value = ''
+      inputPkNotExist.value = ''
       if (coSign.value.length > 0)
       {      
         for(var i = 0; i < coSign.value.length; i++){
@@ -447,9 +450,9 @@ export default {
                 err.value = '';
                 const validAcc = await checkValidAcc(coSign.value[i])
                 if(!validAcc){
-                  publicKeyNotExist.value = "Public Key does not exist"
+                  inputPkNotExist.value = "Input public key does not exist"
                 }else{
-                  publicKeyNotExist.value = ''
+                  inputPkNotExist.value = ''
                 }
               }
             }
@@ -888,7 +891,7 @@ export default {
       getMultiSigCosigner,
       checkCosignBalance,
       passwordErr,
-      publicKeyNotExist
+      inputPkNotExist
     };
   },
 }
