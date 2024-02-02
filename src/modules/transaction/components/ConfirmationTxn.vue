@@ -17,29 +17,12 @@
                         <div class="flex justify-center text-blue-primary font-semibold uppercase ml-3.5 my-3 text-sm xl:text-md xl:ml-0 cursor-pointer" @click="goPayloadExplorer(unsignedTx)">Click to view Unsigned Transaction Details in Explorer</div>
                     </div>
                 </div>
-                <div v-if="hashLockTxnPayload">
-                    <div class="text-lg font-semibold m-7">Hash Lock Transaction</div>
-                    <div class="flex justify-center px-12">
-                        <div class="mb-3 border rounded-lg border-gray-900 w-full p-2 flex items-center justify-center break-all">{{ hashLockTxnPayload }}</div>
-                    </div>
-                    <div class="flex justify-center text-blue-primary font-semibold uppercase ml-3.5 mt-3 text-sm xl:text-md xl:ml-0 cursor-pointer" @click="goPayloadExplorer(hashLockTxnPayload)">Click to view Hash Lock Transaction Details in Explorer</div>
-                </div>
-                <div v-if="txnPayload">
-                    <div class="text-lg font-semibold m-7">Confirm Transaction</div>
-                    <div class="flex justify-center px-12">
-                        <div class="mb-3 border rounded-lg border-gray-900 w-full p-2 flex items-center justify-center break-all">{{ txnPayload }}</div>
-                    </div>
-                    <div class="flex justify-center text-blue-primary font-semibold uppercase ml-3.5 mt-3 text-sm xl:text-md xl:ml-0 cursor-pointer" @click="goPayloadExplorer(txnPayload)">Click to view Transaction Details in Explorer</div>
-                </div>
                 <div class="flex justify-center my-3">
                     <router-link :to="{ name: 'ViewDashboard' }" class="text-black font-bold text-xs pt-3 mr-4 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" @click="clearTransactionState()">
                     {{ $t('general.cancel') }}
                     </router-link>
-                    <button type="submit" v-if="unsignedTxnPayload" class="default-btn focus:outline-none disabled:opacity-50 mt-2" @click="toggleModal = !toggleModal">
+                    <button type="submit" class="default-btn focus:outline-none disabled:opacity-50 mt-2" @click="toggleModal = !toggleModal">
                         Sign
-                    </button>
-                    <button type="submit" v-else class="default-btn focus:outline-none disabled:opacity-50 mt-2" @click="confirmTransaction()">
-                        Confirm
                     </button>
                 </div>
             </div>
@@ -69,7 +52,6 @@ import { TransactionState } from '@/state/transactionState';
 import { walletState } from '@/state/walletState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { WalletUtils } from '@/util/walletUtils';
-import { TransactionMapping } from 'tsjs-xpx-chain-sdk';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -136,6 +118,7 @@ const signTxn = () => {
         TransactionState.lockHashPayload = txn.hashLockTxnPayload
         walletPasswd.value = '';
         TransactionState.unsignedTransactionPayload = ''
+        confirmTransaction()
       } else {
         err.value = "Wallet password is incorrect";
       }
