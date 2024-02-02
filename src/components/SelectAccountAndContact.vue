@@ -47,3 +47,10 @@
     };
     
 </script>
+
+<style>
+.p-tree .p-tree-filter-container input {
+    border: 1px solid black;
+    padding-left: 5px;
+}
+</style>

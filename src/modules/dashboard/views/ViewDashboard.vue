@@ -260,6 +260,9 @@ export default defineComponent({
       if(!walletState.currentLoggedInWallet){
         return null
       }
+      else if(!walletState.currentLoggedInWallet.selectDefaultAccount()){
+        return walletState.currentLoggedInWallet.accounts[0]
+      }
       return walletState.currentLoggedInWallet.selectDefaultAccount()
     })
     const accountAssets = computed(()=>{

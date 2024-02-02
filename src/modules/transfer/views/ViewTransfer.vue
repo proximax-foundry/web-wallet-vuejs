@@ -175,7 +175,7 @@ const disableCreate = computed(() => {
         isEncrypted.value? walletPassword.value.match(passwdPattern): true
         && !showAddressError.value
         && !showBalanceErr.value
-        && currentBytes.value < messageLimit.value
+        && currentBytes.value <= messageLimit.value
         && canEncrypt.value
     );
 });

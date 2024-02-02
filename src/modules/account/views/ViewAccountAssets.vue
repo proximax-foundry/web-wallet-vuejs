@@ -58,7 +58,12 @@
                     </Column>
                     <Column header="Actions ">
                         <template #body="{ data }">
-                    <AssetAction  :address="address" :id="data.id" :is-creator="data.isCreator" />
+                            <div v-if="data.isCreator">
+                                <AssetAction  :address="address" :id="data.id" :is-creator="true" />
+                            </div>
+                            <div v-else>
+                                <AssetAction  :address="address" :id="data.id" :is-creator="false" />
+                            </div>
                       
                             </template>
                     </Column>
