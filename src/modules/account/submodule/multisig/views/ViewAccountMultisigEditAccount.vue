@@ -112,7 +112,10 @@ import TextInputClean from '@/components/TextInputClean.vue'
 import {MultisigUtils} from '@/util/multisigUtils'
 import { walletState } from '@/state/walletState';
 import {
-    PublicAccount,Address, MultisigCosignatoryModification, MultisigCosignatoryModificationType
+    PublicAccount,Address, 
+    MultisigCosignatoryModification, 
+    MultisigCosignatoryModificationType,
+    UInt64
 } from "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
 import {useI18n} from 'vue-i18n'
@@ -406,7 +409,13 @@ export default {
 
         let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        multisigPayload = TransactionUtils.signTxnWithPassword(selectedCosignAddress,acc.value.address,passwd.value,modifyMultisigTransaction, new UInt64(nodeTime.sendTimeStamp))
+        multisigPayload = TransactionUtils.signAbtWithTxnAndPassword(
+          selectedCosignAddress,
+          acc.value.address,
+          passwd.value,
+          modifyMultisigTransaction, 
+          new UInt64(nodeTime.sendTimeStamp)
+        );
         passwordErr.value = '';
         /* var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play(); */

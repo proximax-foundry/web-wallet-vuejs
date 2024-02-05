@@ -100,7 +100,8 @@ import MultisigInput from "../components/MultisigInput.vue"
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { walletState } from '@/state/walletState';
-import { Address, EncryptedMessage, Message, Mosaic, MosaicId, Password, PlainMessage, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
+import { Address, EncryptedMessage, Message, Mosaic, MosaicId, Password, 
+    PlainMessage, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
 import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import { useI18n } from 'vue-i18n';
 import type {TreeNode } from "primevue/treenode"
@@ -411,7 +412,13 @@ const makeTransferPayload = async () => {
         .build()
 
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime(); 
-        let transferPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,transferTransaction, undefined, new UInt64(nodeTime.sendTimeStamp))
+        let transferPayload = TransactionUtils.signTxnWithPassword(
+            selectedAddress.value,
+            selectedMultisigAddress.value,
+            walletPassword.value,transferTransaction, 
+            undefined, 
+            new UInt64(nodeTime.sendTimeStamp)
+        );
 
         TransactionState.lockHashPayload = transferPayload.hashLockTxnPayload
         TransactionState.transactionPayload = transferPayload.txnPayload

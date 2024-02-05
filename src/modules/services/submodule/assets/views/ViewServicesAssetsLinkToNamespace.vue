@@ -97,7 +97,7 @@ import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
 import { TransactionState } from '@/state/transactionState'
 import { isMultiSig, TransactionUtils, findAcc, findAccWithAddress } from '@/util/transactionUtils';
-import { AliasActionType, MosaicId, NamespaceId } from 'tsjs-xpx-chain-sdk';
+import { AliasActionType, MosaicId, NamespaceId, UInt64 } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesAssetsLinkToNamespace',
@@ -296,9 +296,20 @@ export default {
       const linkAssetToNamespaceTx = buildTransactions.assetAlias(aliasActionType, new NamespaceId(selectNamespace.value), new MosaicId(assetId));
       if(cosigner.value){
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        assetLinkPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,linkAssetToNamespaceTx, undefined, new UInt64(nodeTime.sendTimeStamp))
+        assetLinkPayload = TransactionUtils.signAbtWithTxnAndPassword(
+          cosigner.value,
+          selectedAccAdd.value,
+          walletPassword.value,
+          linkAssetToNamespaceTx, 
+          new UInt64(nodeTime.sendTimeStamp)
+        );
       }else{
-        assetLinkPayload = TransactionUtils.signTxnWithPassword(selectedAccAdd.value,null,walletPassword.value,linkAssetToNamespaceTx)
+        assetLinkPayload = TransactionUtils.signTxnWithPassword(
+          selectedAccAdd.value,
+          null,
+          walletPassword.value,
+          linkAssetToNamespaceTx
+        );
       }
       TransactionState.lockHashPayload = assetLinkPayload.hashLockTxnPayload
       TransactionState.transactionPayload = assetLinkPayload.txnPayload

@@ -85,7 +85,7 @@ import { Helper } from "@/util/typeHelper";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
-import { LinkAction, PublicAccount } from "tsjs-xpx-chain-sdk";
+import { LinkAction, PublicAccount, UInt64 } from "tsjs-xpx-chain-sdk";
 import { useI18n } from 'vue-i18n';
 import { accountUtils } from "@/util/accountUtils";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
@@ -351,10 +351,21 @@ export default {
           if(isMultisig.value){
             let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address 
             const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-            delegatePayload = TransactionUtils.signTxnWithPassword(selectedCosignAddress,acc.value.address,walletPassword.value,delegateUnlinkTransaction, new UInt64(nodeTime.sendTimeStamp))
+            delegatePayload = TransactionUtils.signAbtWithTxnAndPassword(
+              selectedCosignAddress,
+              acc.value.address,
+              walletPassword.value,
+              delegateUnlinkTransaction, 
+              new UInt64(nodeTime.sendTimeStamp)
+            );
           }
           else{
-            delegatePayload = TransactionUtils.signTxnWithPassword(acc.value.address,null,walletPassword.value,delegateUnlinkTransaction)
+            delegatePayload = TransactionUtils.signTxnWithPassword(
+              acc.value.address,
+              null,
+              walletPassword.value,
+              delegateUnlinkTransaction
+            );
           }
           walletPassword.value=""
           err.value=""
@@ -367,10 +378,21 @@ export default {
           if(isMultisig.value){
             let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address 
             const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-            delegatePayload = TransactionUtils.signTxnWithPassword(selectedCosignAddress,acc.value.address,walletPassword.value,delegateLinkTransaction, new UInt64(nodeTime.sendTimeStamp))
+            delegatePayload = TransactionUtils.signAbtWithTxnAndPassword(
+              selectedCosignAddress,
+              acc.value.address,
+              walletPassword.value,
+              delegateLinkTransaction, 
+              new UInt64(nodeTime.sendTimeStamp)
+            );
           }
           else{
-            delegatePayload = TransactionUtils.signTxnWithPassword(acc.value.address,null,walletPassword.value,delegateLinkTransaction)
+            delegatePayload = TransactionUtils.signTxnWithPassword(
+              acc.value.address,
+              null,
+              walletPassword.value,
+              delegateLinkTransaction
+            );
           }
           walletPassword.value=""
           err.value=""
