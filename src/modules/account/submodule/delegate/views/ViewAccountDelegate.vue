@@ -85,7 +85,7 @@ import { Helper } from "@/util/typeHelper";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
-import { LinkAction, PublicAccount } from "tsjs-xpx-chain-sdk";
+import { LinkAction, PublicAccount, UInt64 } from "tsjs-xpx-chain-sdk";
 import { useI18n } from 'vue-i18n';
 import { accountUtils } from "@/util/accountUtils";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
