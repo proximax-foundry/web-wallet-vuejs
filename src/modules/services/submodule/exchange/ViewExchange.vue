@@ -560,7 +560,8 @@ const exchangeSell = async () => {
     if (isMultisig.value) {
         const multisigAcc = [...walletState.currentLoggedInWallet.accounts, ...walletState.currentLoggedInWallet.others].find(acc => acc.address == selectedMultisigAddress.value)
         const innerTxn = [sdaExchangeOfferTxn.toAggregateV1(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType))];
-        const aggregateBondedTransaction = AppState.buildTxn.aggregateBonded(innerTxn)
+        const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
+        const aggregateBondedTransaction = AppState.buildTxn.aggregateBonded(innerTxn, new UInt64(nodeTime.sendTimeStamp!))
         const aggregateBondedTransactionSigned = acc.preV2Sign(aggregateBondedTransaction, generationHash);
 
         const hashLockTransaction = TransactionUtils.lockFundTx(aggregateBondedTransactionSigned)

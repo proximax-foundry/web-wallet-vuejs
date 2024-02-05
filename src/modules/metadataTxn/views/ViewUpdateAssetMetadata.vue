@@ -268,9 +268,10 @@ export default {
       }
     }
 
-    const createTxnBuilder = () =>{
+    const createTxnBuilder = async() =>{
       txnBuilder = AppState.buildTxn.assetMetadataBuilder();
-      aggregateTxnBuilder = AppState.buildTxn.aggregateBondedBuilder();
+      const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
+      aggregateTxnBuilder = AppState.buildTxn.aggregateBondedBuilder(new UInt64(nodeTime.sendTimeStamp!));
     }
 
     const loadCurrentMetadataValue = async () =>{
@@ -311,7 +312,7 @@ export default {
     }
     
     const init = async ()=>{
-      createTxnBuilder();
+      await createTxnBuilder();
       await handleParamTargetId();
       handleParamScopedMetadataKey();
       await loadCurrentMetadataValue();
@@ -465,7 +466,7 @@ export default {
       }
     }
     
-    const updateMetadata = () => {   
+    const updateMetadata = async() => {   
       if(!walletState.currentLoggedInWallet){
         return
       }
@@ -498,7 +499,8 @@ export default {
       if(targetAccIsMultisig.value){
         let cosignerAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosigner.value).address
         let innerTxn = [mosaicMetadataTransaction.toAggregateV1(targetPublicAccount.value)]
-        assetMetadataPayload = TransactionUtils.signTxnWithPassword(cosignerAddress,selectedAddress,walletPassword.value,null,innerTxn)
+        const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
+        assetMetadataPayload = TransactionUtils.signTxnWithPassword(cosignerAddress,selectedAddress,walletPassword.value,null,innerTxn, new UInt64(nodeTime.sendTimeStamp))
       }else{
         assetMetadataPayload = TransactionUtils.signTxnWithPassword(selectedAddress,null,walletPassword.value,aggregateTx)
       }

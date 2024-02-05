@@ -119,6 +119,7 @@ import {
   HarvesterInfo,
   PublicAccount,
   RemoveHarvesterTransactionBuilder,
+  UInt64
 } from "tsjs-xpx-chain-sdk";
 import type { TreeNode } from "primevue/treenode";
 import { TransactionState } from "@/state/transactionState";
@@ -379,12 +380,14 @@ const createTxn = async () => {
     const txn = txnBuilder.harvesterKey(harvesterPublicAccount.value).build();
     const innerTxn = txn.toAggregateV1(multisigPublicAccount.value);
     const innerTxns = [innerTxn];
+    const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
     txnObj = TransactionUtils.signTxnWithPassword(
       selectedAddress.value,
       selectedMultisigAddress.value,
       walletPassword.value,
       null,
-      innerTxns
+      innerTxns,
+      new UInt64(nodeTime.sendTimeStamp!)
     );
   } else {
     const txn = txnBuilder.harvesterKey(harvesterPublicAccount.value).build();

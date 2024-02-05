@@ -281,7 +281,7 @@ watch(selectNamespace, newValue => {
   }
 }, { immediate: true })
 
-const createNamespace = () => {
+const createNamespace = async() => {
   let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword.value)
   if (!verifyPassword) {
     err.value = t('general.walletPasswordInvalid', { name: walletState.currentLoggedInWallet.name })
@@ -292,12 +292,13 @@ const createNamespace = () => {
     hashLockTxnPayload?: string
   },{} = {}
   let buildTransactions = AppState.buildTxn;
+  const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime(); 
   if (selectNamespace.value === '1') {
     let registerRootNamespaceTransaction = buildTransactions.registerRootNamespace(namespaceName.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value))));
-    namespacePayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,registerRootNamespaceTransaction)
+    namespacePayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,registerRootNamespaceTransaction, undefined, new UInt64(nodeTime.sendTimeStamp))
   } else {
     let registerSubNamespaceTransaction = buildTransactions.registersubNamespace(selectNamespace.value, namespaceName.value);
-    namespacePayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,registerSubNamespaceTransaction)
+    namespacePayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,registerSubNamespaceTransaction, undefined, new UInt64(nodeTime.sendTimeStamp))
   }
   TransactionState.lockHashPayload = namespacePayload.hashLockTxnPayload
   TransactionState.transactionPayload = namespacePayload.txnPayload

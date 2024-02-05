@@ -1,6 +1,6 @@
 import { walletState } from "@/state/walletState";
 import { readonly } from "vue";
-import { Address, Account, SignedTransaction,PublicAccount, LinkAction, NamespaceId, AliasActionType, Password, AddressAliasTransaction, AccountLinkTransaction} from "tsjs-xpx-chain-sdk";
+import { Address, Account, SignedTransaction,PublicAccount, LinkAction, NamespaceId, AliasActionType, Password, AddressAliasTransaction, AccountLinkTransaction, UInt64} from "tsjs-xpx-chain-sdk";
 import { WalletUtils } from "@/util/walletUtils";
 import { ChainUtils } from "@/util/chainUtils";
 import { networkState } from "@/state/networkState";
@@ -209,7 +209,7 @@ const getLinkNamespaceToAddressTransactionFee = (isMultisig :boolean,namespaceAd
   
 }
 
-const linkNamespaceToAddress = (selectedCosign :string,isMultisig :boolean, multisigAccount: WalletAccount | OtherAccount, walletPassword: string, namespaceID: string, linkType: string, namespaceAddress: string) :void=> {
+const linkNamespaceToAddress = (selectedCosign :string,isMultisig :boolean, multisigAccount: WalletAccount | OtherAccount, walletPassword: string, namespaceID: string, linkType: string, namespaceAddress: string, currentNodeTime: UInt64) :void=> {
   const namespaceTransaction = linkNamespaceToAddressTransaction(namespaceID, linkType, namespaceAddress);
   const senderAddress = multisigAccount.address
   const senderAccount = getAccountDetail(senderAddress, walletPassword)
@@ -221,7 +221,7 @@ const linkNamespaceToAddress = (selectedCosign :string,isMultisig :boolean, mult
     
     let multisigPublicAccount = PublicAccount.createFromPublicKey(multisigAccount.publicKey, AppState.networkType);
     let innerTx = [namespaceTransaction.toAggregateV1(multisigPublicAccount)];
-    const aggregateBondedTx = TransactionUtils.aggregateBondedTx(innerTx);
+    const aggregateBondedTx = TransactionUtils.aggregateBondedTx(innerTx, currentNodeTime);
     const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === selectedCosign)
     let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
     let initiatorAcc = Account.createFromPrivateKey(privateKey, AppState.networkType,1)
@@ -232,7 +232,7 @@ const linkNamespaceToAddress = (selectedCosign :string,isMultisig :boolean, mult
   }
 }
 
-const createDelegateTransaction = (selectedCosign :string,isMultisig :boolean,multisigAccount: WalletAccount, walletPassword: string, accPublicKey: string, delegateAction: LinkAction) :SignedTransaction=>{
+const createDelegateTransaction = (selectedCosign :string,isMultisig :boolean,multisigAccount: WalletAccount, walletPassword: string, accPublicKey: string, delegateAction: LinkAction, currentNodeTime: UInt64) :SignedTransaction=>{
 
   let delegateTx = delegateTransaction(accPublicKey,delegateAction)
   let signedTransaction :SignedTransaction
@@ -244,7 +244,7 @@ const createDelegateTransaction = (selectedCosign :string,isMultisig :boolean,mu
   }else{ //multisig account
     let multisigPublicAccount = PublicAccount.createFromPublicKey(multisigAccount.publicKey, AppState.networkType);
     let innerTx = [delegateTx.toAggregateV1(multisigPublicAccount)];
-    const aggregateBondedTx = TransactionUtils.aggregateBondedTx(innerTx);
+    const aggregateBondedTx = TransactionUtils.aggregateBondedTx(innerTx, currentNodeTime);
     const accountDetails = walletState.currentLoggedInWallet.accounts.find(element => element.publicKey === selectedCosign)
     let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), accountDetails.encrypted, accountDetails.iv);
     let initiatorAcc = Account.createFromPrivateKey(privateKey, AppState.networkType,1)
