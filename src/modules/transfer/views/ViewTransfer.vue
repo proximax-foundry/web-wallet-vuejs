@@ -412,7 +412,13 @@ const makeTransferPayload = async () => {
         .build()
 
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime(); 
-        let transferPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,transferTransaction, undefined, new UInt64(nodeTime.sendTimeStamp))
+        let transferPayload = TransactionUtils.signTxnWithPassword(
+            selectedAddress.value,
+            selectedMultisigAddress.value,
+            walletPassword.value,transferTransaction, 
+            undefined, 
+            new UInt64(nodeTime.sendTimeStamp)
+        );
 
         TransactionState.lockHashPayload = transferPayload.hashLockTxnPayload
         TransactionState.transactionPayload = transferPayload.txnPayload

@@ -521,9 +521,21 @@ export default {
         let cosignerAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosigner.value).address
         let innerTxn = [namespaceMetadataTransaction.toAggregateV1(targetPublicAccount.value)]
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        namespaceMetadataPayload = TransactionUtils.signTxnWithPassword(cosignerAddress,selectedAddress,walletPassword.value,null,innerTxn, new UInt64(nodeTime.sendTimeStamp))
+        namespaceMetadataPayload = TransactionUtils.signTxnWithPassword(
+          cosignerAddress,
+          selectedAddress,
+          walletPassword.value,
+          null,
+          innerTxn, 
+          new UInt64(nodeTime.sendTimeStamp)
+        );
       }else{
-        namespaceMetadataPayload = TransactionUtils.signTxnWithPassword(selectedAddress,null,walletPassword.value,aggregateTx)
+        namespaceMetadataPayload = TransactionUtils.signTxnWithPassword(
+          selectedAddress,
+          null,
+          walletPassword.value,
+          aggregateTx
+        );
       }
       inputScopedMetadataKey.value=""
       oldValue.value = ""

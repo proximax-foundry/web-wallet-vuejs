@@ -580,6 +580,19 @@ export class TransactionUtils {
 
     return addresses;
   }
+
+  static signAbtWithTxnAndPassword(selectedAddress: string, selectedMultisigAddress: string, walletPassword: string, transaction: Transaction, currentNodeTime?: UInt64):{txnPayload:string, hashLockTxnPayload?: string}{
+
+    return TransactionUtils.signTxnWithPassword(
+      selectedAddress, 
+      selectedMultisigAddress, 
+      walletPassword, 
+      transaction, 
+      undefined, 
+      currentNodeTime
+    );
+  }
+
   static signTxnWithPassword = (selectedAddress: string, selectedMultisigAddress: string, walletPassword: string, transaction?: Transaction, innerTransactions?: InnerTransaction[], currentNodeTime?: UInt64):{txnPayload:string, hashLockTxnPayload?: string} => {
     const genHash = networkState.currentNetworkProfile.generationHash
 

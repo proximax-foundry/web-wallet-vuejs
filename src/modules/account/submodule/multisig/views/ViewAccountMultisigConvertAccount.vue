@@ -418,7 +418,13 @@ export default {
           .build();
 
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        multisigPayload = TransactionUtils.signTxnWithPassword(acc.value.address,accountToConvert.address.plain(),passwd.value,convertIntoMultisigTransaction, new UInt64(nodeTime.sendTimeStamp))
+        multisigPayload = TransactionUtils.signAbtWithTxnAndPassword(
+          acc.value.address,
+          accountToConvert.address.plain(),
+          passwd.value,
+          convertIntoMultisigTransaction,
+          new UInt64(nodeTime.sendTimeStamp)
+        );
         passwordErr.value = '';
         // toggleAnounceNotification.value = true;
         // var audio = new Audio(require('@/assets/audio/ding.ogg'));

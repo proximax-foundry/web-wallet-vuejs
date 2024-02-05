@@ -500,9 +500,21 @@ export default {
         let cosignerAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosigner.value).address
         let innerTxn = [mosaicMetadataTransaction.toAggregateV1(targetPublicAccount.value)]
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        assetMetadataPayload = TransactionUtils.signTxnWithPassword(cosignerAddress,selectedAddress,walletPassword.value,null,innerTxn, new UInt64(nodeTime.sendTimeStamp))
+        assetMetadataPayload = TransactionUtils.signTxnWithPassword(
+          cosignerAddress,
+          selectedAddress,
+          walletPassword.value,
+          null,
+          innerTxn, 
+          new UInt64(nodeTime.sendTimeStamp)
+        );
       }else{
-        assetMetadataPayload = TransactionUtils.signTxnWithPassword(selectedAddress,null,walletPassword.value,aggregateTx)
+        assetMetadataPayload = TransactionUtils.signTxnWithPassword(
+          selectedAddress,
+          null,
+          walletPassword.value,
+          aggregateTx
+        );
       }
       inputScopedMetadataKey.value=""
       oldValue.value = ""

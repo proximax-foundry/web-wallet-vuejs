@@ -393,7 +393,7 @@ const createTxn = async () => {
     const txn = txnBuilder.harvesterKey(harvesterPublicAccount.value).build();
     txnObj = TransactionUtils.signTxnWithPassword(
       selectedAddress.value,
-      selectedMultisigAddress.value,
+      null,
       walletPassword.value,
       txn
     );
