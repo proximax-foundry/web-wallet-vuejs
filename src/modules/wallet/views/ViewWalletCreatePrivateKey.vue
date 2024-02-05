@@ -134,7 +134,7 @@ export default defineComponent({
     const confirmPasswd = ref("");
     const privateKeyInput = ref("");
     const showPasswdError = ref(false);
-    const privKeyPattern = "^(0x|0X)?[a-fA-F0-9].{63,65}$";
+    const privKeyPattern = "^(0x|0X)?[a-fA-F0-9]{64}$";
     const passwdPattern = "^[^ ]{8,}$";
     const toggleModal = ref(false)
     const address = ref('')
@@ -168,7 +168,6 @@ export default defineComponent({
 
     const createWallet = () => {
       err.value = "";
-      let result = 0;
       let wallets = new Wallets();
 
       if(wallets.filterByNetworkNameAndName(selectedNetworkName.value, walletName.value)){
@@ -176,8 +175,10 @@ export default defineComponent({
       }else{
         let password = WalletUtils.createPassword(passwd.value);
 
+        if (privateKeyInput.value.substring(0,2) == "0x") {
+          privateKeyInput.value = privateKeyInput.value.substring(2)
+        }
         const walletAccount = WalletUtils.addNewWalletWithPrivateKey(walletState.wallets, privateKeyInput.value, password, walletName.value, selectedNetworkName.value, selectedNetworkType.value);
-        
         privateKey.value = privateKeyInput.value;
         newWallet.value = walletAccount;
         accName.value = walletAccount.name

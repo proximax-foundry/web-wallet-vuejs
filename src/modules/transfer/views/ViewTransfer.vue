@@ -173,7 +173,7 @@ const disableCreate = computed(() => {
         walletPassword.value.match(passwdPattern) &&
         !showAddressError.value
         && !showBalanceErr.value
-        && currentBytes.value < messageLimit.value
+        && currentBytes.value <= messageLimit.value
         && canEncrypt.value
     );
 });
@@ -410,7 +410,8 @@ const makeTransferPayload = async () => {
         .message(msg)
         .build()
 
-        let transferPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,transferTransaction)
+        const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime(); 
+        let transferPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,transferTransaction, undefined, new UInt64(nodeTime.sendTimeStamp))
 
         TransactionState.lockHashPayload = transferPayload.hashLockTxnPayload
         TransactionState.transactionPayload = transferPayload.txnPayload

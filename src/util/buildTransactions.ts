@@ -158,9 +158,9 @@ export class BuildTransactions {
         return this.transactionBuilderFactory.mosaicDefinition();
     }
 
-    aggregateBonded(innerTxn: InnerTransaction[]): AggregateTransaction {
+    aggregateBonded(innerTxn: InnerTransaction[], currentNodeTimetamp?: UInt64): AggregateTransaction {
 
-        let abtDeadline = ChainConfigUtils.getABTMaxSafeDeadline();
+        let abtDeadline = ChainConfigUtils.getABTMaxSafeDeadline(currentNodeTimetamp);
 
         return this.transactionBuilderFactory.aggregateBondedV1()
             .deadline(abtDeadline)
@@ -168,9 +168,9 @@ export class BuildTransactions {
             .build();
     }
 
-    aggregateBondedBuilder(): AggregateBondedV1TransactionBuilder  {
+    aggregateBondedBuilder(currentNodeTimetamp?: UInt64): AggregateBondedV1TransactionBuilder  {
 
-        let abtDeadline = ChainConfigUtils.getABTMaxSafeDeadline();
+        let abtDeadline = ChainConfigUtils.getABTMaxSafeDeadline(currentNodeTimetamp);
 
         return this.transactionBuilderFactory.aggregateBondedV1().deadline(abtDeadline);
     }

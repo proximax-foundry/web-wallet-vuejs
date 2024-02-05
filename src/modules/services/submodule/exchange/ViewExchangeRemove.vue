@@ -113,6 +113,7 @@ import { networkState } from '@/state/networkState';
 import PasswordInput from "@/components/PasswordInput.vue";
 import { WalletUtils } from '@/util/walletUtils';
 import { useRouter } from 'vue-router';
+import { UInt64 } from "tsjs-xpx-chain-sdk";
 
 interface SdaOfferWithDivisibilityAndNamespace extends SdaOfferInfo {
     mosaicGiveDivisibility?: number,
@@ -352,7 +353,8 @@ const removeOffer = async() => {
     }else{
         const multisigAcc = [...walletState.currentLoggedInWallet.accounts, ...walletState.currentLoggedInWallet.others].find(acc => acc.address == plainAddress)
         const innerTxn = [removeSdaExchangeTxn.toAggregateV1(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType))];
-        const aggregateBondedTransaction = AppState.buildTxn.aggregateBonded(innerTxn)
+        const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
+        const aggregateBondedTransaction = AppState.buildTxn.aggregateBonded(innerTxn, new UInt64(nodeTime.sendTimeStamp!));
         const aggregateBondedTransactionSigned = acc.preV2Sign(aggregateBondedTransaction, generationHash);
 
         const hashLockTransaction = TransactionUtils.lockFundTx(aggregateBondedTransactionSigned)

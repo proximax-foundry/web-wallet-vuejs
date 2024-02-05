@@ -251,7 +251,7 @@ export class NamespaceUtils {
     TransactionUtils.announceTransaction(signedTx);
   }
 
-  static createRootNamespaceMultisig = (selectedAddress: string, walletPassword: string, namespaceName: string, duration: number, multiSigAddress:string) => {
+  static createRootNamespaceMultisig = (selectedAddress: string, walletPassword: string, namespaceName: string, duration: number, multiSigAddress:string, currentNodeTime: UInt64) => {
     let buildTransactions = AppState.buildTxn;
     let registerRootNamespaceTransaction = NamespaceUtils.rootNamespaceTransaction(namespaceName, duration);
     const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
@@ -262,7 +262,7 @@ export class NamespaceUtils {
 
     const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType);
     const innerTxn = [registerRootNamespaceTransaction.toAggregateV1(multisigPublicAccount)];
-    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
+    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn, currentNodeTime);
     const aggregateBondedTxSigned = account.preV2Sign(aggregateBondedTx, networkState.currentNetworkProfile.generationHash);
 
     let hashLockTx = TransactionUtils.lockFundTx(aggregateBondedTxSigned)
@@ -270,7 +270,7 @@ export class NamespaceUtils {
     TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedHashlock,aggregateBondedTxSigned );
   }
 
-  static createSubNamespaceMultisig = (selectedAddress: string, walletPassword: string, subNamespace: string, rootNamespace: string, multiSigAddress:string) => {
+  static createSubNamespaceMultisig = (selectedAddress: string, walletPassword: string, subNamespace: string, rootNamespace: string, multiSigAddress:string, currentNodeTime: UInt64) => {
     let buildTransactions = AppState.buildTxn;
     let registerSubNamespaceTransaction = NamespaceUtils.subNamespaceTransaction( rootNamespace, subNamespace);
     const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
@@ -281,7 +281,7 @@ export class NamespaceUtils {
 
     const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType);
     const innerTxn = [registerSubNamespaceTransaction.toAggregateV1(multisigPublicAccount)];
-    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
+    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn, currentNodeTime);
     const aggregateBondedTxSigned = account.preV2Sign(aggregateBondedTx, networkState.currentNetworkProfile.generationHash);
 
     let hashLockTx = TransactionUtils.lockFundTx(aggregateBondedTxSigned)
@@ -296,7 +296,7 @@ export class NamespaceUtils {
     TransactionUtils.announceTransaction(signedTx);
   }
 
-  static extendNamespaceMultisig = (selectedAddress: string, walletPassword: string, namespaceName: string, duration: number, multiSigAddress:string) => {
+  static extendNamespaceMultisig = (selectedAddress: string, walletPassword: string, namespaceName: string, duration: number, multiSigAddress:string, currentNodeTime: UInt64) => {
     let buildTransactions = AppState.buildTxn;
     let extendNamespaceTx = NamespaceUtils.rootNamespaceTransaction( namespaceName, duration);
     const account = NamespaceUtils.getSenderAccount(selectedAddress, walletPassword);
@@ -307,7 +307,7 @@ export class NamespaceUtils {
 
     const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType);
     const innerTxn = [extendNamespaceTx.toAggregateV1(multisigPublicAccount)];
-    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn);
+    const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn, currentNodeTime);
     const aggregateBondedTxSigned = account.preV2Sign(aggregateBondedTx, networkState.currentNetworkProfile.generationHash);
 
     let hashLockTx = TransactionUtils.lockFundTx(aggregateBondedTxSigned)

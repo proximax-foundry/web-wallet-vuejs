@@ -337,7 +337,7 @@ export default {
     },{immediate:true})
     
 
-    const modifyAsset = () => {
+    const modifyAsset = async() => {
       let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
       if(!verifyPassword){
         err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
@@ -348,7 +348,8 @@ export default {
       let supplyChangeType = (selectIncreaseDecrease.value == 'increase')?MosaicSupplyType.Increase:MosaicSupplyType.Decrease;
       let createAssetAggregateTransaction = buildTransactions.buildMosaicSupplyChange(new MosaicId(selectAsset.value), supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(assetDivisibility.value, Number(supply.value))));
       if(cosigner.value){
-        assetModifyPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,createAssetAggregateTransaction)
+        const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
+        assetModifyPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,createAssetAggregateTransaction, undefined, new UInt64(nodeTime.sendTimeStamp))
       }else{
         assetModifyPayload = TransactionUtils.signTxnWithPassword(selectedAccAdd.value,null,walletPassword.value,createAssetAggregateTransaction)
       }
