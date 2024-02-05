@@ -5,7 +5,7 @@ import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Con
   AccountInfo, Transaction, TransactionQueryParams, SignedTransaction, TransactionType, NamespaceName, Mosaic, MosaicInfo,
   NamespaceInfo, TransactionGroupType, TransactionSearch
 } from "tsjs-xpx-chain-sdk";
-import { NetworkConfig } from "../models/stores/chainProfileConfig";
+import { NetworkConfig, supportedEntityVersions } from "../models/stores/chainProfileConfig";
 import { ChainAPICall } from "../models/REST/chainAPICall";
 import { ChainConfigAPI } from "../models/REST/chainConfig";
 import { networkState } from "../state/networkState";
@@ -52,12 +52,11 @@ export class ChainUtils{
       //return location.protocol=='https:' ? `https://${endpoint}` : `http://${endpoint}:${port}`;
     }
 
-    static async getChainConfig(chainHeight: number, chainConfigAPI: ChainConfigAPI): Promise<NetworkConfig | string>{
+    static async getChainConfig(chainHeight: number, chainConfigAPI: ChainConfigAPI): Promise<NetworkConfig| string>{
       let configString = await chainConfigAPI.getChainConfig(chainHeight);
             
       const regex = /[^=\n{1}]+=\s*(.*)/g;
       const configs = configString.networkConfig.match(regex);
-
       if(configs){
         const networkConfig = configs.reduce((result, data)=>{
           const [config, value] = data.split("=");
@@ -66,6 +65,7 @@ export class ChainUtils{
         }, {});
         const chainConfig = <NetworkConfig>
         {
+          supportedEntities  : JSON.parse( configString.supportedEntityVersions.trim().replace('\n','')).entities,
           chainHeight: chainHeight,
           publicKey: networkConfig['publicKey'],
           blockGenerationTargetTime: networkConfig['blockGenerationTargetTime'],
