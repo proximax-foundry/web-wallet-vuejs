@@ -296,15 +296,20 @@ export default {
       const linkAssetToNamespaceTx = buildTransactions.assetAlias(aliasActionType, new NamespaceId(selectNamespace.value), new MosaicId(assetId));
       if(cosigner.value){
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        assetLinkPayload = TransactionUtils.signTxnWithPassword(
-          cosigner.value,selectedAccAdd.value,
+        assetLinkPayload = TransactionUtils.signAbtWithTxnAndPassword(
+          cosigner.value,
+          selectedAccAdd.value,
           walletPassword.value,
           linkAssetToNamespaceTx, 
-          undefined, 
           new UInt64(nodeTime.sendTimeStamp)
         );
       }else{
-        assetLinkPayload = TransactionUtils.signTxnWithPassword(selectedAccAdd.value,null,walletPassword.value,linkAssetToNamespaceTx)
+        assetLinkPayload = TransactionUtils.signTxnWithPassword(
+          selectedAccAdd.value,
+          null,
+          walletPassword.value,
+          linkAssetToNamespaceTx
+        );
       }
       TransactionState.lockHashPayload = assetLinkPayload.hashLockTxnPayload
       TransactionState.transactionPayload = assetLinkPayload.txnPayload

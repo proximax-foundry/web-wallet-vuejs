@@ -287,14 +287,26 @@ import { TransactionState } from '@/state/transactionState';
         const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(multisigPublicAccount.value);
         const innerTxn = [assetDefinitionTx,assetSupplyChangeTx];
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        assetPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,null,innerTxn, new UInt64(nodeTime.sendTimeStamp))
+        assetPayload = TransactionUtils.signTxnWithPassword(
+          selectedAddress.value,
+          selectedMultisigAddress.value,
+          walletPassword.value,
+          null,
+          innerTxn, 
+          new UInt64(nodeTime.sendTimeStamp)
+        );
       }else{
         const assetDefinition = AppState.buildTxn.mosaicDefinition(ownerPublicAccount.value, isMutable.value, isTransferable.value, Number(divisibility.value));
         const assetDefinitionTx = assetDefinition.toAggregateV1(ownerPublicAccount.value);
         let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase;
         const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(ownerPublicAccount.value);
         let createAssetAggregateTransaction = AppState.buildTxn.aggregateComplete([assetDefinitionTx, assetSupplyChangeTx]);
-        assetPayload = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPassword.value,createAssetAggregateTransaction)
+        assetPayload = TransactionUtils.signTxnWithPassword(
+          selectedAddress.value,
+          selectedMultisigAddress.value,
+          walletPassword.value,
+          createAssetAggregateTransaction
+        );
       }
       clearInput();
       TransactionState.lockHashPayload = assetPayload.hashLockTxnPayload

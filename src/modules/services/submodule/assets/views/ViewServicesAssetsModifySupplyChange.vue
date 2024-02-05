@@ -349,9 +349,20 @@ export default {
       let createAssetAggregateTransaction = buildTransactions.buildMosaicSupplyChange(new MosaicId(selectAsset.value), supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(assetDivisibility.value, Number(supply.value))));
       if(cosigner.value){
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        assetModifyPayload = TransactionUtils.signTxnWithPassword(cosigner.value,selectedAccAdd.value,walletPassword.value,createAssetAggregateTransaction, undefined, new UInt64(nodeTime.sendTimeStamp))
+        assetModifyPayload = TransactionUtils.signAbtWithTxnAndPassword(
+          cosigner.value,
+          selectedAccAdd.value,
+          walletPassword.value,
+          createAssetAggregateTransaction, 
+          new UInt64(nodeTime.sendTimeStamp)
+        );
       }else{
-        assetModifyPayload = TransactionUtils.signTxnWithPassword(selectedAccAdd.value,null,walletPassword.value,createAssetAggregateTransaction)
+        assetModifyPayload = TransactionUtils.signTxnWithPassword(
+          selectedAccAdd.value,
+          null,
+          walletPassword.value,
+          createAssetAggregateTransaction
+        );
       }
       TransactionState.lockHashPayload = assetModifyPayload.hashLockTxnPayload
       TransactionState.transactionPayload = assetModifyPayload.txnPayload
