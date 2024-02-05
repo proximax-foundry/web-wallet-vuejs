@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="relative">
     <div class='my-4 w-11/12 ml-auto mr-auto flex flex-col sm:flex-row justify-between'>
       <LabelComponent />
       <div class="absolute invisible 2xl:visible text-gray-500 mt-1 explicitLeft" >Labels</div>

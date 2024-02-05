@@ -1,7 +1,7 @@
 import { RouteRecordRaw } from 'vue-router'
 export const MetadataTransactionRoutes: RouteRecordRaw[] = [
   {
-    path: '/metadata-txn/update-asset-metadata/:targetId?/:scopedMetadataKey?',
+    path: '/metadata-txn/update-asset-metadata/:targetId?/:scopedMetadataKey?/:address?',
     name: 'ViewUpdateAssetMetadata',
     props: true,
     component: () => import('@/modules/metadataTxn/views/ViewUpdateAssetMetadata.vue'),

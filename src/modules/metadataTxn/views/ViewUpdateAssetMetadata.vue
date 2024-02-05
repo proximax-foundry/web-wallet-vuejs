@@ -99,7 +99,7 @@
                     Update Asset Metadata
                 </button>
                 <div class="text-center">
-                <router-link :to="{name: 'ViewDashboard'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
+                <router-link :to="{name:'ViewAccountAssets', params: { address: address}}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
                 </div>
             </div>
         </div>
@@ -139,6 +139,7 @@ export default {
   props:{
     targetId: String,
     scopedMetadataKey: String,
+    address:String
   },
   components: {
     MetadataInput,

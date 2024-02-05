@@ -110,6 +110,7 @@ import { walletState } from "@/state/walletState";
 import { useI18n } from "vue-i18n";
 import { WalletUtils } from "@/util/walletUtils";
 import { AppState } from "@/state/appState";
+import Dialog from "primevue/dialog";
 
     const customGroup = ref("");
     const customGroupPattern = "^[0-9A-Za-z]{1,}$";

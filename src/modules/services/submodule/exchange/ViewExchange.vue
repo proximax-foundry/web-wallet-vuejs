@@ -7,11 +7,11 @@
                     Transaction</div>
                 <SelectInputAccount />
                 <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
-                <div class="text-blue-primary mt-3">Price</div>
-                <div> {{ Math.trunc(rate * Math.pow(10, offerInfo?.mosaicGiveDivisibility)) / Math.pow(10,
-                    offerInfo?.mosaicGiveDivisibility) }}
+                <!-- <div class="text-blue-primary mt-3">Price</div>
+                <div> {{/*  Math.trunc( */rate.toFixed(6) /* * Math.pow(10, offerInfo?.mosaicGiveDivisibility) )/ Math.pow(10,
+                    offerInfo?.mosaicGiveDivisibility) */ }}
                     {{ displayAssetName(offerInfo?.mosaicGiveName) }}/{{ displayAssetName(offerInfo?.mosaicGetName) }}
-                </div>
+                </div> -->
                 <div class="text-blue-primary mt-3">Available Amount</div>
                 <div>{{ Helper.toCurrencyFormat(offerInfo?.currentMosaicGiveAmount.compact() / Math.pow(10, offerInfo?.mosaicGiveDivisibility),offerInfo?.mosaicGiveDivisibility) }} {{
                     displayAssetName(offerInfo?.mosaicGiveName) }}</div>
@@ -30,7 +30,7 @@
                     Balance</div>
                 <div class="text-red-500 text-xs"
                     v-if="parseFloat(amountToPay) < (baseRatio[0] / Math.pow(10, offerInfo?.mosaicGetDivisibility))">Less
-                    than minimum offer amount</div>
+                    than minimum offer amount </div>
 
                 <div class="mt-2 text-xs text-gray-600">Available to give: {{  Helper.toCurrencyFormat( giveAssetBalance, offerInfo?.mosaicGetDivisibility )}} {{
                     displayAssetName(offerInfo?.mosaicGetName) }}</div>
@@ -185,7 +185,6 @@ const reduceFraction = (numerator: number, denominator: number): [number, number
     // Reduce the fraction
     const reducedNumerator = numerator / commonDivisor;
     const reducedDenominator = denominator / commonDivisor;
-
     // Return the reduced fraction
     return [reducedNumerator, reducedDenominator];
 }
@@ -195,9 +194,8 @@ const exceededAmount = computed(() => {
     if (parseFloat(amountToPay.value) < (baseRatio.value[0] / Math.pow(10, offerInfo.value?.mosaicGetDivisibility))) {
         return 0
     }
-    return parseFloat(amountToPay.value) * Math.pow(10,offerInfo.value?.mosaicGetDivisibility)% baseRatio.value[0]
+    return( parseFloat(amountToPay.value) * Math.pow(10,offerInfo.value?.mosaicGetDivisibility)% baseRatio.value[0])/Math.pow(10,offerInfo.value?.mosaicGetDivisibility)
 })
-
 const knownToken = [{
     namespace: "prx.xpx",
     name: "XPX"
@@ -246,9 +244,9 @@ const txnFee = computed(() => {
         Deadline.create(),
         [new SdaExchangeOffer(
             new MosaicId(AppState.nativeToken.assetId),
-            UInt64.fromUint(parseFloat(amountToPay.value) * Math.pow(10, offerInfo.value?.mosaicGiveDivisibility ?? 0)),
+            UInt64.fromUint(parseFloat(amountToPay.value) * Math.pow(10, offerInfo.value?.mosaicGetDivisibility ?? 0)),
             new MosaicId(AppState.nativeToken.assetId),
-            UInt64.fromUint(amountToGet.value * Math.pow(10, offerInfo.value?.mosaicGetDivisibility ?? 0)),
+            UInt64.fromUint(amountToGet.value * Math.pow(10, offerInfo.value?.mosaicGiveDivisibility ?? 0)),
             offerInfo.value?.deadline
         ),
         ], AppState.networkType
@@ -389,11 +387,11 @@ const fetchExchange = async () => {
     }
     const namespaceInfo = await AppState.chainAPI.assetAPI.getMosaicsNames([offerInfo.value.mosaicIdGet as MosaicId, offerInfo.value.mosaicIdGive as MosaicId])
     const assetInfo = await AppState.chainAPI.assetAPI.getMosaics([offerInfo.value.mosaicIdGet as MosaicId, offerInfo.value.mosaicIdGive as MosaicId])
+
     offerInfo.value.mosaicGetName = namespaceInfo[0].names.length ? namespaceInfo[0].names[0].name : offerInfo.value.mosaicIdGet.toHex()
     offerInfo.value.mosaicGiveName = namespaceInfo[1].names.length ? namespaceInfo[1].names[0].name : offerInfo.value.mosaicIdGive.toHex()
     offerInfo.value.mosaicGetDivisibility = assetInfo.find(info => info.mosaicId.toHex() == offerInfo.value.mosaicIdGet.toHex()).divisibility
     offerInfo.value.mosaicGiveDivisibility = assetInfo.find(info => info.mosaicId.toHex() == offerInfo.value.mosaicIdGive.toHex()).divisibility
-
     rate.value = (offerInfo.value.initialMosaicGiveAmount.compact() / Math.pow(10, offerInfo.value.mosaicGiveDivisibility)) / (offerInfo.value.initialMosaicGetAmount.compact() / Math.pow(10, offerInfo.value.mosaicGetDivisibility))
 }
 
@@ -536,7 +534,7 @@ const exchangeSell = async () => {
             detail: "Incorrect password",
             group: 'br-custom',
             life: 1000
-        });
+        });                                     
         return;
     }
    
@@ -548,7 +546,7 @@ const exchangeSell = async () => {
             offerInfo.value.mosaicIdGet as MosaicId,
             UInt64.fromUint(Math.trunc((parseFloat(amountToPay.value) - exceededAmount.value) * Math.pow(10, offerInfo.value.mosaicGetDivisibility))),
             offerInfo.value.mosaicIdGive as MosaicId,
-            UInt64.fromUint(Math.trunc(amountToGet.value * Math.pow(10, offerInfo.value.mosaicGetDivisibility))),
+            UInt64.fromUint(Math.trunc(amountToGet.value * Math.pow(10, offerInfo.value.mosaicGiveDivisibility))),
             UInt64.fromUint(57600)
         ),
         ], AppState.networkType
