@@ -158,7 +158,9 @@
 import { AppState } from '@/state/appState';
 import { useToast } from 'primevue/usetoast';
 import { lastValueFrom } from 'rxjs';
-import { Account, Address, Deadline, ExchangeSdaHttp, MosaicId, Password, PlaceSdaExchangeOfferTransaction, PublicAccount, SdaExchangeOffer, SdaOfferInfo, UInt64, XpxMosaicProperties } from 'tsjs-xpx-chain-sdk';
+import { Account, Address, Deadline, ExchangeSdaHttp, MosaicId, Password, 
+    PlaceSdaExchangeOfferTransaction, PublicAccount, SdaExchangeOffer, SdaOfferInfo, 
+    UInt64, XpxMosaicProperties } from 'tsjs-xpx-chain-sdk';
 import { computed, getCurrentInstance, ref, watch } from 'vue';
 import InputAmount from './components/InputAmount.vue';
 import SelectInputAccount from './components/SelectInputAccount.vue';
