@@ -287,7 +287,7 @@ import { TransactionState } from '@/state/transactionState';
         const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(multisigPublicAccount.value);
         const innerTxn = [assetDefinitionTx,assetSupplyChangeTx];
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        assetPayload = TransactionUtils.signTxnWithPassword(
+        assetPayload = await TransactionUtils.signTxnWithPassword(
           selectedAddress.value,
           selectedMultisigAddress.value,
           walletPassword.value,
@@ -301,7 +301,7 @@ import { TransactionState } from '@/state/transactionState';
         let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase;
         const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(ownerPublicAccount.value);
         let createAssetAggregateTransaction = AppState.buildTxn.aggregateComplete([assetDefinitionTx, assetSupplyChangeTx]);
-        assetPayload = TransactionUtils.signTxnWithPassword(
+        assetPayload = await TransactionUtils.signTxnWithPassword(
           selectedAddress.value,
           selectedMultisigAddress.value,
           walletPassword.value,

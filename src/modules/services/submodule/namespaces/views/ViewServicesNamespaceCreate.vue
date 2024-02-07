@@ -295,7 +295,7 @@ const createNamespace = async() => {
   const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime(); 
   if (selectNamespace.value === '1') {
     let registerRootNamespaceTransaction = buildTransactions.registerRootNamespace(namespaceName.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value))));
-    namespacePayload = TransactionUtils.signTxnWithPassword(
+    namespacePayload = await TransactionUtils.signTxnWithPassword(
       selectedAddress.value,
       selectedMultisigAddress.value,
       walletPassword.value,
@@ -305,7 +305,7 @@ const createNamespace = async() => {
     );
   } else {
     let registerSubNamespaceTransaction = buildTransactions.registersubNamespace(selectNamespace.value, namespaceName.value);
-    namespacePayload = TransactionUtils.signTxnWithPassword(
+    namespacePayload = await TransactionUtils.signTxnWithPassword(
       selectedAddress.value,
       selectedMultisigAddress.value,
       walletPassword.value,
