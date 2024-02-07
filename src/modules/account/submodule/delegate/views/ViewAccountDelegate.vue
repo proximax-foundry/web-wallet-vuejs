@@ -386,7 +386,7 @@ export default {
             );
           }
           else{
-            delegatePayload = TransactionUtils.signTxnWithPassword(
+            delegatePayload = await TransactionUtils.signTxnWithPassword(
               acc.value.address,
               null,
               walletPassword.value,
