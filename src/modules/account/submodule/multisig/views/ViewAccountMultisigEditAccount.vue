@@ -409,7 +409,7 @@ export default {
 
         let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        multisigPayload = TransactionUtils.signAbtWithTxnAndPassword(
+        multisigPayload =await TransactionUtils.signAbtWithTxnAndPassword(
           selectedCosignAddress,
           acc.value.address,
           passwd.value,
