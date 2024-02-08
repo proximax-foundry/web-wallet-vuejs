@@ -64,6 +64,7 @@
               </div>
             </div>
           </div>
+          <div class="error error_box mb-5" v-if="selectErr===true">Please select one of options</div>
           <div class="text-sm text-center mb-2 sm:mb-4">{{$t('swap.feesValidDuration')}}: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
           <div class="tex-center font-bold text-sm mb-2">{{$t('general.transactionFee')}} ({{$t('swap.siriusNetwork')}}):</div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
@@ -271,6 +272,7 @@ export default {
     const selectedAccountAddress = ref("");
     const selectedAccountPublicKey = ref("");
     const selectedAccountBalance = ref(0);
+    const selectErr = ref(false)
     const selectAccount = (name, address) => {
       currentPage.value = 2;
       selectedAccountName.value = name;
@@ -945,6 +947,12 @@ export default {
     };
 
     const validated = () => {
+      if(bscGasStrategy.value === ""){
+        selectErr.value = true
+        return
+      }else{
+        selectErr.value = false
+      }
       try{
         let validateAddress = ethers.utils.getAddress(bscAddress.value);
         if(validateAddress && !showAmountErr.value){
@@ -1020,7 +1028,8 @@ export default {
       tokenList,
       selectedToken,
       selectedTokenName,
-      validated
+      validated,
+      selectErr
     };
   }
 }
