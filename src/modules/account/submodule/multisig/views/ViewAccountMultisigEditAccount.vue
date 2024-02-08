@@ -62,7 +62,7 @@
             </div>
           </div>
        </div>
-        <button class="pl-6 font-semibold text-xs mt-1 text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton || (onPartial && !enableEditPartial)">+ {{$t('multisig.addNewCosignatory')}}</button>
+        <button class="pl-6 font-semibold text-xs mt-1 text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">+ {{$t('multisig.addNewCosignatory')}}</button>
         <div class="ml-6 my-7 gray-line"/> 
         <div class="pl-6 text-xs font-semibold mb-3">{{$t('general.scheme')}}</div>
         <div class='flex gap-2 pl-6'>
@@ -284,7 +284,7 @@ export default {
     })
     const addCoSigButton = computed(() => {
           var status = false;
-          if(accountBalance.value >= totalFee.value && isCoSigner.value){
+          if(accountBalance.value >= totalFee.value && isCoSigner.value && (!onPartial.value || enableEditPartial.value)){
             for(var i = 0; i < coSign.value.length; i++){
               if(showAddressError.value[i] != ''){
                 status = true;
