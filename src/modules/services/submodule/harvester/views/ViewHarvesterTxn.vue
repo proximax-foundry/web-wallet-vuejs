@@ -381,7 +381,7 @@ const createTxn = async () => {
     const innerTxn = txn.toAggregateV1(multisigPublicAccount.value);
     const innerTxns = [innerTxn];
     const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-    txnObj = TransactionUtils.signTxnWithPassword(
+    txnObj = await TransactionUtils.signTxnWithPassword(
       selectedAddress.value,
       selectedMultisigAddress.value,
       walletPassword.value,
@@ -391,7 +391,7 @@ const createTxn = async () => {
     );
   } else {
     const txn = txnBuilder.harvesterKey(harvesterPublicAccount.value).build();
-    txnObj = TransactionUtils.signTxnWithPassword(
+    txnObj = await TransactionUtils.signTxnWithPassword(
       selectedAddress.value,
       null,
       walletPassword.value,

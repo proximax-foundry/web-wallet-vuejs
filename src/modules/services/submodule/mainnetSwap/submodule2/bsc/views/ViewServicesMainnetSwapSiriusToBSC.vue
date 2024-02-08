@@ -82,7 +82,7 @@
           </div>
           <div class="mt-10 text-center">
             <button @click="$router.push({name: 'ViewServicesMainnetSwap'})" class="text-black font-bold text-xs mr-1 sm:mr-5 mt-2 focus:outline-none disabled:opacity-50" :disabled="isDisabledCancel">{{$t('general.later')}}</button>
-            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="isDisabledValidate" @click="validated()">{{$t('general.continue')}}</button>
+            <button type="submit" class="default-btn focus:outline-none disabled:opacity-50" :disabled="xpxFeeErr" @click="validated()">{{$t('general.continue')}}</button>
           </div>
         </div>
       </div>

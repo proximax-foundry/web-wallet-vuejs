@@ -349,7 +349,7 @@ export default {
       let createAssetAggregateTransaction = buildTransactions.buildMosaicSupplyChange(new MosaicId(selectAsset.value), supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(assetDivisibility.value, Number(supply.value))));
       if(cosigner.value){
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        assetModifyPayload = TransactionUtils.signAbtWithTxnAndPassword(
+        assetModifyPayload = await TransactionUtils.signAbtWithTxnAndPassword(
           cosigner.value,
           selectedAccAdd.value,
           walletPassword.value,
@@ -357,7 +357,7 @@ export default {
           new UInt64(nodeTime.sendTimeStamp)
         );
       }else{
-        assetModifyPayload = TransactionUtils.signTxnWithPassword(
+        assetModifyPayload = await TransactionUtils.signTxnWithPassword(
           selectedAccAdd.value,
           null,
           walletPassword.value,

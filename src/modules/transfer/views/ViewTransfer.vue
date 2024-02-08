@@ -343,7 +343,6 @@ const createTransferTxn = async () => {
         router.push({ name: "ViewAccountPendingTransactions", params: { address: selectedAddress.value } })
         clearInput()
 }
-
 const makeTransferPayload = async () => {
     // verify password
     let verify = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword.value)
@@ -412,7 +411,7 @@ const makeTransferPayload = async () => {
         .build()
 
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime(); 
-        let transferPayload = TransactionUtils.signTxnWithPassword(
+        let transferPayload = await TransactionUtils.signTxnWithPassword(
             selectedAddress.value,
             selectedMultisigAddress.value,
             walletPassword.value,transferTransaction, 

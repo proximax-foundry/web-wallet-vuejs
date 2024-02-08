@@ -418,7 +418,7 @@ export default {
           .build();
 
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        multisigPayload = TransactionUtils.signAbtWithTxnAndPassword(
+        multisigPayload = await TransactionUtils.signAbtWithTxnAndPassword(
           acc.value.address,
           accountToConvert.address.plain(),
           passwd.value,

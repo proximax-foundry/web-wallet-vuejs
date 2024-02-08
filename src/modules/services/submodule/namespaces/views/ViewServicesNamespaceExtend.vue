@@ -302,7 +302,7 @@ export default {
       const extendNamespaceTx = buildTransactions.registerRootNamespace(selectNamespace.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value))));
       if(cosigner.value){
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime(); 
-        namespaceExtendPayload = TransactionUtils.signAbtWithTxnAndPassword(
+        namespaceExtendPayload = await TransactionUtils.signAbtWithTxnAndPassword(
           cosigner.value,
           selectedAccAdd.value,
           walletPassword.value,
@@ -310,7 +310,7 @@ export default {
           new UInt64(nodeTime.sendTimeStamp)
         );
       }else{
-        namespaceExtendPayload = TransactionUtils.signTxnWithPassword(
+        namespaceExtendPayload = await TransactionUtils.signTxnWithPassword(
           selectedAccAdd.value,
           null,
           walletPassword.value,

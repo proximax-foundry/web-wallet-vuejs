@@ -351,7 +351,7 @@ export default {
           if(isMultisig.value){
             let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address 
             const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-            delegatePayload = TransactionUtils.signAbtWithTxnAndPassword(
+            delegatePayload = await TransactionUtils.signAbtWithTxnAndPassword(
               selectedCosignAddress,
               acc.value.address,
               walletPassword.value,
@@ -360,7 +360,7 @@ export default {
             );
           }
           else{
-            delegatePayload = TransactionUtils.signTxnWithPassword(
+            delegatePayload = await TransactionUtils.signTxnWithPassword(
               acc.value.address,
               null,
               walletPassword.value,
@@ -374,11 +374,10 @@ export default {
           .remoteAccountKey(AccPublicKey.value)
           .linkAction(LinkAction.Link)
           .build()
-          console.log(acc.value.address) 
           if(isMultisig.value){
             let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address 
             const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-            delegatePayload = TransactionUtils.signAbtWithTxnAndPassword(
+            delegatePayload = await TransactionUtils.signAbtWithTxnAndPassword(
               selectedCosignAddress,
               acc.value.address,
               walletPassword.value,
@@ -387,7 +386,7 @@ export default {
             );
           }
           else{
-            delegatePayload = TransactionUtils.signTxnWithPassword(
+            delegatePayload = await TransactionUtils.signTxnWithPassword(
               acc.value.address,
               null,
               walletPassword.value,
