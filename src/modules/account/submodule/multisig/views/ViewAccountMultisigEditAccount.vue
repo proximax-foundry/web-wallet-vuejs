@@ -32,11 +32,10 @@
            <div class=" error error_box mb-5" v-if="passwordErr!=''">{{ passwordErr }}</div>
         </div>
         <div class="mt-4"></div>
-
         <div class="flex flex-col gap-2">
           <div v-for="(publicKey, index) in cosignaturies" :key="index" >
             <div class="flex">
-              <img v-if="checkRemoval(publicKey)" @click="restoreFromRemovalList(publicKey)" src="@/modules/account/submodule/multisig/img/icon-delete-red.svg"  class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
+              <img v-if="checkRemoval(publicKey) && (!onPartial || enableEditPartial)" @click="restoreFromRemovalList(publicKey)" src="@/modules/account/submodule/multisig/img/icon-delete-red.svg"  class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
               <img v-else @click="addToRemovalList(publicKey)" src="@/modules/account/submodule/multisig/img/icon-delete-gray.svg"  class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
               <TextInput class='w-5/12 mr-2 ' v-model="cosignerName[index]" :disabled="true" />
               <TextInput class='w-7/12' v-model="cosignaturies[index]" :disabled="true"  />
@@ -44,11 +43,11 @@
           </div>
         </div>
 
-        <div class="flex flex-col gap-2 mt-2">
+        <div v-if="!onPartial || enableEditPartial" class="flex flex-col gap-2 mt-2">
           <div v-for="(coSignAddress, index) in coSign" :key="index" >
             <div class="flex">
               <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
-              <TextInput class='w-5/12 mr-2 ' :placeholder="$t('multisig.cosignatory')+`${index+1}`"  v-model="contactName[index]" :disabled="true"  />
+              <TextInput class='w-5/12 mr-2' :placeholder="$t('multisig.cosignatory')+`${index+1}`"  v-model="contactName[index]" :disabled="true"  />
               <TextInputClean class='w-7/12 mr-2 ' :placeholder="$t('general.publicKey')" :errorMessage="$t('general.invalidInput')" :showError="showAddressError[index]"  v-model="coSign[index]" />
               <!-- <div v-if="showAddressError[index]==true " class=""/> -->
               <div @click="toggleContact[index]=!toggleContact[index]" class=' border  cursor-pointer flex flex-col justify-center  p-2' style="height:2.66rem">
@@ -63,7 +62,7 @@
             </div>
           </div>
        </div>
-        <button class="pl-6 font-semibold text-xs mt-1 text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton">+ {{$t('multisig.addNewCosignatory')}}</button>
+        <button class="pl-6 font-semibold text-xs mt-1 text-blue-primary outline-none focus:outline-none disabled:opacity-50  disabled:cursor-auto" @click="addCoSig" :disabled="addCoSigButton || (onPartial && !enableEditPartial)">+ {{$t('multisig.addNewCosignatory')}}</button>
         <div class="ml-6 my-7 gray-line"/> 
         <div class="pl-6 text-xs font-semibold mb-3">{{$t('general.scheme')}}</div>
         <div class='flex gap-2 pl-6'>
@@ -88,7 +87,7 @@
         </div>
       </div>
       <div class='bg-navy-primary p-6 lg:col-span-1'>
-        <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig="isMultisig" :is-cosigner="isCoSigner" :on-partial="onPartial" :transaction-fee="String(aggregateFee)" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
+        <TransactionFeeDisplay @ticked="(val)=> enableEditPartial = val" :fund-status="fundStatus" :is-multisig="isMultisig" :is-cosigner="isCoSigner" :on-partial="onPartial" :transaction-fee="String(aggregateFee)" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
         <div class="mt-5"/>
         <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
         <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="passwd" :disabled="disabledPassword" />
@@ -150,7 +149,7 @@ export default {
     const inputPkNotExist = ref('')
     const passwordErr = ref('');
     const fundStatus = ref(false);
-    
+    const enableEditPartial = ref(false)
     const passwd = ref('');
     const passwdPattern = "^[^ ]{8,}$";
     const publicKeyPattern = "^[0-9A-Fa-f]{64}$";
@@ -272,14 +271,14 @@ export default {
     })
     const disableSend = computed(() => 
       !isMultisig.value || 
-      onPartial.value || 
+      (onPartial.value && !enableEditPartial.value) || 
       !passwd.value.match(passwdPattern) || 
       err.value || 
       showAddressError.value.indexOf(true) != -1 || 
       numDeleteUser.value < 0 || 
       numApproveTransaction.value < 0
     );
-    const disabledPassword = computed(() => !(!onPartial.value && isMultisig.value && !fundStatus.value && isCoSigner.value));
+    const disabledPassword = computed(() => !((!onPartial.value || enableEditPartial.value) && isMultisig.value && !fundStatus.value && isCoSigner.value));
     const isCoSigner = computed(() => {
       return getWalletCosigner().hasCosigner;
     })
@@ -623,7 +622,7 @@ export default {
     }
     // add cosigner to remove list
     const addToRemovalList = (publicKey) => {
-      if(!onPartial.value && !fundStatus.value && isCoSigner.value){
+      if((!onPartial.value || enableEditPartial.value) && !fundStatus.value && isCoSigner.value){
         removeCosign.value = []
         removeCosign.value.push(publicKey);
       }
@@ -844,7 +843,7 @@ export default {
         return false
       }
     }
-    
+
     return {
       cosignerName,
       contact,
@@ -901,7 +900,8 @@ export default {
       getMultiSigCosigner,
       checkCosignBalance,
       passwordErr,
-      inputPkNotExist
+      inputPkNotExist,
+      enableEditPartial
     };
   },
 }
