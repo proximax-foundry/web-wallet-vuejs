@@ -153,9 +153,7 @@ import SelectInputAccount from './components/SelectInputAccount.vue';
 import SelectInputAsset from './components/SelectInputAsset.vue';
 import InputAmount from './components/InputAmount.vue';
 import InputId from './components/InputId.vue';
-import { Account, Address, Deadline, ExchangeSdaHttp, MosaicId, NamespaceId, Password, 
-    PlaceSdaExchangeOfferTransaction, PublicAccount, SdaExchangeOffer, 
-    UInt64 } from 'tsjs-xpx-chain-sdk';
+import { Account, Address, Deadline, ExchangeSdaHttp, MosaicId, NamespaceId, Password, PlaceSdaExchangeOfferTransaction, PublicAccount, SdaExchangeOffer, UInt64 } from 'tsjs-xpx-chain-sdk';
 import { AppState } from '@/state/appState';
 import SelectInputMultisigAccount from './components/SelectInputMultisigAccount.vue';
 import PasswordInput from "@/components/PasswordInput.vue";
@@ -526,8 +524,7 @@ const exchangeCreate = async () => {
     if (isMultisig.value) {
         const multisigAcc = [...walletState.currentLoggedInWallet.accounts, ...walletState.currentLoggedInWallet.others].find(acc => acc.address == selectedMultisigAddress.value)
         const innerTxn = [sdaExchangeOfferTxn.toAggregateV1(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType))];
-        const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        const aggregateBondedTransaction = AppState.buildTxn.aggregateBonded(innerTxn, new UInt64(nodeTime.sendTimeStamp!))
+        const aggregateBondedTransaction = AppState.buildTxn.aggregateBonded(innerTxn)
         const aggregateBondedTransactionSigned = acc.preV2Sign(aggregateBondedTransaction, generationHash);
 
         const hashLockTransaction = TransactionUtils.lockFundTx(aggregateBondedTransactionSigned)

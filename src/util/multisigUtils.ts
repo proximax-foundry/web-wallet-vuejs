@@ -7,7 +7,6 @@ import {
     MultisigCosignatoryModificationType,
     Password,
     MultisigAccountGraphInfo,
-    UInt64
   } from "tsjs-xpx-chain-sdk";
   import { WalletUtils } from "@/util/walletUtils";
   import { walletState } from "@/state/walletState";
@@ -105,7 +104,6 @@ import {
         .minRemovalDelta(relativeNumDeleteUser)
         .modifications(multisigCosignatory)
         .build();
-
       const aggregateBondedTx = txBuilder
         .aggregateBondedBuilder()
         .innerTransactions([
@@ -199,10 +197,8 @@ import {
         .modifications(multisigCosignatory)
         .build();
   
-      const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-
       const aggregateBondedTransaction = txBuilder
-        .aggregateBondedBuilder(new UInt64(nodeTime.sendTimeStamp!))
+        .aggregateBondedBuilder()
         .innerTransactions([
           convertIntoMultisigTransaction.toAggregateV1(
             accountToConvert.publicAccount
@@ -489,11 +485,8 @@ import {
         multisigAccount.publicKey,
         AppState.networkType
       );
-
-      const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-
       const aggregateBondedTransaction = txBuilder
-        .aggregateBondedBuilder(new UInt64(nodeTime.sendTimeStamp!))
+        .aggregateBondedBuilder()
         .innerTransactions([modifyMultisigTransaction.toAggregateV1(publicAcc)])
         .build();
   

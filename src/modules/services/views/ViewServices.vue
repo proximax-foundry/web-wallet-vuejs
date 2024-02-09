@@ -24,7 +24,7 @@
               class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
             <div class='text-center text-xs font-semibold'>Airdrop Token Utility</div>
           </router-link>
-          <div class="mx-auto" v-if="networkState.currentNetworkProfileConfig?.supportedEntities.find(entity=>entity.type==TransactionType.PLACE_SDA_EXCHANGE_OFFER)" @click="toggle">
+          <div class="mx-auto" v-if="nodeEnv != 'production'" @click="toggle">
             <img src="@/assets/img/navi/icon-exchange.svg"
               class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
             <div class='text-center text-xs font-semibold'>SDA Exchange</div>
@@ -51,14 +51,12 @@
 import Menu from 'primevue/menu';
 import { useRouter } from 'vue-router'
 import { ref} from "vue";
-import { networkState } from "@/state/networkState";
-import { TransactionType } from 'tsjs-xpx-chain-sdk';
-
 const nodeEnv =  import.meta.env.VITE_NODE_ENV
 const menu = ref();
 const toggle = (event :Event) => {
   menu.value.toggle(event);
 };
+
 const router = useRouter()
 
 const items = ref([

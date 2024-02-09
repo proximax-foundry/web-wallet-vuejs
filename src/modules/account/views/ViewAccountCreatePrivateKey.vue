@@ -48,7 +48,7 @@ export default {
     const accountName = ref("");
     const walletPassword = ref("");
     const showPasswdError = ref(false);
-    const privKeyPattern = "^(0x|0X)?[a-fA-F0-9]{64}$";
+    const privKeyPattern = "^(0x|0X)?[a-fA-F0-9].{63,65}$";
     const passwdPattern = "^[^ ]{8,}$";
     const router = useRouter();
     const disableCreate = computed(
@@ -76,9 +76,6 @@ export default {
           err.value = t('general.walletPasswordInvalid',{name : walletName}) ;
         } else {    
           // create account
-          if (privKey.value.substring(0,2) == "0x") {
-            privKey.value = privKey.value.substring(2)
-          }
           const account = Account.createFromPrivateKey(privKey.value,AppState.networkType,1);
           const verifyExistingAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.publicKey == account.publicKey);
           if (verifyExistingAccount) {

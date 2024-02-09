@@ -110,9 +110,7 @@ import TextInputClean from '@/components/TextInputClean.vue'
 import {MultisigUtils} from '@/util/multisigUtils'
 import { walletState } from '@/state/walletState';
 import {
-    PublicAccount,Address, 
-    MultisigCosignatoryModification, 
-    MultisigCosignatoryModificationType
+    PublicAccount,Address, MultisigCosignatoryModification, MultisigCosignatoryModificationType
 } from "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
 import {useI18n} from 'vue-i18n'

@@ -65,17 +65,10 @@ export interface NetworkConfig{
     downloadDuration: number | null;
     downloadCacheEnabled: boolean | null;
     maxSuperContractsOnDrive: number | null
-    supportedEntities: supportedEntityVersions[]
-}
-
-export interface supportedEntityVersions {
-    name: string,
-    type: number,
-    supportedVersions: number[]
 }
 
 export class ChainProfileConfig extends StoreProperties implements NetworkConfig  {
-    supportedEntities: supportedEntityVersions[];
+
     chainHeight: number | null = null;
     publicKey: string = '';
     blockGenerationTargetTime: string = '';

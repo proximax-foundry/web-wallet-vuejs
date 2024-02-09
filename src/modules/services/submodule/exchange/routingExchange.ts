@@ -1,9 +1,6 @@
-import { networkState } from '@/state/networkState';
-import { computed } from 'vue';
-import { TransactionType } from 'tsjs-xpx-chain-sdk';
 
-const findEntity = computed(()=>networkState.currentNetworkProfileConfig?.supportedEntities.find(entity=>entity.type==TransactionType.PLACE_SDA_EXCHANGE_OFFER))
-export const ExchangeRoutes = !findEntity? [] :[
+const nodeEnv = import.meta.env.VITE_NODE_ENV
+export const ExchangeRoutes =  nodeEnv == 'production'? [] :[
     {
       path: '/exchange/create',
       name: 'ViewExchangeCreate',

@@ -319,12 +319,7 @@ const walletCosignerList = computed<{
       };
     });
 
-    let hasList = false
-    if(list.length > 0){
-      hasList = true
-    }
-
-    return { hasCosigner: hasList, cosignerList: list };
+    return { hasCosigner: false, cosignerList: list };
   } else {
     return { hasCosigner: false, cosignerList: [] };
   }
