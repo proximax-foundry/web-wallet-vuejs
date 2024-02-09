@@ -287,9 +287,10 @@ export default {
       }
     }
 
-    const createTxnBuilder = () =>{
+    const createTxnBuilder = async () =>{
       txnBuilder = AppState.buildTxn.namespaceMetadataBuilder();
-      aggregateTxnBuilder = AppState.buildTxn.aggregateBondedBuilder();
+      const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
+      aggregateTxnBuilder = AppState.buildTxn.aggregateBondedBuilder(new UInt64(nodeTime.sendTimeStamp!));
     }
 
     const loadCurrentMetadataValue = async () =>{
@@ -331,7 +332,7 @@ export default {
     }
     
     const init = async ()=>{
-      createTxnBuilder();
+      await createTxnBuilder();
       await handleParamTargetId();
       handleParamScopedMetadataKey();
       await loadCurrentMetadataValue();
@@ -483,7 +484,7 @@ export default {
       }
     }
   
-    const updateMetadata = () => {   
+    const updateMetadata = async() => {   
       if(!walletState.currentLoggedInWallet){
         return
       }

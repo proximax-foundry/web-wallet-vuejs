@@ -279,6 +279,7 @@ watch(selectNamespace, newValue => {
 
 const createNamespace = () => {
   let buildTransactions = AppState.buildTxn;
+  const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime(); 
   if (selectNamespace.value === '1') {
     let unsignedRegisterRootNamespaceTransaction = buildTransactions.registerRootNamespace(namespaceName.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value)))).serialize();
     TransactionState.unsignedTransactionPayload = unsignedRegisterRootNamespaceTransaction

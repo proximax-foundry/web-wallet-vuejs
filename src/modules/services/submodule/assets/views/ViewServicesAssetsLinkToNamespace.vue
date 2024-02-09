@@ -95,7 +95,7 @@ import {MultisigUtils} from '@/util/multisigUtils'
 import { AppState } from '@/state/appState';
 import { TransactionState } from '@/state/transactionState'
 import { isMultiSig, TransactionUtils, findAcc, findAccWithAddress } from '@/util/transactionUtils';
-import { AliasActionType, MosaicId, NamespaceId } from 'tsjs-xpx-chain-sdk';
+import { AliasActionType, MosaicId, NamespaceId, UInt64 } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewServicesAssetsLinkToNamespace',

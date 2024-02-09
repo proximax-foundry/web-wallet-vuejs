@@ -144,7 +144,7 @@ export class Sirius {
         }
         }
         */
-    static createDistributeAggregateTransactions(distributorPublicKey: string, distributionList: DistributeListInterface[], aggregateNum: number, sda: SimpleSDA): AggregateTransaction[] {
+    static createDistributeAggregateTransactions(distributorPublicKey: string, distributionList: DistributeListInterface[], aggregateNum: number, sda: SimpleSDA, currentNodeTime: UInt64): AggregateTransaction[] {
 
         let distributorPublicAccount = PublicAccount.createFromPublicKey(distributorPublicKey, AppState.networkType);
         let txns: AggregateTransaction[] = [];
@@ -195,7 +195,7 @@ export class Sirius {
                 innerTxn.push(transferTxnRange[x].toAggregateV1(distributorPublicAccount));
             }
 
-            let aggregateTransaction = AppState.buildTxn!.aggregateBonded(innerTxn);
+            let aggregateTransaction = AppState.buildTxn!.aggregateBonded(innerTxn, currentNodeTime);
 
             txns.push(aggregateTransaction);
         }

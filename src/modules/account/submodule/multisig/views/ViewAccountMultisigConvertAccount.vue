@@ -93,7 +93,8 @@ Account,
     MultisigCosignatoryModification,
     MultisigCosignatoryModificationType,
     Password,
-    PublicAccount
+    PublicAccount,
+    UInt64
 } from "tsjs-xpx-chain-sdk"
 import { networkState } from '@/state/networkState';
 import {useI18n} from 'vue-i18n'

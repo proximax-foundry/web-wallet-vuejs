@@ -589,7 +589,6 @@ export class TransactionUtils {
     selectedAddress: string,
     selectedMultisigAddress: string,
     walletPassword: string,
-    transaction: string|string[],
     currentNodeTime?: UInt64
   ): Promise<{ txnPayload: string; hashLockTxnPayload?: string }> {
     return await TransactionUtils.signTxnWithPassword(

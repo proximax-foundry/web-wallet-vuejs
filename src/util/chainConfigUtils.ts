@@ -1,5 +1,6 @@
 import { 
-  Deadline
+  Deadline,
+  UInt64
 } from "tsjs-xpx-chain-sdk";
 import { networkState } from "../state/networkState";
 import { ChronoUnit } from "@js-joda/core"
@@ -19,10 +20,19 @@ export class ChainConfigUtils{
       return safeMaxBlockDuration;
     }
 
-    static getABTMaxSafeDeadline(): Deadline{
+    static getABTMaxSafeDeadline(currentNodeTimetamp?: UInt64): Deadline{
       let abtLifeTimeInSeconds = ChainConfigUtils.getABTMinConfigSeconds();
 
-      let safeMaxDeadline = Deadline.createForBonded(abtLifeTimeInSeconds - 5, ChronoUnit.SECONDS);
+      let safeMaxDeadline: Deadline;
+
+      if(currentNodeTimetamp){
+        let deadlineUint64 = UInt64.fromUint(currentNodeTimetamp.compact() + ((abtLifeTimeInSeconds - 5) * 1000));
+
+        safeMaxDeadline = Deadline.createFromUint64(deadlineUint64);
+      }
+      else{
+        safeMaxDeadline = Deadline.createForBonded(abtLifeTimeInSeconds - 5, ChronoUnit.SECONDS);
+      }
 
       return safeMaxDeadline;
     }
