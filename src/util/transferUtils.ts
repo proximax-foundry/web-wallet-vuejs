@@ -126,7 +126,8 @@ export class TransferUtils {
       let selectedSignerPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), selectedWalletSigner.encrypted, selectedWalletSigner.iv);
       let selectedSignerAccount = Account.createFromPrivateKey(selectedSignerPrivateKey, networkType, 1)
       const innerTxn = [transferTransaction.toAggregateV1(senderPublicAccount)];
-      const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn)
+      const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
+      const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn, new UInt64(nodeTime.sendTimeStamp))
       const aggregateBondedTransactionSigned = selectedSignerAccount.preV2Sign(aggregateBondedTransaction, hash);
 
       const hashLockTransaction = TransactionUtils.lockFundTx(aggregateBondedTransactionSigned)

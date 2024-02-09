@@ -25,6 +25,7 @@ export default defineConfig(({ command, mode }) => {
     define: {
       BUILD_YEAR :new Date().getFullYear()
     },
+    server:{port:8080},
     base: publicPath,
     plugins: [
       //experimental features

@@ -102,7 +102,8 @@ import MultisigInput from "../components/MultisigInput.vue"
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { walletState } from '@/state/walletState';
-import { Address, EncryptedMessage, Message, Mosaic, MosaicId, Password, PlainMessage, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
+import { Address, EncryptedMessage, Message, Mosaic, MosaicId, Password, 
+    PlainMessage, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
 import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import { useI18n } from 'vue-i18n';
 import type {TreeNode } from "primevue/treenode"

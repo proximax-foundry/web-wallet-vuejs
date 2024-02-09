@@ -47,11 +47,13 @@
 
 <script setup lang="ts">
 import PasswordInput from '@/components/PasswordInput.vue';
+import { AppState } from '@/state/appState';
 import { networkState } from '@/state/networkState';
 import { TransactionState } from '@/state/transactionState';
 import { walletState } from '@/state/walletState';
 import { TransactionUtils } from '@/util/transactionUtils';
 import { WalletUtils } from '@/util/walletUtils';
+import { UInt64 } from 'tsjs-xpx-chain-sdk';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -106,14 +108,31 @@ const clearTransactionState = () => {
     TransactionState.selectedMultisigAddress = ''
 }
 
-const signTxn = () => {
+const signTxn = async () => {
     if (walletPasswd.value == "") {
       err.value = "Please insert wallet password to sign transaction";
     } else{
       if (WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName, walletPasswd.value)) {
         toggleModal.value = !toggleModal.value
         err.value = '';
-        let txn = TransactionUtils.signTxnWithPassword(selectedAddress.value,selectedMultisigAddress.value,walletPasswd.value,unsignedTxnPayload.value)
+        let txn = null
+        if(selectedMultisigAddress.value){
+            const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
+            txn = await TransactionUtils.signAbtWithTxnAndPassword(
+              selectedAddress.value,
+              selectedMultisigAddress.value,
+              walletPasswd.value,
+              unsignedTxnPayload.value, 
+              new UInt64(nodeTime.sendTimeStamp)
+            );
+        }
+        else{
+             txn = await TransactionUtils.signTxnWithPassword(
+                selectedAddress.value,
+                selectedMultisigAddress.value,
+                walletPasswd.value,
+                unsignedTxnPayload.value)
+        }
         TransactionState.transactionPayload = txn.txnPayload
         TransactionState.lockHashPayload = txn.hashLockTxnPayload
         walletPasswd.value = '';

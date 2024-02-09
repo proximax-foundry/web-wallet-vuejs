@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, computed, getCurrentInstance } from 'vue'
 import { 
-  AccountHttp, MosaicHttp, Convert, Address
+  AccountHttp, MosaicHttp, Convert, Address,
+  UInt64
 } from 'tsjs-xpx-chain-sdk';
 
 import { SimpleSDA } from '@/models/sda'
@@ -131,7 +132,14 @@ let distribute = async()=>{
   let totalLockHashToken = totalLockHashTxn * networkState.currentNetworkProfileConfig!.lockedFundsPerAggregate!;
 
   let selectedSda = assetList.value.find(x => x.id === assetSelected.value.id);
-  let aggregateTxns = Sirius.createDistributeAggregateTransactions(selectedMultisigPublicKey.value ? selectedMultisigPublicKey.value : selectedAccount.value.publicKey, distributionList.value, aggregateNum.value, selectedSda!);
+  const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
+  let aggregateTxns = Sirius.createDistributeAggregateTransactions(
+    selectedMultisigPublicKey.value ? selectedMultisigPublicKey.value : selectedAccount.value.publicKey, 
+    distributionList.value, 
+    aggregateNum.value, 
+    selectedSda!,
+    new UInt64(nodeTime.sendTimeStamp!)
+  );
   let totalAggregateTxnsFee = sum(aggregateTxns.map(x=> x.maxFee.compact()));
   let totalInitiatorFee = sum(totalLockHashFee, totalLockHashToken, totalAggregateTxnsFee);
   let xpxNeeded = totalInitiatorFee / Math.pow(10, AppState.nativeToken.divisibility);

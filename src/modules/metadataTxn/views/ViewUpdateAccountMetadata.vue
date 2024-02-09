@@ -262,9 +262,10 @@ export default {
       }
     }
 
-    const createTxnBuilder = () =>{
+    const createTxnBuilder = async () =>{
       txnBuilder = AppState.buildTxn.accountMetadataBuilder();
-      aggregateTxnBuilder = AppState.buildTxn.aggregateBondedBuilder();
+      const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
+      aggregateTxnBuilder = AppState.buildTxn.aggregateBondedBuilder(new UInt64(nodeTime.sendTimeStamp!));
     }
 
     const loadCurrentMetadataValue = async () =>{
@@ -588,7 +589,7 @@ export default {
       }
     })
     const init = async ()=>{
-      createTxnBuilder();
+      await createTxnBuilder();
       handleParamTargetPublicKey();
       await handleParamScopedMetadataKey();
       await loadCurrentMetadataValue();

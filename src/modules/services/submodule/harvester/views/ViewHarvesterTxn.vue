@@ -109,6 +109,7 @@ import {
   HarvesterInfo,
   PublicAccount,
   RemoveHarvesterTransactionBuilder,
+  UInt64,
 } from "tsjs-xpx-chain-sdk";
 import type { TreeNode } from "primevue/treenode";
 import { TransactionState } from "@/state/transactionState";
@@ -306,7 +307,7 @@ const totalFeeFormatted = computed(() => {
 });
 
 const createTxn = async () => {
-  let unsignedTxnPayload: string | string[]
+  let unsignedTxnPayload: string | string[];
 
   let txnBuilder:
     | AddHarvesterTransactionBuilder
