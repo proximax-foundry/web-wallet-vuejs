@@ -350,18 +350,15 @@ const cosignerOptions = computed(() => {
   });
 });
 
-const selectedCosignPublicKey = ref(
-  walletCosignerList.value.cosignerList[0]
-    ? walletCosignerList.value.cosignerList[0].publicKey
-    : ""
-);
+const selectedCosignPublicKey = ref("");
 watch(
-  walletCosignerList,
+  selectedCosigner,
   (n) => {
-    if (n.cosignerList.length) {
-      selectedCosignPublicKey.value = n.cosignerList[0]
-        ? n.cosignerList[0].publicKey
-        : "";
+    if (n.value != "") {
+      selectedCosignPublicKey.value = n.value
+    }
+    else{
+      selectedCosignPublicKey.value = ""
     }
   },
   { deep: true }
