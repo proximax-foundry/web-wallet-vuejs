@@ -90,8 +90,6 @@
       <div class='bg-navy-primary p-6 lg:col-span-1'>
         <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig="isMultisig" :is-cosigner="isCoSigner" :on-partial="onPartial" :transaction-fee="String(aggregateFee)" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
         <div class="mt-5"/>
-        <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="passwd" :disabled="disabledPassword" />
         <div class="mt-3"><button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="modifyAccount()" :disabled="disableSend">{{$t('multisig.updateCosignatories')}}</button></div>
         <div class="text-center">
           <router-link :to="{name: 'ViewMultisigHome',params:{address:address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
@@ -151,7 +149,6 @@ export default {
     const passwordErr = ref('');
     const fundStatus = ref(false);
     
-    const passwd = ref('');
     const passwdPattern = "^[^ ]{8,}$";
     const publicKeyPattern = "^[0-9A-Fa-f]{64}$";
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
@@ -273,7 +270,6 @@ export default {
     const disableSend = computed(() => 
       !isMultisig.value || 
       onPartial.value || 
-      !passwd.value.match(passwdPattern) || 
       err.value || 
       showAddressError.value.indexOf(true) != -1 || 
       numDeleteUser.value < 0 || 
@@ -316,7 +312,6 @@ export default {
       removeCosign.value = [];
       selectedAddresses.value = [];
       showAddressError.value = [];
-      passwd.value = '';
       numApproveTransaction.value = acc.value.multisigInfo.find(acc=> acc.level === 0).minApproval;
       numDeleteUser.value = acc.value.multisigInfo.find(acc=> acc.level === 0).minRemoval;
       selectMainCosign.value = '';
@@ -331,17 +326,8 @@ export default {
         signer.push({address: walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey).address})
       })
       console.log(signer)
-      const verify = WalletUtils.verifyWalletPassword(
-        wallet.name,
-        networkState.chainNetworkName,
-        passwd.value
-      );
-      if(!verify){
-        passwordErr.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
-      }else{
         // transaction made
 
-        let multisigPayload = {}
         const multisigCosignatory = [];
   
         const cosignatory = [];
@@ -408,23 +394,14 @@ export default {
           .build();
 
         let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address
-        const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        multisigPayload =await TransactionUtils.signAbtWithTxnAndPassword(
-          selectedCosignAddress,
-          acc.value.address,
-          passwd.value,
-          modifyMultisigTransaction, 
-          new UInt64(nodeTime.sendTimeStamp)
-        );
         passwordErr.value = '';
         /* var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play(); */
         clear();
-        TransactionState.lockHashPayload = multisigPayload.hashLockTxnPayload
-        TransactionState.transactionPayload = multisigPayload.txnPayload
-        TransactionState.selectedAddress = p.address
+        TransactionState.unsignedTransactionPayload = modifyMultisigTransaction.serialize()
+        TransactionState.selectedAddress = selectedCosignAddress
+        TransactionState.selectedMultisigAddress = acc.value.address
         router.push({ name: "ViewConfirmTransaction" })
-      }
     };
 
     watch(() => [...coSign.value], async (n) => {
@@ -861,7 +838,6 @@ export default {
       accountNameDisplay,
       accountName,
       acc,
-      passwd,
       showAddressError,
       addCoSig,
       findAcc,
