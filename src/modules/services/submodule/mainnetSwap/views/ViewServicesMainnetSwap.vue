@@ -6,7 +6,7 @@
       <template>
       <!-- <div class="text-xs max-w-md inline-block">You can swap from NIS1, ETH and BSC to ProximaX Sirius Chain. In reverse, ProximaX Sirius Chain is available to swap in ETH and BSC only.</div><br>-->
       </template>
-      <div class="inline-block relative w-full sm:w-80 text-left mt-5 transition-all duration-500">
+      <div class="inline-block w-full sm:w-80 text-left mt-5 transition-all duration-500">
          <div class="border inline-block w-full mt-4 rounded shadow-md filter" :class="`${open['bsc']?'border-blue-500':'border-gray-200'}`" style="top: 205px;" @click="openMenu('bsc')">
           <div class="flex items-center w-full px-5 h-20 cursor-pointer hover:bg-blue-50 transition-all duration-500" :class="`${open['bsc']?'bg-blue-50':'bg-white'}`">
             <img src="@/modules/services/submodule/mainnetSwap/img/bsc.svg" class="float-left">

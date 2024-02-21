@@ -19,7 +19,7 @@
         >
       </div>
       <div
-        class="border border-gray-100 p-5 filter drop-shadow-xl mt-10 bg-white"
+        class="border border-gray-100 p-5 filter shadow-xl mt-10 bg-white"
       >
         <div class="text-md mb-5 font-semibold">
           {{ $t("addressBook.addNewContact") }}

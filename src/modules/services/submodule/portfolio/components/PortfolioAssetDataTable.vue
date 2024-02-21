@@ -138,6 +138,9 @@ const explorerNamespaceLink = namespace=>{
     .p-highlight{
       border-radius: 9999px;
     }
+    .p-datatable,.p-datatable-thead {
+    position: unset !important;
+}
    
 }
 </style>

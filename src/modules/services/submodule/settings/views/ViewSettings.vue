@@ -5,7 +5,7 @@
         <div class="flex justify-between text-sm mb-5">
           <div><span class="text-gray-700">Settings</span></div>
         </div>
-        <div class="border border-gray-200 filter drop-shadow-xl py-2 sm:py-14 px-2 sm:px-28 text-center bg-white">
+        <div class="border border-gray-200 filter shadow-xl py-2 sm:py-14 px-2 sm:px-28 text-center bg-white">
             <div class="flex mb-3 gap-2 items-center">
               <div class="text-left  text-gray-700">Select Language:</div>
               <selectLanguageModal  />

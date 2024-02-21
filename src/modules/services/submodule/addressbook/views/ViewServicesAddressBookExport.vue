@@ -58,7 +58,7 @@
             </div>
             <div
               @click="exportCSV()"
-              class="cursor-pointer px-5 py-0.5 rounded-md w-36 bg-blue-primary text-white text-tsm drop-shadow-lg filter hover:bg-blue-600 transition-all duration-500"
+              class="cursor-pointer px-5 py-0.5 rounded-md w-36 bg-blue-primary text-white text-tsm shadow-lg filter hover:bg-blue-600 transition-all duration-500"
             >
               <img
                 src="@/modules/services/submodule/addressbook/img/icon-upload.svg"

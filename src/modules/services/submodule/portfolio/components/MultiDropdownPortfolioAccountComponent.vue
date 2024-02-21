@@ -13,7 +13,7 @@
           <div v-if="selectedAccount.length > 0" @click="clearAll">Clear all</div>
           <div>{{selectedAccount.length}} SELECTED</div>
         </div>
-        <ul class="max-h-40 overflow-auto px-2 filter drop-shadow-xl">
+        <ul class="max-h-40 overflow-auto px-2 filter shadow-xl">
             <li v-for="(acc, index) in filteredAccount" :key="index">
                 <input type="checkbox" :id="index" :value="acc" v-model="selectedAccount">
                 <label for="index" class="pl-1">{{acc.name}}</label>

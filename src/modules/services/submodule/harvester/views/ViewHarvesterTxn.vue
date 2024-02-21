@@ -66,7 +66,7 @@
           />
           <button
             type="submit"
-            class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white"
+            class="mt-3 w-full blue-btn py-4 disabled:bg-blue-primary/50 disabled:text-white/50 disabled:cursor-auto text-white"
             :disabled="disableSubmit"
             @click="createTxn"
           >

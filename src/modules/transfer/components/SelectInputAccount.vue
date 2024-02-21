@@ -6,7 +6,7 @@
             <div v-else-if="type == 'asset'">Select Account to create asset</div>
             <div v-else>Select Account to {{ label }}</div>
         </div>
-        <Dropdown v-model=selectedAccountInfo :style="{ 'width': '100%' }" :options=accounts :filter="true"
+        <Dropdown v-model=selectedAccountInfo :style="{ 'width': '100%', 'position': 'unset' }" :options=accounts :filter="true"
             :filterFields="['label','value','publicKey']" emptyFilterMessage=" "  placeholder="Select Account"
             @change="selectAccount($event.value?.label, $event.value?.value, $event.value?.publicKey); $emit('update:modelValue', $event.value?.value); $emit('select-account', $event.value?.value); $emit('select-account-public-key', $event.value?.publicKey);">
             <!-- For the display of  account information -->

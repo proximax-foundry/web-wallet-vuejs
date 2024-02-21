@@ -4,7 +4,7 @@
             <AccountComponent :address="address" class="mb-6" />
             <AccountTabs :address="address" selected="assets" />
             <div class='border-2 border-t-0  '>
-                <DataTable :value="assets" :paginator="true" :rows="10" dataKey="id" ref="dt" @page="onPage($event)"
+                <DataTable :value="assets" :paginator="true" :rows="10" dataKey="id" ref="dt" @page="onPage($event)" style="position: unset;"
                     @update:rows="updateRow($event)" :loading="loading" :rowsPerPageOptions="[10, 20, 30, 40, 50]"
                     paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown"
                     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
@@ -17,7 +17,7 @@
                         <template #body="{ data }" headerClass="w-96">
                             <a :href="explorerLink(data.id)" target=_new class="col-span-2">
                                 <div
-                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
+                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointer text-blue-primary pr-7 ">
                                     {{ data.id }}</div>
                             </a>
                         </template>
@@ -247,3 +247,9 @@ const lazyLoad = async () => {
 
 
 </script>
+
+<style>
+.p-datatable,.p-datatable-thead {
+    position: unset !important;
+}
+</style>
