@@ -185,9 +185,3 @@ const contactGroups = computed(() => {
   );
 });
 </script>
-
-<style>
-.p-datatable {
-  position: unset;
-}
-</style>

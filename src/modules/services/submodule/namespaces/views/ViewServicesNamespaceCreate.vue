@@ -45,7 +45,7 @@
           <TxnSummary :signer-native-token-balance="balance" :namespace-rental-fee-currency="rentalFeeCurrency"
             :native-token-balance="selectedMultisigAddress ? multisigBalance : balance" :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee"
             :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact" :total-fee="totalFee" />
-          <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:bg-blue-primary/50 disabled:text-white/50 disabled:cursor-auto text-white"
+          <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white"
             :disabled="disableCreate" @click="createNamespace">{{ $t('namespace.registerNamespace') }}</button>
           <div class="text-center">
             <router-link :to="{ name: 'ViewDashboard' }"

@@ -31,7 +31,7 @@
         <TxnSummary :signer-native-token-balance="balance" :asset-rental-fee-currency="rentalFeeCurrency"
             :native-token-balance="selectedMultisigAddress ? multisigBalance : balance" :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee"
             :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact" :total-fee="Number(totalFeeFormatted)"/>
-        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:bg-blue-primary/50 disabled:text-white/50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="createAsset">{{$t('asset.createAssets')}}</button>
+        <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="createAsset">{{$t('asset.createAssets')}}</button>
         <div class="text-center">
           <router-link :to="{name: 'ViewDashboard'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
         </div>

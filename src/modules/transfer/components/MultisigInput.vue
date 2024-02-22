@@ -32,7 +32,7 @@
               </div>
             </div>
             <div class="ml-auto mt-auto mb-auto mr-6">
-              <font-awesome-icon icon="times" class="text-gray-400 cursor-pointer" @click="closeMultisig()">
+              <font-awesome-icon icon="times" class="delete-icon-style" @click="closeMultisig()">
               </font-awesome-icon>
             </div>
         </div>

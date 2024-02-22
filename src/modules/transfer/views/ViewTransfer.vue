@@ -77,7 +77,7 @@
                         :native-amount="nativeAmount" :native-token-balance="nativeTokenBalance" :lock-fund="lockFund"
                         :lock-fund-tx-fee="lockFundTxFee" :selected-multisig-address="selectedMultisigAddress"
                         :txn-fee="txnFee" :total-fee="totalFee" :selected-assets="selectedAssets" />
-                    <button type="submit" class="w-full blue-btn px-3 py-3 disabled:bg-blue-primary/50 disabled:text-white/50 disabled:cursor-auto"
+                    <button type="submit" class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
                         :disabled="disableCreate" @click="makeTransferPayload()">
                         {{ $t('general.transfer') }}
                     </button>
