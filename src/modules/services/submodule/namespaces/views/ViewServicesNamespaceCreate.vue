@@ -111,7 +111,6 @@ const duration = ref('1');
 const err = ref('');
 const namespaceErrorMessage = ref(t('namespace.validName'));
 const currentSelectedName = ref('');
-const disabledPassword = ref(false);
 const disabledDuration = ref(false);
 const disabledClear = ref(false);
 const passwdPattern = "^[^ ]{8,}$";
@@ -222,13 +221,11 @@ const showNoBalance = computed(() => {
 
 // validate enough fee to create namespace
 if (balance.value < rentalFee.value) {
-  disabledPassword.value = true;
   disabledClear.value = true;
   disabledDuration.value = true;
   disableNamespaceName.value = true;
   disableSelectNamespace.value = true;
 } else {
-  disabledPassword.value = false;
   disabledClear.value = false;
   disabledDuration.value = false;
   disableNamespaceName.value = false;
@@ -269,11 +266,8 @@ watch(selectNamespace, newValue => {
   if (!newValue) {
     disableNamespaceName.value = true;
     disabledDuration.value = true;
-    disabledPassword.value = true;
   } else {
     disableNamespaceName.value = false;
-    disabledDuration.value = false;
-    disabledPassword.value = false;
   }
 }, { immediate: true })
 
@@ -314,10 +308,8 @@ const totalFee = computed(() => {
 
 watch(totalFee, (newValue) => {
   if (balance.value < newValue) {
-    disabledPassword.value = true;
     disableSelectNamespace.value = true;
   } else {
-    disabledPassword.value = false;
     disableSelectNamespace.value = false;
   }
 });
