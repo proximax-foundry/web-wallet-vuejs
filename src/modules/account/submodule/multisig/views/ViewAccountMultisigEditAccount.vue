@@ -25,9 +25,15 @@
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>
            <div class=" error error_box mb-5 whitespace-pre" v-if="err!=''">{{ err }}</div>
-           <div v-if="inputPkNotExist!=''" class="flex gap-2 bg-yellow-50 py-2 rounded-md px-2 my-3 mb-5">
-              <img src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-              <div class="text-xs font-bold pt-1">{{ inputPkNotExist }}</div>
+           <div v-if="pkNotExistArray.length>0">
+              <div v-for="(inputPkNotExist) in pkNotExistArray">
+                <div v-for="(publicKey, index) in coSign" :key="index">
+                  <div class="flex gap-2 bg-yellow-50 py-2 rounded-md px-2 my-3" v-if="inputPkNotExist===publicKey">
+                    <img src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+                    <div class="text-xs font-bold pt-1">{{contactName[index]? contactName[index]: $t('multisig.cosignatory') + `${index+1}` }}'s public key does not exist</div>
+                  </div>
+                </div>
+              </div>
            </div>
            <div class=" error error_box mb-5" v-if="passwordErr!=''">{{ passwordErr }}</div>
         </div>
@@ -145,7 +151,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref('');
-    const inputPkNotExist = ref('')
+    const pkNotExistArray = ref([])
     const passwordErr = ref('');
     const fundStatus = ref(false);
     
@@ -317,7 +323,7 @@ export default {
       selectMainCosign.value = '';
       selectOtherCosign.value = [];
       err.value = '';
-      inputPkNotExist.value = '';
+      pkNotExistArray.value = [];
     };
 
     const modifyAccount = async() => {
@@ -407,7 +413,6 @@ export default {
     watch(() => [...coSign.value], async (n) => {
       let duplicateCosign = false
       let duplicateOwner = false
-      inputPkNotExist.value = ''
       if (coSign.value.length > 0)
       {      
         for(var i = 0; i < coSign.value.length; i++){
@@ -437,9 +442,9 @@ export default {
                 err.value = '';
                 const validAcc = await checkValidAcc(coSign.value[i])
                 if(!validAcc){
-                  inputPkNotExist.value = "Input public key does not exist"
-                }else{
-                  inputPkNotExist.value = ''
+                  if(!pkNotExistArray.value.includes(coSign.value[i])){
+                    pkNotExistArray.value.push(coSign.value[i])
+                  }
                 }
               }
             }
@@ -877,7 +882,7 @@ export default {
       getMultiSigCosigner,
       checkCosignBalance,
       passwordErr,
-      inputPkNotExist
+      pkNotExistArray
     };
   },
 }
