@@ -9,6 +9,7 @@
                     class="supply_input" v-maska:[options] :data-maska="maskaFormat()"
                     data-maska-tokens="0:\d:multiple|9:\d:optional" :placeholder="placeholder" 
                     @input="$emit('update:modelValue',parseFloat((<HTMLInputElement>$event.target).value.replace(/,/g, '')).toString() )"
+                    @keydown="handleKeyDown"
                   />
               </div>
           </div>
@@ -17,7 +18,7 @@
 
   </template>
   
-  <script setup lang=ts>
+  <script setup lang="ts">
 
   
   const props = defineProps({
@@ -44,7 +45,7 @@
 
 
   
-  defineEmits([
+  const emit = defineEmits([
       'update:modelValue', 'show-error'
     ])
   
@@ -76,6 +77,33 @@
         .slice(0, sub ? -sub : undefined);
     },
   };
+
+  const handleKeyDown = (event: KeyboardEvent) =>{
+ // Check if the pressed key is either backspace or delete
+ if (event.key === 'Backspace' || event.key === 'Delete') {
+  event.preventDefault(); // Prevent the default behavior
+        
+  const cursorPosition = (event.target as HTMLInputElement).selectionStart!;
+  const deletePosition = (event.key === 'Backspace') ? cursorPosition - 1 : cursorPosition;
+
+  const inputValue = (event.target as HTMLInputElement).value;
+    
+    // Ensure delete position is within bounds
+    if (deletePosition >= 0 && deletePosition < inputValue.length) {
+      // Remove character at delete position
+      const newText = inputValue.slice(0, deletePosition) + inputValue.slice(deletePosition + 1);
+
+      // Emit updated modelValue back to the parent component
+      emit('update:modelValue', newText);
+
+      // Set the input value after deletion
+      (event.target as HTMLInputElement).value = newText;
+
+      // Set the cursor position after deletion
+      (event.target as HTMLInputElement).setSelectionRange(deletePosition, deletePosition);
+    }
+  }
+}
   
   
   </script>
