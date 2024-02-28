@@ -8,9 +8,15 @@
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>
            <div class=" error error_box mb-5 whitespace-pre" v-if="err!=''">{{ err }}</div>
-           <div v-if="inputPkNotExist!=''" class="flex gap-2 bg-yellow-50 py-2 rounded-md px-2 my-3 mb-5">
-              <img src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-              <div class="text-xs font-bold pt-1">{{ inputPkNotExist }}</div>
+           <div v-if="pkNotExistArray.length>0">
+              <div v-for="(inputPkNotExist) in pkNotExistArray">
+                <div v-for="(publicKey, index) in coSign" :key="index">
+                  <div class="flex gap-2 bg-yellow-50 py-2 rounded-md px-2 my-3" v-if="inputPkNotExist===publicKey">
+                    <img src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+                    <div class="text-xs font-bold pt-1">{{contactName[index]? contactName[index]: $t('multisig.cosignatory') + `${index+1}` }}'s public key does not exist</div>
+                  </div>
+                </div>
+              </div>
            </div>
            <div class=" error error_box mb-5" v-if="passwordErr!=''">{{ passwordErr }}</div>
         </div>
@@ -18,7 +24,7 @@
         <div class="flex flex-col gap-2">
           <div v-for="(coSignAddress, index) in coSign" :key="index" >
             <div class="flex">
-              <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
+              <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(coSignAddress,index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
               <TextInput class='w-5/12 mr-2 ' :placeholder="$t('multisig.cosignatory') + `${index+1}`"  v-model="contactName[index]" :disabled="true"  />
               <TextInputClean class='w-7/12 mr-2 ' :placeholder="$t('general.publicKey')" :errorMessage="$t('general.invalidInput')" :showError="showAddressError[index]" v-model="coSign[index]" />
               <div v-if="showAddressError[index]==true " class="mt-16"/>
@@ -123,7 +129,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref('');
-    const inputPkNotExist = ref('');
+    const pkNotExistArray = ref([])
     const passwordErr = ref('');
     const fundStatus = ref(false);
     
@@ -342,7 +348,7 @@ export default {
       maxNumApproveTransaction.value = 0;
       numDeleteUser.value = 1;
       maxNumDeleteUser.value = 0;
-      inputPkNotExist.value = '';
+      pkNotExistArray.value = [];
     };
     const convertAccount = async() => {
       const wallet = walletState.currentLoggedInWallet;
@@ -432,7 +438,6 @@ export default {
     
     watch(() => [...coSign.value], async (n) => {
       let duplicateOwner = false
-      inputPkNotExist.value = ''
       if (coSign.value.length > 0)
       {
         for(var i = 0; i < coSign.value.length; i++){
@@ -454,9 +459,9 @@ export default {
                 err.value = '';
                 const validAcc = await checkValidAcc(coSign.value[i])
                 if(!validAcc){
-                  inputPkNotExist.value = "Input public key does not exist"
-                }else{
-                  inputPkNotExist.value = ''
+                  if(!pkNotExistArray.value.includes(coSign.value[i])){
+                    pkNotExistArray.value.push(coSign.value[i])
+                  }
                 }
               }
             }
@@ -486,7 +491,7 @@ export default {
       maxNumDeleteUser.value += 1;
     };
 
-    const deleteCoSigAddressInput = (i) => {
+    const deleteCoSigAddressInput = (publicKey,i) => {
       if(maxNumApproveTransaction.value > 0){
         maxNumApproveTransaction.value -= 1;
       }
@@ -506,6 +511,11 @@ export default {
       toggleContact.value.splice(i,1);
       selectedAddresses.value.splice(i, 1);
       showAddressError.value.splice(i,1)
+      for(let j = 0; j<pkNotExistArray.value.length; j++){
+        if(publicKey === pkNotExistArray.value[j]){
+          pkNotExistArray.value.splice(j,1)
+        }
+      }
     }
     const validateApproval = (e) => {
       if((numApproveTransaction.value * 10*(~~(maxNumApproveTransaction.value/10)) + e.charCode - 48) > maxNumApproveTransaction.value){
@@ -651,7 +661,7 @@ export default {
       selectedAccAdd,
       accBalance,
       passwordErr,
-      inputPkNotExist
+      pkNotExistArray
     };
   },
 }
