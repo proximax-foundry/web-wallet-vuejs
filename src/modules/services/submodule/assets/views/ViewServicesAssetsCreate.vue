@@ -58,7 +58,6 @@ import { useRouter } from "vue-router";
 import SelectInputAccount from '@/modules/transfer/components/SelectInputAccount.vue';
 import SelectInputMultisigAccount from '@/modules/transfer/components/SelectInputMultisigAccount.vue';
 import MultisigInput from "@/modules/transfer/components/MultisigInput.vue"
-import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
 import CheckInput from '@/components/CheckInput.vue';
 import NumberInputClean from '@/modules/services/submodule/assets/components/NumberInputClean.vue';
@@ -86,15 +85,12 @@ import { TransactionState } from '@/state/transactionState';
     const showDivisibilityErr = ref(false);
     const isTransferable = ref(false);
     const isMutable = ref(false);
-    const disabledPassword = computed(() => showNoBalance.value||disableAllInput.value);
     const disabledInput = computed(() => disableAllInput.value)
     const disabledClear = ref(false);
     const disabledDuration = ref(false);
     const durationOption =ref('month');
     const duration = ref('1');
     const showDurationErr = ref(false);
-    const passwdPattern = "^[^ ]{8,}$";
-    const showPasswdError = ref(false);
     const durationCheckDisabled = ref(false);
     const supply = ref('0');
     const disableAllInput = ref(false);
@@ -146,7 +142,7 @@ import { TransactionState } from '@/state/transactionState';
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
-      (divisibility.value != null) && (Number(supply.value) > 0) && (!showSupplyErr.value) && (!showDurationErr.value) && (!showNoBalance.value)
+      (selectedAddress.value != null) && (divisibility.value != null) && (Number(supply.value) > 0) && (!showSupplyErr.value) && (!showDurationErr.value) && (!showNoBalance.value)
     ));
 
     const selectedMultisigAddress = ref<string | null>(null)
