@@ -3,7 +3,7 @@
     <form @submit.prevent="login">
       <fieldset>
         <div class="w-8/12 text-center mr-auto ml-auto error error_box" v-if="err!=''">{{ err }}</div>
-        <SelectNetworkInput />
+        <SelectNetworkInput/>
         <div class='mt-3'></div>
         <SelectWalletInput />
         <div class='mt-3'></div>

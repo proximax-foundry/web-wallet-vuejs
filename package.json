@@ -32,6 +32,7 @@
     "maska": "^2.1.9",
     "mathjs": "^11.7.0",
     "mitt": "^3.0.0",
+    "peerjs": "^1.5.2",
     "primeicons": "^6.0.1",
     "primevue": "^3.37.0",
     "qrcode-generator": "^1.4.4",

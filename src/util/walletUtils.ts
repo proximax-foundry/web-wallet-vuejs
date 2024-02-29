@@ -522,18 +522,22 @@ export class WalletUtils {
         let sessionLastNetworkName = sessionStorage.getItem("lastNetworkName");
 
         if(sessionLastNetworkName && sessionLastNetworkName !== networkName){
-            AppState.assetsInfo = [];
-            AppState.namespacesInfo = [];
-            AppState.pendingAssetsInfo = [];
-            AppState.pendingNamespacesName = [];
+            WalletUtils.resetNetworkData();
+        }
+    }
 
-            if(sessionStorage.getItem(assetInfoSessionKey)){
-                sessionStorage.removeItem(assetInfoSessionKey);
-            }
+    static resetNetworkData(){
+        AppState.assetsInfo = [];
+        AppState.namespacesInfo = [];
+        AppState.pendingAssetsInfo = [];
+        AppState.pendingNamespacesName = [];
 
-            if(sessionStorage.getItem(namespaceInfoSessionKey)){
-                sessionStorage.removeItem(namespaceInfoSessionKey);
-            }
+        if(sessionStorage.getItem(assetInfoSessionKey)){
+            sessionStorage.removeItem(assetInfoSessionKey);
+        }
+
+        if(sessionStorage.getItem(namespaceInfoSessionKey)){
+            sessionStorage.removeItem(namespaceInfoSessionKey);
         }
     }
 

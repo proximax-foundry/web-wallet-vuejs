@@ -7,12 +7,22 @@
       <div
         class="md:col-span-1 bg-white mx-5 md:mx-0 px-30 pt-1 md:pt-0 rounded-md"
       >
-        <div class="text-center font-semibold mt-16 text-gray-700 text-lg">
+      <div class="flex flex-row-reverse text-sm font-semibold m-1">
+        <div class="bg-amber-100 text-yellow-400 border-2 border-amber-200 rounded-sm p-2">
+          <a v-if="!isQRLogin" href="#" @click="isQRLogin = !isQRLogin">Login with QR</a>
+          <a v-else href="#" @click="isQRLogin = !isQRLogin">Login with Password</a>
+        </div>
+      </div>
+        <div class="text-center font-semibold mt-1 text-gray-700 text-lg">
           {{ $t("home.signIn") }}
         </div>
-        <div class="px-5 text-gray-700 md:text-lg text-tsm mt-4">
+        <div v-if="!isQRLogin" class="px-5 text-gray-700 md:text-lg text-tsm mt-4">
           <SignInComponent />
         </div>
+        <div v-else class="px-5 text-gray-700 md:text-lg text-tsm mt-4">
+          <QrSignInComponent />
+        </div>
+
         <!--  <div v-if ='currentNetwork == "Sirius Mainnet"'>
       <h2 class = 'my-10 ml-auto mr-auto'><span class = 'text-semibold'>or</span></h2>
       <div class="px-5 mt-4  text-center">
@@ -46,12 +56,15 @@
 <script setup lang="ts">
 //import SignInSiriusIDModal from '@/modules/home/views/ViewHomeSignInSiriusID.vue'
 import SignInComponent from "@/modules/home/components/SignInComponent.vue";
+import QrSignInComponent from "@/modules/home/components/QrSignInComponent.vue";
 import IntroTextComponent from "@/components/IntroTextComponent.vue";
 import CryptoJS from "crypto-js";
 import { appSetting } from "@/config/appSetting";
 import { WalletUtils } from "@/util/walletUtils";
 import { NetworkType } from "tsjs-xpx-chain-sdk";
+import { ref } from "vue";
 
+const isQRLogin = ref(false);
 let migrationUI = appSetting.backupOldWallet;
 
 let mainnetOldFormat = localStorage.getItem("sw-mainnet");
