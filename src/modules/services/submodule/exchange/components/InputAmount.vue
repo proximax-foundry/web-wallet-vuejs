@@ -5,11 +5,11 @@
               <div class="uppercase font-light text-gray-500 text-txs text-left mb-2">{{ placeholder }}</div>
               <div class="flex w-full">
                   <input 
-                    :value="modelValue"
-                    class="supply_input" v-maska:[options] :data-maska="maskaFormat()"
-                    data-maska-tokens="0:\d:multiple|9:\d:optional" :placeholder="placeholder" 
-                    @input="$emit('update:modelValue',parseFloat((<HTMLInputElement>$event.target).value.replace(/,/g, '')).toString() )"
-                    @keydown="handleKeyDown"
+                    :value="formattedValue"
+                    class="supply_input"
+                    :placeholder="placeholder" 
+                    @input="handleInput(parseFloat((<HTMLInputElement>$event.target).value.replace(/,/g, '')).toString())"
+                    @keypress="handleKeypress"
                   />
               </div>
           </div>
@@ -19,6 +19,8 @@
   </template>
   
   <script setup lang="ts">
+import { computed, ref } from 'vue';
+
 
   
   const props = defineProps({
@@ -49,62 +51,43 @@
       'update:modelValue', 'show-error'
     ])
   
-  const maskaFormat = () => {
-    let maskaFormat = "0";
-    if (props.decimal > 0) {
-      maskaFormat = maskaFormat + "." + "9".repeat(props.decimal);
-    }
-    return maskaFormat;
-  };
-  
-  const options = {
-    preProcess: (val: string) => {
-      return val.replace(/,/g, "");
-    },
-    postProcess: (val: string) => {
-      if (!val) return "";
-      let sub = 0;
-      if (props.decimal > 0) {
-        sub =
-          1 +
-          props.decimal -
-          (val.includes(".") ? val.length - val.indexOf(".") : 0);
-      }
-      return Intl.NumberFormat("en-US", {
-        minimumFractionDigits: props.decimal,
-      })
-        .format(parseFloat(val))
-        .slice(0, sub ? -sub : undefined);
-    },
-  };
+    const inputValue = ref(props.modelValue);
 
-  const handleKeyDown = (event: KeyboardEvent) =>{
- // Check if the pressed key is either backspace or delete
- if (event.key === 'Backspace' || event.key === 'Delete') {
-  event.preventDefault(); // Prevent the default behavior
-        
-  const cursorPosition = (event.target as HTMLInputElement).selectionStart!;
-  const deletePosition = (event.key === 'Backspace') ? cursorPosition - 1 : cursorPosition;
-
-  const inputValue = (event.target as HTMLInputElement).value;
-    
-    // Ensure delete position is within bounds
-    if (deletePosition >= 0 && deletePosition < inputValue.length) {
-      // Remove character at delete position
-      const newText = inputValue.slice(0, deletePosition) + inputValue.slice(deletePosition + 1);
-
-      // Emit updated modelValue back to the parent component
-      emit('update:modelValue', newText);
-
-      // Set the input value after deletion
-      (event.target as HTMLInputElement).value = newText;
-
-      // Set the cursor position after deletion
-      (event.target as HTMLInputElement).setSelectionRange(deletePosition, deletePosition);
-    }
+const handleKeypress = (event: KeyboardEvent) => {
+  const charCode = event.key;
+  // Allow numbers (0-9)
+  if (
+    (charCode >= '0' && charCode <= '9') ||
+    charCode === 'Backspace' ||
+    charCode === 'Delete' ||
+    charCode === 'ArrowLeft' ||
+    charCode === 'ArrowRight'
+  ) {
+    // Allow the keypress
+    return true;
+  } else {
+    // Prevent the default behavior (i.e., disallow the keypress)
+    event.preventDefault();
+    return false;
   }
-}
-  
+};
+
+const handleInput = (value: string) => {
+  // Update the input value
+  if(!isNaN(parseFloat(value))){
+    inputValue.value = value;
+  }
+  else{
+    inputValue.value = "0";
+  }
+  emit('update:modelValue', inputValue.value);
+};
+
+const formattedValue = computed(() => {
+  return Intl.NumberFormat("en-US", {
+      maximumFractionDigits: props.decimal,
+    }).format(parseFloat(inputValue.value))
+});
   
   </script>
   <style lang="scss" scoped>
