@@ -39,52 +39,55 @@
           <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">{{$t('swap.noOtherExtension')}} <b>{{$t('swap.metamask')}}</b>.<div class="my-2">{{$t('swap.referTo')}}<a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">{{$t('swap.walkthrough')}}<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a>{{$t('swap.forMoreDetails')}}</div>{{$t('swap.refreshMsg')}}</div>
           <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
           <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-          <div class="mb-5 md:flex md:justify-between border border-gray-200 rounded">
-            <div class="flex justify-left">
-              <div class="w-18 flex items-center justify-center py-5 sm:h-20">
-                <img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask-fox.svg" class="w-8 h-8 inline-block">
+          <div class="mb-5">
+            <div class="md:flex md:justify-between border border-gray-200 rounded">
+              <div class="flex justify-left">
+                <div class="w-18 flex items-center justify-center py-5 sm:h-20">
+                  <img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask-fox.svg" class="w-8 h-8 inline-block">
+                </div>
+                <div class="text-left flex items-center">
+                  <div>
+                    <div class="text-xxs uppercase text-blue-primary font-bold mb-1">{{$t('swap.fromMetamaskAddress')}}</div>
+                    <div class="font-bold text-black text-tsm break-all mr-2">{{ isMetamaskConnected?(currentAccount?currentAccount:$t('swap.notConnected')):$t('swap.notConnected') }}</div>
+                  </div>
+                </div>
               </div>
-              <div class="text-left flex items-center">
-                <div>
-                  <div class="text-xxs uppercase text-blue-primary font-bold mb-1">{{$t('swap.fromMetamaskAddress')}}</div>
-                  <div class="font-bold text-black text-tsm break-all mr-2">{{ isMetamaskConnected?(currentAccount?currentAccount:$t('swap.notConnected')):$t('swap.notConnected') }}</div>
+              <div class="md:grid hidden " :class="currentAccount?'grid-cols-2':'grid-cols-1'">
+                <div class="border-l border-gray-200 text-green-500 font-semibold text-xxs w-16 lg:w-20 flex items-center justify-center uppercase" v-if="currentAccount">
+                  <div>
+                    <img src="@/modules/services/submodule/mainnetSwap/img/icon-connected.svg" class="inline-block">
+                    <div>{{$t('swap.connected')}}</div>
+                  </div>
+                </div>
+                <div class="border-l border-gray-200 text-blue-primary text-tsm font-bold w-16 lg:w-20 flex justify-center items-center">
+                  <div v-if="isInstallMetamask">
+                    <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">{{$t('swap.connect')}}</div>
+                    <div class="cursor-pointer" @click="changeMetamask()" v-else>{{$t('general.change')}}</div>
+                  </div>
+                  <div v-else>
+                    <a href="https://metamask.io/" target=_new>{{$t('general.download')}}</a>
+                  </div>
+                </div>
+              </div>
+              <div class="md:hidden">
+                <div class="border-t border-gray-200 text-green-500 font-semibold text-xxs uppercase p-2" v-if="currentAccount">
+                  <div class="flex items-center justify-center">
+                    <img src="@/modules/services/submodule/mainnetSwap/img/icon-connected.svg" class="inline-block mr-2 w-4 h-4">
+                    {{$t('swap.connected')}}
+                  </div>
+                </div>
+                <div class="border-t border-gray-200 text-blue-primary text-tsm font-bold p-3">
+                  <div v-if="isInstallMetamask">
+                    <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">{{$t('swap.connect')}}</div>
+                    <div class="cursor-pointer" @click="changeMetamask()" v-else>{{$t('general.change')}}</div>
+                  </div>
+                  <div v-else>
+                    <a href="https://metamask.io/" target=_new>{{$t('general.download')}}</a>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="md:grid hidden " :class="currentAccount?'grid-cols-2':'grid-cols-1'">
-              <div class="border-l border-gray-200 text-green-500 font-semibold text-xxs w-16 lg:w-20 flex items-center justify-center uppercase" v-if="currentAccount">
-                <div>
-                  <img src="@/modules/services/submodule/mainnetSwap/img/icon-connected.svg" class="inline-block">
-                  <div>{{$t('swap.connected')}}</div>
-                </div>
-              </div>
-              <div class="border-l border-gray-200 text-blue-primary text-tsm font-bold w-16 lg:w-20 flex justify-center items-center">
-                <div v-if="isInstallMetamask">
-                  <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">{{$t('swap.connect')}}</div>
-                  <div class="cursor-pointer" @click="changeMetamask()" v-else>{{$t('general.change')}}</div>
-                </div>
-                <div v-else>
-                  <a href="https://metamask.io/" target=_new>{{$t('general.download')}}</a>
-                </div>
-              </div>
-            </div>
-            <div class="md:hidden">
-              <div class="border-t border-gray-200 text-green-500 font-semibold text-xxs uppercase p-2" v-if="currentAccount">
-                <div class="flex items-center justify-center">
-                  <img src="@/modules/services/submodule/mainnetSwap/img/icon-connected.svg" class="inline-block mr-2 w-4 h-4">
-                  {{$t('swap.connected')}}
-                </div>
-              </div>
-              <div class="border-t border-gray-200 text-blue-primary text-tsm font-bold p-3">
-                <div v-if="isInstallMetamask">
-                  <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">{{$t('swap.connect')}}</div>
-                  <div class="cursor-pointer" @click="changeMetamask()" v-else>{{$t('general.change')}}</div>
-                </div>
-                <div v-else>
-                  <a href="https://metamask.io/" target=_new>{{$t('general.download')}}</a>
-                </div>
-              </div>
-            </div>
+            <div class="mt-1 text-xs">Please connect your account and switch to it in MetaMask</div>
           </div>
           <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'BEP20 ' + `${selectedToken?selectedToken.name:''}`" type="text" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':amount>=minAmount?$t('swap.insufficientTokenBalance'):`Min. amount is ${minAmount}(${feeAmount} ${selectedToken.name.toUpperCase()} will deducted for transaction fee)`" :decimal="tokenDivisibility"  />
           <div class="flex">
@@ -565,6 +568,7 @@ export default {
               const accountsPermission = permissions.find(
                   (permission) => permission.parentCapability === "eth_accounts"
               );
+              console.log(accountsPermission)
               if (accountsPermission) {
                   console.log("eth_accounts permission successfully requested!");
               }
