@@ -53,7 +53,7 @@
           </div>
           <div v-if="selectedGroupType !== transactionGroupType.CONFIRMED">
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.value')}}</div>
-            <div><img src="@/modules/dashboard/img/icon-message.svg" v-if="data.valueChange" v-tooltip.left="{value:'<tiptext>' + constructValueDisplay(data) + '</tiptext>', escape: true}" class="inline-block"></div>
+            <div><img src="@/modules/dashboard/img/icon-message.svg" v-if="data.valueChange" v-tooltip.left="{value:'<tiptext>' + constructValueDisplay(data) + '</tiptext>', escape: false}" class="inline-block"></div>
           </div>
         </template>
       </Column>
@@ -106,7 +106,7 @@
       <Column :header="$t('dashboard.value')" v-if="selectedGroupType !== transactionGroupType.CONFIRMED && wideScreen" headerStyle="width:40px">
         <template #body="{data}">
           <div>
-            <img src="@/modules/dashboard/img/icon-message.svg" v-if="data.valueChange" v-tooltip.left="{ value:'<tiptext>' + constructValueDisplay(data) + '</tiptext>', escape: true}" class="inline-block">
+            <img src="@/modules/dashboard/img/icon-message.svg" v-if="data.valueChange" v-tooltip.left="{ value:'<tiptext>' + constructValueDisplay(data) + '</tiptext>', escape: false}" class="inline-block">
           </div>
         </template>
       </Column>
