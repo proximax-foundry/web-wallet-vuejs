@@ -172,8 +172,19 @@ const message = ref('')
 const signerNativeTokenBalance = ref(0)
 
 const disableCreate = computed(() => {
+    let checkEncryptedPassword = true
+    if(isEncrypted.value){
+        if(walletPassword.value.match(passwdPattern)){
+            checkEncryptedPassword = true
+        }
+        else{
+            checkEncryptedPassword = false
+        }
+    }else{
+        checkEncryptedPassword = true
+    }
     return !(
-        isEncrypted.value? walletPassword.value.match(passwdPattern): true
+        checkEncryptedPassword
         && !showAddressError.value
         && !showBalanceErr.value
         && currentBytes.value <= messageLimit.value
