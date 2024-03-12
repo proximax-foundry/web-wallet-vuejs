@@ -85,7 +85,7 @@ const handleKeypress = (event: KeyboardEvent, value: string) => {
     // Allow the keypress
     if (charCode === '.'){
       // If a dot already exists in the value, prevent adding another dot
-      if (formattedValue.value.includes('.') || value.includes('.')){
+      if (value.includes('.')){
         event.preventDefault();
       }
     }
