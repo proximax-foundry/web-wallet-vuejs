@@ -9,7 +9,8 @@
         :placeholder="placeholder"
         @keyup="checkBalance($event), validateInput($event)"
         @input="handleInput(parseFloat((<HTMLInputElement>$event.target).value.replace(/,/g, '')).toString())"
-        @keypress="handleKeypress"
+        @keypress="handleKeypress($event,(<HTMLInputElement>$event.target).value)"
+        @blur="handleBlur($event)"
       />
         <button :disabled="disabled == true" class="w-24 cursor-pointer focus:outline-none text-blue-primary text-xs font-bold" @click="showRemark();$emit('clickedMaxAvailable', true);clearAllError()">{{$t('swap.maxAmount')}}</button>
       </div>
@@ -58,6 +59,8 @@ const p = defineProps({
   const isShowRemark = ref(false)
   const emptyErr = ref(false)
   const inputValue = ref(p.modelValue);
+  const maxDigitLimit = 16
+  const maxDecLimit = ref(0)
   watch(modelValue, val => {
       if(val == p.maxAmount){
         isShowRemark.value = true;
@@ -92,7 +95,7 @@ const p = defineProps({
       }
    };
 
-const handleKeypress = (event: KeyboardEvent) => {
+const handleKeypress = (event: KeyboardEvent, value: string) => {
   const charCode = event.key;
   // Allow numbers (0-9) and dot (.)
   if (
@@ -104,9 +107,11 @@ const handleKeypress = (event: KeyboardEvent) => {
     charCode === 'ArrowRight'
   ) {
     // Allow the keypress
-    if (charCode === '.' && formattedValue.value.includes('.')) {
+    if (charCode === '.'){
       // If a dot already exists in the value, prevent adding another dot
-      event.preventDefault();
+      if (formattedValue.value.includes('.') || value.includes('.')){
+        event.preventDefault();
+      }
     }
     return true;
   } else {
@@ -126,21 +131,26 @@ const handleInput = (value: string) => {
   }
 };
 
+const handleBlur = (event) => {
+  (event.target as HTMLInputElement).value = formattedValue.value
+}
+
 const formattedValue = computed(() => {
   return Intl.NumberFormat("en-US", {
-      maximumFractionDigits: p.decimal,
+      maximumFractionDigits: maxDecLimit.value,
     }).format(inputValue.value)
 });
 
 watch(inputValue, (newValue, oldValue) => {
   if(newValue.toString().includes('.')) {
     const [integerPart, decimalPart] = newValue.toString().split('.');
-    if (decimalPart && decimalPart.length > p.decimal) {
+    maxDecLimit.value = maxDigitLimit - integerPart.length
+    if (decimalPart && decimalPart.length > maxDecLimit.value) {
       inputValue.value = oldValue;
     }
   }
   else{
-    if(newValue.toString().length > 9){
+    if(newValue.toString().length > maxDigitLimit){
       inputValue.value = oldValue;
     }
   }

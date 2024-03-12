@@ -11,7 +11,8 @@
                   class="supply_input"
                   :placeholder="placeholder" 
                   @input="handleInput(parseFloat((<HTMLInputElement>$event.target).value.replace(/,/g, '')).toString())"
-                  @keypress="handleKeypress"
+                  @keypress="handleKeypress($event,(<HTMLInputElement>$event.target).value)"
+                  @blur="handleBlur($event)"
                 />
             </div>
           </div>
@@ -67,8 +68,10 @@ const emit = defineEmits([
   ])
 
 const inputValue = ref(props.modelValue);
+const maxDigitLimit = 16
+const maxDecLimit = ref(0)
 
-const handleKeypress = (event: KeyboardEvent) => {
+const handleKeypress = (event: KeyboardEvent, value: string) => {
   const charCode = event.key;
   // Allow numbers (0-9) and dot (.)
   if (
@@ -80,9 +83,11 @@ const handleKeypress = (event: KeyboardEvent) => {
     charCode === 'ArrowRight'
   ) {
     // Allow the keypress
-    if (charCode === '.' && formattedValue.value.includes('.')) {
+    if (charCode === '.'){
       // If a dot already exists in the value, prevent adding another dot
-      event.preventDefault();
+      if (formattedValue.value.includes('.') || value.includes('.')){
+        event.preventDefault();
+      }
     }
     return true;
   } else {
@@ -102,21 +107,26 @@ const handleInput = (value: string) => {
   }
 };
 
+const handleBlur = (event) => {
+  (event.target as HTMLInputElement).value = formattedValue.value
+}
+
 const formattedValue = computed(() => {
   return Intl.NumberFormat("en-US", {
-      maximumFractionDigits: props.decimal,
+      maximumFractionDigits: maxDecLimit.value,
     }).format(parseFloat(inputValue.value))
 });
 
 watch(inputValue, (newValue, oldValue) => {
   if(newValue.includes('.')) {
     const [integerPart, decimalPart] = newValue.split('.');
-    if (decimalPart && decimalPart.length > props.decimal) {
+    maxDecLimit.value = maxDigitLimit - integerPart.length
+    if (decimalPart && decimalPart.length > maxDecLimit.value) {
       inputValue.value = oldValue;
     }
   }
   else{
-    if(newValue.length > 9){
+    if(newValue.length > maxDigitLimit){
       inputValue.value = oldValue;
     }
   }
