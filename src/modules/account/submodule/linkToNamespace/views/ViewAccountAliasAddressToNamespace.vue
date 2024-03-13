@@ -59,11 +59,12 @@
                 selectedNamespace == null
               "
             />
-            <div
+            <button
             
             
               class="border rounded-md cursor-pointer flex flex-col justify-around p-2"
               @click="toggleContact=true"
+              :disabled="selectedNamespace == null"
             >
               <font-awesome-icon
                 icon="id-card-alt"
@@ -75,7 +76,7 @@
               class="text-xxs font-semibold uppercase">
                 {{ $t("general.select") }}
               </div>
-            </div>
+            </button>
           </div>
         </div>
         <div class="bg-navy-primary p-6 lg:col-span-1">
