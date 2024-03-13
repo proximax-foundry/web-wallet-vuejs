@@ -10,6 +10,7 @@
 
 <script setup lang="ts">
 import { getCurrentInstance, ref, watch } from 'vue';
+import { networkState } from '@/state/networkState';
 
 const props = defineProps({
     placeholder: String,
@@ -31,17 +32,21 @@ const inputText = ref("")
 const borderColor = ref('border border-gray-300')
 const textErr = ref(false)
 const inputValue = ref(props.modelValue)
+const maxDivisibility = networkState.currentNetworkProfileConfig.maxMosaicDivisibility
 
 const validateKey = (e: KeyboardEvent) => {
   const charCode = e.key;
   if (
-    (charCode >= '0' && charCode <= '6') ||
+    (charCode >= '0' && charCode <= "9") ||
     charCode === 'Backspace' ||
     charCode === 'Delete' ||
     charCode === 'ArrowLeft' ||
     charCode === 'ArrowRight'
   ) {
     // Allow the keypress
+    if(charCode === '0' && inputValue.value.slice(0,1) === '0'){
+      e.preventDefault();
+    }
     return true;
   } else {
     // Prevent the default behavior (i.e., disallow the keypress)
@@ -61,8 +66,11 @@ const handleInput  = (value: number) => {
 }
 
 watch(inputValue, (newValue) => {
-  if(newValue.toString().length > 1) {
-    inputValue.value = parseInt(newValue.toString().slice(1,2)).toString()
+  if(newValue.toString().length > maxDivisibility.toString().length) {
+    inputValue.value = parseInt(newValue.slice(0, maxDivisibility.toString().length-1) + newValue.slice(-1)).toString()
+  }
+  else if(parseInt(newValue) > maxDivisibility){
+    inputValue.value = maxDivisibility.toString()
   }
   emit('update:modelValue', inputValue.value);
 });
