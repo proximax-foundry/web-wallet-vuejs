@@ -64,7 +64,9 @@
             
               class="border rounded-md cursor-pointer flex flex-col justify-around p-2"
               @click="toggleContact=true"
-              :disabled="selectedNamespace == null"
+              :disabled="disableNamespace ||
+                selectedAction.value == 'Unlink' ||
+                selectedNamespace == null"
             >
               <font-awesome-icon
                 icon="id-card-alt"
