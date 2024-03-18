@@ -168,7 +168,7 @@ const maxInputLimit = computed(() => {
   if(dotInclude.value){
     totalMaxInputLimit = totalMaxInputLimit + 1
   }
-  return totalMaxInputLimit != 0 ? totalMaxInputLimit+maxDigitLimit : maxDigitLimit
+  return maxDigitLimit + totalMaxInputLimit
 })
 
 watch(inputValue, (newValue, oldValue) => {
