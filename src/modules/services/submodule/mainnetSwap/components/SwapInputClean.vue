@@ -7,10 +7,10 @@
         :value="formattedValue"
         class="supply_input"
         :placeholder="placeholder"
+        :maxlength="maxInputLimit"
         @keyup="checkBalance($event), validateInput($event)"
-        @input="handleInput(parseFloat((<HTMLInputElement>$event.target).value.replace(/,/g, '')).toString())"
+        @input="handleInput((<HTMLInputElement>$event.target).value.replace(/,/g, ''))"
         @keypress="handleKeypress($event,(<HTMLInputElement>$event.target).value)"
-        @blur="handleBlur($event)"
       />
         <button :disabled="disabled == true" class="w-24 cursor-pointer focus:outline-none text-blue-primary text-xs font-bold" @click="showRemark();$emit('clickedMaxAvailable', true);clearAllError()">{{$t('swap.maxAmount')}}</button>
       </div>
@@ -61,6 +61,8 @@ const p = defineProps({
   const inputValue = ref(p.modelValue);
   const maxDigitLimit = 16
   const maxDecLimit = ref(0)
+  const dotInclude = ref(false)
+  const retainZero = ref(false)
   watch(modelValue, val => {
       if(val == p.maxAmount){
         isShowRemark.value = true;
@@ -121,7 +123,21 @@ const handleKeypress = (event: KeyboardEvent, value: string) => {
   }
 };
 
+const countCommas = (str: string) => {
+  return str.split(',').length - 1;
+}
+
 const handleInput = (value: string) => {
+  if(value.includes('.')){
+    if(value.includes('.0')){
+      retainZero.value = true
+    }
+    dotInclude.value = true
+  }
+  else{
+    dotInclude.value = false
+    retainZero.value = false
+  }
   // Update the input value
   if(!isNaN(parseFloat(value))){
     inputValue.value = parseFloat(value);
@@ -131,15 +147,29 @@ const handleInput = (value: string) => {
   }
 };
 
-const handleBlur = (event) => {
-  (event.target as HTMLInputElement).value = formattedValue.value
-}
-
 const formattedValue = computed(() => {
-  return Intl.NumberFormat("en-US", {
+  let formatValue = Intl.NumberFormat("en-US", {
       maximumFractionDigits: maxDecLimit.value,
-    }).format(inputValue.value)
+    }).format((inputValue.value))
+  if(dotInclude.value && !formatValue.includes('.')){
+    formatValue = formatValue + "."
+  }
+  if(retainZero.value && inputValue.value.toString() !== formatValue){
+    formatValue = formatValue + "0"
+  }
+  return formatValue
 });
+
+const maxInputLimit = computed(() => {
+  let totalMaxInputLimit = 0
+  if(formattedValue.value.includes(',')){
+    totalMaxInputLimit = totalMaxInputLimit + countCommas(formattedValue.value)
+  }
+  if(dotInclude.value){
+    totalMaxInputLimit = totalMaxInputLimit + 1
+  }
+  return totalMaxInputLimit != 0 ? totalMaxInputLimit+maxDigitLimit : maxDigitLimit
+})
 
 watch(inputValue, (newValue, oldValue) => {
   if(newValue.toString().includes('.')) {
