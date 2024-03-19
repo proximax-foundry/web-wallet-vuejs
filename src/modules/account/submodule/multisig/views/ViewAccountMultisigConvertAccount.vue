@@ -8,9 +8,15 @@
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>
            <div class=" error error_box mb-5 whitespace-pre" v-if="err!=''">{{ err }}</div>
-           <div v-if="inputPkNotExist!=''" class="flex gap-2 bg-yellow-50 py-2 rounded-md px-2 my-3 mb-5">
-              <img src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-              <div class="text-xs font-bold pt-1">{{ inputPkNotExist }}</div>
+           <div v-if="pkNotExistArray.length>0">
+              <div v-for="(inputPkNotExist) in pkNotExistArray">
+                <div v-for="(publicKey, index) in coSign" :key="index">
+                  <div class="flex gap-2 bg-yellow-50 py-2 rounded-md px-2 my-3" v-if="inputPkNotExist===publicKey">
+                    <img src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+                    <div class="text-xs font-bold pt-1">{{contactName[index]? contactName[index]: $t('multisig.cosignatory') + `${index+1}` }}'s public key does not exist</div>
+                  </div>
+                </div>
+              </div>
            </div>
            <div class=" error error_box mb-5" v-if="passwordErr!=''">{{ passwordErr }}</div>
         </div>
@@ -18,7 +24,7 @@
         <div class="flex flex-col gap-2">
           <div v-for="(coSignAddress, index) in coSign" :key="index" >
             <div class="flex">
-              <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
+              <img  src="@/modules/account/submodule/multisig/img/icon-delete-red.svg" @click="deleteCoSigAddressInput(coSignAddress,index)" class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"  >
               <TextInput class='w-5/12 mr-2 ' :placeholder="$t('multisig.cosignatory') + `${index+1}`"  v-model="contactName[index]" :disabled="true"  />
               <TextInputClean class='w-7/12 mr-2 ' :placeholder="$t('general.publicKey')" :errorMessage="$t('general.invalidInput')" :showError="showAddressError[index]" v-model="coSign[index]" />
               <div v-if="showAddressError[index]==true " class="mt-16"/>
@@ -57,12 +63,14 @@
             <div class="text-xxs border-t-2 text-center py-1 uppercase">{{$t('multisig.ofCosignatories',{value:maxNumDeleteUser})}}</div>
           </div>
         </div>
+        <div class="pl-6">
+          <div class='text-xs font-semibold my-3'>{{$t('general.enterPasswordContinue')}}</div>
+          <PasswordInput :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
+        </div>
       </div>
       <div class='bg-navy-primary p-6 lg:col-span-1'>
         <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig-already="isMultisig" :on-partial="onPartial" :transaction-fee="String(aggregateFee)" :total-fee-formatted="totalFeeFormatted" :lock-fund-currency-convert="lockFundCurrency" :lock-fund-tx-fee-convert="String(lockFundTxFee)" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
         <div class="mt-5"/>
-        <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="passwd" :disabled="disabledPassword" />
         <div class="mt-3"><button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="convertAccount()" :disabled="disableSend">{{$t('multisig.updateCosignatories')}}</button></div>
         <div class="text-center">
           <router-link :to="{name: 'ViewMultisigHome',params:{address:address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
@@ -121,7 +129,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref('');
-    const inputPkNotExist = ref('');
+    const pkNotExistArray = ref([])
     const passwordErr = ref('');
     const fundStatus = ref(false);
     
@@ -340,7 +348,7 @@ export default {
       maxNumApproveTransaction.value = 0;
       numDeleteUser.value = 1;
       maxNumDeleteUser.value = 0;
-      inputPkNotExist.value = '';
+      pkNotExistArray.value = [];
     };
     const convertAccount = async() => {
       const wallet = walletState.currentLoggedInWallet;
@@ -353,7 +361,6 @@ export default {
         passwordErr.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
       }else{
         // transaction made
-        let multisigPayload = {}
         const multisigCosignatory = [];
   
         const accountDetails = wallet.accounts.find(
@@ -417,29 +424,20 @@ export default {
           .modifications(multisigCosignatory)
           .build();
 
-        const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        multisigPayload = await TransactionUtils.signAbtWithTxnAndPassword(
-          acc.value.address,
-          accountToConvert.address.plain(),
-          passwd.value,
-          convertIntoMultisigTransaction,
-          new UInt64(nodeTime.sendTimeStamp)
-        );
         passwordErr.value = '';
         // toggleAnounceNotification.value = true;
         // var audio = new Audio(require('@/assets/audio/ding.ogg'));
         // audio.play();
         clear();
-        TransactionState.lockHashPayload = multisigPayload.hashLockTxnPayload
-        TransactionState.transactionPayload = multisigPayload.txnPayload
-        TransactionState.selectedAddress = p.address
+        TransactionState.unsignedTransactionPayload = convertIntoMultisigTransaction.serialize()
+        TransactionState.selectedAddress = acc.value.address
+        TransactionState.selectedMultisigAddress = accountToConvert.address.plain()
         router.push({ name: "ViewConfirmTransaction" })
       } 
     };
     
     watch(() => [...coSign.value], async (n) => {
       let duplicateOwner = false
-      inputPkNotExist.value = ''
       if (coSign.value.length > 0)
       {
         for(var i = 0; i < coSign.value.length; i++){
@@ -461,9 +459,9 @@ export default {
                 err.value = '';
                 const validAcc = await checkValidAcc(coSign.value[i])
                 if(!validAcc){
-                  inputPkNotExist.value = "Input public key does not exist"
-                }else{
-                  inputPkNotExist.value = ''
+                  if(!pkNotExistArray.value.includes(coSign.value[i])){
+                    pkNotExistArray.value.push(coSign.value[i])
+                  }
                 }
               }
             }
@@ -493,7 +491,7 @@ export default {
       maxNumDeleteUser.value += 1;
     };
 
-    const deleteCoSigAddressInput = (i) => {
+    const deleteCoSigAddressInput = (publicKey,i) => {
       if(maxNumApproveTransaction.value > 0){
         maxNumApproveTransaction.value -= 1;
       }
@@ -513,6 +511,11 @@ export default {
       toggleContact.value.splice(i,1);
       selectedAddresses.value.splice(i, 1);
       showAddressError.value.splice(i,1)
+      for(let j = 0; j<pkNotExistArray.value.length; j++){
+        if(publicKey === pkNotExistArray.value[j]){
+          pkNotExistArray.value.splice(j,1)
+        }
+      }
     }
     const validateApproval = (e) => {
       if((numApproveTransaction.value * 10*(~~(maxNumApproveTransaction.value/10)) + e.charCode - 48) > maxNumApproveTransaction.value){
@@ -658,7 +661,7 @@ export default {
       selectedAccAdd,
       accBalance,
       passwordErr,
-      inputPkNotExist
+      pkNotExistArray
     };
   },
 }

@@ -45,9 +45,6 @@
           <TxnSummary :signer-native-token-balance="balance" :namespace-rental-fee-currency="rentalFeeCurrency"
             :native-token-balance="selectedMultisigAddress ? multisigBalance : balance" :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee"
             :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact" :total-fee="totalFee" />
-          <div class='text-xs text-white my-5'>{{ $t('general.enterPasswordContinue') }}</div>
-          <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')"
-            :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
           <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white"
             :disabled="disableCreate" @click="createNamespace">{{ $t('namespace.registerNamespace') }}</button>
           <div class="text-center">
@@ -111,11 +108,9 @@ const disableSelectNamespace = ref(false);
 const namespaceName = ref('');
 const showDurationErr = ref(false);
 const duration = ref('1');
-const walletPassword = ref('');
 const err = ref('');
 const namespaceErrorMessage = ref(t('namespace.validName'));
 const currentSelectedName = ref('');
-const disabledPassword = ref(false);
 const disabledDuration = ref(false);
 const disabledClear = ref(false);
 const passwdPattern = "^[^ ]{8,}$";
@@ -174,7 +169,7 @@ const lockFundTxFee = computed(() => {
 const lockFundTotalFee = computed(() => lockFund.value + lockFundTxFee.value);
 
 const disableCreate = computed(() => !(
-  walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && !showNamespaceNameError.value && selectNamespace.value
+  namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && !showNamespaceNameError.value && selectNamespace.value
 ));
 
 const selectedMultisigAddress = ref<string | null>(null)
@@ -226,13 +221,11 @@ const showNoBalance = computed(() => {
 
 // validate enough fee to create namespace
 if (balance.value < rentalFee.value) {
-  disabledPassword.value = true;
   disabledClear.value = true;
   disabledDuration.value = true;
   disableNamespaceName.value = true;
   disableSelectNamespace.value = true;
 } else {
-  disabledPassword.value = false;
   disabledClear.value = false;
   disabledDuration.value = false;
   disableNamespaceName.value = false;
@@ -273,50 +266,22 @@ watch(selectNamespace, newValue => {
   if (!newValue) {
     disableNamespaceName.value = true;
     disabledDuration.value = true;
-    disabledPassword.value = true;
   } else {
     disableNamespaceName.value = false;
-    disabledDuration.value = false;
-    disabledPassword.value = false;
   }
 }, { immediate: true })
 
-const createNamespace = async() => {
-  let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword.value)
-  if (!verifyPassword) {
-    err.value = t('general.walletPasswordInvalid', { name: walletState.currentLoggedInWallet.name })
-    return
-  }
-  let namespacePayload : {
-    txnPayload: string,
-    hashLockTxnPayload?: string
-  },{} = {}
+const createNamespace = () => {
   let buildTransactions = AppState.buildTxn;
-  const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime(); 
   if (selectNamespace.value === '1') {
-    let registerRootNamespaceTransaction = buildTransactions.registerRootNamespace(namespaceName.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value))));
-    namespacePayload = await TransactionUtils.signTxnWithPassword(
-      selectedAddress.value,
-      selectedMultisigAddress.value,
-      walletPassword.value,
-      registerRootNamespaceTransaction,
-      undefined,
-      new UInt64(nodeTime.sendTimeStamp)
-    );
+    let unsignedRegisterRootNamespaceTransaction = buildTransactions.registerRootNamespace(namespaceName.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value)))).serialize();
+    TransactionState.unsignedTransactionPayload = unsignedRegisterRootNamespaceTransaction
   } else {
-    let registerSubNamespaceTransaction = buildTransactions.registersubNamespace(selectNamespace.value, namespaceName.value);
-    namespacePayload = await TransactionUtils.signTxnWithPassword(
-      selectedAddress.value,
-      selectedMultisigAddress.value,
-      walletPassword.value,
-      registerSubNamespaceTransaction, 
-      undefined, 
-      new UInt64(nodeTime.sendTimeStamp)
-    );
+    let unsignedRegisterSubNamespaceTransaction = buildTransactions.registersubNamespace(selectNamespace.value, namespaceName.value).serialize();
+    TransactionState.unsignedTransactionPayload = unsignedRegisterSubNamespaceTransaction
   }
-  TransactionState.lockHashPayload = namespacePayload.hashLockTxnPayload
-  TransactionState.transactionPayload = namespacePayload.txnPayload
   TransactionState.selectedAddress = selectedAddress.value
+  TransactionState.selectedMultisigAddress = selectedMultisigAddress.value
   router.push({ name: "ViewConfirmTransaction" })
 };
 
@@ -343,10 +308,8 @@ const totalFee = computed(() => {
 
 watch(totalFee, (newValue) => {
   if (balance.value < newValue) {
-    disabledPassword.value = true;
     disableSelectNamespace.value = true;
   } else {
-    disabledPassword.value = false;
     disableSelectNamespace.value = false;
   }
 });

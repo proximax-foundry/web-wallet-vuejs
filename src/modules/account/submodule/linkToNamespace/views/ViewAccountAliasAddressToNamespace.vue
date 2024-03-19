@@ -90,16 +90,6 @@
             :selected-acc-add="address"
             :is-cosigner="isCosigner"
             :fund-status="fundStatus"/>
-          <div class="font-semibold text-xs text-white mb-1.5">
-            {{ $t("general.enterPasswordContinue") }}
-          </div>
-          <PasswordInput
-            :placeholder="$t('general.enterPassword')"
-            :errorMessage="$t('general.passwordRequired')"
-            v-model="walletPassword"
-            icon="lock"
-            :disabled="disableNamespace"
-          />
           <div class="mt-3"></div>
           <button
             class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
@@ -128,7 +118,7 @@ import { networkState } from "@/state/networkState";
 import { accountUtils } from "@/util/accountUtils";
 import { walletState } from "@/state/walletState";
 import { WalletUtils } from "@/util/walletUtils";
-import { Address, UInt64 } from "tsjs-xpx-chain-sdk";
+import { Address, AliasActionType, NamespaceId } from "tsjs-xpx-chain-sdk";
 import { ref, computed, watch } from "vue";
 import { Helper } from "@/util/typeHelper";
 import { useI18n } from "vue-i18n";
@@ -142,6 +132,7 @@ import { useRouter } from "vue-router";
 import TransactionFeeDisplay from "@/modules/services/components/TransactionFeeDisplay.vue";
 import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
 import type {TreeNode } from "primevue/treenode"
+import { TransactionState } from "@/state/transactionState";
 
 const { address } = defineProps<{ address: string }>();
 const { t } = useI18n();
@@ -194,7 +185,6 @@ const acc = computed(() => {
 });
 
 const err = ref("");
-const walletPassword = ref("");
 
 const namespaceAddress = ref("");
 const showAddressError = ref(true);
@@ -286,7 +276,6 @@ const fundStatus = computed(() => {
 const disableCreate = computed(() => {
   return !(
     fundStatus.value == false &&
-    walletPassword.value.match(passwordPattern) &&
     namespaceAddress.value != "" &&
     selectedNamespace.value.value != null &&
     showAddressError.value == false
@@ -350,18 +339,15 @@ const cosignerOptions = computed(() => {
   });
 });
 
-const selectedCosignPublicKey = ref(
-  walletCosignerList.value.cosignerList[0]
-    ? walletCosignerList.value.cosignerList[0].publicKey
-    : ""
-);
+const selectedCosignPublicKey = ref("");
 watch(
-  walletCosignerList,
+  selectedCosigner,
   (n) => {
-    if (n.cosignerList.length) {
-      selectedCosignPublicKey.value = n.cosignerList[0]
-        ? n.cosignerList[0].publicKey
-        : "";
+    if (n.value != "") {
+      selectedCosignPublicKey.value = n.value
+    }
+    else{
+      selectedCosignPublicKey.value = ""
     }
   },
   { deep: true }
@@ -452,17 +438,7 @@ watch(namespaceAddress, (namespaceAddressValue) => {
   }
 });
 const router = useRouter();
-const aliasAddressToNamespace = async() => {
-  if (
-    !WalletUtils.verifyWalletPassword(
-      walletName,
-      networkState.chainNetworkName,
-      walletPassword.value
-    )
-  ) {
-    err.value = t("general.walletPasswordInvalid", { name: walletName });
-    walletPassword.value = "";
-  } else {
+const aliasAddressToNamespace = () => {
     let acc = walletState.currentLoggedInWallet.accounts.find(
       (acc) => acc.address == address
     )
@@ -473,25 +449,26 @@ const aliasAddressToNamespace = async() => {
           (acc) => acc.address == address
         );
     err.value = "";
+    const transactionBuilder = AppState.buildTxn
+    const tempLinkType = (selectedAction.value.value == 'Link') ? AliasActionType.Link : AliasActionType.Unlink;
+    const namespaceId = new NamespaceId(selectedNamespace.value?.value);
+    const linkNamespaceAdd = Address.createFromRawAddress(namespaceAddress.value);
+    const unsignedNamespaceTransaction = transactionBuilder.addressAliasBuilder()
+    .actionType(tempLinkType)
+    .namespaceId(namespaceId)
+    .address(linkNamespaceAdd)
+    .build()
 
-    const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
+    if(selectedCosignPublicKey.value){
+      let cosignerAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address
+      TransactionState.selectedAddress = cosignerAddress
+      TransactionState.selectedMultisigAddress = acc.address
+    }else{
+      TransactionState.selectedAddress = acc.address
+    }
 
-    accountUtils.linkNamespaceToAddress(
-      selectedCosignPublicKey.value,
-      walletCosignerList.value.hasCosigner,
-      acc,
-      walletPassword.value,
-      selectedNamespace.value?.value,
-      selectedAction.value.value,
-      namespaceAddress.value,
-      new UInt64(nodeTime.sendTimeStamp)
-    );
-
-    router.push({
-      name: "ViewAccountPendingTransactions",
-      params: { address: address },
-    });
-  }
+    TransactionState.unsignedTransactionPayload = unsignedNamespaceTransaction.serialize()
+    router.push({ name: "ViewConfirmTransaction" })
 };
 
 const checkCosignBalance = computed(() => {

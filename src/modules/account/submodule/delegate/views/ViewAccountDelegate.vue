@@ -57,8 +57,6 @@
       <div class='bg-navy-primary p-6 lg:col-span-1'>
         <TransactionFeeDisplay :fund-status="fundStatus" :is-multisig="isMultisig" :is-cosigner="isCosigner" :on-partial="onPartial" :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFund" :lock-fund-tx-fee="lockFundTxFee" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
         <div class="mt-5"/>
-        <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" />
         <div class="mt-3">
           <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="delegateValue " :disabled="disableLinkBtn">{{$t('delegate.unlinkAcc')}}</button>
           <button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="createDelegate" v-if="!delegateValue " :disabled="disableLinkBtn">{{$t('delegate.delegateAcc')}}</button>
@@ -111,7 +109,7 @@ export default {
     const privKeyPattern = "^(0x|0X)?[a-fA-F0-9].{63,65}$"; 
     let privateKey = ref('')
     let showPrivateKeyError = ref(true)
-    const walletPassword = ref("");
+
     const showPasswdError = ref(false);
     const err = ref(false);
     const defaultAcc = walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount(): null
@@ -275,20 +273,9 @@ export default {
     const disableLinkBtn = computed(() => {
       if(onPartial.value || fundStatus.value || (!isCosigner.value && isMultisig.value) ){
         return true
-      }else if(!delegateValue.value){
-        if(walletPassword.value.match(passwdPattern)){
-          return false
-        }else{
-          return true
-        }
-      }else if(delegateValue.value){
-        if(walletPassword.value.match(passwdPattern)){
-          return false
-        }else{
-          return true
-        }
-      }else{
-        return true
+      }
+      else{
+        return false
       }
     });
     const copy = (id) =>{
@@ -340,71 +327,33 @@ export default {
         AccPublicKey.value = account.publicKey;
          
         }
-      let delegatePayload = {}
+      let unsignedTxnPayload = ""
       const txBuilder = AppState.buildTxn
-      if (WalletUtils.verifyWalletPassword(walletName,networkState.chainNetworkName,walletPassword.value)) {
         if (delegateAcc.value !== "0".repeat(64)) { //unlink
           const delegateUnlinkTransaction = txBuilder.accountLinkBuilder() 
           .remoteAccountKey(delegateAcc.value)
           .linkAction(LinkAction.Unlink)
           .build() 
-          if(isMultisig.value){
-            let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address 
-            const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-            delegatePayload = await TransactionUtils.signAbtWithTxnAndPassword(
-              selectedCosignAddress,
-              acc.value.address,
-              walletPassword.value,
-              delegateUnlinkTransaction, 
-              new UInt64(nodeTime.sendTimeStamp)
-            );
-          }
-          else{
-            delegatePayload = await TransactionUtils.signTxnWithPassword(
-              acc.value.address,
-              null,
-              walletPassword.value,
-              delegateUnlinkTransaction
-            );
-          }
-          walletPassword.value=""
+          unsignedTxnPayload = delegateUnlinkTransaction.serialize()
           err.value=""
         } else if (AccPublicKey.value != "") { //link
           const delegateLinkTransaction = txBuilder.accountLinkBuilder() 
           .remoteAccountKey(AccPublicKey.value)
           .linkAction(LinkAction.Link)
           .build()
-          if(isMultisig.value){
-            let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address 
-            const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-            delegatePayload = await TransactionUtils.signAbtWithTxnAndPassword(
-              selectedCosignAddress,
-              acc.value.address,
-              walletPassword.value,
-              delegateLinkTransaction, 
-              new UInt64(nodeTime.sendTimeStamp)
-            );
-          }
-          else{
-            delegatePayload = await TransactionUtils.signTxnWithPassword(
-              acc.value.address,
-              null,
-              walletPassword.value,
-              delegateLinkTransaction
-            );
-          }
-          walletPassword.value=""
+          unsignedTxnPayload = delegateLinkTransaction.serialize()
           err.value=""
-        } else {
-          
         }
-        TransactionState.lockHashPayload = delegatePayload.hashLockTxnPayload
-        TransactionState.transactionPayload = delegatePayload.txnPayload
-        TransactionState.selectedAddress = p.address
+        if(isMultisig.value){
+          let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address
+          TransactionState.selectedAddress = selectedCosignAddress
+          TransactionState.selectedMultisigAddress = acc.value.address
+        }
+        else{
+          TransactionState.selectedAddress = acc.value.address
+        }
+        TransactionState.unsignedTransactionPayload = unsignedTxnPayload
         router.push({ name: "ViewConfirmTransaction"})
-      } else {
-        err.value = t('general.walletPasswordInvalid',{name : walletName});
-      }
     };
 
     const accounts = computed(()=>{
@@ -476,7 +425,6 @@ export default {
       splitBalance,
       isMultisig,
       acc,
-      walletPassword,
       showPasswdError,
       walletState,
       createDelegate,

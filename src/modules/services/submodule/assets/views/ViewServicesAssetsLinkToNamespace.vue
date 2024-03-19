@@ -41,19 +41,19 @@
         <div class="border border-gray-200 p-4 rounded mt-5">
           <div class="lg:grid lg:grid-cols-2">
             <div class="my-3">
-              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('asset.currentSupply')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+$t('asset.supplyMsg2')+'<br>'+$t('asset.supplyMsg3')+'</tiptext>', escape: true}"></div>
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('asset.currentSupply')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+$t('asset.supplyMsg2')+'<br>'+$t('asset.supplyMsg3')+'</tiptext>', escape: false}"></div>
               <div class="text-black font-bold text-sm">{{ assetAmount }}</div>
             </div>
             <div class="my-3">
-              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.divisibility')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>' + $t('asset.divisibilityMsg4') + '<br><br>' + $t('asset.divisibilityMsg2') + '<br>' + $t('asset.divisibilityMsg3') + '</tiptext>', escape: true}"></div>
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.divisibility')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>' + $t('asset.divisibilityMsg4') + '<br><br>' + $t('asset.divisibilityMsg2') + '<br>' + $t('asset.divisibilityMsg3') + '</tiptext>', escape: false}"></div>
               <div class="text-black font-bold text-sm">{{ assetDivisibility }}</div>
             </div>
             <div class="my-3">
-              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.transferable')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+ $t('asset.transferableMsg')+'</tiptext>', escape: true}"></div>
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.transferable')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+ $t('asset.transferableMsg')+'</tiptext>', escape: false}"></div>
               <div class="uppercase text-black font-bold text-sm">{{ assetTransferable?$t('general.yes'):$t('general.no') }}</div>
             </div>
             <div class="my-3">
-              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.supplyMutable')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+ $t('asset.supplyMutableMsg')+'</tiptext>', escape: true}"></div>
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.supplyMutable')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+ $t('asset.supplyMutableMsg')+'</tiptext>', escape: false}"></div>
               <div class="uppercase text-black font-bold text-sm">{{ assetMutable?$t('general.yes'):$t('general.no') }}</div>
             </div>
           </div>
@@ -65,8 +65,6 @@
       </div>
       <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
         <TransactionFeeDisplay :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="balance" :selected-acc-add="selectedAccAdd"/>
-        <div class='text-xs text-white mt-5 mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="linkNamespace">{{ (selectAction=='link')?$t('general.linkToNamespace'):$t('namespace.unlinkNamespace') }}</button>
         <div class="text-center">
           <router-link :to="{name: 'ViewDashboard'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
@@ -117,7 +115,6 @@ export default {
     const router = useRouter();
     const toast = useToast();
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
-    const walletPassword = ref('');
     const err = ref('');
     const disabledPassword = ref(false);
     const disabledSelectAction = ref(false);
@@ -153,7 +150,7 @@ export default {
 
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (selectNamespace.value != '')
+      (selectNamespace.value != '')
     ));
 
     const selectedAccName = ref('');
@@ -274,14 +271,8 @@ export default {
     }
    
 
-    const linkNamespace = async() => {
-      let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
-      if(!verifyPassword){
-        err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
-        return
-      }
+    const linkNamespace = () => {
       let assetId;
-      let assetLinkPayload = {}
       if(selectAction.value=='link'){ 
         assetId = selectAsset.value;
       }else{
@@ -293,27 +284,14 @@ export default {
       }
       const buildTransactions = AppState.buildTxn;
       let aliasActionType = (selectAction.value == 'link')?AliasActionType.Link:AliasActionType.Unlink;
-      const linkAssetToNamespaceTx = buildTransactions.assetAlias(aliasActionType, new NamespaceId(selectNamespace.value), new MosaicId(assetId));
+      const unsignedLinkAssetToNamespaceTx = buildTransactions.assetAlias(aliasActionType, new NamespaceId(selectNamespace.value), new MosaicId(assetId));
       if(cosigner.value){
-        const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        assetLinkPayload = await TransactionUtils.signAbtWithTxnAndPassword(
-          cosigner.value,
-          selectedAccAdd.value,
-          walletPassword.value,
-          linkAssetToNamespaceTx, 
-          new UInt64(nodeTime.sendTimeStamp)
-        );
+        TransactionState.selectedAddress = cosigner.value
+        TransactionState.selectedMultisigAddress = selectedAccAdd.value
       }else{
-        assetLinkPayload = await TransactionUtils.signTxnWithPassword(
-          selectedAccAdd.value,
-          null,
-          walletPassword.value,
-          linkAssetToNamespaceTx
-        );
+        TransactionState.selectedAddress = selectedAccAdd.value
       }
-      TransactionState.lockHashPayload = assetLinkPayload.hashLockTxnPayload
-      TransactionState.transactionPayload = assetLinkPayload.txnPayload
-      TransactionState.selectedAddress = selectedAccAdd.value
+      TransactionState.unsignedTransactionPayload = unsignedLinkAssetToNamespaceTx.serialize()
       router.push({ name: "ViewConfirmTransaction" })
     };
 
@@ -389,7 +367,6 @@ export default {
       lockFundTotalFee,
       totalFeeFormatted,
       err,
-      walletPassword,
       disableCreate,
       showPasswdError,
       supply,

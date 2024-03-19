@@ -25,9 +25,15 @@
         <div class="text-xs font-semibold pl-6">{{$t('multisig.manageCosignatories')}}</div>
         <div class='pl-6'>
            <div class=" error error_box mb-5 whitespace-pre" v-if="err!=''">{{ err }}</div>
-           <div v-if="inputPkNotExist!=''" class="flex gap-2 bg-yellow-50 py-2 rounded-md px-2 my-3 mb-5">
-              <img src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-              <div class="text-xs font-bold pt-1">{{ inputPkNotExist }}</div>
+           <div v-if="pkNotExistArray.length>0">
+              <div v-for="(inputPkNotExist) in pkNotExistArray">
+                <div v-for="(publicKey, index) in coSign" :key="index">
+                  <div class="flex gap-2 bg-yellow-50 py-2 rounded-md px-2 my-3" v-if="inputPkNotExist===publicKey">
+                    <img src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+                    <div class="text-xs font-bold pt-1">{{contactName[index]? contactName[index]: $t('multisig.cosignatory') + `${index+1}` }}'s public key does not exist</div>
+                  </div>
+                </div>
+              </div>
            </div>
            <div class=" error error_box mb-5" v-if="passwordErr!=''">{{ passwordErr }}</div>
         </div>
@@ -89,8 +95,6 @@
       <div class='bg-navy-primary p-6 lg:col-span-1'>
         <TransactionFeeDisplay @ticked="(val)=> enableEditPartial = val" :fund-status="fundStatus" :is-multisig="isMultisig" :is-cosigner="isCoSigner" :on-partial="onPartial" :transaction-fee="String(aggregateFee)" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="accBalance" :selected-acc-add="selectedAccAdd"/>
         <div class="mt-5"/>
-        <div class='font-semibold text-xs text-white mb-1.5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput  :placeholder="$t('general.enterPassword')" :errorMessage="$t('general.passwordRequired')"  v-model="passwd" :disabled="disabledPassword" />
         <div class="mt-3"><button type="submit" class=' w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto'  @click="modifyAccount()" :disabled="disableSend">{{$t('multisig.updateCosignatories')}}</button></div>
         <div class="text-center">
           <router-link :to="{name: 'ViewMultisigHome',params:{address:address}}" class="content-center text-xs text-white underline" >{{$t('general.cancel')}}</router-link>
@@ -146,7 +150,7 @@ export default {
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const err = ref('');
-    const inputPkNotExist = ref('')
+    const pkNotExistArray = ref([])
     const passwordErr = ref('');
     const fundStatus = ref(false);
     const enableEditPartial = ref(false)
@@ -315,13 +319,12 @@ export default {
       removeCosign.value = [];
       selectedAddresses.value = [];
       showAddressError.value = [];
-      passwd.value = '';
       numApproveTransaction.value = acc.value.multisigInfo.find(acc=> acc.level === 0).minApproval;
       numDeleteUser.value = acc.value.multisigInfo.find(acc=> acc.level === 0).minRemoval;
       selectMainCosign.value = '';
       selectOtherCosign.value = [];
       err.value = '';
-      inputPkNotExist.value = '';
+      pkNotExistArray.value = [];
     };
 
     const modifyAccount = async() => {
@@ -330,17 +333,8 @@ export default {
         signer.push({address: walletState.currentLoggedInWallet.accounts.find(acc=>acc.publicKey==publicKey).address})
       })
       console.log(signer)
-      const verify = WalletUtils.verifyWalletPassword(
-        wallet.name,
-        networkState.chainNetworkName,
-        passwd.value
-      );
-      if(!verify){
-        passwordErr.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name});
-      }else{
         // transaction made
 
-        let multisigPayload = {}
         const multisigCosignatory = [];
   
         const cosignatory = [];
@@ -407,29 +401,19 @@ export default {
           .build();
 
         let selectedCosignAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosignPublicKey.value).address
-        const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        multisigPayload =await TransactionUtils.signAbtWithTxnAndPassword(
-          selectedCosignAddress,
-          acc.value.address,
-          passwd.value,
-          modifyMultisigTransaction, 
-          new UInt64(nodeTime.sendTimeStamp)
-        );
         passwordErr.value = '';
         /* var audio = new Audio(require('@/assets/audio/ding.ogg'));
         audio.play(); */
         clear();
-        TransactionState.lockHashPayload = multisigPayload.hashLockTxnPayload
-        TransactionState.transactionPayload = multisigPayload.txnPayload
-        TransactionState.selectedAddress = p.address
+        TransactionState.unsignedTransactionPayload = modifyMultisigTransaction.serialize()
+        TransactionState.selectedAddress = selectedCosignAddress
+        TransactionState.selectedMultisigAddress = acc.value.address
         router.push({ name: "ViewConfirmTransaction" })
-      }
     };
 
     watch(() => [...coSign.value], async (n) => {
       let duplicateCosign = false
       let duplicateOwner = false
-      inputPkNotExist.value = ''
       if (coSign.value.length > 0)
       {      
         for(var i = 0; i < coSign.value.length; i++){
@@ -459,9 +443,9 @@ export default {
                 err.value = '';
                 const validAcc = await checkValidAcc(coSign.value[i])
                 if(!validAcc){
-                  inputPkNotExist.value = "Input public key does not exist"
-                }else{
-                  inputPkNotExist.value = ''
+                  if(!pkNotExistArray.value.includes(coSign.value[i])){
+                    pkNotExistArray.value.push(coSign.value[i])
+                  }
                 }
               }
             }
@@ -860,7 +844,6 @@ export default {
       accountNameDisplay,
       accountName,
       acc,
-      passwd,
       showAddressError,
       addCoSig,
       findAcc,

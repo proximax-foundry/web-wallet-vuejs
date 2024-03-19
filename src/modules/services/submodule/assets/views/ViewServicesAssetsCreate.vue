@@ -31,8 +31,6 @@
         <TxnSummary :signer-native-token-balance="balance" :asset-rental-fee-currency="rentalFeeCurrency"
             :native-token-balance="selectedMultisigAddress ? multisigBalance : balance" :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee"
             :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact" :total-fee="Number(totalFeeFormatted)"/>
-        <div class='text-xs text-white my-5'>{{$t('general.enterPasswordContinue')}}</div>
-        <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')" :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableCreate" @click="createAsset">{{$t('asset.createAssets')}}</button>
         <div class="text-center">
           <router-link :to="{name: 'ViewDashboard'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
@@ -60,7 +58,6 @@ import { useRouter } from "vue-router";
 import SelectInputAccount from '@/modules/transfer/components/SelectInputAccount.vue';
 import SelectInputMultisigAccount from '@/modules/transfer/components/SelectInputMultisigAccount.vue';
 import MultisigInput from "@/modules/transfer/components/MultisigInput.vue"
-import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
 import CheckInput from '@/components/CheckInput.vue';
 import NumberInputClean from '@/modules/services/submodule/assets/components/NumberInputClean.vue';
@@ -82,22 +79,18 @@ import { TransactionState } from '@/state/transactionState';
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
     const showSupplyErr = ref(false);
-    const walletPassword = ref('');
     const {t} = useI18n();
     const err = ref('');
     const divisibility = ref('0');
     const showDivisibilityErr = ref(false);
     const isTransferable = ref(false);
     const isMutable = ref(false);
-    const disabledPassword = computed(() => showNoBalance.value||disableAllInput.value);
     const disabledInput = computed(() => disableAllInput.value)
     const disabledClear = ref(false);
     const disabledDuration = ref(false);
     const durationOption =ref('month');
     const duration = ref('1');
     const showDurationErr = ref(false);
-    const passwdPattern = "^[^ ]{8,}$";
-    const showPasswdError = ref(false);
     const durationCheckDisabled = ref(false);
     const supply = ref('0');
     const disableAllInput = ref(false);
@@ -149,7 +142,7 @@ import { TransactionState } from '@/state/transactionState';
     const lockFundTotalFee = computed(()=> lockFund.value + lockFundTxFee.value);
 
     const disableCreate = computed(() => !(
-      walletPassword.value.match(passwdPattern) && (divisibility.value != null) && (Number(supply.value) > 0) && (!showSupplyErr.value) && (!showDurationErr.value) && (!showNoBalance.value)
+      (selectedAddress.value != null) && (divisibility.value != null) && (Number(supply.value) > 0) && (!showSupplyErr.value) && (!showDurationErr.value) && (!showNoBalance.value)
     ));
 
     const selectedMultisigAddress = ref<string | null>(null)
@@ -210,7 +203,6 @@ import { TransactionState } from '@/state/transactionState';
     }
 
     const clearInput = () => {
-      walletPassword.value = '';
       divisibility.value = '0';
       supply.value = '0';
       duration.value = '1';
@@ -270,48 +262,24 @@ import { TransactionState } from '@/state/transactionState';
       showSupplyErr.value = bolError;
     }
 
-    const createAsset = async() => {
-      let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name,networkState.chainNetworkName,walletPassword.value)
-      if(!verifyPassword){
-        err.value = t('general.walletPasswordInvalid',{name : walletState.currentLoggedInWallet.name})
-        return
-      }
-      let assetPayload : {
-        txnPayload: string,
-        hashLockTxnPayload?: string
-      },{} = {}
+    const createAsset = () => {
       if(selectedMultisigAddress.value){
         const assetDefinition = AppState.buildTxn.mosaicDefinition(multisigPublicAccount.value, isMutable.value, isTransferable.value, Number(divisibility.value));
-        const assetDefinitionTx = assetDefinition.toAggregateV1(multisigPublicAccount.value);
         let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase
-        const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(multisigPublicAccount.value);
-        const innerTxn = [assetDefinitionTx,assetSupplyChangeTx];
-        const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-        assetPayload = await TransactionUtils.signTxnWithPassword(
-          selectedAddress.value,
-          selectedMultisigAddress.value,
-          walletPassword.value,
-          null,
-          innerTxn, 
-          new UInt64(nodeTime.sendTimeStamp)
-        );
+        const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value))));
+        const unsignedInnerTxn = [assetDefinition.serialize(),assetSupplyChangeTx.serialize()];
+        TransactionState.unsignedTransactionPayload = unsignedInnerTxn
       }else{
         const assetDefinition = AppState.buildTxn.mosaicDefinition(ownerPublicAccount.value, isMutable.value, isTransferable.value, Number(divisibility.value));
         const assetDefinitionTx = assetDefinition.toAggregateV1(ownerPublicAccount.value);
         let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase;
         const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(ownerPublicAccount.value);
-        let createAssetAggregateTransaction = AppState.buildTxn.aggregateComplete([assetDefinitionTx, assetSupplyChangeTx]);
-        assetPayload = await TransactionUtils.signTxnWithPassword(
-          selectedAddress.value,
-          selectedMultisigAddress.value,
-          walletPassword.value,
-          createAssetAggregateTransaction
-        );
+        let unsignedAssetAggregateTransaction = AppState.buildTxn.aggregateComplete([assetDefinitionTx, assetSupplyChangeTx]).serialize();
+        TransactionState.unsignedTransactionPayload = unsignedAssetAggregateTransaction
       }
       clearInput();
-      TransactionState.lockHashPayload = assetPayload.hashLockTxnPayload
-      TransactionState.transactionPayload = assetPayload.txnPayload
       TransactionState.selectedAddress = selectedAddress.value
+      TransactionState.selectedMultisigAddress = selectedMultisigAddress.value
       router.push({ name: "ViewConfirmTransaction" })
     };
 
