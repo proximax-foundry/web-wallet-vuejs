@@ -154,8 +154,6 @@ export default {
     const passwordErr = ref('');
     const fundStatus = ref(false);
     const enableEditPartial = ref(false)
-    const passwd = ref('');
-    const passwdPattern = "^[^ ]{8,}$";
     const publicKeyPattern = "^[0-9A-Fa-f]{64}$";
     const addressPatternShort = "^[0-9A-Za-z]{40}$";
     const addressPatternLong = "^[0-9A-Za-z-]{46}$";
@@ -276,7 +274,6 @@ export default {
     const disableSend = computed(() => 
       !isMultisig.value || 
       (onPartial.value && !enableEditPartial.value) || 
-      !passwd.value.match(passwdPattern) || 
       err.value || 
       showAddressError.value.indexOf(true) != -1 || 
       numDeleteUser.value < 0 || 
@@ -883,7 +880,7 @@ export default {
       getMultiSigCosigner,
       checkCosignBalance,
       passwordErr,
-      inputPkNotExist,
+      pkNotExistArray,
       enableEditPartial
     };
   },
