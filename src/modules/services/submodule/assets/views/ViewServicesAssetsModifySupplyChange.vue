@@ -357,7 +357,7 @@ export default {
           showSupplyErr.value = parseFloat(supply.value) > assetSupply.value-1;
         }
         else{
-          showSupplyErr.value = parseFloat(supply.value) > (assetAmount.value);
+          showSupplyErr.value = parseFloat(supply.value) > (assetAmount.value-1);
         }
       }
     });
@@ -371,7 +371,7 @@ export default {
           showSupplyErr.value = parseFloat(n) > assetSupply.value - 1;
         }
         else{
-          showSupplyErr.value = parseFloat(n) > (assetAmount.value);
+          showSupplyErr.value = parseFloat(n) > (assetAmount.value - 1);
         }
       } 
     });
