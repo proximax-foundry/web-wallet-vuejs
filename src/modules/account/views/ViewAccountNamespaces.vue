@@ -94,12 +94,15 @@ import NamespaceAction from '../components/NamespaceAction.vue';
     let namespaces :{name:string,id: string,linkedAssetAddress:string,expiringBlock: number | string,isActive: boolean }[] =[]
     for(let i=0;i<acc.value.namespaces.length;i++){
       let namespace = acc.value.namespaces[i]
+      if(!namespace.endHeight){
+        namespace.endHeight = 0
+      }
        namespaces.push({
         name:namespace.name,
         id: namespace.idHex,
         linkedAssetAddress: namespace.linkedId!=''?namespace.linkType==2?Address.createFromRawAddress(namespace.linkedId).pretty():namespace.linkedId:'-',
         expiringBlock: namespace.endHeight,
-        isActive: validateExpiry(namespace.name)? true : namespace.endHeight??0 > AppState.readBlockHeight ?true: false 
+        isActive: validateExpiry(namespace.name)? true : namespace.endHeight > AppState.readBlockHeight ?true: false 
       })
     }
     return namespaces
