@@ -18,21 +18,21 @@ import { Helper } from '@/util/typeHelper';
 import { TransactionUtils, isMultiSig } from '@/util/transactionUtils';
 import { WalletUtils } from '@/util/walletUtils';
 import {useI18n} from 'vue-i18n'
-import SelectMultisigInput from "@/components/SelectMultisigInput.vue"
-import MultisigInput from "@/components/MultisigInput.vue"
 import PasswordInput from '@/components/PasswordInput.vue';
-import SelectInputAccount from "@/modules/services/submodule/airdropToken/components/SelectInputAccount.vue";
+import SelectInputAccount from '@/components/SelectInputAccount.vue';
 import type { Account } from '@/models/account';
 import type { WalletAccount } from '@/models/walletAccount';
 import { parse } from 'csv-parse';
+import { TreeNode } from 'primevue/treenode';
 
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
 const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 const cosignerBalanceInsufficient = ref(false);
-const selectedMultisigAdd = ref("")
-const selectedMultisigName = ref("")
+const selectedAddress = ref<string | null>(null)
+const selectedMultisigAddress = ref<string | null>(null)
+const selectedMultisigName = ref<string | null>(null)
 const selectedMultisigPublicKey = ref("")
 const toggleMultisig = ref(false)
 const selectedMultisig = ref({})
@@ -44,7 +44,7 @@ const walletPassword = ref("");
 const {t} = useI18n();
 const err = ref('');
 const initiateBy = computed(() => {
-  if(selectedMultisigAdd.value){
+  if(selectedMultisigAddress.value){
     return true
   } else {
     return false
@@ -420,7 +420,7 @@ const haveSelectableMultisig = computed(() => {
 
 const onSelectMultisig = (event) => {
   toggleMultisig.value = false
-  selectedMultisigAdd.value = WalletUtils.createAddressFromPublicKey(event.data,AppState.networkType).plain()
+  selectedMultisigAddress.value = WalletUtils.createAddressFromPublicKey(event.data,AppState.networkType).plain()
   selectedMultisigName.value = event.label
   selectedMultisigPublicKey.value = event.data
   cosignAddress.value = selectedAccount.value.address
@@ -497,15 +497,28 @@ if (isMultiSigBool.value) {
     checkDistributorAssetAmountDecimal(assetSelected.value);
   });
 
+  watch(selectedAddress, async (n,o) => {
+    //reload asset
+    if(n == null){
+        selectedMultisigName.value = null
+        selectedMultisigAddress.value = null
+    }
+    else if(n != o){
+        selectedMultisigName.value = null
+        selectedMultisigAddress.value = null
+    }
+})
+
   // Cancel transfer from multisig
   emitter.on("CLOSE_MULTISIG", () =>{
-    selectedMultisigAdd.value = ""
-    selectedMultisigName.value = ""
+    selectedMultisigName.value = null
+    selectedMultisigAddress.value = null
     selectedMultisigPublicKey.value = ""
     scanDistributorAsset()
   })
   // account is clicked
-  emitter.on("select-account", (address) => {
+  emitter.on("select-account", (address: string) => {
+    selectedAddress.value = address
     for (let i = 0; i < accounts.value.length; i++){
       if (accounts.value[i].address == address){
         selectedAccount.value = accounts.value[i]
@@ -514,31 +527,19 @@ if (isMultiSigBool.value) {
       }
     }
   })
+  emitter.on("select-multisig-account", (node: TreeNode) => {
+    selectedMultisigName.value = node.label
+    selectedMultisigAddress.value = node.value
+  })
 </script>
 
 <template>
   <div class="container">
     <div class="p-2">
-      <div class="flex gap-1">
-        <SelectInputAccount v-model="currentAccount" :initiateBy="initiateBy" :selectDefault="currentAccount"/>
-          <div v-if="haveSelectableMultisig" @click="toggleMultisig = !toggleMultisig"
-            class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 h-16 w-18 mt-auto'>
-            <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
-            <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.select') }}</div>
-            <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.multisig') }}</div>
-          </div>
-      </div>
-      <!-- Pop Up when select icon is clicked -->
-      <Sidebar v-model:visible="toggleMultisig" :baseZIndex="10000" position="full">
-          <SelectMultisigInput :account="selectableMultisig" :selectedMultisig="selectedMultisig"
-            @select="onSelectMultisig($event)" />
-      </Sidebar>
+      <SelectInputAccount :type="'airdrop'" :label="'create airdrop token'" :selectedMultisigAddress="selectedMultisigAddress" :selectedMultisigName="selectedMultisigName"  />
       <div v-if="noAssetFound" class="error error_box" role="alert">
           No SDA found
       </div>
-      <div v-if="selectedMultisigAdd" class="mt-3">
-          <MultisigInput :select-default-address="selectedMultisigAdd" :select-default-name="selectedMultisigName"/>
-        </div>
     </div>
     <div class="p-2">
       <div>

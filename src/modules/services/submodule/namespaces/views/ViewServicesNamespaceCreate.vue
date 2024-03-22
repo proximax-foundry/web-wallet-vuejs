@@ -78,8 +78,8 @@ import PasswordInput from '@/components/PasswordInput.vue';
 import TextInputTooltip from '@/components/TextInputTooltip.vue';
 import SelectInputParentNamespace from '@/modules/services/submodule/namespaces/components/SelectInputParentNamespace.vue';
 import DurationInputClean from '@/modules/services/submodule/namespaces/components/DurationInputClean.vue';
-import SelectInputAccount from '@/modules/transfer/components/SelectInputAccount.vue';
-import SelectInputMultisigAccount from '@/modules/transfer/components/SelectInputMultisigAccount.vue';
+import SelectInputAccount from '@/components/SelectInputAccount.vue';
+import SelectInputMultisigAccount from '@/components/SelectInputMultisigAccount.vue';
 import MultisigInput from "@/modules/transfer/components/MultisigInput.vue"
 import TxnSummary from "@/components/TxnSummary.vue"
 import { walletState } from "@/state/walletState";

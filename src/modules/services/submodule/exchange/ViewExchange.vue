@@ -5,7 +5,7 @@
                 <div>SDA-SDA Exchange </div>
                 <div v-if="!selectedAddress" class="text-xs mt-3 text-blue-primary ">Select Account to Create / Initiate
                     Transaction</div>
-                <SelectInputAccount />
+                <SelectInputAccount :type="'dynamic'" :label="'create exchange'" />
                 <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
                 <!-- <div class="text-blue-primary mt-3">Price</div>
                 <div> {{/*  Math.trunc( */rate.toFixed(6) /* * Math.pow(10, offerInfo?.mosaicGiveDivisibility) )/ Math.pow(10,
@@ -163,8 +163,8 @@ import { Account, Address, Deadline, ExchangeSdaHttp, MosaicId, Password,
     UInt64, XpxMosaicProperties } from 'tsjs-xpx-chain-sdk';
 import { computed, getCurrentInstance, ref, watch } from 'vue';
 import InputAmount from './components/InputAmount.vue';
-import SelectInputAccount from './components/SelectInputAccount.vue';
-import SelectInputMultisigAccount from './components/SelectInputMultisigAccount.vue';
+import SelectInputAccount from '@/components/SelectInputAccount.vue';
+import SelectInputMultisigAccount from '@/components/SelectInputMultisigAccount.vue';
 import { Helper } from '@/util/typeHelper';
 import { walletState } from '@/state/walletState';
 import { TransactionUtils } from '@/util/transactionUtils';

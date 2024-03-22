@@ -1,114 +1,136 @@
 <template>
-  <div class="w-full">
-      <Dropdown
-        v-model= selectedAccountInfo
-        :style="{'width':'100%'}"
-        :options=filteredAccounts
-        :filter="true"
-        optionLabel="label"
-        emptyFilterMessage=" "
-        @change="selectAccount($event.value.label, $event.value.value);$emit('update:modelValue', $event.value.value);$emit('select-account', $event.value.value);"
-      >
-        <!-- For the display of the main transfer account information -->
-        <template #value="slotProps">
-          <div v-if="slotProps.value" class="account-item-value account-item">
-              <div class='flex'>
-                <div v-html="selectedImg"/>
-                <div class='flex flex-col ml-2 text-left'>
-                  <div class='text-blue-primary font-semibold text-xxs uppercase'  style="line-height: 9px;">{{$t('transfer.transferFrom')}}</div>
-                  <div class='mt-2 text-base font-bold'>{{slotProps.value.label}}</div>
-                </div>
-              </div>
-          </div>
-        </template>
-        <!-- For the display of the dropdown option -->
-        <template #option="slotProps">
-            <div class='flex '>
-              <div v-html="toSvg(slotProps.option.value, 20, jdenticonConfig)" />
-                <div class='text-xs ml-2 font-semibold '>{{ slotProps.option.label }}</div>
+    <div class="flex gap-1 items-center ">
+        <div class="w-full">
+            <div v-if="!selectedAccountInfo" class="text-blue-primary font-semibold uppercase text-xxs">
+                <div v-if="type == 'transfer'">Select Account to create / initiate transfer</div>
+                <div v-else-if="type == 'namespace'">Select Account to create namespace</div>
+                <div v-else-if="type == 'asset'">Select Account to create asset</div>
+                <div v-else>Select Account to {{ label }}</div>
             </div>
-        </template>
-      </Dropdown>
-  </div>
+            <Dropdown v-model=selectedAccountInfo :style="{ 'width': '100%' }" :options=accounts :filter="true"
+                :filterFields="['label', 'value', 'publicKey']" emptyFilterMessage=" " placeholder="Select Account"
+                :class="`${(type == 'airdrop') ? 'h-16 mt-0' : ''}`"
+                @change="selectAccount($event.value?.label, $event.value?.value, $event.value?.publicKey); $emit('update:modelValue', $event.value?.value); $emit('select-account', $event.value?.value); $emit('select-account-public-key', $event.value?.publicKey);">
+                <!-- For the display of  account information -->
+                <template #value="slotProps">
+                    <div v-if="slotProps.value" class="account-item-value account-item">
+                        <div class='flex'>
+                            <div v-html="selectedImg" />
+                            <div v-if="type == 'transfer'" class='flex flex-col ml-2 text-left'>
+                                <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
+                                    Selected Account to create / initiate transfer</div>
+                                <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
+                            </div>
+                            <div v-else-if="type == 'namespace'" class='flex flex-col ml-2 text-left'>
+                                <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
+                                    Selected Account to create namespace</div>
+                                <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
+                            </div>
+                            <div v-else-if="type == 'asset'" class='flex flex-col ml-2 text-left'>
+                                <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
+                                    Selected Account to create asset</div>
+                                <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
+                            </div>
+                            <div v-else-if="type == 'airdrop'" class='flex flex-col ml-2 text-left'>
+                                <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
+                                    Selected Account to {{ label }}</div>
+                                <div class='mt-2 text-base font-bold'>{{ slotProps.value.label }}</div>
+                            </div>
+                            <div v-else class='flex flex-col ml-2 text-left'>
+                                <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
+                                    Selected Account to {{ label }}</div>
+                                <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                <!-- For the display of the dropdown option -->
+                <template #option="slotProps">
+                    <div class="account-item">
+                        <div class='flex'>
+                            <div v-html="toSvg(slotProps.option.value, 20, jdenticonConfig)" />
+                            <div class='text-xs ml-2 font-semibold'>{{ slotProps.option.label }}</div>
+                        </div>
+                    </div>
+                </template>
+            </Dropdown>
+        </div>
+        <SelectInputMultisigAccount :selected-address="selectedAccountInfo ? selectedAccountInfo.value : ''" :type="type" />
+    </div>
+    <div v-if="selectedMultisigAddress" class="mt-3">
+        <MultisigInput :select-default-address="selectedMultisigAddress" :select-default-name="selectedMultisigName"
+            :type="type" />
+    </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { walletState } from '@/state/walletState';
-import { computed, defineComponent, ref, getCurrentInstance } from 'vue';
+import { computed, ref, getCurrentInstance } from 'vue';
+import SelectInputMultisigAccount from '@/components/SelectInputMultisigAccount.vue';
+import MultisigInput from "../components/MultisigInput.vue"
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
-export default defineComponent({
-name: 'SelectInputAccount',
-emits:[
-    'select-account','update:modelValue',
-  ],
-props: [
-    'modelValue',
-    'selectDefault',
-    'initiateBy'
-  ],
-setup(p){
-    const toggleSelection = ref(false);
-    const internalInstance = getCurrentInstance();
-    const emitter = internalInstance.appContext.config.globalProperties.emitter;
-    let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
-    themeConfig.init();
-    let jdenticonConfig = themeConfig.jdenticonConfig;
-    const accounts = computed(() =>{
-      if(walletState.currentLoggedInWallet){
-        var accountList = [];
-        const concatOther = walletState.currentLoggedInWallet.accounts.concat(walletState.currentLoggedInWallet.others)
-        concatOther.forEach(account => {
-          accountList.push({
-            value: account.address,
-            label: walletState.currentLoggedInWallet.convertAddressToName(account.address,true)
-          });
-        });
-        
-        return accountList;
-      }else{
-        return []
-      }
-      
-    });
-    const selectedAccount = ref(accounts.value.length?accounts.value.find(acc => acc.value == p.selectDefault).label:'');
-    const selectedAddress = ref(p.selectDefault);
-    const selectedAccountInfo = {label : selectedAccount.value, value: selectedAddress.value}
-    const selectedImg = ref(toSvg(p.selectDefault, 25, jdenticonConfig));
-    const selectAccount = (accountName, accountAddress) => {
-      emitter.emit("select-account",accountAddress)
-      selectedAccount.value,selectedAccountInfo.label = accountName;
-      selectedAddress.value,selectedAccountInfo.value = accountAddress;
-      selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
-      toggleSelection.value = !toggleSelection.value;
-    };
-    const filterQuery = ref("");
-    const filteredAccounts = computed(() => {
-      const query = filterQuery.value.toLowerCase();
-      if(filterQuery.value == ""){
-        return accounts.value;
-      }
-      return accounts.value.filter((items) =>{
-        return Object.values(items).some((word) =>
-          String(word).toLowerCase().includes(query));
-      });
-    });
-    return {
-      selectAccount,
-      selectedAddress,
-      selectedAccountInfo,
-      selectedImg,
-      accounts,
-      toggleSelection,
-      selectedAccount,
-      jdenticonConfig,
-      toSvg,
-      filterQuery,
-      filteredAccounts
-    };
-}
-})
-</script>
 
-<style>
-</style>
+const props = defineProps({
+    type: {
+        type: String,
+        required: true
+    },
+    label: {
+        type: String,
+        required: false
+    },
+    selectedMultisigAddress: {
+        type: String,
+        required: false
+    },
+    selectedMultisigName: {
+        type: String,
+        required: false
+    }
+})
+
+defineEmits([
+    'select-account', 'select-account-public-key', 'update:modelValue'
+])
+
+const internalInstance = getCurrentInstance();
+const emitter = internalInstance.appContext.config.globalProperties.emitter;
+let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
+themeConfig.init();
+let jdenticonConfig = themeConfig.jdenticonConfig;
+
+const accounts = computed(() => {
+    if (!walletState.currentLoggedInWallet) {
+        return []
+    }
+    const cosignerAccounts = walletState.currentLoggedInWallet.accounts.filter(acc => acc.multisigInfo.length == 0 || acc.multisigInfo.find(info => info.level == 0).cosignaturies.length == 0)
+    return [...cosignerAccounts].map((cosignerAcc) => {
+        return {
+            value: cosignerAcc.address,
+            label: walletState.currentLoggedInWallet.convertAddressToName(cosignerAcc.address, true),
+            publicKey: cosignerAcc.publicKey
+        }
+    })
+})
+
+const selectedAccountInfo = ref(null)
+
+const selectedImg = ref(null);
+const selectAccount = (accountName: string, accountAddress: string, accountPublicKey: string) => {
+    if (accountName == null && accountAddress == null && accountPublicKey == null) {
+        selectedAccountInfo.value = null
+        emitter.emit("select-account", null)
+        emitter.emit("select-account-public-key", null)
+        return
+    }
+    emitter.emit("select-account", accountAddress)
+    emitter.emit("select-account-public-key", accountPublicKey)
+    selectedAccountInfo.value.label = accountName;
+    selectedAccountInfo.value.value = accountAddress;
+    selectedAccountInfo.value.publicKey = accountPublicKey;
+    selectedImg.value = toSvg(accountAddress, 25, jdenticonConfig);
+};
+
+
+</script>

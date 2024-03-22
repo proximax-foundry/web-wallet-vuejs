@@ -92,7 +92,7 @@ import { useToast } from "primevue/usetoast";
 import PublicKeyInputClean from "@/modules/services/submodule/harvester/components/PublicKeyInputClean.vue";
 import SelectInputAccount from "@/modules/transfer/components/SelectInputAccount.vue";
 import SelectActionType from "@/modules/services/submodule/harvester/components/SelectActionType.vue";
-import SelectInputMultisigAccount from "@/modules/transfer/components/SelectInputMultisigAccount.vue";
+import SelectInputMultisigAccount from '@/components/SelectInputMultisigAccount.vue';
 import MultisigInput from "@/modules/transfer/components/MultisigInput.vue";
 import PasswordInput from "@/components/PasswordInput.vue";
 import TxnSummary from "@/components/TxnSummary.vue";
