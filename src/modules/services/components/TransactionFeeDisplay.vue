@@ -24,15 +24,18 @@
             <div class="text-txs">{{$t('general.noCosigner')}}</div>
           </div>
         </div>
-        <div v-if="onPartial" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
-          <div class="flex gap-2">
-            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
-            <div class="text-txs">{{$t('general.hasPartial')}}</div>
+        <div v-if="onPartial">
+          <div class="mt-2 grid bg-yellow-50 p-3 rounded-md">
+            <div class="flex gap-2">
+              <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+              <div class="text-txs">{{$t('general.hasPartial')}}</div>
+            </div>
           </div>
+          <label class="text-txs text-gray-100"><input type="checkbox" class="my-2 mr-1 align-top" @change="onTick"/>Tick to proceed modifying multisig</label>
         </div>
         <div v-if="isMultisigAlready" class="mt-2 grid bg-yellow-50 p-3 rounded-md" >
           <div class="flex gap-2">
-            <img  src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
+            <img src="@/modules/account/img/icon-warning.svg" class="w-5 h-5">
             <div class="text-txs">{{$t('multisig.alreadyMultisig')}}</div>
           </div>
         </div>
@@ -153,6 +156,8 @@ const props = defineProps({
     lockFundCurrencyConvert: String,
     lockFundTxFeeConvert: String,
 })
+const emit = defineEmits(['ticked'])
+
 const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
 const isMultiSig = (address) => {
       if(walletState.currentLoggedInWallet){
@@ -195,4 +200,7 @@ const topUpUrl = computed(()=>{
 
 const networkType = computed(()=>AppState.networkType)
 
+const onTick = (e: any) => {
+  emit('ticked', e.target.checked)
+}
 </script>
