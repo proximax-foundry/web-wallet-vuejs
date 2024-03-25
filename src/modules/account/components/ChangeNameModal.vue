@@ -36,7 +36,7 @@
 
 <script setup lang='ts'>
 import { walletState } from "@/state/walletState";
-import { computed, defineComponent, ref } from "vue"
+import { computed, defineComponent, getCurrentInstance, ref } from "vue"
 import { useI18n } from "vue-i18n";
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextInput from '@/components/TextInput.vue'
@@ -49,6 +49,10 @@ const props = defineProps({
     isOther: Boolean,
     address: String
 })
+defineEmits(['change-name'])
+
+const internalInstance = getCurrentInstance();
+const emitter = internalInstance.appContext.config.globalProperties.emitter;
 const addressCopy = ref(props.address)
 const {t} = useI18n() 
 const disabledConfirm = computed(()=>{ 
@@ -79,9 +83,11 @@ const changeName = () => {
         if(acc_index == -1){
         const other_acc_index = walletState.currentLoggedInWallet.others.findIndex((accAdd) => accAdd.address === props.address);
         walletState.currentLoggedInWallet.others[other_acc_index].name = accountName.value;
+        emitter.emit("change-name", accountName.value)
         }
         else{
         walletState.currentLoggedInWallet.accounts[acc_index].name = accountName.value;
+        emitter.emit("change-name", accountName.value)
         }
         walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
         err.value=""
