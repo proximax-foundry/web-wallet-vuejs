@@ -44,6 +44,10 @@ const accounts = ref<{ label: string, value: string }[]>([])
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
+const selectedMultisigAddress = ref<string | null>(null)
+
+const selectedMultisigName = ref<string | null>(null)
+
 watch(selectedAddress, (n) => {
     if(n == null){
         accounts.value = []
