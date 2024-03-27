@@ -16,7 +16,7 @@
                     </div>
                     <div class="text-sm font-semibold ">{{ $t('transfer.newTransfer') }}</div>
                     <div class="mt-3">
-                        <SelectInputAccount :type="'transfer'" :selectedMultisigAddress="selectedMultisigAddress" :selectedMultisigName="selectedMultisigName"  />
+                        <SelectInputAccount :type="'transfer'" :label="'create / initiate transfer'" :selectedMultisigAddress="selectedMultisigAddress" :selectedMultisigName="selectedMultisigName"  />
                     </div>
                     <div class="text-blue-primary font-semibold uppercase mt-3 text-xxs">Transfer to</div>
 

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <button v-if="accounts.length && !isSelected && selectedAddress" :class="`${(type == 'airdrop')?'justify-around p-2 h-16 w-18 mt-auto':'justify-center py-1  px-1.5 '}`" class=' border rounded-md cursor-pointer flex flex-col ' 
+        <button v-if="accounts.length && !isSelected && selectedAddress" class=' border rounded-md cursor-pointer flex flex-col justify-center py-1  px-1.5 ' 
         @click="isSelected = true">
             <font-awesome-icon icon="id-card-alt" class=" text-blue-primary ml-auto mr-auto "></font-awesome-icon>
             <div class='text-xxs text-blue-primary font-semibold uppercase ml-auto mr-auto'>{{ $t('general.select') }}</div>
@@ -30,11 +30,7 @@ const props = defineProps({
     selectedAddress: {
         type: String as PropType<string | null>,
         required: false
-    },
-    type: {
-      type: String,
-      required: false
-  }
+    }
 })
 
 defineEmits([

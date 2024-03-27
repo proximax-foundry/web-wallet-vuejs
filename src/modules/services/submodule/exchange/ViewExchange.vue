@@ -3,10 +3,8 @@
         <div class='border-2 xl:grid xl:grid-cols-3'>
             <div class="xl:col-span-2 p-12">
                 <div>SDA-SDA Exchange </div>
-                <div v-if="!selectedAddress" class="text-xs mt-3 text-blue-primary ">Select Account to Create / Initiate
-                    Transaction</div>
-                <SelectInputAccount :type="'dynamic'" :label="'create exchange'" />
-                <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
+                    <SelectInputAccount :type="'dynamic'" :label="'Create / Initiate Transaction'" 
+                    :selectedMultisigAddress="selectedMultisigAddress" :selectedMultisigName="selectedMultisigName" />
                 <!-- <div class="text-blue-primary mt-3">Price</div>
                 <div> {{/*  Math.trunc( */rate.toFixed(6) /* * Math.pow(10, offerInfo?.mosaicGiveDivisibility) )/ Math.pow(10,
                     offerInfo?.mosaicGiveDivisibility) */ }}
@@ -164,7 +162,6 @@ import { Account, Address, Deadline, ExchangeSdaHttp, MosaicId, Password,
 import { computed, getCurrentInstance, ref, watch } from 'vue';
 import InputAmount from './components/InputAmount.vue';
 import SelectInputAccount from '@/components/SelectInputAccount.vue';
-import SelectInputMultisigAccount from '@/components/SelectInputMultisigAccount.vue';
 import { Helper } from '@/util/typeHelper';
 import { walletState } from '@/state/walletState';
 import { TransactionUtils } from '@/util/transactionUtils';
@@ -172,6 +169,7 @@ import { networkState } from '@/state/networkState';
 import PasswordInput from "@/components/PasswordInput.vue";
 import { WalletUtils } from '@/util/walletUtils';
 import { useRouter } from 'vue-router';
+import { TreeNode } from 'primevue/treenode';
 
 const reduceFraction = (numerator: number, denominator: number): [number, number] => {
     // Find the greatest common divisor (GCD) using Euclid's algorithm
@@ -226,6 +224,8 @@ const selectedAddress = ref<string | null>(null)
 
 const selectedMultisigAddress = ref<string | null>(null)
 
+const selectedMultisigName = ref<string | null>(null)
+
 
 const lockFund = computed(() =>
     Helper.convertToExact(
@@ -266,10 +266,15 @@ emitter.on("select-account", (address: string) => {
     selectedAddress.value = address
 })
 
-emitter.on("select-multisig-account", (address: string) => {
-    selectedMultisigAddress.value = address
-
+emitter.on("select-multisig-account", (node: TreeNode) => {
+    selectedMultisigName.value = node.label
+    selectedMultisigAddress.value = node.value
 })
+
+emitter.on("CLOSE_MULTISIG", () => {
+  selectedMultisigName.value = null;
+  selectedMultisigAddress.value = null;
+});
 
 
 
@@ -423,6 +428,7 @@ watch([selectedAddress, selectedMultisigAddress], ([n, mn]) => {
     giveAssetBalance.value = 0
     //reload asset
     if (n != null && mn == null) {
+        selectedMultisigName.value = null;
         fetchGiveAssetBalance(n)
     } else if (n != null && mn != null) {
 

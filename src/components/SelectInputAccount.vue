@@ -2,41 +2,17 @@
     <div class="flex gap-1 items-center ">
         <div class="w-full">
             <div v-if="!selectedAccountInfo" class="text-blue-primary font-semibold uppercase text-xxs">
-                <div v-if="type == 'transfer'">Select Account to create / initiate transfer</div>
-                <div v-else-if="type == 'namespace'">Select Account to create namespace</div>
-                <div v-else-if="type == 'asset'">Select Account to create asset</div>
-                <div v-else>Select Account to {{ label }}</div>
+                <div v-if="type">Select Account to {{ label }}</div>
             </div>
             <Dropdown v-model=selectedAccountInfo :style="{ 'width': '100%' }" :options=accounts :filter="true"
                 :filterFields="['label', 'value', 'publicKey']" emptyFilterMessage=" " placeholder="Select Account"
-                :class="`${(type == 'airdrop') ? 'h-16 mt-0' : ''}`"
                 @change="selectAccount($event.value?.label, $event.value?.value, $event.value?.publicKey); $emit('update:modelValue', $event.value?.value); $emit('select-account', $event.value?.value); $emit('select-account-public-key', $event.value?.publicKey);">
                 <!-- For the display of  account information -->
                 <template #value="slotProps">
                     <div v-if="slotProps.value" class="account-item-value account-item">
                         <div class='flex'>
                             <div v-html="selectedImg" />
-                            <div v-if="type == 'transfer'" class='flex flex-col ml-2 text-left'>
-                                <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
-                                    Selected Account to create / initiate transfer</div>
-                                <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
-                            </div>
-                            <div v-else-if="type == 'namespace'" class='flex flex-col ml-2 text-left'>
-                                <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
-                                    Selected Account to create namespace</div>
-                                <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
-                            </div>
-                            <div v-else-if="type == 'asset'" class='flex flex-col ml-2 text-left'>
-                                <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
-                                    Selected Account to create asset</div>
-                                <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
-                            </div>
-                            <div v-else-if="type == 'airdrop'" class='flex flex-col ml-2 text-left'>
-                                <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
-                                    Selected Account to {{ label }}</div>
-                                <div class='mt-2 text-base font-bold'>{{ slotProps.value.label }}</div>
-                            </div>
-                            <div v-else class='flex flex-col ml-2 text-left'>
+                            <div class='flex flex-col ml-2 text-left'>
                                 <div class='text-blue-primary font-semibold text-xxs uppercase' style="line-height: 9px;">
                                     Selected Account to {{ label }}</div>
                                 <div class='mt-2 text-tsm font-bold'>{{ slotProps.value.label }}</div>
@@ -55,9 +31,9 @@
                 </template>
             </Dropdown>
         </div>
-        <SelectInputMultisigAccount :selected-address="selectedAccountInfo ? selectedAccountInfo.value : ''" :type="type" />
+        <SelectInputMultisigAccount v-if="type !== 'swap'" :selected-address="selectedAccountInfo ? selectedAccountInfo.value : ''" />
     </div>
-    <div v-if="selectedMultisigAddress" class="mt-3">
+    <div v-if="selectedMultisigAddress && type !== 'swap'" class="mt-3">
         <MultisigInput :select-default-address="selectedMultisigAddress" :select-default-name="selectedMultisigName"
             :type="type" />
     </div>
@@ -104,14 +80,26 @@ const accounts = computed(() => {
     if (!walletState.currentLoggedInWallet) {
         return []
     }
-    const cosignerAccounts = walletState.currentLoggedInWallet.accounts.filter(acc => acc.multisigInfo.length == 0 || acc.multisigInfo.find(info => info.level == 0).cosignaturies.length == 0)
-    return [...cosignerAccounts].map((cosignerAcc) => {
-        return {
-            value: cosignerAcc.address,
-            label: walletState.currentLoggedInWallet.convertAddressToName(cosignerAcc.address, true),
-            publicKey: cosignerAcc.publicKey
-        }
-    })
+    if(props.type !== 'swap'){
+        const cosignerAccounts = walletState.currentLoggedInWallet.accounts.filter(acc => acc.multisigInfo.length == 0 || acc.multisigInfo.find(info => info.level == 0).cosignaturies.length == 0)
+        return [...cosignerAccounts].map((cosignerAcc) => {
+            return {
+                value: cosignerAcc.address,
+                label: walletState.currentLoggedInWallet.convertAddressToName(cosignerAcc.address, true),
+                publicKey: cosignerAcc.publicKey
+            }
+        })
+    }
+    else{
+        const cosignerAccounts = walletState.currentLoggedInWallet.accounts
+        return [...cosignerAccounts].map((cosignerAcc) => {
+            return {
+                value: cosignerAcc.address,
+                label: walletState.currentLoggedInWallet.convertAddressToName(cosignerAcc.address, true),
+                publicKey: cosignerAcc.publicKey
+            }
+        })
+    }
 })
 
 const selectedAccountInfo = ref(null)

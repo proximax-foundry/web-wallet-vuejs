@@ -81,7 +81,7 @@
           </div>
           <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'ERC20 ' + currentNativeTokenName + ' (MINIMUM = 51 )'" type="text" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':((parseFloat(amount) <= defaultXPXTxFee)?'Insufficient amount':'Insufficient token balance.')" :decimal="6" toolTip="BEP20 token amount to swap. Minimum 51 BEP20 amount is required as 50 will be deducted from the amount as transaction fee." />
           <div class="text-left">
-            <SelectInputAccount :type="'dynamic'" :label="'create swap'" />
+            <SelectInputAccount :type="'swap'" :label="'Create / Initiate Transaction'" />
           </div>
           <div class="bg-blue-50 border border-blue-primary h-20 mt-5 rounded flex items-center justify-center">
             {{ amountReceived }} {{ currentNativeTokenName }} <img src="@/modules/dashboard/img/icon-xpx.svg" class="w-5 h-5 ml-4">

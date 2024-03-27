@@ -4,18 +4,10 @@
       <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8">
         <div class="xl:col-span-2 p-12">
           <div class="font-semibold mb-4">Harvester Transaction</div>
-          <div
-            v-if="showNoBalance"
-            class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center"
-          >
-            <div
-              class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"
-            >
-              <font-awesome-icon
-                icon="times"
-                class="text-red-500 h-3 w-3 absolute"
-                style="top: 3px; left: 4px"
-              ></font-awesome-icon>
+          <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+            <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2">
+              <font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute"
+                style="top: 3px; left: 4px"></font-awesome-icon>
             </div>
             <div class="inline-block text-xs">
               {{ $t("general.insufficientBalance") }}
@@ -23,61 +15,29 @@
           </div>
           <div class="error error_box" v-if="err != ''">{{ err }}</div>
           <div class="mt-4">
-            <div class="flex gap-1 mt-3">
-              <SelectInputAccount :type="'dynamic'" :label="'Add Harvester'" />
-              <SelectInputMultisigAccount :selected-address="selectedAddress" />
-            </div>
-            <div v-if="selectedMultisigAddress" class="mt-3">
-              <MultisigInput
-                :select-default-address="selectedMultisigAddress"
-                :select-default-name="selectedMultisigName"
-                label="Multisig account selected"
-                :type="'dynamic'"
-              />
-            </div>
+            <SelectInputAccount :type="'dynamic'" :label="'Add Harvester'" :selectedMultisigAddress="selectedMultisigAddress"
+              :selectedMultisigName="selectedMultisigName" />
           </div>
           <div class="mt-3">
-            <SelectActionType
-              title="Type"
-              v-model="actionType"
-              :disabled="false"
-            />
+            <SelectActionType title="Type" v-model="actionType" :disabled="false" />
           </div>
           <div class="">
-            <PublicKeyInputClean
-              placeholder="Harvester Key"
-              v-model="harvesterKey"
-              v-debounce:1000="checkHarvester"
-              :showError="showHarvesterError"
-            />
+            <PublicKeyInputClean placeholder="Harvester Key" v-model="harvesterKey" v-debounce:1000="checkHarvester"
+              :showError="showHarvesterError" />
           </div>
         </div>
         <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
-          <TxnSummary
-            :signer-native-token-balance="balance"
-            :native-token-balance="
-              selectedMultisigAddress ? multisigBalance : balance
-            "
-            :lock-fund="lockFund"
-            :lock-fund-tx-fee="lockFundTxFee"
-            :selected-multisig-address="selectedMultisigAddress"
-            :txn-fee="transactionFeeExact"
-            :total-fee="Number(totalFeeFormatted)"
-          />
-          <button
-            type="submit"
-            class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white"
-            :disabled="disableSubmit"
-            @click="createTxn"
-          >
+          <TxnSummary :signer-native-token-balance="balance" :native-token-balance="selectedMultisigAddress ? multisigBalance : balance
+            " :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee"
+            :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact"
+            :total-fee="Number(totalFeeFormatted)" />
+          <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white"
+            :disabled="disableSubmit" @click="createTxn">
             Create harvester transaction
           </button>
           <div class="text-center">
-            <router-link
-              :to="{ name: 'ViewServices' }"
-              class="content-center text-xs text-white border-b-2 border-white"
-              >{{ $t("general.cancel") }}</router-link
-            >
+            <router-link :to="{ name: 'ViewServices' }"
+              class="content-center text-xs text-white border-b-2 border-white">{{ $t("general.cancel") }}</router-link>
           </div>
         </div>
       </div>
@@ -90,11 +50,8 @@ import { computed, getCurrentInstance, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import PublicKeyInputClean from "@/modules/services/submodule/harvester/components/PublicKeyInputClean.vue";
-import SelectInputAccount from "@/modules/transfer/components/SelectInputAccount.vue";
+import SelectInputAccount from '@/components/SelectInputAccount.vue';
 import SelectActionType from "@/modules/services/submodule/harvester/components/SelectActionType.vue";
-import SelectInputMultisigAccount from '@/components/SelectInputMultisigAccount.vue';
-import MultisigInput from "@/modules/transfer/components/MultisigInput.vue";
-import PasswordInput from "@/components/PasswordInput.vue";
 import TxnSummary from "@/components/TxnSummary.vue";
 import { useI18n } from "vue-i18n";
 import { walletState } from "@/state/walletState";

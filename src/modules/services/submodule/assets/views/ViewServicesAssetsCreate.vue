@@ -9,14 +9,7 @@
         </div>
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="mt-4">
-          <div class="flex gap-1 mt-3">
-              <SelectInputAccount :type="'asset'"/>
-              <SelectInputMultisigAccount :selected-address="selectedAddress" />
-            </div>
-            <div v-if="selectedMultisigAddress" class="mt-3">
-              <MultisigInput :select-default-address="selectedMultisigAddress"
-                :select-default-name="selectedMultisigName" :type="'asset'"/>
-            </div>
+            <SelectInputAccount :type="'asset'" :label="'create asset'" :selectedMultisigAddress="selectedMultisigAddress" :selectedMultisigName="selectedMultisigName"  />
           <div class="lg:grid lg:grid-cols-2 mt-5">
             <div class="lg:mr-2"><SupplyInputClean :disabled="showNoBalance||disabledInput" v-model="supply" :balance="Number.MAX_VALUE" :placeholder="$t('general.supply')" type="text" @show-error="updateSupplyErr"  :decimal="Number(divisibility)" :toolTip="$t('asset.supplyMsg1') +' <br><br>' + $t('asset.supplyMsg2') + '<br>' + $t('asset.supplyMsg3')" /></div>
             <div class="lg:ml-2"><NumberInputClean :disabled="showNoBalance||disabledInput" v-model="divisibility" :max="6" :placeholder="$t('general.divisibility')" :showError="showDivisibilityErr"  :toolTip="$t('asset.divisibilityMsg1') +' <br><br>' + $t('asset.divisibilityMsg2') + '<br>' + $t('asset.divisibilityMsg3')" /></div>
@@ -56,8 +49,6 @@
 import { computed, getCurrentInstance, ref, watch } from 'vue';
 import { useRouter } from "vue-router";
 import SelectInputAccount from '@/components/SelectInputAccount.vue';
-import SelectInputMultisigAccount from '@/components/SelectInputMultisigAccount.vue';
-import MultisigInput from "@/modules/transfer/components/MultisigInput.vue"
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
 import CheckInput from '@/components/CheckInput.vue';
 import NumberInputClean from '@/modules/services/submodule/assets/components/NumberInputClean.vue';

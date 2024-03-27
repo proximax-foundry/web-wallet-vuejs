@@ -84,6 +84,9 @@ let knownToken = [{
 let scanDistributorAsset = async() =>{
   noAssetFound.value = false;
   assetSelected.value = null;
+  if(selectedMultisigAddress.value){
+    selectedMultisigPublicKey.value = (await WalletUtils.getAccInfo(selectedMultisigAddress.value)).publicKey
+  }
   let assets = await Sirius.scanAsset(selectedMultisigPublicKey.value ? selectedMultisigPublicKey.value : selectedAccount.value ? selectedAccount.value.publicKey : "");
 
   assetList.value = assets;
@@ -530,6 +533,7 @@ if (isMultiSigBool.value) {
   emitter.on("select-multisig-account", (node: TreeNode) => {
     selectedMultisigName.value = node.label
     selectedMultisigAddress.value = node.value
+    scanDistributorAsset()
   })
 </script>
 
