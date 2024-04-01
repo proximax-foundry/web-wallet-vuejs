@@ -119,7 +119,7 @@ import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeD
 import { 
   PublicAccount, Convert, AccountMetadataTransactionBuilder, 
   AggregateTransaction, UInt64,
-  MetadataQueryParams, MetadataType, AccountMetadataTransaction, Account, AggregateBondedV1TransactionBuilder
+  MetadataQueryParams, MetadataType, AccountMetadataTransaction, Account, AggregateBondedTransactionBuilder
 } from 'tsjs-xpx-chain-sdk';
 import { WalletAccount } from '@/models/walletAccount';
 import { OtherAccount } from '@/models/otherAccount';
@@ -153,7 +153,7 @@ export default {
     let inputScopedMetadataKey = ref(""); 
     let selectedAcc = ref<WalletAccount | OtherAccount>(null);
     let txnBuilder: AccountMetadataTransactionBuilder;
-    let aggregateTxnBuilder: AggregateBondedV1TransactionBuilder;
+    let aggregateTxnBuilder: AggregateBondedTransactionBuilder;
     let metadataTxn: AccountMetadataTransaction;
     let aggregateTxn: AggregateTransaction;
     const oldValue = ref("");
@@ -201,7 +201,7 @@ export default {
     const accountAddress = computed(()=>selectedAcc.value?selectedAcc.value.address:'0'.repeat(40))
     const handleParamTargetPublicKey = ()=>{
       if(props.targetPublicKey.length === 64 && Convert.isHexString(props.targetPublicKey)){
-        targetPublicAccount.value = PublicAccount.createFromPublicKey(props.targetPublicKey, AppState.networkType);
+        targetPublicAccount.value = PublicAccount.createFromPublicKey(props.targetPublicKey, AppState.networkType, 1);
         txnBuilder.targetPublicKey(targetPublicAccount.value);
       }
       if(!walletState.currentLoggedInWallet){
@@ -294,7 +294,7 @@ export default {
 
     const buildAggregateTxn = ()=>{
       if(metadataTxn){
-        aggregateTxn = aggregateTxnBuilder.innerTransactions([metadataTxn.toAggregateV1(targetPublicAccount.value)]).build();
+        aggregateTxn = aggregateTxnBuilder.innerTransactions([metadataTxn.toAggregate(targetPublicAccount.value)]).build();
       }
     }
 
@@ -454,11 +454,11 @@ export default {
       .oldValue(oldValue.value)
       .calculateDifferences()
       .build()
-      let aggregateTxPayload = AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([accountMetadataTransaction.toAggregateV1(targetPublicAccount.value)]).build().serialize()
+      let aggregateTxPayload = AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([accountMetadataTransaction.toAggregate(targetPublicAccount.value)]).build().serialize()
       let selectedAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == targetPublicAccount.value.publicKey).address 
       if(targetAccIsMultisig.value){
         let cosignerAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosigner.value).address
-        unsignedTxnPayload = accountMetadataTransaction.toAggregateV1(targetPublicAccount.value).serialize()
+        unsignedTxnPayload = accountMetadataTransaction.toAggregate(targetPublicAccount.value).serialize()
         TransactionState.selectedAddress = cosignerAddress
         TransactionState.selectedMultisigAddress = selectedAddress
       }else{

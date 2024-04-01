@@ -9,6 +9,7 @@ import {
   PublicAccount,
   Password,
   Message,
+  DerivationScheme,
 } from "tsjs-xpx-chain-sdk";
 
 import { networkState } from "@/state/networkState";
@@ -21,7 +22,7 @@ import { TransactionUtils } from "./transactionUtils";
 
 
 const test_publicKey = "0".repeat(64)
-const test_address = PublicAccount.createFromPublicKey(test_publicKey, AppState.networkType).address.plain()
+const test_address = PublicAccount.createFromPublicKey(test_publicKey, AppState.networkType, 1).address.plain()
 
 const getMosaic = (amount: string, mosaic: { id: string, amount: string }[]): Mosaic[] => {
   let mosaics: Mosaic[] = []
@@ -87,7 +88,7 @@ export class TransferUtils {
       // initiator acc details
       initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedAddress);
       const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(selectedMultisigAddress))
-      senderPublicAccount = PublicAccount.createFromPublicKey(accountInfo.publicKey, networkType);
+      senderPublicAccount = PublicAccount.createFromPublicKey(accountInfo.publicKey, networkType, 1);
     }
 
 
@@ -104,7 +105,7 @@ export class TransferUtils {
         const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(recipientAddress))
         msg = EncryptedMessage.create(messageText, accountInfo.publicAccount, privateKey);
       } catch (error) {
-        msg = EncryptedMessage.create(messageText, PublicAccount.createFromPublicKey(recipientPublicKey,AppState.networkType) , privateKey)
+        msg = EncryptedMessage.create(messageText, PublicAccount.createFromPublicKey(recipientPublicKey,AppState.networkType, 1) , privateKey, DerivationScheme.Ed25519Sha3)
       }
     } else {
       msg = PlainMessage.create(messageText);
@@ -119,19 +120,19 @@ export class TransferUtils {
     const account = Account.createFromPrivateKey(privateKey, networkType, 1);
 
     if (!selectedMultisigAddress) { // no cosigner, normal transaction
-      const signedTransaction = account.preV2Sign(transferTransaction, hash);
+      const signedTransaction = account.sign(transferTransaction, hash);
       TransactionUtils.announceTransaction(signedTransaction)
     } else { // there is a cosigner, aggregate  bonded transaction
       let selectedWalletSigner = walletState.currentLoggedInWallet.accounts.find(acc => acc.address == selectedAddress)
       let selectedSignerPrivateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword), selectedWalletSigner.encrypted, selectedWalletSigner.iv);
       let selectedSignerAccount = Account.createFromPrivateKey(selectedSignerPrivateKey, networkType, 1)
-      const innerTxn = [transferTransaction.toAggregateV1(senderPublicAccount)];
+      const innerTxn = [transferTransaction.toAggregate(senderPublicAccount)];
       const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
       const aggregateBondedTransaction = transactionBuilder.aggregateBonded(innerTxn, new UInt64(nodeTime.sendTimeStamp))
-      const aggregateBondedTransactionSigned = selectedSignerAccount.preV2Sign(aggregateBondedTransaction, hash);
+      const aggregateBondedTransactionSigned = selectedSignerAccount.sign(aggregateBondedTransaction, hash);
 
       const hashLockTransaction = TransactionUtils.lockFundTx(aggregateBondedTransactionSigned)
-      const hashLockTransactionSigned = selectedSignerAccount.preV2Sign(hashLockTransaction, hash)
+      const hashLockTransactionSigned = selectedSignerAccount.sign(hashLockTransaction, hash)
       TransactionUtils.announceLF_AND_addAutoAnnounceABT(hashLockTransactionSigned, aggregateBondedTransactionSigned)
     }
 
@@ -147,7 +148,7 @@ export class TransferUtils {
       .mosaics(mosaics)
       .message(isEncrypted && message.length>0? EncryptedMessage.create(message, PublicAccount.createFromPublicKey('0'.repeat(64), AppState.networkType), '0'.repeat(64)) : PlainMessage.create(message))
       .build()
-    let innerTxn = [transferTransaction.toAggregateV1(PublicAccount.createFromPublicKey(test_publicKey, AppState.networkType))]
+    let innerTxn = [transferTransaction.toAggregate(PublicAccount.createFromPublicKey(test_publicKey, AppState.networkType, 1))]
     let aggregateBondedTx = transactionBuilder.aggregateBondedBuilder()
       .innerTransactions(innerTxn)
       .build()

@@ -24,6 +24,9 @@
           <div class="lg:grid lg:grid-cols-2">
             <div class="mb-5 lg:mb-0 lg:mr-2"><CheckInput :disabled="showNoBalance||disabledInput" v-model="isTransferable" :title="$t('general.transferable')" :toolTip="$t('asset.transferableMsg')" @click="!showNoBalance?(isTransferable = !isTransferable):''"/></div>
             <div class="mb-5 lg:mb-0 lg:ml-2"><CheckInput :disabled="showNoBalance||disabledInput" v-model="isMutable" :title="$t('general.supplyMutable')" :toolTip="$t('asset.supplyMutableMsg')" @click="!showNoBalance?(isMutable = !isMutable):''" /></div>
+            <div class="mb-5 lg:mb-0 lg:mr-2"><CheckInput :disabled="showNoBalance||disabledInput" v-model="isRestrictable" :title="$t('general.restrictable')" :toolTip="$t('asset.restrictableMsg')" @click="!showNoBalance?(isRestrictable = !isRestrictable):''" /></div>
+            <div class="mb-5 lg:mb-0 lg:ml-2"><CheckInput :disabled="showNoBalance||disabledInput" v-model="isSupplyForceImmutable" :title="$t('general.supplyForceImmutable')" :toolTip="$t('asset.supplyForceImmutableMsg')" @click="!showNoBalance?(isSupplyForceImmutable = !isSupplyForceImmutable):''" /></div>
+            <div class="mb-5 lg:mb-0 lg:mr-2"><CheckInput :disabled="showNoBalance||disabledInput" v-model="isDisableLocking" :title="$t('general.disableLocking')" :toolTip="$t('asset.disableLockingMsg')" @click="!showNoBalance?(isDisableLocking = !isDisableLocking):''" /></div>
           </div>
         </div>
       </div>
@@ -85,6 +88,9 @@ import { TransactionState } from '@/state/transactionState';
     const showDivisibilityErr = ref(false);
     const isTransferable = ref(false);
     const isMutable = ref(false);
+    const isDisableLocking = ref(false);
+    const isRestrictable = ref(false);
+    const isSupplyForceImmutable = ref(false);
     const disabledInput = computed(() => disableAllInput.value)
     const disabledClear = ref(false);
     const disabledDuration = ref(false);
@@ -105,8 +111,8 @@ import { TransactionState } from '@/state/transactionState';
     const transactionFee = ref('0')
     const transactionFeeExact = ref(0)
     try {
-      transactionFee.value =  Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, Number(supply.value), isMutable.value, isTransferable.value, Number(divisibility.value)), AppState.nativeToken.divisibility);
-      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, Number(supply.value), isMutable.value, isTransferable.value, Number(divisibility.value)), AppState.nativeToken.divisibility);
+      transactionFee.value =  Helper.amountFormatterSimple(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, Number(divisibility.value)), AppState.nativeToken.divisibility);
+      transactionFeeExact.value = Helper.convertToExact(AssetsUtils.createAssetTransactionFee( ownerPublicAccount.value, Number(divisibility.value)), AppState.nativeToken.divisibility);
     } catch (error) {
       console.log(error)
     }
@@ -210,6 +216,9 @@ import { TransactionState } from '@/state/transactionState';
       disabledDuration.value = false;
       isTransferable.value = false;
       isMutable.value = false;
+      isSupplyForceImmutable.value = false;
+      isDisableLocking.value = false;
+      isRestrictable.value = false;
     };
 
     watch(selectedAddress, async (newValue, oldValue) => {
@@ -264,16 +273,22 @@ import { TransactionState } from '@/state/transactionState';
 
     const createAsset = () => {
       if(selectedMultisigAddress.value){
-        const assetDefinition = AppState.buildTxn.mosaicDefinition(multisigPublicAccount.value, isMutable.value, isTransferable.value, Number(divisibility.value));
+        const assetDefinition = AppState.buildTxn.mosaicDefinition(multisigPublicAccount.value, 
+          isMutable.value, isTransferable.value, isRestrictable.value, isSupplyForceImmutable.value, isDisableLocking.value, 
+          Number(divisibility.value)
+        );
         let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase
         const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value))));
         const unsignedInnerTxn = [assetDefinition.serialize(),assetSupplyChangeTx.serialize()];
         TransactionState.unsignedTransactionPayload = unsignedInnerTxn
       }else{
-        const assetDefinition = AppState.buildTxn.mosaicDefinition(ownerPublicAccount.value, isMutable.value, isTransferable.value, Number(divisibility.value));
-        const assetDefinitionTx = assetDefinition.toAggregateV1(ownerPublicAccount.value);
+        const assetDefinition = AppState.buildTxn.mosaicDefinition(ownerPublicAccount.value, 
+          isMutable.value, isTransferable.value, isRestrictable.value, isSupplyForceImmutable.value, isDisableLocking.value,
+          Number(divisibility.value)
+        );
+        const assetDefinitionTx = assetDefinition.toAggregate(ownerPublicAccount.value);
         let supplyChangeType: MosaicSupplyType = MosaicSupplyType.Increase;
-        const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregateV1(ownerPublicAccount.value);
+        const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(Number(divisibility.value), Number(supply.value)))).toAggregate(ownerPublicAccount.value);
         let unsignedAssetAggregateTransaction = AppState.buildTxn.aggregateComplete([assetDefinitionTx, assetSupplyChangeTx]).serialize();
         TransactionState.unsignedTransactionPayload = unsignedAssetAggregateTransaction
       }

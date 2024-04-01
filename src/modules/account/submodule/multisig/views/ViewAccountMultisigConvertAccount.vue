@@ -387,7 +387,8 @@ export default {
           if (cosignKey.length == 64) {
             cosignatory = PublicAccount.createFromPublicKey(
               cosignKey,
-              AppState.networkType
+              AppState.networkType,
+              1
             );
           } else if (cosignKey.length == 40 || cosignKey.length == 46) {
             const address = Address.createFromRawAddress(cosignKey);
@@ -398,7 +399,8 @@ export default {
               );
               cosignatory = PublicAccount.createFromPublicKey(
                 accInfo.publicKey,
-                AppState.networkType
+                AppState.networkType,
+                1
               );
             } catch (error) {
               console.log(error);
@@ -578,7 +580,7 @@ export default {
    
     // check if onPartial
     if(acc.value){
-      MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(verify=>
+      MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType, 1)).then(verify=>
       onPartial.value = verify
     )
     }
@@ -605,7 +607,7 @@ export default {
     });
 
     const checkValidAcc = async (publicKey) => {
-      const acc = PublicAccount.createFromPublicKey(publicKey,AppState.networkType)
+      const acc = PublicAccount.createFromPublicKey(publicKey,AppState.networkType, 1)
       try{
         const isValidAcc = await AppState.chainAPI.accountAPI.getAccountInfo(acc.address) ? true : false
         if(isValidAcc){

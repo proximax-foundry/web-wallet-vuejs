@@ -267,6 +267,9 @@ class Reconstruct{
         
         newAsset.transferable = tempAsset.transferable ? tempAsset.transferable : true;
         newAsset.supplyMutable = tempAsset.supplyMutable ? tempAsset.supplyMutable : true;
+        newAsset.restrictable = tempAsset.restrictable ? tempAsset.restrictable : true;
+        newAsset.supplyForceImmutable = tempAsset.supplyForceImmutable ? tempAsset.supplyForceImmutable : true;
+        newAsset.disableLocking = tempAsset.disableLocking ? tempAsset.disableLocking : true;
         newAsset.rawAmount = tempAsset.rawAmount ? tempAsset.rawAmount : 0;
         newAsset.divisibility = tempAsset.divisibility ? tempAsset.divisibility : 0;
         newAsset.amount = tempAsset.amount ? tempAsset.amount : 0;

@@ -257,7 +257,7 @@ const txnFee = computed(() => {
         return sdaExchangeOfferTxn.maxFee?.compact() / Math.pow(10, AppState.nativeToken.divisibility)
     }
     const multisigAcc = [...walletState.currentLoggedInWallet.accounts, ...walletState.currentLoggedInWallet.others].find(acc => acc.address == selectedMultisigAddress.value)
-    const innerTxn = [sdaExchangeOfferTxn.toAggregateV1(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType))];
+    const innerTxn = [sdaExchangeOfferTxn.toAggregate(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType, 1))];
     return AppState.buildTxn.aggregateBonded(innerTxn).maxFee.compact() / Math.pow(10, AppState.nativeToken.divisibility)
 
 })
@@ -561,16 +561,16 @@ const exchangeSell = async () => {
     const generationHash = networkState.currentNetworkProfile.generationHash
     if (isMultisig.value) {
         const multisigAcc = [...walletState.currentLoggedInWallet.accounts, ...walletState.currentLoggedInWallet.others].find(acc => acc.address == selectedMultisigAddress.value)
-        const innerTxn = [sdaExchangeOfferTxn.toAggregateV1(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType))];
+        const innerTxn = [sdaExchangeOfferTxn.toAggregate(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType, 1))];
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
         const aggregateBondedTransaction = AppState.buildTxn.aggregateBonded(innerTxn, new UInt64(nodeTime.sendTimeStamp!))
-        const aggregateBondedTransactionSigned = acc.preV2Sign(aggregateBondedTransaction, generationHash);
+        const aggregateBondedTransactionSigned = acc.sign(aggregateBondedTransaction, generationHash);
 
         const hashLockTransaction = TransactionUtils.lockFundTx(aggregateBondedTransactionSigned)
-        const hashLockTransactionSigned = acc.preV2Sign(hashLockTransaction, generationHash)
+        const hashLockTransactionSigned = acc.sign(hashLockTransaction, generationHash)
         TransactionUtils.announceLF_AND_addAutoAnnounceABT(hashLockTransactionSigned, aggregateBondedTransactionSigned)
     } else {
-        const signedTransaction = acc.preV2Sign(sdaExchangeOfferTxn, generationHash);
+        const signedTransaction = acc.sign(sdaExchangeOfferTxn, generationHash);
         await TransactionUtils.announceTransaction(signedTransaction)
     }
     router.push({ name: "ViewAccountPendingTransactions", params: { address: acc.address.plain() } })

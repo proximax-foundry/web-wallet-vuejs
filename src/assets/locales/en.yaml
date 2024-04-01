@@ -81,7 +81,10 @@ asset:
   supplyMsg2: Maximum supply is 900T
   supplyMsg3: 'Example: 900,000,000,000,000'
   supplyMutableMsg: 'If you tick "Supply Mutable", supply can be changed.'
-  transferableMsg: 'If you tick "Transferable",asset can be transferred.'
+  transferableMsg: 'If you tick "Transferable", asset can be transferred.'
+  restrictableMsg: 'If you tick this, asset can be restricted.'
+  supplyForceImmutableMsg: 'If you tick this, supply will be totally immutable.'
+  disableLockingMsg: 'If you tick this, locking will be disabled for the asset.'
 dashboard:
   accDescription: >-
     A key pair (private and public key) associated with a mutable state stored
@@ -202,6 +205,7 @@ general:
   digitalAsset: Digital Asset
   disable: Disable
   disabled: Disabled
+  disableLocking: Disable Locking
   divisibility: Divisibility
   done: Done
   download: Download
@@ -300,6 +304,7 @@ general:
   remove: Remove
   rentalFee: Rental Fee
   requiredField: Required field
+  restrictable: Restrictable
   save: Save
   scheme: Scheme
   sda: SDA | SDAs
@@ -317,6 +322,7 @@ general:
   signerAcc: Signer Account
   supply: Supply
   supplyMutable: Supply Mutable
+  supplyForceImmutable: Supply Force Immutable
   swap: Swap
   to: To
   topUp: 'Top Up {tokenName}'

@@ -123,7 +123,7 @@ import {
   MetadataQueryParams, MetadataType, MosaicMetadataTransaction,
   MosaicId,
   Account,
-AggregateBondedV1TransactionBuilder
+AggregateBondedTransactionBuilder
 } from 'tsjs-xpx-chain-sdk';
 import { WalletAccount } from '@/models/walletAccount';
 import { OtherAccount } from '@/models/otherAccount';
@@ -156,7 +156,7 @@ export default {
     let inputScopedMetadataKey = ref("");
     let selectedAcc = ref<WalletAccount | OtherAccount>(null);
     let txnBuilder: MosaicMetadataTransactionBuilder;
-    let aggregateTxnBuilder: AggregateBondedV1TransactionBuilder;
+    let aggregateTxnBuilder: AggregateBondedTransactionBuilder;
     let metadataTxn: MosaicMetadataTransaction;
     let aggregateTxn: AggregateTransaction;
     const oldValue = ref("");
@@ -299,7 +299,7 @@ export default {
 
     const buildAggregateTxn = ()=>{
       if(metadataTxn){
-        aggregateTxn = aggregateTxnBuilder.innerTransactions([metadataTxn.toAggregateV1(targetPublicAccount.value)]).build();
+        aggregateTxn = aggregateTxnBuilder.innerTransactions([metadataTxn.toAggregate(targetPublicAccount.value)]).build();
       }
     }
 
@@ -484,11 +484,11 @@ export default {
       .oldValue(oldValue.value)
       .calculateDifferences()
       .build()
-      let aggregateTx = AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([mosaicMetadataTransaction.toAggregateV1(targetPublicAccount.value)]).build().serialize()
+      let aggregateTx = AppState.buildTxn.aggregateCompleteBuilder().innerTransactions([mosaicMetadataTransaction.toAggregate(targetPublicAccount.value)]).build().serialize()
       let selectedAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == targetPublicAccount.value.publicKey).address 
       if(targetAccIsMultisig.value){
         let cosignerAddress = walletState.currentLoggedInWallet.accounts.find((account) => account.publicKey == selectedCosigner.value).address
-        unsignedTxnPayload = mosaicMetadataTransaction.toAggregateV1(targetPublicAccount.value).serialize()
+        unsignedTxnPayload = mosaicMetadataTransaction.toAggregate(targetPublicAccount.value).serialize()
         TransactionState.selectedAddress = cosignerAddress
         TransactionState.selectedMultisigAddress = selectedAddress
       }else{

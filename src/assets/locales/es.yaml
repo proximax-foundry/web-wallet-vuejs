@@ -22,6 +22,7 @@ account:
   privateKeyExist: Account with this Private Key is already in the wallet
 addressBook:
   addBackUpContact: Add contacts from a contact backup file
+  addAccountContact: Add contacts from wallet account
   addCustomGroup: Add Custom Group
   addNewContact: Add New Contact
   addressBookMessage1: imported to address book
@@ -37,11 +38,11 @@ addressBook:
   director: Director
   editContact: Edit Contact
   employee: Employee
-  exportBackUpContact: Export contacts for backup
+  exportBackUpContact: Export contacts for backup from selected group
   exportContacts: Export Contacts
   family: Family
   friend: Friend
-  groupValidation: Group name is not availble or already exist
+  groupValidation: Group name is not available or already exist
   importAddress: Import Address
   importContacts: Import Contacts
   nameExist: Name already exists in account or address book.
@@ -50,10 +51,14 @@ addressBook:
   removeContact: Remove Contact
   removeContactFromAB: Remove Contact from Address book?
   saveAddress: Save Address
+  selectExportContacts: Export contacts for backup from selected contacts
   work: Work
 asset:
   assetAns: >-
-    An asset is called Sirius Digital Asset (SDA) in our ecosystem. Assets represent anything that needs to be quantified and/or named. Each SDA group can have a quantity range from 1 to a maximum of 10^16 units (without decimals). Each SDA group can optionally be given a name.
+    An asset is called Sirius Digital Asset (SDA) in our ecosystem. 
+    Assets represent anything that needs to be quantified and/or named. 
+    Each SDA group can have a quantity range from 1 to a maximum of 10^16 units (without decimals). 
+    Each SDA group can optionally be given a name.
   assetCreatedBy: Asset created by
   assetCreatedByAcc: Sirius Digital Assets created by account {accountName}
   assetCreatedInWallet: Sirius Digital Assets created in wallet {walletName}
@@ -76,7 +81,10 @@ asset:
   supplyMsg2: Maximum supply is 900T
   supplyMsg3: 'Example: 900,000,000,000,000'
   supplyMutableMsg: 'If you tick "Supply Mutable", supply can be changed.'
-  transferableMsg: 'If you tick "Transferable",asset can be transferred.'
+  transferableMsg: 'If you tick "Transferable", asset can be transferred.'
+  restrictableMsg: 'If you tick this, asset can be restricted.'
+  supplyForceImmutableMsg: 'If you tick this, supply will be totally immutable.'
+  disableLockingMsg: 'If you tick this, locking will be disabled for the asset.'
 dashboard:
   accDescription: >-
     A key pair (private and public key) associated with a mutable state stored
@@ -84,7 +92,7 @@ dashboard:
   accountAdded: Account added
   accountRemoved: Account removed
   addingAcc: 'Adding account:'
-  aggregate: Aggregate
+  aggregate: Aggregate 
   allTransactions: All Transactions
   applyHeightDelta: Apply Height Delta
   approvalAndRemoval: Approval and Removal Delta
@@ -167,6 +175,7 @@ general:
   balance: Balance
   block: Block | Blocks
   blockHeight: Block Height
+  buy: Buy
   cancel: Cancel
   certificate: Certificate
   change: Change
@@ -196,6 +205,7 @@ general:
   digitalAsset: Digital Asset
   disable: Disable
   disabled: Disabled
+  disableLocking: Disable Locking
   divisibility: Divisibility
   done: Done
   download: Download
@@ -288,10 +298,13 @@ general:
     assets cannot be recovered without it!
   privateKey: Private Key
   publicKey: Public Key
+  publicKeyAvailable: Public key is available on the blockchain!
+  publicKeyNotAvailable: Public key is not available on the blockchain!
   recipient: Recipient
   remove: Remove
   rentalFee: Rental Fee
   requiredField: Required field
+  restrictable: Restrictable
   save: Save
   scheme: Scheme
   sda: SDA | SDAs
@@ -309,6 +322,7 @@ general:
   signerAcc: Signer Account
   supply: Supply
   supplyMutable: Supply Mutable
+  supplyForceImmutable: Supply Force Immutable
   swap: Swap
   to: To
   topUp: 'Top Up {tokenName}'
@@ -380,7 +394,7 @@ multisig:
   deletionAtLeastOne: Number of cosignatories for deletion approval cannot be less than 1
   deletionExceedMax: >-
     Number of cosignatories for deletion approval is more than number of
-      cosignatories for this account
+    cosignatories for this account
   deletionScheme: 'D:{deletion}-of-{maxDeletion}'
   duplicatedCosigner: Duplicated cosigner added
   horizontal: Horizontal
@@ -557,7 +571,7 @@ swap:
   step1: 'Step 1: Send BEP20 {tokenName} to the escrow account'
   step2: 'Step 2: Validate your Sirius address'
   step3: 'Step 3: Initiate swap'
-  swapAmount: Swap AMount
+  swapAmount: Swap Amount
   swapBscToSirius: Swap from BSC to Sirius Chain
   swapDetails: Swap Details
   swapInProgress: Swap in progress. Please wait...

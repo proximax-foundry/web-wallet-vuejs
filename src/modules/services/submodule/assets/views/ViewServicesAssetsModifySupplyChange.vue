@@ -14,8 +14,8 @@
             </div>
           </div>
         </div>
-        <div v-if="!assetMutable" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
-          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">Asset is immutable</div>
+        <div v-if="disableProceed" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
+          <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">Asset supply is immutable</div>
         </div>
         <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
           <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div><div class="inline-block text-xs">{{$t('general.insufficientBalance')}}</div>
@@ -57,6 +57,18 @@
             <div class="my-3">
               <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">{{$t('general.supplyMutable')}}<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+ $t('asset.supplyMutableMsg')+'</tiptext>', escape: false}"></div>
               <div class="uppercase text-black font-bold text-sm">{{ assetMutable?$t('general.yes') : $t('general.no') }}</div>
+            </div>
+            <div class="my-3">
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">Restritable<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+ $t('asset.restritableMsg')+'</tiptext>', escape: false}"></div>
+              <div class="uppercase text-black font-bold text-sm">{{ assetRestritable?$t('general.yes'): $t('general.no') }}</div>
+            </div>
+            <div class="my-3">
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">Supply Force Immutable<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+ $t('asset.supplyForceImmutableMsg')+'</tiptext>', escape: false}"></div>
+              <div class="uppercase text-black font-bold text-sm">{{ assetSupplyForceImmutable?$t('general.yes') : $t('general.no') }}</div>
+            </div>
+            <div class="my-3">
+              <div class="text-xxs text-blue-primary uppercase mb-1 font-bold">Disable Locking<img src="@/assets/img/icon-info.svg" class="inline-block ml-2 relative" style="top: -1px;" v-tooltip.bottom="{value:'<tiptext>'+ $t('asset.disableLockingMsg')+'</tiptext>', escape: false}"></div>
+              <div class="uppercase text-black font-bold text-sm">{{ assetDisableLocking?$t('general.yes'): $t('general.no') }}</div>
             </div>
           </div>
         </div>
@@ -120,7 +132,7 @@ export default {
     const currentNativeTokenName = computed(()=> AppState.nativeToken.label);
     const showSupplyErr = ref(false);
     const err = ref('');
-    const disabledPassword = ref(false);
+    const disableProceed = ref(false);
     const disabledSupply = ref(false);
     const disabledSelectIncreaseDecrease = ref(false);
     const passwdPattern = "^[^ ]{8,}$";
@@ -155,7 +167,7 @@ export default {
 
 
     const disableModify = computed(() => !(
-      (supply.value > 0) && !showSupplyErr.value && !showNoBalance.value & !isNotCosigner.value
+      (supply.value > 0) && !disableProceed && !showSupplyErr.value && !showNoBalance.value & !isNotCosigner.value
     ));
 
     
@@ -209,7 +221,7 @@ export default {
       if(!account.value){
         return null
       }
-      return  account.value.assets.find( asset => asset.idHex === props.assetId);
+      return account.value.assets.find( asset => asset.idHex === props.assetId);
     })
     const assetAmount = computed(()=>{
       if(!asset.value){
@@ -234,6 +246,24 @@ export default {
         return false
       }
       return asset.value.supplyMutable
+    })
+    const assetRestritable = computed(()=>{
+      if(!asset.value){
+        return false
+      }
+      return asset.value.restrictable
+    })
+    const assetSupplyForceImmutable = computed(()=>{
+      if(!asset.value){
+        return false
+      }
+      return asset.value.supplyForceImmutable
+    })
+    const assetDisableLocking = computed(()=>{
+      if(!asset.value){
+        return false
+      }
+      return asset.value.disableLocking
     })
     const assetDivisibility = computed(()=>{
       if(!asset.value){
@@ -321,18 +351,26 @@ export default {
       return Helper.convertToExact(AssetsUtils.getMosaicSupplyChangeTransactionFee( props.assetId, selectIncreaseDecrease.value, parseFloat(supply.value), assetDivisibility.value), AppState.nativeToken.divisibility);
     })
   
-    watch(assetMutable,n=>{
-      if(!n){
+    watch([assetMutable,assetSupplyForceImmutable],([supplyMutable, supplyForceImmutable])=>{
+      if(supplyForceImmutable){
         disabledSelectIncreaseDecrease.value = true;
         disabledSupply.value = true;
-        disabledPassword.value = true;
-      }else{
+        disableProceed.value = true;
+      }else if(asset.value && asset.value.supply === asset.value.rawAmount){
         disabledSelectIncreaseDecrease.value = false;
         disabledSupply.value = false;
-        disabledPassword.value = false;
+        disableProceed.value = false;
+      }else if(!supplyMutable){
+        disabledSelectIncreaseDecrease.value = true;
+        disabledSupply.value = true;
+        disableProceed.value = true;
+      }
+      else{
+        disabledSelectIncreaseDecrease.value = false;
+        disabledSupply.value = false;
+        disableProceed.value = false;
       }
     },{immediate:true})
-    
 
     const modifyAsset = () => {
       const buildTransactions = AppState.buildTxn;
@@ -390,7 +428,6 @@ export default {
     });
 
     const setFormInput = (isValidate) => {
-      disabledPassword.value = isValidate;
       disabledSupply.value = isValidate;
       disabledSelectIncreaseDecrease.value = isValidate;
     };
@@ -435,7 +472,6 @@ export default {
       disableModify,
       showPasswdError,
       supply,
-      disabledPassword,
       disabledSupply,
       currencyName,
       isMultiSig,
@@ -450,6 +486,10 @@ export default {
       assetDivisibility,
       assetTransferable,
       assetMutable,
+      assetRestritable,
+      assetSupplyForceImmutable,
+      assetDisableLocking,
+      disableProceed,
       getMultiSigCosigner,
       cosignerBalanceInsufficient,
       cosignerAddress,

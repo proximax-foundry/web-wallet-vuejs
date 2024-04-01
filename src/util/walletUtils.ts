@@ -758,8 +758,8 @@ export class WalletUtils {
         return (Account.createFromPrivateKey(privateKey, net,1).address.plain() === address) ? true : false;
     }
 
-    static createPublicAccount(publicKey: string, network: NetworkType): PublicAccount {
-        return PublicAccount.createFromPublicKey(publicKey, network);
+    static createPublicAccount(publicKey: string, network: NetworkType, version: number = 1): PublicAccount {
+        return PublicAccount.createFromPublicKey(publicKey, network, version);
     }
 
     static createAddressFromPublicKey(publicKey: string, networkType: NetworkType): Address {
@@ -780,7 +780,7 @@ export class WalletUtils {
         const endpoint = ChainUtils.buildAPIEndpoint(networkState.selectedAPIEndpoint, chainProfile.httpPort);
 
         return AppState.chainAPI.transactionAPI.announceAggregateBondedCosignature(
-            account.preV2SignCosignatureTransaction(cosignatureTransaction)
+            account.signCosignatureTransaction(cosignatureTransaction)
         );
     }
 
@@ -1288,9 +1288,9 @@ export class WalletUtils {
                 walletState.currentLoggedInWallet.removeOtherAccount(oldLinkedPublicKey);
             }
 
-            accs[i].linkedPublicKey = accountInfo.linkedAccountKey;
+            accs[i].linkedPublicKey = accountInfo.linkedAccountKey ?? "";
 
-            if (addInLinkedAccount && isWalletAccount && accountInfo.linkedAccountKey !== "0".repeat(64)) {
+            if (addInLinkedAccount && isWalletAccount && accountInfo.linkedAccountKey && accountInfo.linkedAccountKey !== "0".repeat(64)) {
 
                 let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, AppState.networkType);
 
@@ -1421,7 +1421,7 @@ export class WalletUtils {
 
             accs[i].linkedPublicKey = accountInfo.linkedAccountKey;
 
-            if (addInLinkedAccount && isWalletAccount && accountInfo.linkedAccountKey !== "0".repeat(64)) {
+            if (addInLinkedAccount && isWalletAccount && accountInfo.linkedAccountKey && accountInfo.linkedAccountKey !== "0".repeat(64)) {
 
                 let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, AppState.networkType);
 
@@ -1516,7 +1516,7 @@ export class WalletUtils {
                 continue;
             }
 
-            if (addInLinkedAccount && accountInfo.linkedAccountKey !== "0".repeat(64)) {
+            if (addInLinkedAccount && accountInfo.linkedAccountKey && accountInfo.linkedAccountKey !== "0".repeat(64)) {
 
                 wallet.accounts[i].linkedPublicKey = accountInfo.linkedAccountKey;
 
@@ -1806,7 +1806,10 @@ export class WalletUtils {
         let asset = new Asset(assetInfo.idHex);
         asset.divisibility = assetInfo.divisibility;
         asset.supplyMutable = assetInfo.supplyMutable;
-        asset.transferable = assetInfo.transferable;
+        asset.disableLocking = assetInfo.disableLocking;
+        asset.supplyForceImmutable = assetInfo.supplyForceImmutable;
+        asset.restrictable = assetInfo.restrictable;
+        asset.supplyMutable = assetInfo.supplyMutable;
         asset.supply = assetInfo.supply;
         asset.creator = assetInfo.creator;
         asset.duration = assetInfo.duration;
@@ -1822,6 +1825,9 @@ export class WalletUtils {
             assetInfo.divisibility,
             assetInfo.isSupplyMutable(),
             assetInfo.isTransferable(),
+            assetInfo.isRestrictable(),
+            assetInfo.isSupplyForceImmutable(),
+            assetInfo.isDisableLocking(),
             assetInfo.owner.publicKey
         );
         asset.supply = assetInfo.supply.compact();
@@ -1835,6 +1841,9 @@ export class WalletUtils {
         assetToUpdate.divisibility = assetInfo.divisibility;
         assetToUpdate.supplyMutable = assetInfo.supplyMutable;
         assetToUpdate.transferable = assetInfo.transferable;
+        assetToUpdate.restrictable = assetInfo.restrictable;
+        assetToUpdate.disableLocking = assetInfo.disableLocking;
+        assetToUpdate.supplyForceImmutable = assetInfo.supplyForceImmutable;
         assetToUpdate.supply = assetInfo.supply;
         assetToUpdate.creator = assetInfo.creator;
         assetToUpdate.duration = assetInfo.duration;
@@ -1846,6 +1855,9 @@ export class WalletUtils {
         assetInfoToUpdate.divisibility = assetInfo.divisibility;
         assetInfoToUpdate.supplyMutable = assetInfo.supplyMutable;
         assetInfoToUpdate.transferable = assetInfo.transferable;
+        assetInfoToUpdate.restrictable = assetInfo.restrictable;
+        assetInfoToUpdate.supplyForceImmutable = assetInfo.supplyForceImmutable;
+        assetInfoToUpdate.disableLocking = assetInfo.disableLocking;
         assetInfoToUpdate.supply = assetInfo.supply;
         assetInfoToUpdate.creator = assetInfo.creator;
         assetInfoToUpdate.duration = assetInfo.duration;
@@ -2054,6 +2066,9 @@ export class WalletUtils {
                 assetId.toHex(), nativeAssetInfo.divisibility,
                 nativeAssetInfo.isSupplyMutable(),
                 nativeAssetInfo.isTransferable(),
+                nativeAssetInfo.isRestrictable(),
+                nativeAssetInfo.isSupplyForceImmutable(),
+                nativeAssetInfo.isDisableLocking(),
                 nativeAssetInfo.owner.publicKey
             );
 

@@ -1084,7 +1084,11 @@ export class DashboardService {
             let formattedTxn = await this.formatUnconfirmedTransaction(txns[i]);
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedAggregateTransaction, formattedTxn) as UnconfirmedAggregateTransaction;
 
-            if(txns[i].type === TransactionType.AGGREGATE_BONDED_V1 || txns[i].type === TransactionType.AGGREGATE_COMPLETE_V1){
+            if(txns[i].type === TransactionType.AGGREGATE_BONDED_V1 
+                || txns[i].type === TransactionType.AGGREGATE_COMPLETE_V1 
+                || txns[i].type === TransactionType.AGGREGATE_BONDED_V2 
+                || txns[i].type === TransactionType.AGGREGATE_COMPLETE_V2
+            ){
                 let aggregateTxn = txns[i] as AggregateTransaction;
 
                 if(aggregateTxn.innerTransactions.length === 0){
@@ -1125,7 +1129,11 @@ export class DashboardService {
             let formattedTxn = await this.formatConfirmedTransaction(txns[i]);
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedAggregateTransaction, formattedTxn) as ConfirmedAggregateTransaction;
             
-            if(txns[i].type === TransactionType.AGGREGATE_BONDED_V1 || txns[i].type === TransactionType.AGGREGATE_COMPLETE_V1){
+            if(txns[i].type === TransactionType.AGGREGATE_BONDED_V1 
+                || txns[i].type === TransactionType.AGGREGATE_COMPLETE_V1 
+                || txns[i].type === TransactionType.AGGREGATE_BONDED_V2 
+                || txns[i].type === TransactionType.AGGREGATE_COMPLETE_V2
+            ){
                 let aggregateTxn = txns[i] as AggregateTransaction;
 
                 if(aggregateTxn.innerTransactions.length === 0){
@@ -1166,7 +1174,11 @@ export class DashboardService {
             let formattedTxn = await this.formatPartialTransaction(txns[i]);
             let txn = PartialTransaction.convertToSubClass(PartialAggregateTransaction, formattedTxn) as PartialAggregateTransaction;
             
-            if(txns[i].type === TransactionType.AGGREGATE_BONDED_V1 || txns[i].type === TransactionType.AGGREGATE_COMPLETE_V1){
+            if(txns[i].type === TransactionType.AGGREGATE_BONDED_V1 
+                || txns[i].type === TransactionType.AGGREGATE_COMPLETE_V1 
+                || txns[i].type === TransactionType.AGGREGATE_BONDED_V2 
+                || txns[i].type === TransactionType.AGGREGATE_COMPLETE_V2
+            ){
                 let aggregateTxn = txns[i] as AggregateTransaction;
 
                 if(aggregateTxn.innerTransactions.length === 0){
@@ -2771,7 +2783,11 @@ export class DashboardService {
         formattedTxn.deadline = deadline;
         formattedTxn.initiator = initiator;
 
-        if(txn.type === TransactionType.AGGREGATE_BONDED_V1 || txn.type === TransactionType.AGGREGATE_COMPLETE_V1){
+        if(txn.type === TransactionType.AGGREGATE_BONDED_V1 
+            || txn.type === TransactionType.AGGREGATE_COMPLETE_V1 
+            || txn.type === TransactionType.AGGREGATE_BONDED_V2 
+            || txn.type === TransactionType.AGGREGATE_COMPLETE_V2
+        ){
             let aggregateTxn = txn as AggregateTransaction;
 
             for(let i = 0; i < aggregateTxn.cosignatures.length; ++i){
@@ -2838,8 +2854,11 @@ export class DashboardService {
             //txnBytes = aggregateTxn.serialize().length / 2;
             //deadline = aggregateTxn.deadline.adjustedValue.compact();
         }
-        else if(txn.type === TransactionType.AGGREGATE_BONDED_V1 || txn.type === TransactionType.AGGREGATE_COMPLETE_V1){
-
+        else if(txn.type === TransactionType.AGGREGATE_BONDED_V1 
+            || txn.type === TransactionType.AGGREGATE_COMPLETE_V1 
+            || txn.type === TransactionType.AGGREGATE_BONDED_V2 
+            || txn.type === TransactionType.AGGREGATE_COMPLETE_V2
+        ){
             let aggregateTxn = txn as AggregateTransaction;
 
             if(aggregateTxn.innerTransactions.length === 0){
@@ -4808,7 +4827,7 @@ export class DashboardService {
                     let offer = exchangeOfferFormat.exchangeOffers[i];
                     let offeringAssetString = `${offer.amount} ${offer.assetId}` + offer.assetNamespace ? ` (${offer.assetNamespace})`: '';
                     let costString = `${offer.cost} ${AppState.nativeToken.label}`;
-                    let ownerPublicAccount = PublicAccount.createFromPublicKey(offer.owner, AppState.networkType);
+                    let ownerPublicAccount = PublicAccount.createFromPublicKey(offer.owner, AppState.networkType, 1);
                     let owner = this.wallet.convertAddressToName(ownerPublicAccount.address.plain());
                     let offerInfo: TxnDetails = {
                         type: offer.type === "Buy" ? MsgType.RED: MsgType.GREEN,
@@ -5139,7 +5158,7 @@ export class DashboardService {
                 infos.push(minRemovalInfo);
 
                 for(let i =0; i < modifyMultisigFormat.addedCosigner.length; ++i){
-                    let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.addedCosigner[i], AppState.networkType)
+                    let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.addedCosigner[i], AppState.networkType, 1)
                     let tryShortName = this.wallet.convertAddressToName(publicAccount.address.plain());
                     let shortName = tryShortName === publicAccount.address.plain() ? '' : tryShortName;
                     let addCosignerInfo: TxnDetails = {
@@ -5152,7 +5171,7 @@ export class DashboardService {
                 }
 
                 for(let i =0; i < modifyMultisigFormat.removedCosigner.length; ++i){
-                    let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.removedCosigner[i], AppState.networkType)
+                    let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.removedCosigner[i], AppState.networkType, 1)
                     let removeCosignerInfo: TxnDetails = {
                         type: MsgType.RED,
                         value: modifyMultisigFormat.removedCosigner[i],
@@ -5563,7 +5582,7 @@ export class DashboardService {
                 let accMetadataFormat = tempData as InnerMetadataTransaction;
                 let infos: TxnDetails[] = [];
 
-                let targetPublicAccount =  PublicAccount.createFromPublicKey(accMetadataFormat.targetPublicKey, AppState.networkType);
+                let targetPublicAccount =  PublicAccount.createFromPublicKey(accMetadataFormat.targetPublicKey, AppState.networkType, 1);
                 let targetAddress = targetPublicAccount.address.plain();
 
                 let accountInfo: TxnDetails = {

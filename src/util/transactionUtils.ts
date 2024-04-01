@@ -192,7 +192,7 @@ export class TransactionUtils {
   static getFakeEncryptedMessageSize(message: string): number {
     return EncryptedMessage.create(
       message,
-      PublicAccount.createFromPublicKey("0".repeat(64), AppState.networkType),
+      PublicAccount.createFromPublicKey("0".repeat(64), AppState.networkType, 1),
       "0".repeat(64)
     ).size();
   }
@@ -206,7 +206,7 @@ export class TransactionUtils {
     account: Account,
     generationHash: string
   ): SignedTransaction {
-    return account.preV2Sign(transaction, generationHash);
+    return account.sign(transaction, generationHash);
   }
 
   static aggregateToCosignatureTransaction(
@@ -222,7 +222,7 @@ export class TransactionUtils {
     const cosignatureTransaction =
       TransactionUtils.aggregateToCosignatureTransaction(transactionToCosign);
 
-    return account.preV2SignCosignatureTransaction(cosignatureTransaction);
+    return account.signCosignatureTransaction(cosignatureTransaction);
   }
 
   static async getTransactions(
@@ -450,7 +450,7 @@ export class TransactionUtils {
   }
 
   static getLockFundFee(): number {
-    let abtType = TransactionType.AGGREGATE_BONDED_V1;
+    let abtType = TransactionType.AGGREGATE_BONDED_V2;
     let txHash = new TransactionHash("0".repeat(64), abtType);
     const lockFundTx = TransactionUtils.lockFundTx(txHash);
     return lockFundTx.maxFee.compact();
@@ -469,21 +469,12 @@ export class TransactionUtils {
 
     switch (txn.type) {
       case TransactionType.AGGREGATE_BONDED_V1:
-        {
-          let aggregateBondedTxn = txn as AggregateTransaction;
-          let addressInDeep = aggregateBondedTxn.innerTransactions.map((x) => {
-            return TransactionUtils.extractConfirmedRelatedAddressByTransactionType(
-              x
-            );
-          });
-          let allNewAddress = addressInDeep.flat();
-          addresses = addresses.concat(allNewAddress);
-        }
-        break;
       case TransactionType.AGGREGATE_COMPLETE_V1:
+      case TransactionType.AGGREGATE_BONDED_V2:
+      case TransactionType.AGGREGATE_COMPLETE_V2:
         {
-          let aggregateCompleteTxn = txn as AggregateTransaction;
-          let addressInDeep = aggregateCompleteTxn.innerTransactions.map(
+          let aggregateTxn = txn as AggregateTransaction;
+          let addressInDeep = aggregateTxn.innerTransactions.map(
             (x) => {
               return TransactionUtils.extractConfirmedRelatedAddressByTransactionType(
                 x
@@ -518,7 +509,7 @@ export class TransactionUtils {
           let tempTxn = txn as AccountLinkTransaction;
           let linkAccountAddress = PublicAccount.createFromPublicKey(
             tempTxn.remoteAccountKey,
-            AppState.networkType
+            AppState.networkType, 1
           ).address;
           addresses.push(linkAccountAddress);
         }
@@ -631,7 +622,7 @@ export class TransactionUtils {
     if (!selectedMultisigAddress && typeof transaction === "string") {
       // no cosigner, normal transaction
       let txn = TransactionMapping.createFromPayload(transaction)
-      const signedTransaction = account.preV2Sign(txn, genHash);
+      const signedTransaction = account.sign(txn, genHash);
       return { txnPayload: signedTransaction.payload };
     } else {
       // there is a cosigner, aggregate  bonded transaction
@@ -641,22 +632,22 @@ export class TransactionUtils {
       );
       const multisigPublicAccount = PublicAccount.createFromPublicKey(
         accInfo.publicKey,
-        AppState.networkType
+        AppState.networkType, 1
       );
       if(typeof transaction !== "string"){
         for(let i=0; i<transaction.length; ++i){
-          innerTxn.push(TransactionMapping.createFromPayload(transaction[i]).toAggregateV1(multisigPublicAccount))
+          innerTxn.push(TransactionMapping.createFromPayload(transaction[i]).toAggregate(multisigPublicAccount))
         }
       }
       else{
         let txn = TransactionMapping.createFromPayload(transaction)
-        innerTxn = [txn.toAggregateV1(multisigPublicAccount)];
+        innerTxn = [txn.toAggregate(multisigPublicAccount)];
       }
       const aggregateBondedTransaction = transactionBuilder.aggregateBonded(
         innerTxn,
         currentNodeTime
       );
-      const aggregateBondedTransactionSigned = account.preV2Sign(
+      const aggregateBondedTransactionSigned = account.sign(
         aggregateBondedTransaction,
         genHash
       );
@@ -664,7 +655,7 @@ export class TransactionUtils {
       const hashLockTransaction = TransactionUtils.lockFundTx(
         aggregateBondedTransactionSigned
       );
-      const hashLockTransactionSigned = account.preV2Sign(
+      const hashLockTransactionSigned = account.sign(
         hashLockTransaction,
         genHash
       );

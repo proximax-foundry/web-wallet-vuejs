@@ -67,7 +67,7 @@ import {
           multisigCosignatory.push(
             new MultisigCosignatoryModification(
               MultisigCosignatoryModificationType.Add,
-              PublicAccount.createFromPublicKey("0".repeat(64),AppState.networkType)
+              PublicAccount.createFromPublicKey("0".repeat(64),AppState.networkType, 1)
             )
           );
       }
@@ -75,7 +75,7 @@ import {
       if (removeCosign) {
         removeCosign.forEach((element, index) => {
           cosignatories[addedCosigners.length + index] =
-            PublicAccount.createFromPublicKey(element, AppState.networkType);
+            PublicAccount.createFromPublicKey(element, AppState.networkType, 1);
           multisigCosignatory.push(
             new MultisigCosignatoryModification(
               MultisigCosignatoryModificationType.Remove,
@@ -91,7 +91,7 @@ import {
   
       const publicAcc = PublicAccount.createFromPublicKey(
         publicKey,
-        AppState.networkType
+        AppState.networkType, 1
       );
       const findAcc = acc.multisigInfo.find((element) => element.level === 0);
       if (!findAcc) {
@@ -109,7 +109,7 @@ import {
       const aggregateBondedTx = txBuilder
         .aggregateBondedBuilder()
         .innerTransactions([
-          convertIntoMultisigTransaction.toAggregateV1(publicAcc),
+          convertIntoMultisigTransaction.toAggregate(publicAcc),
         ])
         .build();
       return aggregateBondedTx.maxFee.compact()/Math.pow(10, AppState.nativeToken.divisibility)
@@ -162,7 +162,7 @@ import {
         if (cosignKey.length == 64) {
           cosignatory = PublicAccount.createFromPublicKey(
             cosignKey,
-            AppState.networkType
+            AppState.networkType, 1
           );
         } else if (cosignKey.length == 40 || cosignKey.length == 46) {
           const address = Address.createFromRawAddress(cosignKey);
@@ -173,7 +173,7 @@ import {
             );
             cosignatory = PublicAccount.createFromPublicKey(
               accInfo.publicKey,
-              AppState.networkType
+              AppState.networkType, 1
             );
           } catch (error) {
             console.log(error);
@@ -204,7 +204,7 @@ import {
       const aggregateBondedTransaction = txBuilder
         .aggregateBondedBuilder(new UInt64(nodeTime.sendTimeStamp!))
         .innerTransactions([
-          convertIntoMultisigTransaction.toAggregateV1(
+          convertIntoMultisigTransaction.toAggregate(
             accountToConvert.publicAccount
           ),
         ])
@@ -212,14 +212,14 @@ import {
       if (!networkState.currentNetworkProfile) {
         throw new Error("Service unavailable");
       }
-      const signedAggregateBondedTransaction = accountToConvert.preV2Sign(
+      const signedAggregateBondedTransaction = accountToConvert.sign(
         aggregateBondedTransaction,
         networkState.currentNetworkProfile.generationHash
       );
       const lockFundsTransaction = TransactionUtils.lockFundTx(
         signedAggregateBondedTransaction
       );
-      const lockFundsTransactionSigned = accountToConvert.preV2Sign(
+      const lockFundsTransactionSigned = accountToConvert.sign(
         lockFundsTransaction,
         networkState.currentNetworkProfile.generationHash
       );
@@ -427,7 +427,7 @@ import {
         if (cosignKey.length == 64) {
           cosignatory[index] = PublicAccount.createFromPublicKey(
             cosignKey,
-            AppState.networkType
+            AppState.networkType, 1
           );
         } else if (cosignKey.length == 40 || cosignKey.length == 46) {
           // option to accept address
@@ -438,7 +438,7 @@ import {
             );
             cosignatory[index] = PublicAccount.createFromPublicKey(
               accInfo.publicKey,
-              AppState.networkType
+              AppState.networkType, 1
             );
           } catch (error) {
             console.log(error);
@@ -456,7 +456,7 @@ import {
       removeCosign.forEach((element, index) => {
         cosignatory[coSign.length + index] = PublicAccount.createFromPublicKey(
           element,
-          AppState.networkType
+          AppState.networkType, 1
         );
         multisigCosignatory.push(
           new MultisigCosignatoryModification(
@@ -487,14 +487,14 @@ import {
   
       const publicAcc = PublicAccount.createFromPublicKey(
         multisigAccount.publicKey,
-        AppState.networkType
+        AppState.networkType, 1
       );
 
       const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
 
       const aggregateBondedTransaction = txBuilder
         .aggregateBondedBuilder(new UInt64(nodeTime.sendTimeStamp!))
-        .innerTransactions([modifyMultisigTransaction.toAggregateV1(publicAcc)])
+        .innerTransactions([modifyMultisigTransaction.toAggregate(publicAcc)])
         .build();
   
       const initiator = wallet.accounts.find(
@@ -515,14 +515,14 @@ import {
         initiatorPrivateKey,
         AppState.networkType,1
       );
-      const signedAggregateBondedTransaction = initiatorAccount.preV2Sign(
+      const signedAggregateBondedTransaction = initiatorAccount.sign(
         aggregateBondedTransaction,
         networkState.currentNetworkProfile.generationHash
       );
       const lockFundsTransaction = TransactionUtils.lockFundTx(
         signedAggregateBondedTransaction
       );
-      const lockFundsTransactionSigned = initiatorAccount.preV2Sign(
+      const lockFundsTransactionSigned = initiatorAccount.sign(
         lockFundsTransaction,
         networkState.currentNetworkProfile.generationHash
       );

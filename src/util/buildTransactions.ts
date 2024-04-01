@@ -47,8 +47,6 @@ import {
     Message,
     EmptyMessage,
     TransactionHash,
-    AggregateCompleteV1TransactionBuilder,
-    AggregateBondedV1TransactionBuilder,
     HarvesterTransaction,
     AddHarvesterTransactionBuilder,
     RemoveHarvesterTransactionBuilder
@@ -134,7 +132,8 @@ export class BuildTransactions {
     }
 
     mosaicDefinition(owner: PublicAccount, 
-        supplyMutable: boolean, transferable: boolean, 
+        supplyMutable: boolean, transferable: boolean, restrictable: boolean, 
+        supplyForceImmutable: boolean, disableLocking: boolean, 
         divisibility: number, duration?: UInt64): MosaicDefinitionTransaction {
         const nonce = Helper.createNonceRandom();
 
@@ -146,6 +145,9 @@ export class BuildTransactions {
                 MosaicProperties.create({
                     supplyMutable: supplyMutable,
                     transferable: transferable,
+                    restrictable: restrictable,
+                    supplyForceImmutable: supplyForceImmutable,
+                    disableLocking: disableLocking,
                     divisibility: divisibility,
                     duration: (duration) ? duration : undefined
                 })
@@ -162,30 +164,30 @@ export class BuildTransactions {
 
         let abtDeadline = ChainConfigUtils.getABTMaxSafeDeadline(currentNodeTimetamp);
 
-        return this.transactionBuilderFactory.aggregateBondedV1()
+        return this.transactionBuilderFactory.aggregateBonded()
             .deadline(abtDeadline)
             .innerTransactions(innerTxn)
             .build();
     }
 
-    aggregateBondedBuilder(currentNodeTimetamp?: UInt64): AggregateBondedV1TransactionBuilder  {
+    aggregateBondedBuilder(currentNodeTimetamp?: UInt64): AggregateBondedTransactionBuilder  {
 
         let abtDeadline = ChainConfigUtils.getABTMaxSafeDeadline(currentNodeTimetamp);
 
-        return this.transactionBuilderFactory.aggregateBondedV1().deadline(abtDeadline);
+        return this.transactionBuilderFactory.aggregateBonded().deadline(abtDeadline);
     }
 
     aggregateComplete(innerTxn: InnerTransaction[]): AggregateTransaction {
 
-        return this.transactionBuilderFactory.aggregateCompleteV1 ()
+        return this.transactionBuilderFactory.aggregateComplete ()
             .deadline(Deadline.create())
             .innerTransactions(innerTxn)
             .build();
     }
 
-    aggregateCompleteBuilder(): AggregateCompleteV1TransactionBuilder {
+    aggregateCompleteBuilder(): AggregateCompleteTransactionBuilder {
 
-        return this.transactionBuilderFactory.aggregateCompleteV1();
+        return this.transactionBuilderFactory.aggregateComplete();
     }
 
     hashLock(mosaic: Mosaic, duration: UInt64, transactionHash: TransactionHash | SignedTransaction): HashLockTransaction {

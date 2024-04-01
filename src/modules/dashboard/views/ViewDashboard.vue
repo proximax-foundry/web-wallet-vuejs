@@ -426,7 +426,9 @@ export default defineComponent({
       allTxnQueryParams.publicKey = selectedAccount.value.publicKey;
       if(allTxnQueryParams.type.length === 0 || 
         allTxnQueryParams.type.includes(TransactionType.AGGREGATE_COMPLETE_V1) ||
-        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_BONDED_V1)){
+        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_BONDED_V1) || 
+        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_COMPLETE_V2) ||
+        allTxnQueryParams.type.includes(TransactionType.AGGREGATE_BONDED_V2)){
         allTxnQueryParams.firstLevel = false;
       }
       else{

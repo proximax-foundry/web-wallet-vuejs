@@ -392,7 +392,7 @@ const makeTransferPayload = async () => {
             const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(recipientInput.value))
             msg = EncryptedMessage.create(message.value, accountInfo.publicAccount, privateKey);
         } catch (error) {
-            msg = EncryptedMessage.create(message.value, PublicAccount.createFromPublicKey(publicKeyInput.value,AppState.networkType) , privateKey)
+            msg = EncryptedMessage.create(message.value, PublicAccount.createFromPublicKey(publicKeyInput.value,AppState.networkType, 1) , privateKey)
         }
         } else {
         msg = PlainMessage.create(message.value);
@@ -591,7 +591,7 @@ const checkEncryptable = () => {
 
 const checkPublicKey = () => {
     try {
-        const publicAccount = PublicAccount.createFromPublicKey(publicKeyInput.value, AppState.networkType)
+        const publicAccount = PublicAccount.createFromPublicKey(publicKeyInput.value, AppState.networkType, 1)
         if (publicAccount.address.plain() == Address.createFromRawAddress(recipientInput.value).plain()) {
             showPublicKeyError.value = false;
         }

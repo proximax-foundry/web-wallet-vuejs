@@ -47,7 +47,7 @@ export class Sirius {
     }
 
     static async scanAsset(publicKey: string): Promise<SimpleSDA[]> {
-        let distributorPublicAccount = PublicAccount.createFromPublicKey(publicKey, AppState.networkType);
+        let distributorPublicAccount = PublicAccount.createFromPublicKey(publicKey, AppState.networkType, 1);
 
         try {
             let accountInfo = await AppState.chainAPI!.accountAPI.getAccountInfo(distributorPublicAccount.address);
@@ -146,7 +146,7 @@ export class Sirius {
         */
     static createDistributeAggregateTransactions(distributorPublicKey: string, distributionList: DistributeListInterface[], aggregateNum: number, sda: SimpleSDA, currentNodeTime: UInt64): AggregateTransaction[] {
 
-        let distributorPublicAccount = PublicAccount.createFromPublicKey(distributorPublicKey, AppState.networkType);
+        let distributorPublicAccount = PublicAccount.createFromPublicKey(distributorPublicKey, AppState.networkType, 1);
         let txns: AggregateTransaction[] = [];
 
         let totalTxnCount = Math.ceil(distributionList.length / aggregateNum);
@@ -163,7 +163,7 @@ export class Sirius {
             let recipient: Address;
 
             if(distributionList[i].publicKeyOrAddress.length === 64){
-                let publicAccount = PublicAccount.createFromPublicKey(distributionList[i].publicKeyOrAddress, AppState.networkType);
+                let publicAccount = PublicAccount.createFromPublicKey(distributionList[i].publicKeyOrAddress, AppState.networkType, 1);
                 recipient = publicAccount.address;
             }
             else{
@@ -192,7 +192,7 @@ export class Sirius {
             let innerTxn: InnerTransaction[] = [];
 
             for (let x = 0; x < transferTxnRange.length; ++x) {
-                innerTxn.push(transferTxnRange[x].toAggregateV1(distributorPublicAccount));
+                innerTxn.push(transferTxnRange[x].toAggregate(distributorPublicAccount));
             }
 
             let aggregateTransaction = AppState.buildTxn!.aggregateBonded(innerTxn, currentNodeTime);
@@ -206,7 +206,7 @@ export class Sirius {
     static getLockFundTransactionFee(): number {
         // const nativeTokenNamespace = AppState.nativeToken.fullNamespace
         const lockingAtomicFee = networkState.currentNetworkProfileConfig!.lockedFundsPerAggregate ?? 0;
-        let transactionHash = new TransactionHash("0".repeat(64), TransactionType.AGGREGATE_BONDED_V1);
+        let transactionHash = new TransactionHash("0".repeat(64), TransactionType.AGGREGATE_BONDED_V2);
         let lockFundTxn = AppState.buildTxn!.hashLock(
             new Mosaic(new NamespaceId("prx.xpx"), UInt64.fromUint(lockingAtomicFee)),
             UInt64.fromUint(ChainConfigUtils.getABTMaxSafeDuration()),
@@ -236,7 +236,7 @@ export class Sirius {
 
         for(let i =0; i < aggregateBondedTxns.length; ++i){
 
-            let signedABT = account.preV2Sign(aggregateBondedTxns[i], networkState.currentNetworkProfile!.generationHash);
+            let signedABT = account.sign(aggregateBondedTxns[i], networkState.currentNetworkProfile!.generationHash);
             signedABTs.push(signedABT);
 
             let lockFundTxn = AppState.buildTxn!.hashLock(
@@ -244,7 +244,7 @@ export class Sirius {
                 UInt64.fromUint(ChainConfigUtils.getABTMaxSafeDuration()),
                 signedABT
             );
-            let signedHashLockTxn = account.preV2Sign(lockFundTxn, networkState.currentNetworkProfile!.generationHash);
+            let signedHashLockTxn = account.sign(lockFundTxn, networkState.currentNetworkProfile!.generationHash);
             signedHashLockTxns.push(signedHashLockTxn);
 
             txnsConfirmationBlock.push({ txnHash: signedABT.hash, block: null});

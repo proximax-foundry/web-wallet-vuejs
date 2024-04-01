@@ -9,6 +9,9 @@ export class Asset{
     expirationBlock: number | null = null;
     supplyMutable: boolean | null = null;
     transferable: boolean | null = null;
+    supplyForceImmutable: boolean | null = null;
+    restrictable: boolean | null = null;
+    disableLocking: boolean | null = null;
     creator: string | null; 
     namespaceNames: string[] = []; 
     height: number = 0;
@@ -23,6 +26,9 @@ export class Asset{
         newAsset.divisibility = this.divisibility;
         newAsset.supplyMutable = this.supplyMutable;
         newAsset.transferable = this.transferable;
+        newAsset.supplyForceImmutable = this.supplyForceImmutable;
+        newAsset.restrictable = this.restrictable;
+        newAsset.disableLocking = this.disableLocking;
         newAsset.creator = this.creator;
         newAsset.duration = this.duration;
         newAsset.expirationBlock = this.expirationBlock;

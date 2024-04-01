@@ -283,7 +283,7 @@ const txnFee = computed(() => {
         return removeSdaExchangeTxn.maxFee?.compact() / Math.pow(10, AppState.nativeToken.divisibility)
     }
     const multisigAcc = [...walletState.currentLoggedInWallet.accounts, ...walletState.currentLoggedInWallet.others].find(acc => acc.address == Address.createFromRawAddress(props.owner).plain())
-    const innerTxn = [removeSdaExchangeTxn.toAggregateV1(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType))];
+    const innerTxn = [removeSdaExchangeTxn.toAggregate(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType, 1))];
     return AppState.buildTxn.aggregateBonded(innerTxn).maxFee.compact() / Math.pow(10, AppState.nativeToken.divisibility)
 
 })
@@ -348,17 +348,17 @@ const removeOffer = async() => {
     const acc = Account.createFromPrivateKeyV1(privateKey, AppState.networkType)
     const generationHash = networkState.currentNetworkProfile.generationHash
     if (!isMultisig.value) {
-        const signedTransaction = acc.preV2Sign(removeSdaExchangeTxn, generationHash);
+        const signedTransaction = acc.sign(removeSdaExchangeTxn, generationHash);
         await TransactionUtils.announceTransaction(signedTransaction)
     }else{
         const multisigAcc = [...walletState.currentLoggedInWallet.accounts, ...walletState.currentLoggedInWallet.others].find(acc => acc.address == plainAddress)
-        const innerTxn = [removeSdaExchangeTxn.toAggregateV1(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType))];
+        const innerTxn = [removeSdaExchangeTxn.toAggregate(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType, 1))];
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
         const aggregateBondedTransaction = AppState.buildTxn.aggregateBonded(innerTxn, new UInt64(nodeTime.sendTimeStamp!));
-        const aggregateBondedTransactionSigned = acc.preV2Sign(aggregateBondedTransaction, generationHash);
+        const aggregateBondedTransactionSigned = acc.sign(aggregateBondedTransaction, generationHash);
 
         const hashLockTransaction = TransactionUtils.lockFundTx(aggregateBondedTransactionSigned)
-        const hashLockTransactionSigned = acc.preV2Sign(hashLockTransaction, generationHash)
+        const hashLockTransactionSigned = acc.sign(hashLockTransaction, generationHash)
         TransactionUtils.announceLF_AND_addAutoAnnounceABT(hashLockTransactionSigned, aggregateBondedTransactionSigned)
     }
     router.push({ name: "ViewAccountPendingTransactions", params: { address: acc.address.plain() } })

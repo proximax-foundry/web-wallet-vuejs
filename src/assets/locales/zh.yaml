@@ -78,6 +78,9 @@ asset:
   supplyMsg3: '例如：900,000,000,000,000'
   supplyMutableMsg: 如果你勾选 "供应可变"，供应可以改变。
   transferableMsg: 如果你勾选 "可转让"，资产就可以转让。
+  restrictableMsg: 'If you tick this, asset can be restricted.'
+  supplyForceImmutableMsg: 'If you tick this, supply will be totally immutable.'
+  disableLockingMsg: 'If you tick this, locking will be disabled for the asset.'
 dashboard:
   accDescription: >-
     A key pair (private and public key) associated with a mutable state stored
@@ -197,6 +200,7 @@ general:
   digitalAsset: 数字资产
   disable: 禁用
   disabled: 已禁用
+  disableLocking: Disable Locking
   divisibility: 可分性
   done: 已完成
   download: 下载
@@ -293,6 +297,7 @@ general:
   remove: 移除
   rentalFee: 租用费
   requiredField: 必须填写
+  restrictable: Restrictable
   save: 储存
   scheme: 方案
   sda: 数字资产 | 数字资产
@@ -310,6 +315,7 @@ general:
   signerAcc: Signer Account
   supply: 供应
   supplyMutable: 供给可变
+  supplyForceImmutable: Supply Force Immutable
   swap: 互换
   to: 致
   topUp: '充值{tokenName}'

@@ -43,7 +43,7 @@ export class Helper {
     }
 
     static createEncryptedMessage(message: string, recipientPublicKey: string, networkType: NetworkType, senderPrivateKey: string): EncryptedMessage {
-        const publicAccount = PublicAccount.createFromPublicKey(recipientPublicKey, networkType);
+        const publicAccount = PublicAccount.createFromPublicKey(recipientPublicKey, networkType, 1);
         return EncryptedMessage.create(message, publicAccount, senderPrivateKey);
     }
 
@@ -69,10 +69,10 @@ export class Helper {
 
     static appendInnerTransaction(transactions: Transaction[], publicKeyTosign: string, innerTransactions: InnerTransaction[]): InnerTransaction[] {
         const networkType = transactions[0].version.networkType;
-        const publicAccount = PublicAccount.createFromPublicKey(publicKeyTosign, networkType);
+        const publicAccount = PublicAccount.createFromPublicKey(publicKeyTosign, networkType, 1);
 
         transactions.forEach((transaction) => {
-            innerTransactions.push(transaction.toAggregateV1(publicAccount));
+            innerTransactions.push(transaction.toAggregate(publicAccount));
         });
 
         return innerTransactions;
@@ -80,11 +80,11 @@ export class Helper {
 
     static createInnerTransaction(transactions: Transaction[], publicKeyTosign: string): InnerTransaction[] {
         const networkType = transactions[0].version.networkType;
-        const publicAccount = PublicAccount.createFromPublicKey(publicKeyTosign, networkType);
+        const publicAccount = PublicAccount.createFromPublicKey(publicKeyTosign, networkType, 1);
         const newInnerTransaction: InnerTransaction[] = [];
 
         transactions.forEach((transaction) => {
-            newInnerTransaction.push(transaction.toAggregateV1(publicAccount));
+            newInnerTransaction.push(transaction.toAggregate(publicAccount));
         });
 
         return newInnerTransaction;
@@ -102,8 +102,8 @@ export class Helper {
         return MosaicSupplyType;
     }
 
-    static createPublicAccount(publicKey: string, network: NetworkType): PublicAccount {
-        return PublicAccount.createFromPublicKey(publicKey, network);
+    static createPublicAccount(publicKey: string, network: NetworkType, version: number = 1): PublicAccount {
+        return PublicAccount.createFromPublicKey(publicKey, network, version);
     }
 
     static createAccount(privateKey: string, network: NetworkType): Account {
@@ -310,7 +310,7 @@ export class Helper {
     }
 
     static samplePubAcc(): PublicAccount{
-        return PublicAccount.createFromPublicKey("0".repeat(64), NetworkType.TEST_NET);
+        return PublicAccount.createFromPublicKey("0".repeat(64), NetworkType.TEST_NET, 1);
     }
 }
 

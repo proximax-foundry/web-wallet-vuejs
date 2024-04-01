@@ -81,7 +81,9 @@ export class TransactionFilterTypes{
     static getAggregateTypes(){
         return [
             TransactionType.AGGREGATE_BONDED_V1,
-            TransactionType.AGGREGATE_COMPLETE_V1
+            TransactionType.AGGREGATE_COMPLETE_V1,
+            TransactionType.AGGREGATE_BONDED_V2,
+            TransactionType.AGGREGATE_COMPLETE_V2
         ];
         
     }

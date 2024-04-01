@@ -138,7 +138,8 @@ const checkHarvester = () => {
   try {
     harvesterPublicAccount.value = PublicAccount.createFromPublicKey(
       harvesterKey.value,
-      AppState.networkType
+      AppState.networkType,
+      1
     );
     showHarvesterError.value = false;
   } catch (error) {
@@ -164,7 +165,7 @@ const transactionFee = computed(() => {
     let txn = AppState.buildTxn.addHarvester(Helper.samplePubAcc());
     if (selectedMultisigAddress.value) {
       let aggTxn = AppState.buildTxn.aggregateBonded([
-        txn.toAggregateV1(Helper.samplePubAcc()),
+        txn.toAggregate(Helper.samplePubAcc()),
       ]);
       return Helper.amountFormatterSimple(
         aggTxn.maxFee.compact(),
@@ -351,7 +352,7 @@ const createTxn = async () => {
 
   if (selectedMultisigAddress.value) {
     const txn = txnBuilder.harvesterKey(harvesterPublicAccount.value).build();
-    const innerTxn = txn.toAggregateV1(multisigPublicAccount.value);
+    const innerTxn = txn.toAggregate(multisigPublicAccount.value);
     const innerTxns = [innerTxn.serialize()];
     unsignedTxnPayload = innerTxns
   } else {

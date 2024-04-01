@@ -234,7 +234,8 @@ export class ChainUtils{
 
     static announceTransaction(signedTx: SignedTransaction): void{
 
-      if(signedTx.type === TransactionType.AGGREGATE_BONDED_V1){
+      if(signedTx.type === TransactionType.AGGREGATE_BONDED_V1 || 
+        signedTx.type === TransactionType.AGGREGATE_BONDED_V2){
         throw new Error("Invalid, cannot be aggregate bonded transaction");
       }
 
@@ -245,7 +246,7 @@ export class ChainUtils{
 
     static announceBondedTransaction(signedTx: SignedTransaction): void{
 
-      if(signedTx.type !== TransactionType.AGGREGATE_BONDED_V1){
+      if(signedTx.type !== TransactionType.AGGREGATE_BONDED_V2){
         throw new Error("Invalid, not aggregate bonded transaction");
       }
 
