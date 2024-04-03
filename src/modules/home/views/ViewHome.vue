@@ -1,19 +1,14 @@
 <template>
-  <div>
-    <div
-      class="container mx-auto md:grid md:grid-cols-2 lg:px-20 xl:px-40 gap-4 mt-8 md:mt-0"
-    >
-      <IntroTextComponent />
-      <div
-        class="md:col-span-1 bg-white mx-5 md:mx-0 px-30 pt-1 md:pt-0 rounded-md"
-      >
-        <div class="text-center font-semibold mt-16 text-gray-700 text-lg">
-          {{ $t("home.signIn") }}
-        </div>
-        <div class="px-5 text-gray-700 md:text-lg text-tsm mt-4">
-          <SignInComponent />
-        </div>
-        <!--  <div v-if ='currentNetwork == "Sirius Mainnet"'>
+  <div
+    class="md:col-span-1 bg-white mx-5 md:mx-0 px-30 pt-1 md:pt-0 rounded-md"
+  >
+    <div class="text-center font-semibold mt-16 text-gray-700 text-lg">
+      {{ $t("home.signIn") }}
+    </div>
+    <div class="px-5 text-gray-700 md:text-lg text-tsm mt-4">
+      <SignInComponent />
+    </div>
+    <!--  <div v-if ='currentNetwork == "Sirius Mainnet"'>
       <h2 class = 'my-10 ml-auto mr-auto'><span class = 'text-semibold'>or</span></h2>
       <div class="px-5 mt-4  text-center">
         <router-link :to="{ name: 'ViewHomeSignInSiriusID' }" >
@@ -23,30 +18,27 @@
         </router-link>
       </div>
       </div> -->
-        <div class="text-center text-xs mt-6">{{ $t("wallet.noWallet") }}</div>
-        <div class="text-center text-xs text-blue-link font-semibold">
-          <router-link :to="{ name: 'ViewWalletCreateSelection' }"
-            >{{ $t("wallet.createSiriusWallet") }} ></router-link
-          >
-        </div>
-        <div
-          class="text-center text-xs text-blue-link font-semibold"
-          v-if="migrationUI && haveOldWallet"
-        >
-          <div class="cursor-pointer" @click="oldWalletBackup">
-            {{ $t("wallet.backupOldWallet") }}
-          </div>
-        </div>
-        <div class="mt-1 h-16"></div>
+    <div class="text-center text-xs mt-6">{{ $t("wallet.noWallet") }}</div>
+    <div class="text-center text-xs text-blue-link font-semibold">
+      <router-link :to="{ name: 'ViewWalletCreateSelection' }"
+        >{{ $t("wallet.createSiriusWallet") }} ></router-link
+      >
+    </div>
+    <div
+      class="text-center text-xs text-blue-link font-semibold"
+      v-if="migrationUI && haveOldWallet"
+    >
+      <div class="cursor-pointer" @click="oldWalletBackup">
+        {{ $t("wallet.backupOldWallet") }}
       </div>
     </div>
+    <div class="mt-1 h-16"></div>
   </div>
 </template>
 
 <script setup lang="ts">
 //import SignInSiriusIDModal from '@/modules/home/views/ViewHomeSignInSiriusID.vue'
 import SignInComponent from "@/modules/home/components/SignInComponent.vue";
-import IntroTextComponent from "@/components/IntroTextComponent.vue";
 import CryptoJS from "crypto-js";
 import { appSetting } from "@/config/appSetting";
 import { WalletUtils } from "@/util/walletUtils";
