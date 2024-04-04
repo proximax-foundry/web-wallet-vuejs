@@ -444,12 +444,7 @@ const searchedTransactions = ref([]);
 const recentTransferTransactions = ref([]);
 let allTxnQueryParams = Helper.createTransactionQueryParams();
 let transactionGroupType = Helper.getTransactionGroupType();
-let selectedTxnGroupType = transactionGroupType.CONFIRMED;
-let selectedTxnType = ref("all");
 
-let endOfRecords = false;
-let searchingTxn = ref(false);
-let boolIsTxnFetched = ref(true);
 let blockDescOrderSortingField = Helper.createTransactionFieldOrder(
   Helper.getQueryParamOrder_v2().DESC,
   Helper.getTransactionSortField().BLOCK
