@@ -182,15 +182,14 @@
 
 <script setup lang="ts">
 import PendingDataTable from "@/modules/account/components/PendingDataTable.vue";
-import { computed, defineComponent, ref, getCurrentInstance, watch } from "vue";
+import { computed,  ref, getCurrentInstance, watch } from "vue";
 import {
-  TransactionFilterType,
   TransactionFilterTypes,
 } from "@/modules/dashboard/model/transactions/transaction";
 import MixedTxnDataTable from "@/modules/dashboard/components/TransactionDataTable/MixedTxnDataTable.vue";
 import DashboardAssetDataTable from "@/modules/dashboard/components/DashboardAssetDataTable.vue";
 import AddressQRModal from "@/modules/dashboard/components/AddressQRModal.vue";
-import { copyToClipboard, getXPXcurrencyPrice } from "@/util/functions";
+import { copyToClipboard } from "@/util/functions";
 import { Helper } from "@/util/typeHelper";
 import { useToast } from "primevue/usetoast";
 import { walletState } from "@/state/walletState";
@@ -198,18 +197,13 @@ import { ChainUtils } from "@/util/chainUtils";
 import { networkState } from "@/state/networkState";
 import { DashboardService } from "@/modules/dashboard/service/dashboardService";
 import qrcode from "qrcode-generator";
-import { toSvg } from "jdenticon";
-import { ThemeStyleConfig } from "@/models/stores/themeStyleConfig";
 import { listenerState } from "@/state/listenerState";
 import { WalletUtils } from "@/util/walletUtils";
 import { AppState } from "@/state/appState";
 import { useI18n } from "vue-i18n";
-import { TransactionType, NetworkType } from "tsjs-xpx-chain-sdk";
+import {  NetworkType, TransactionMapping } from "tsjs-xpx-chain-sdk";
+import { TransactionUtils } from "@/util/transactionUtils";
 
-const props = defineProps<{
-  type: string;
-  address:string
-}>();
 
 const { t } = useI18n();
 const toast = useToast();
@@ -220,18 +214,12 @@ const showAddressQRModal = ref(false);
 const showMessageModal = ref(false);
 const showDecryptMessageModal = ref(false);
 const showCosignModal = ref(false);
-const txMessage = ref("");
 const messagePayload = ref("");
 const publicKeyToUse = ref("");
-const recipientAddress = ref("");
-const signedPublicKey = ref([]);
-const signerPublicKey = ref([]);
-const txHash = ref("");
-//const decryptedMessage = ref('');
+
 const manualPublicKey = ref(false);
 const initialSignerPublicKey = ref("");
 const isInitialSender = ref(false);
-const cosignModalKey = ref(0);
 const decryptMessageKey = ref(0);
 
 const isPublicNetwork = computed(() => {
@@ -315,14 +303,12 @@ const openDecryptMsgModal = async (data) => {
   decryptMessageKey.value++;
   showDecryptMessageModal.value = true;
 };
-const selectedCosignHash = ref("");
 
 
 const currentNativeTokenName = computed(() => AppState.nativeToken.label);
 const currentNativeTokenDivisibility = computed(
   () => AppState.nativeToken.divisibility
 );
-const currentNativeTokenId = computed(() => AppState.nativeToken.assetId);
 const displyFaucet = computed(() => {
   return AppState.networkType == NetworkType.TEST_NET ? true : false;
 });
@@ -343,9 +329,7 @@ const faucetLink = computed(() => {
     }
   }
 });
-// let currentAccount = walletState.currentLoggedInWallet.selectDefaultAccount() ? walletState.currentLoggedInWallet.selectDefaultAccount() : walletState.currentLoggedInWallet.accounts[0];
-// currentAccount.default = true;
-// const selectedAccount = ref(currentAccount);
+
 let selectedAccount = computed(() => {
   if (!walletState.currentLoggedInWallet) {
     return null;
@@ -362,12 +346,8 @@ const accountAssets = computed(() => {
   let filteredAsset = defaultAccAsset.filter((asset) => asset.rawAmount != 0);
   return filteredAsset;
 });
-const currentBlock = computed(() => AppState.readBlockHeight);
 
-const selectedAccountPublicKey = computed(
-  () => selectedAccount.value.publicKey
-);
-// const selectedAccountAddress = computed(()=> Helper.createAddress(selectedAccount.value.address).pretty().substring(0, 13) + '....' + Helper.createAddress(selectedAccount.value.address).pretty().substring(Helper.createAddress(selectedAccount.value.address).pretty().length - 11));
+
 const selectedAccountAddress = computed(() => {
   if (selectedAccount.value) {
     return Helper.createAddress(selectedAccount.value.address).pretty();
@@ -390,24 +370,8 @@ const selectedAccountAddressShort = computed(() => {
     return null;
   }
 });
-const selectedAccountDirectChilds = computed(() => {
-  let multisigInfo = selectedAccount.value.multisigInfo.find(
-    (x) => x.level === 0
-  );
-  if (multisigInfo) {
-    return multisigInfo.getMultisigAccountsAddress(AppState.networkType);
-  } else {
-    return [];
-  }
-});
-const selectedAccountNamespaceCount = computed(() => {
-  return selectedAccount.value.namespaces.length;
-});
-const selectedAccountAssetsCount = computed(() => {
-  return selectedAccount.value.assets.filter(
-    (x) => x.idHex !== currentNativeTokenId.value
-  ).length;
-});
+
+
 const selectedAccountBalance = computed(() => {
   if (!selectedAccount.value) {
     return null;
@@ -482,9 +446,7 @@ let allTxnQueryParams = Helper.createTransactionQueryParams();
 let transactionGroupType = Helper.getTransactionGroupType();
 let selectedTxnGroupType = transactionGroupType.CONFIRMED;
 let selectedTxnType = ref("all");
-let txnTypeList = Object.entries(TransactionFilterType).map(
-  ([label, value]) => ({ label, value })
-);
+
 let endOfRecords = false;
 let searchingTxn = ref(false);
 let boolIsTxnFetched = ref(true);
@@ -532,90 +494,16 @@ let loadRecentTransferTransactions = async () => {
     );
   }
 };
-const reloadSearchTxns = () => {
-  allTxnQueryParams.pageNumber = 1;
-  endOfRecords = false;
 
-  searchTransaction();
-};
-const loadMoreTxns = () => {
-  searchTransaction(true);
-};
-const searchTransaction = async (loadMore = false) => {
-  allTxnQueryParams.pageNumber = loadMore ? allTxnQueryParams.pageSize + 1 : 1;
-  allTxnQueryParams.publicKey = selectedAccount.value.publicKey;
-  if (
-    allTxnQueryParams.type.length === 0 ||
-    allTxnQueryParams.type.includes(TransactionType.AGGREGATE_COMPLETE_V1) ||
-    allTxnQueryParams.type.includes(TransactionType.AGGREGATE_BONDED_V1)
-  ) {
-    allTxnQueryParams.firstLevel = false;
-  } else {
-    allTxnQueryParams.firstLevel = true;
-  }
-  searchingTxn.value = true;
-  let transactionSearchResult = await dashboardService.searchTxns(
-    selectedTxnGroupType,
-    allTxnQueryParams
-  );
-  if (
-    transactionSearchResult.pagination.pageNumber <=
-    allTxnQueryParams.pageNumber
-  ) {
-    endOfRecords = true;
-  } else {
-    endOfRecords = false;
-  }
-  searchingTxn.value = false;
-  let formattedTxns = [];
-  switch (selectedTxnGroupType) {
-    case transactionGroupType.CONFIRMED:
-      formattedTxns = await formatConfirmedTransaction(
-        transactionSearchResult.transactions
-      );
-      break;
-    case transactionGroupType.UNCONFIRMED:
-      formattedTxns = await formatUnconfirmedTransaction(
-        transactionSearchResult.transactions
-      );
-      break;
-    case transactionGroupType.PARTIAL:
-      formattedTxns = await formatPartialTransaction(
-        transactionSearchResult.transactions
-      );
-      break;
-  }
-  if (loadMore) {
-    let tempTxns = searchedTransactions.value.concat(formattedTxns);
-    searchedTransactions.value = removeDuplicateTxn(tempTxns);
-  } else {
-    searchedTransactions.value = formattedTxns;
-  }
-  boolIsTxnFetched.value = true;
-};
 
-const explorerBaseURL = computed(
-  () => networkState.currentNetworkProfile.chainExplorer.url
-);
-const addressExplorerURL = computed(
-  () =>
-    explorerBaseURL.value +
-    networkState.currentNetworkProfile.chainExplorer.addressRoute
-);
-const hashExplorerURL = computed(
-  () =>
-    explorerBaseURL.value +
-    networkState.currentNetworkProfile.chainExplorer.hashRoute
-);
+
 const recentTransferTxnRow = ref([]);
-let themeConfig = new ThemeStyleConfig("ThemeStyleConfig");
-themeConfig.init();
-const jdenticonConfig = themeConfig.jdenticonConfig;
+
 const formatRecentTransfer = (transactions) => {
   let transferTxn = [];
   let nativeTokenTxns = transactions.filter((txn) => txn.amountTransfer > 0);
   for (const txn of nativeTokenTxns) {
-    let formattedTransferTxn = {};
+    let formattedTransferTxn ;
     if (
       selectedAccountAddressPlain.value == txn.sender &&
       selectedAccountAddressPlain.value == txn.recipient
@@ -654,306 +542,7 @@ const formatRecentTransfer = (transactions) => {
   }
   return transferTxn;
 };
-const formatConfirmedTransaction = async (transactions) => {
-  let formattedTxns = [];
-  switch (selectedTxnType.value) {
-    case TransactionFilterType.TRANSFER:
-      formattedTxns = await dashboardService.formatConfirmedMixedTxns(
-        transactions
-      );
-      break;
-    case TransactionFilterType.ACCOUNT:
-      formattedTxns = await dashboardService.formatConfirmedAccountTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.AGGREGATE:
-      formattedTxns =
-        await dashboardService.formatConfirmedAggregateTransaction(
-          transactions
-        );
-      break;
-    case TransactionFilterType.RESTRICTION:
-      formattedTxns =
-        await dashboardService.formatConfirmedRestrictionTransaction(
-          transactions
-        );
-      break;
-    case TransactionFilterType.SECRET:
-      formattedTxns = await dashboardService.formatConfirmedSecretTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.ALIAS:
-      formattedTxns = await dashboardService.formatConfirmedAliasTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.ASSET:
-      formattedTxns = await dashboardService.formatConfirmedAssetTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.METADATA:
-      formattedTxns = await dashboardService.formatConfirmedMetadataTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.CHAIN:
-      formattedTxns = await dashboardService.formatConfirmedChainTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.EXCHANGE:
-      formattedTxns = await dashboardService.formatConfirmedExchangeTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.LINK:
-      formattedTxns = await dashboardService.formatConfirmedLinkTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.LOCK:
-      formattedTxns = await dashboardService.formatConfirmedLockTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.NAMESPACE:
-      formattedTxns =
-        await dashboardService.formatConfirmedNamespaceTransaction(
-          transactions
-        );
-      break;
-    default:
-      formattedTxns = await dashboardService.formatConfirmedMixedTxns(
-        transactions
-      );
-      break;
-  }
-  return formattedTxns;
-};
-const formatUnconfirmedTransaction = async (transactions) => {
-  let formattedTxns = [];
-  switch (selectedTxnType.value) {
-    case TransactionFilterType.TRANSFER:
-      formattedTxns = await dashboardService.formatUnconfirmedMixedTxns(
-        transactions
-      );
-      break;
-    case TransactionFilterType.ACCOUNT:
-      formattedTxns =
-        await dashboardService.formatUnconfirmedAccountTransaction(
-          transactions
-        );
-      break;
-    case TransactionFilterType.AGGREGATE:
-      formattedTxns =
-        await dashboardService.formatUnconfirmedAggregateTransaction(
-          transactions
-        );
-      break;
-    case TransactionFilterType.RESTRICTION:
-      formattedTxns =
-        await dashboardService.formatUnconfirmedRestrictionTransaction(
-          transactions
-        );
-      break;
-    case TransactionFilterType.SECRET:
-      formattedTxns = await dashboardService.formatUnconfirmedSecretTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.ALIAS:
-      formattedTxns = await dashboardService.formatUnconfirmedAliasTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.ASSET:
-      formattedTxns = await dashboardService.formatUnconfirmedAssetTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.METADATA:
-      formattedTxns =
-        await dashboardService.formatUnconfirmedMetadataTransaction(
-          transactions
-        );
-      break;
-    case TransactionFilterType.CHAIN:
-      formattedTxns = await dashboardService.formatUnconfirmedChainTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.EXCHANGE:
-      formattedTxns =
-        await dashboardService.formatUnconfirmedExchangeTransaction(
-          transactions
-        );
-      break;
-    case TransactionFilterType.LINK:
-      formattedTxns = await dashboardService.formatUnconfirmedLinkTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.LOCK:
-      formattedTxns = await dashboardService.formatUnconfirmedLockTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.NAMESPACE:
-      formattedTxns =
-        await dashboardService.formatUnconfirmedNamespaceTransaction(
-          transactions
-        );
-      break;
-  }
-  return formattedTxns;
-};
-const formatPartialTransaction = async (transactions) => {
-  let formattedTxns = [];
-  switch (selectedTxnType.value) {
-    case TransactionFilterType.TRANSFER:
-      formattedTxns = await dashboardService.formatPartialMixedTxns(
-        transactions
-      );
-      break;
-    case TransactionFilterType.ACCOUNT:
-      formattedTxns = await dashboardService.formatPartialAccountTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.AGGREGATE:
-      formattedTxns = await dashboardService.formatPartialAggregateTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.RESTRICTION:
-      formattedTxns =
-        await dashboardService.formatPartialRestrictionTransaction(
-          transactions
-        );
-      break;
-    case TransactionFilterType.SECRET:
-      formattedTxns = await dashboardService.formatPartialSecretTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.ALIAS:
-      formattedTxns = await dashboardService.formatPartialAliasTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.ASSET:
-      formattedTxns = await dashboardService.formatPartialAssetTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.METADATA:
-      formattedTxns = await dashboardService.formatPartialMetadataTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.CHAIN:
-      formattedTxns = await dashboardService.formatPartialChainTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.EXCHANGE:
-      formattedTxns = await dashboardService.formatPartialExchangeTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.LINK:
-      formattedTxns = await dashboardService.formatPartialLinkTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.LOCK:
-      formattedTxns = await dashboardService.formatPartialLockTransaction(
-        transactions
-      );
-      break;
-    case TransactionFilterType.NAMESPACE:
-      formattedTxns = await dashboardService.formatPartialNamespaceTransaction(
-        transactions
-      );
-      break;
-  }
-  return formattedTxns;
-};
-const changeTxnGroupType = (txnGroupType) => {
-  searchedTransactions.value = [];
-  switch (txnGroupType) {
-    case transactionGroupType.CONFIRMED:
-      selectedTxnGroupType = transactionGroupType.CONFIRMED;
-      break;
-    case transactionGroupType.UNCONFIRMED:
-      selectedTxnGroupType = transactionGroupType.UNCONFIRMED;
-      break;
-    case transactionGroupType.PARTIAL:
-      selectedTxnGroupType = transactionGroupType.PARTIAL;
-      break;
-  }
-  searchTransaction();
-};
-const changeSearchTxnType = () => {
-  boolIsTxnFetched.value = false;
-  searchedTransactions.value = [];
-  let txnFilterGroup = selectedTxnType.value;
-  switch (txnFilterGroup) {
-    case TransactionFilterType.TRANSFER:
-      allTxnQueryParams.type = TransactionFilterTypes.getTransferTypes();
-      break;
-    case TransactionFilterType.ACCOUNT:
-      allTxnQueryParams.type = TransactionFilterTypes.getAccountTypes();
-      break;
-    case TransactionFilterType.ASSET:
-      allTxnQueryParams.type = TransactionFilterTypes.getAssetTypes();
-      break;
-    case TransactionFilterType.ALIAS:
-      allTxnQueryParams.type = TransactionFilterTypes.getAliasTypes();
-      break;
-    case TransactionFilterType.NAMESPACE:
-      allTxnQueryParams.type = TransactionFilterTypes.getNamespaceTypes();
-      break;
-    case TransactionFilterType.METADATA:
-      allTxnQueryParams.type = TransactionFilterTypes.getMetadataTypes();
-      break;
-    case TransactionFilterType.CHAIN:
-      allTxnQueryParams.type = TransactionFilterTypes.getChainTypes();
-      break;
-    case TransactionFilterType.EXCHANGE:
-      allTxnQueryParams.type = TransactionFilterTypes.getExchangeTypes();
-      break;
-    case TransactionFilterType.AGGREGATE:
-      allTxnQueryParams.type = TransactionFilterTypes.getAggregateTypes();
-      break;
-    case TransactionFilterType.LINK:
-      allTxnQueryParams.type = TransactionFilterTypes.getLinkTypes();
-      break;
-    case TransactionFilterType.LOCK:
-      allTxnQueryParams.type = TransactionFilterTypes.getLockTypes();
-      break;
-    case TransactionFilterType.SECRET:
-      allTxnQueryParams.type = TransactionFilterTypes.getSecretTypes();
-      break;
-    case TransactionFilterType.RESTRICTION:
-      allTxnQueryParams.type = TransactionFilterTypes.getRestrictionTypes();
-      break;
-    default:
-      allTxnQueryParams.type = undefined;
-      break;
-  }
-  searchTransaction();
-};
-const removeDuplicateTxn = (txns) => {
-  let result = txns.filter(
-    (value, index, self) =>
-      index === self.findIndex((t) => t.hash === value.hash)
-  );
-  return result;
-};
+
 emitter.on("CLOSE_MODAL", () => {
   showAddressQRModal.value = false;
   showMessageModal.value = false;
@@ -1036,9 +625,9 @@ let loadInQueueTransactions = () => {
     let aggregateTxn = TransactionUtils.castToAggregate(txn);
     if (
       aggregateTxn.innerTransactions.find(
-        (tx) => tx.signer.address.plain() == props.address
+        (tx) => tx.signer.address.plain() == selectedAccount.value.address
       ) != undefined ||
-      tx.signedTransaction.signer == acc.value.publicKey
+      tx.signedTransaction.signer == selectedAccount.value.publicKey
     ) {
       txns.push({
         type: "Aggregate Bonded",

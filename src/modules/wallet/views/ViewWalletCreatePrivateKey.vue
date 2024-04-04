@@ -9,7 +9,7 @@
         $t("general.back")
       }}</router-link
     >
-    <form @submit.prevent="createWallet">
+    <form @submit.prevent="onSubmit">
       <div class="text-sm text-center font-semibold">
         {{ $t("wallet.createWallet") }}
       </div>
@@ -28,39 +28,28 @@
       <div class="mt-3 w-8/12 ml-auto mr-auto">
         <PasswordInput
           :placeholder="$t('general.privateKey')"
-          :errorMessage="$t('general.invalidPrivateKey')"
-          icon="key"
-          :showError="showPkError"
-          v-model="privateKeyInput"
+          :errors="privKeyErr"
+          v-model="privKey"
         />
         <TextInput
-          class="mt-3"
           :placeholder="$t('wallet.namePlaceholder')"
-          :errorMessage="$t('wallet.nameErrMsg')"
-          v-model="walletName"
-          icon="wallet"
+          :errors="nameErr"
+          v-model="name"
         />
         <PasswordInput
-          class="mt-3"
           :placeholder="$t('wallet.enterPassword')"
-          :errorMessage="$t('wallet.passwordErrMsg')"
-          :showError="showPasswdError"
-          icon="lock"
-          v-model="passwd"
+          v-model="password"
+          :errors="passwordErr"
         />
         <PasswordInput
-          class="mt-3"
           :placeholder="$t('wallet.confirmPassword')"
-          :errorMessage="$t('wallet.confirmPasswordErrMsg')"
-          :showError="showConfirmPasswdError"
-          icon="lock"
-          v-model="confirmPasswd"
+          :errors="confirmPasswordErr"
+          v-model="confirmPassword"
         />
       </div>
       <button
         type="submit"
         class="mt-3 text-center font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50"
-        :disabled="disableCreate"
       >
         {{ $t("wallet.createWallet") }}
       </button>
@@ -223,12 +212,12 @@
   </Dialog>
 </template>
 
-<script setup >
+<script setup lang="ts">
 import Dialog from "primevue/dialog";
 import { computed, watch, ref } from "vue";
 import { useToast } from "primevue/usetoast";
-import TextInput from "@/components/TextInput.vue";
-import PasswordInput from "@/components/PasswordInput.vue";
+import TextInput from "@/zodComponents/TextInput.vue";
+import PasswordInput from "@/zodComponents/PasswordInput.vue";
 import { copyToClipboard } from "@/util/functions";
 import { Wallets } from "@/models/wallets";
 import { WalletUtils } from "@/util/walletUtils";
@@ -243,21 +232,54 @@ import { toSvg } from "jdenticon";
 import jsPDF from "jspdf";
 import qrcode from "qrcode-generator";
 import { pdfWalletPaperImg } from "@/modules/account/pdfPaperWalletBackground";
+import { useField, useForm } from "vee-validate";
+import { toTypedSchema } from "@vee-validate/zod";
+import * as zod from "zod";
 
 const { t } = useI18n();
 const toast = useToast();
-const selectedNetworkType = computed(() => AppState.networkType);
-const selectedNetworkName = computed(() => networkState.chainNetworkName);
-const err = ref("");
-const newWallet = ref(null);
-const walletName = ref("");
-const passwd = ref("");
-const privateKey = ref("");
-const confirmPasswd = ref("");
-const privateKeyInput = ref("");
-const showPasswdError = ref(false);
 const privKeyPattern = "^(0x|0X)?[a-fA-F0-9]{64}$";
 const passwdPattern = "^[^ ]{8,}$";
+
+const validationSchema = toTypedSchema(
+  zod
+    .object({
+      privKey: zod.string().regex(new RegExp(privKeyPattern),{message:t('general.invalidPrivateKey')}) , 
+      name: zod.string().min(1, { message: t("wallet.nameErrMsg") }),
+      password: zod.string().regex(new RegExp(passwdPattern), {
+        message: t("wallet.passwordErrMsg"),
+      }),
+      confirmPassword: zod.string().regex(new RegExp(passwdPattern), {
+        message: t("wallet.passwordErrMsg"),
+      }),
+    })
+    .refine(({ password, confirmPassword }) => confirmPassword == password, {
+      message: t("wallet.confirmPasswordErrMsg"),
+      path: ["confirmPassword"],
+    })
+);
+
+const { handleSubmit, resetForm } = useForm({
+  validationSchema,
+  initialValues: {
+    privKey:"",
+    name: "",
+    password: "",
+    confirmPassword: "",
+  },
+});
+const { value: privKey, errors: privKeyErr } = useField<string>("privKey");
+const { value: name, errors: nameErr } = useField<string>("name");
+const { value: password, errors: passwordErr } = useField<string>("password");
+const { value: confirmPassword, errors: confirmPasswordErr } =
+  useField<string>("confirmPassword");
+
+const selectedNetworkType = computed(() => AppState.networkType);
+const selectedNetworkName = computed(() => networkState.chainNetworkName);
+
+const err = ref("");
+const newWallet = ref(null);
+const privateKey = ref("");
 const showPk = ref(false);
 const toggleDialog = ref(false);
 const address = ref("");
@@ -266,7 +288,7 @@ const accName = ref("");
 const themeConfig = new ThemeStyleConfig("ThemeStyleConfig");
 themeConfig.init();
 const svgString = ref(toSvg(address.value, 100, themeConfig.jdenticonConfig));
-const copy = (id) => {
+const copy = (id :string) => {
   let stringToCopy = document.getElementById(id).getAttribute("copyValue");
   let copySubject = document.getElementById(id).getAttribute("copySubject");
   copyToClipboard(stringToCopy);
@@ -277,51 +299,33 @@ const copy = (id) => {
     life: 3000,
   });
 };
-const disableCreate = computed(
-  () =>
-    !(
-      walletName.value !== "" &&
-      passwd.value.match(passwdPattern) &&
-      confirmPasswd.value === passwd.value &&
-      privateKeyInput.value.match(privKeyPattern)
-    )
-);
-const showPkError = computed(
-  () =>
-    !privateKeyInput.value.match(privKeyPattern) && privateKeyInput.value != ""
-);
 
-// true to show error
-const showConfirmPasswdError = computed(
-  () => confirmPasswd.value != passwd.value && confirmPasswd.value != ""
-);
-
-const createWallet = () => {
+const onSubmit = handleSubmit(({ name, password,privKey }) => {
   err.value = "";
   let wallets = new Wallets();
 
   if (
     wallets.filterByNetworkNameAndName(
       selectedNetworkName.value,
-      walletName.value
+      name
     )
   ) {
     err.value = t("wallet.walletNameExist");
   } else {
-    let password = WalletUtils.createPassword(passwd.value);
+    let pass = WalletUtils.createPassword(password);
 
-    if (privateKeyInput.value.substring(0, 2) == "0x") {
-      privateKeyInput.value = privateKeyInput.value.substring(2);
+    if (privKey.substring(0, 2) == "0x") {
+      privKey = privKey.substring(2);
     }
     const walletAccount = WalletUtils.addNewWalletWithPrivateKey(
       walletState.wallets,
-      privateKeyInput.value,
-      password,
-      walletName.value,
+      privKey,
+      pass,
+      name,
       selectedNetworkName.value,
       selectedNetworkType.value
     );
-    privateKey.value = privateKeyInput.value;
+    privateKey.value = privKey;
     newWallet.value = walletAccount;
     accName.value = walletAccount.name;
     let account = Account.createFromPrivateKey(
@@ -331,8 +335,9 @@ const createWallet = () => {
     );
     address.value = account.address.pretty();
     publicKey.value = account.publicKey;
+    resetForm()
   }
-};
+});
 const generateQR = (url, size = 2, margin = 0) => {
   const qr = qrcode(10, "H");
   qr.addData(url);
@@ -346,7 +351,7 @@ const saveWalletPaper = () => {
   doc.addImage(pdfWalletPaperImg, "JPEG", 120, 60, 205, 132);
 
   // QR Code Address
-  doc.addImage(generateQR(privateKey.value, 1, 0), 151.5, 105);
+  doc.addImage(generateQR(privateKey.value, 1, 0), "JPEG", 151.5, 105, 40, 40);
 
   // Addres number
   doc.setFontSize(8);
@@ -354,12 +359,7 @@ const saveWalletPaper = () => {
   doc.text(address.value, 146, 164, { maxWidth: 132 });
   doc.save("Your_Paper_Wallet");
 };
-const clearInput = () => {
-  walletName.value = "";
-  passwd.value = "";
-  confirmPasswd.value = "";
-  privateKeyInput.value = "";
-};
+
 
 watch(newWallet, (n) => {
   if (n) {

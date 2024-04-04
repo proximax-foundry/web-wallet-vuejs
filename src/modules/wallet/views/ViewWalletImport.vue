@@ -114,8 +114,8 @@ const readWalletBackup = (e) => {
   reader.readAsText(file);
 };
 
-const importBackup = (dataDecryp) => {
-  let status = "success";
+const importBackup = (dataDecryp) :{msg: string,status: "error" | "success" | "info" | "warn"} => {
+  let status :"error" | "success" | "info" | "warn" = "success";
   let message = t("wallet.importSuccess");
 
   if (WalletUtils.checkIsNewFormat(dataDecryp)) {
@@ -126,7 +126,7 @@ const importBackup = (dataDecryp) => {
         selectedNetworkName.value,
         selectedNetworkType.value
       );
-    } catch (error) {
+    } catch (error :any) {
       status = "error";
 
       if (error.name === "SAME_NAME") {
@@ -143,7 +143,7 @@ const importBackup = (dataDecryp) => {
         selectedNetworkName.value,
         selectedNetworkType.value
       );
-    } catch (error) {
+    } catch (error :any) {
       status = "error";
 
       if (error.name === "SAME_NAME") {

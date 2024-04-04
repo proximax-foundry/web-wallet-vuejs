@@ -10,7 +10,7 @@
         class="w-5 inline-block"
       />Back</router-link
     >
-    <form @submit.prevent="createWallet">
+    <form @submit.prevent="onSubmit">
       <div class="text-sm text-center mt-20 mb-6 font-semibold">
         {{ $t("wallet.createWallet") }}
       </div>
@@ -21,31 +21,23 @@
       <div class="w-8/12 ml-auto mr-auto mt-3">
         <TextInput
           :placeholder="$t('wallet.namePlaceholder')"
-          :errorMessage="$t('wallet.nameErrMsg')"
-          v-model="walletName"
-          icon="wallet"
+          v-model="name"
+          :errors="nameErr"
         />
         <PasswordInput
-          class="mt-3"
           :placeholder="$t('wallet.enterPassword')"
-          :errorMessage="$t('wallet.passwordErrMsg')"
-          :showError="showPasswdError"
-          icon="lock"
-          v-model="passwd"
+          v-model="password"
+          :errors="passwordErr"
         />
         <PasswordInput
-          class="mt-3"
           :placeholder="$t('wallet.confirmPassword')"
-          :errorMessage="$t('wallet.confirmPasswordErrMsg')"
-          :showError="showConfirmPasswdError"
-          icon="lock"
-          v-model="confirmPasswd"
+          v-model="confirmPassword"
+          :errors="confirmPasswordErr"
         />
       </div>
       <button
         type="submit"
         class="text-center mt-3 font-bold blue-btn py-3 block ml-auto mr-auto w-8/12 disabled:opacity-50"
-        :disabled="disableCreate"
       >
         {{ $t("wallet.createWallet") }}
       </button>
@@ -60,13 +52,13 @@
       <div class="h-20"></div>
     </form>
   </div>
- 
+
   <Dialog
     v-model:visible="toggleDialog"
     :closable="false"
     :dismissableMask="false"
     :closeOnEscape="false"
-    class="lg:w-9/12 "
+    class="lg:w-9/12"
     modal
   >
     <div class="mr-auto ml-auto w-10/12 mt-3">
@@ -209,11 +201,11 @@
   </Dialog>
 </template>
 
-<script setup >
+<script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useToast } from "primevue/usetoast";
-import TextInput from "@/components/TextInput.vue";
-import PasswordInput from "@/components/PasswordInput.vue";
+import TextInput from "@/zodComponents/TextInput.vue";
+import PasswordInput from "@/zodComponents/PasswordInput.vue";
 import { copyToClipboard } from "@/util/functions";
 import { WalletUtils } from "@/util/walletUtils";
 import { networkState } from "@/state/networkState";
@@ -228,19 +220,52 @@ import jsPDF from "jspdf";
 import qrcode from "qrcode-generator";
 import { pdfWalletPaperImg } from "@/modules/account/pdfPaperWalletBackground";
 import Dialog from "primevue/dialog";
+import { useField, useForm } from "vee-validate";
+import { toTypedSchema } from "@vee-validate/zod";
+import * as zod from "zod";
+
+const passwdPattern = "^[^ ]{8,}$";
 
 const { t } = useI18n();
+
+const validationSchema = toTypedSchema(
+  zod
+    .object({
+      name: zod.string().min(1, { message: t("wallet.nameErrMsg") }),
+      password: zod.string().regex(new RegExp(passwdPattern), {
+        message: t("wallet.passwordErrMsg"),
+      }),
+      confirmPassword: zod.string().regex(new RegExp(passwdPattern), {
+        message: t("wallet.passwordErrMsg"),
+      }),
+    })
+    .refine(({ password, confirmPassword }) => confirmPassword == password, {
+      message: t("wallet.confirmPasswordErrMsg"),
+      path: ["confirmPassword"],
+    })
+);
+
+const { handleSubmit, resetForm } = useForm({
+  validationSchema,
+  initialValues: {
+    name: "",
+    password: "",
+    confirmPassword: "",
+  },
+});
+
+const { value: name, errors: nameErr } = useField<string>("name");
+const { value: password, errors: passwordErr } = useField<string>("password");
+const { value: confirmPassword, errors: confirmPasswordErr } =
+  useField<string>("confirmPassword");
+
 const toast = useToast();
 const selectedNetworkType = computed(() => AppState.networkType);
 const selectedNetworkName = computed(() => networkState.chainNetworkName);
 const err = ref("");
 const newWallet = ref(null);
-const walletName = ref("");
-const passwd = ref("");
-const confirmPasswd = ref("");
+
 const privateKey = ref("");
-const showPasswdError = ref(false);
-const passwdPattern = "^[^ ]{8,}$";
 const showPk = ref(false);
 const toggleDialog = ref(false);
 const address = ref("");
@@ -249,7 +274,7 @@ const accName = ref("");
 const themeConfig = new ThemeStyleConfig("ThemeStyleConfig");
 themeConfig.init();
 const svgString = ref(toSvg(address.value, 75, themeConfig.jdenticonConfig));
-const copy = (id) => {
+const copy = (id :string) => {
   let stringToCopy = document.getElementById(id).getAttribute("copyValue");
   let copySubject = document.getElementById(id).getAttribute("copySubject");
   copyToClipboard(stringToCopy);
@@ -260,37 +285,26 @@ const copy = (id) => {
     life: 3000,
   });
 };
-const disableCreate = computed(
-  () =>
-    !(
-      walletName.value !== "" &&
-      passwd.value.match(passwdPattern) &&
-      confirmPasswd.value === passwd.value
-    )
-);
 
 // true to show error
-const showConfirmPasswdError = computed(
-  () => confirmPasswd.value != passwd.value && confirmPasswd.value != ""
-);
 
-const createWallet = () => {
+const onSubmit = handleSubmit(({ name, password }) => {
   err.value = "";
 
   if (
     walletState.wallets.filterByNetworkNameAndName(
       selectedNetworkName.value,
-      walletName.value
+      name
     )
   ) {
     err.value = t("wallet.walletNameExist");
   } else {
-    let password = WalletUtils.createPassword(passwd.value);
+    let pass = WalletUtils.createPassword(password);
 
     const data = WalletUtils.addNewWallet(
       walletState.wallets,
-      password,
-      walletName.value,
+      pass,
+      name,
       selectedNetworkName.value,
       selectedNetworkType.value
     );
@@ -304,8 +318,10 @@ const createWallet = () => {
     );
     address.value = account.address.pretty();
     publicKey.value = account.publicKey;
+    resetForm();
   }
-};
+});
+
 const generateQR = (url, size = 2, margin = 0) => {
   const qr = qrcode(10, "H");
   qr.addData(url);
@@ -319,7 +335,7 @@ const saveWalletPaper = () => {
   doc.addImage(pdfWalletPaperImg, "JPEG", 120, 60, 205, 132);
 
   // QR Code Address
-  doc.addImage(generateQR(privateKey.value, 1, 0), 151.5, 105);
+  doc.addImage(generateQR(privateKey.value, 1, 0), "JPEG", 151.5, 105, 40, 40);
 
   // Addres number
   doc.setFontSize(8);
@@ -334,4 +350,3 @@ watch(newWallet, (n) => {
   }
 });
 </script>
-
