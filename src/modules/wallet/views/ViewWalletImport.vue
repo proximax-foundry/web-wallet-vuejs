@@ -19,7 +19,9 @@
     <div class="text-xs mt-8 ml-auto mr-auto w-8/12 text-center mb-5">
       {{ $t("wallet.backUpDescription") }}
     </div>
-    <SelectNetworkInput />
+    <div class="mx-auto w-8/12">
+      <SelectNetwork />
+    </div>
     <label class="cursor-pointer">
       <span
         class="mt-3 font-bold text-xs text-center blue-btn py-2 px-10 block ml-auto mr-auto w-8/12"
@@ -40,16 +42,15 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, computed } from "vue";
+import {  ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import CryptoJS from "crypto-js";
-import IntroTextComponent from "@/components/IntroTextComponent.vue";
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import { networkState } from "@/state/networkState";
 import { WalletUtils } from "@/util/walletUtils";
 import { walletState } from "@/state/walletState";
-import SelectNetworkInput from "@/components/SelectNetworkInput.vue";
+import SelectNetwork from "@/components/SelectNetwork.vue";
 import { useI18n } from "vue-i18n";
 import { AppState } from "@/state/appState";
 

@@ -24,7 +24,9 @@
       <div class="mt-4 w-8/12 ml-auto mr-auto">
         <div class="error error_box" v-if="err != ''">{{ err }}</div>
       </div>
-      <SelectNetworkInput />
+      <div class="w-8/12 mx-auto">
+        <SelectNetwork />
+      </div>
       <div class="mt-3 w-8/12 ml-auto mr-auto">
         <PasswordInput
           :placeholder="$t('general.privateKey')"
@@ -224,7 +226,7 @@ import { WalletUtils } from "@/util/walletUtils";
 import { networkState } from "@/state/networkState";
 import { walletState } from "@/state/walletState";
 import { useI18n } from "vue-i18n";
-import SelectNetworkInput from "@/components/SelectNetworkInput.vue";
+import SelectNetwork from "@/components/SelectNetwork.vue";
 import { AppState } from "@/state/appState";
 import { Account } from "tsjs-xpx-chain-sdk";
 import { ThemeStyleConfig } from "@/models/stores/themeStyleConfig";
