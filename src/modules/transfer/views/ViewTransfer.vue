@@ -98,7 +98,7 @@
 import { ref, getCurrentInstance, computed, watch } from 'vue';
 import SelectInputAccount from '@/components/SelectInputAccount.vue';
 import SelectInputMultisigAccount from '@/components/SelectInputMultisigAccount.vue';
-import MultisigInput from "../components/MultisigInput.vue"
+import MultisigInput from "@/components/MultisigInput.vue"
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { walletState } from '@/state/walletState';

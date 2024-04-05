@@ -21,7 +21,7 @@ import {useI18n} from 'vue-i18n'
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputAccount from '@/components/SelectInputAccount.vue';
 import SelectInputMultisigAccount from '@/components/SelectInputMultisigAccount.vue';
-import MultisigInput from "@/modules/transfer/components/MultisigInput.vue"
+import MultisigInput from "@/components/MultisigInput.vue"
 import type { Account } from '@/models/account';
 import type { WalletAccount } from '@/models/walletAccount';
 import { parse } from 'csv-parse';
