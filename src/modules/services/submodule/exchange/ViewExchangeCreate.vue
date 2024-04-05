@@ -6,7 +6,7 @@
                     <div>Create SDA-SDA Exchange</div>
                     <div v-if="!selectedAddress" class="text-xs mt-3 text-blue-primary ">Select Account to Create / Initiate
                         Transaction</div>
-                    <SelectInputAccount :type="'dynamic'" :label="'Create SDA-SDA Exchange'"/>
+                    <SelectInputAccount :type="'sda exchange'" :label="'Create SDA-SDA Exchange'"/>
                     <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
                     <div class="text-blue-primary text-xs mt-3">Asset to Give</div>
                     <SelectInputAsset :selected-address="selectedAddress"
