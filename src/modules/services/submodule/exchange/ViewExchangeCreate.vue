@@ -4,8 +4,10 @@
             <div class='border-2 xl:grid xl:grid-cols-3'>
                 <div class="xl:col-span-2 p-12">
                     <div>Create SDA-SDA Exchange</div>
-                    <SelectInputAccount :type="'dynamic'" :label="'Create SDA-SDA Exchange'" :selectedMultisigAddress="selectedMultisigAddress"
-                        :selectedMultisigName="selectedMultisigName" />
+                    <div v-if="!selectedAddress" class="text-xs mt-3 text-blue-primary ">Select Account to Create / Initiate
+                        Transaction</div>
+                    <SelectInputAccount :type="'dynamic'" :label="'Create SDA-SDA Exchange'"/>
+                    <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
                     <div class="text-blue-primary text-xs mt-3">Asset to Give</div>
                     <SelectInputAsset :selected-address="selectedAddress"
                         :selected-multisig-address="selectedMultisigAddress" />
@@ -155,6 +157,7 @@ import { Account, Address, Deadline, ExchangeSdaHttp, MosaicId, NamespaceId, Pas
     PlaceSdaExchangeOfferTransaction, PublicAccount, SdaExchangeOffer, 
     UInt64 } from 'tsjs-xpx-chain-sdk';
 import { AppState } from '@/state/appState';
+import SelectInputMultisigAccount from './components/SelectInputMultisigAccount.vue';
 import PasswordInput from "@/components/PasswordInput.vue";
 import { walletState } from '@/state/walletState';
 import { networkState } from '@/state/networkState';
@@ -164,7 +167,6 @@ import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
 import { Helper } from '@/util/typeHelper';
 import { lastValueFrom } from 'rxjs';
-import { TreeNode } from 'primevue/treenode';
 
 
 const convertSecondsToDHMS = (seconds: number): string => {
@@ -224,8 +226,6 @@ const emitter = internalInstance.appContext.config.globalProperties.emitter;
 const selectedAddress = ref<string | null>(null)
 
 const selectedMultisigAddress = ref<string | null>(null)
-
-const selectedMultisigName = ref<string | null>(null)
 
 const assetToGive = ref<{ id: string, amount: number, namespace: string, divisibility: number }>(null)
 
@@ -307,29 +307,13 @@ const getNativeTokenBalanceNumber = (address: string) => {
 
 }
 
-watch(selectedAddress, async (newValue, oldValue) => {
-  if (newValue == null) {
-    selectedMultisigName.value = null;
-    selectedMultisigAddress.value = null;
-  } else if (newValue != oldValue) {
-    selectedMultisigName.value = null;
-    selectedMultisigAddress.value = null;
-  }
-});
-
 emitter.on("select-account", (address: string) => {
     selectedAddress.value = address
 })
 
-emitter.on("select-multisig-account", (node: TreeNode) => {
-    selectedMultisigName.value = node.label
-    selectedMultisigAddress.value = node.value
+emitter.on("select-multisig-account", (address: string) => {
+    selectedMultisigAddress.value = address
 })
-
-emitter.on("CLOSE_MULTISIG", () => {
-  selectedMultisigName.value = null;
-  selectedMultisigAddress.value = null;
-});
 
 emitter.on("select-asset", (asset: { id: string, amount: number, namespace: string, divisibility: number }) => {
     assetToGive.value = asset

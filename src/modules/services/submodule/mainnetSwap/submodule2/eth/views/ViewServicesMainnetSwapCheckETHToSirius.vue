@@ -163,7 +163,7 @@
                 <div v-if="isInitiateSwap">
                   <div class="sm:flex justify-between">
                     <div class="w-full">
-                      <SelectInputAccount :type="'swap'" :label="'Create / Initiate Transaction'" />
+                      <SelectInputAccount v-model="siriusAddressSelected" placeholder="To Sirius Chain Account" :selectDefault="walletState.currentLoggedInWallet.selectDefaultAccount().address" />
                     </div>
                     <button :disabled="!siriusAddressSelected || !disableConfirmAddressSelection" @click="confirmAddress" class="sm:flex-none justify-start sm:justify-end bg-blue-primary h-15 w-40 rounded-3xl sm:ml-5 focus:outline-none text-tsm font-bold py-2 border border-blue-primary px-8 text-white hover:shadow-lg mt-3 sm:mt-2 disabled:opacity-50 self-center" type="button">Confirm</button>
                   </div>

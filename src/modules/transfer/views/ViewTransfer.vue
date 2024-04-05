@@ -15,8 +15,12 @@
                         <div class="inline-block text-xs">{{ $t('general.insufficientBalance') }}</div>
                     </div>
                     <div class="text-sm font-semibold ">{{ $t('transfer.newTransfer') }}</div>
-                    <div class="mt-3">
-                        <SelectInputAccount :type="'transfer'" :label="'create / initiate transfer'" :selectedMultisigAddress="selectedMultisigAddress" :selectedMultisigName="selectedMultisigName"  />
+                    <div class="flex gap-1 mt-3 items-center">
+                        <SelectInputAccount :type="'transfer'" :label="'create / initiate transfer'" />
+                        <SelectInputMultisigAccount :selected-address="selectedAddress" />
+                    </div>
+                    <div v-if="selectedMultisigAddress" class="mt-3">
+                        <MultisigInput :select-default-address="selectedMultisigAddress" :select-default-name="selectedMultisigName" :type="'transfer'"/>
                     </div>
                     <div class="text-blue-primary font-semibold uppercase mt-3 text-xxs">Transfer to</div>
 
@@ -93,6 +97,8 @@
 
 import { ref, getCurrentInstance, computed, watch } from 'vue';
 import SelectInputAccount from '@/components/SelectInputAccount.vue';
+import SelectInputMultisigAccount from '@/components/SelectInputMultisigAccount.vue';
+import MultisigInput from "../components/MultisigInput.vue"
 import { Helper } from '@/util/typeHelper';
 import { AppState } from '@/state/appState';
 import { walletState } from '@/state/walletState';

@@ -12,7 +12,14 @@
           </div>
           <div class="error error_box" v-if="err != ''">{{ err }}</div>
           <div class="mt-4">
-            <SelectInputAccount :type="'namespace'" :label="'create namespace'" :selectedMultisigAddress="selectedMultisigAddress" :selectedMultisigName="selectedMultisigName"  />
+            <div class="flex gap-1 mt-3">
+              <SelectInputAccount :type="'namespace'" :label="'create namespace'"/>
+              <SelectInputMultisigAccount :selected-address="selectedAddress" />
+            </div>
+            <div v-if="selectedMultisigAddress" class="mt-3">
+              <MultisigInput :select-default-address="selectedMultisigAddress"
+                :select-default-name="selectedMultisigName" :type="'namespace'"/>
+            </div>
             <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace"
               ref="nsRef" v-model="selectNamespace"
               :address="selectedMultisigAddress ? selectedMultisigAddress : selectedAddress" class="mt-5"
@@ -71,6 +78,8 @@ import TextInputTooltip from '@/components/TextInputTooltip.vue';
 import SelectInputParentNamespace from '@/modules/services/submodule/namespaces/components/SelectInputParentNamespace.vue';
 import DurationInputClean from '@/modules/services/submodule/namespaces/components/DurationInputClean.vue';
 import SelectInputAccount from '@/components/SelectInputAccount.vue';
+import SelectInputMultisigAccount from '@/components/SelectInputMultisigAccount.vue';
+import MultisigInput from "@/modules/transfer/components/MultisigInput.vue"
 import TxnSummary from "@/components/TxnSummary.vue"
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";

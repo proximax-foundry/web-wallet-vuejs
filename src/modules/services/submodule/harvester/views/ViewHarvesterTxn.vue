@@ -15,8 +15,18 @@
           </div>
           <div class="error error_box" v-if="err != ''">{{ err }}</div>
           <div class="mt-4">
-            <SelectInputAccount :type="'dynamic'" :label="'Add Harvester'" :selectedMultisigAddress="selectedMultisigAddress"
-              :selectedMultisigName="selectedMultisigName" />
+            <div class="flex gap-1 mt-3">
+              <SelectInputAccount :type="'dynamic'" :label="'Add Harvester'" />
+              <SelectInputMultisigAccount :selected-address="selectedAddress" />
+            </div>
+            <div v-if="selectedMultisigAddress" class="mt-3">
+              <MultisigInput
+                :select-default-address="selectedMultisigAddress"
+                :select-default-name="selectedMultisigName"
+                label="Multisig account selected"
+                :type="'dynamic'"
+              />
+            </div>
           </div>
           <div class="mt-3">
             <SelectActionType title="Type" v-model="actionType" :disabled="false" />
@@ -51,6 +61,8 @@ import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import PublicKeyInputClean from "@/modules/services/submodule/harvester/components/PublicKeyInputClean.vue";
 import SelectInputAccount from '@/components/SelectInputAccount.vue';
+import SelectInputMultisigAccount from "@/components/SelectInputMultisigAccount.vue";
+import MultisigInput from "@/modules/transfer/components/MultisigInput.vue";
 import SelectActionType from "@/modules/services/submodule/harvester/components/SelectActionType.vue";
 import TxnSummary from "@/components/TxnSummary.vue";
 import { useI18n } from "vue-i18n";

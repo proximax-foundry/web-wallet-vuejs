@@ -20,6 +20,8 @@ import { WalletUtils } from '@/util/walletUtils';
 import {useI18n} from 'vue-i18n'
 import PasswordInput from '@/components/PasswordInput.vue';
 import SelectInputAccount from '@/components/SelectInputAccount.vue';
+import SelectInputMultisigAccount from '@/components/SelectInputMultisigAccount.vue';
+import MultisigInput from "@/modules/transfer/components/MultisigInput.vue"
 import type { Account } from '@/models/account';
 import type { WalletAccount } from '@/models/walletAccount';
 import { parse } from 'csv-parse';
@@ -540,7 +542,13 @@ if (isMultiSigBool.value) {
 <template>
   <div class="container">
     <div class="p-2">
-      <SelectInputAccount :type="'airdrop'" :label="'create airdrop token'" :selectedMultisigAddress="selectedMultisigAddress" :selectedMultisigName="selectedMultisigName"  />
+      <div class="flex gap-1">
+        <SelectInputAccount :type="'airdrop'" :label="'create airdrop token'"/>
+        <SelectInputMultisigAccount :selected-address="selectedAddress" />
+      </div>
+      <div v-if="selectedMultisigAddress" class="mt-3">
+        <MultisigInput :select-default-address="selectedMultisigAddress" :select-default-name="selectedMultisigName" :type="'airdrop'" :label="'TRANSFER FROM MULTISIG'"/>
+      </div>
       <div v-if="noAssetFound" class="error error_box" role="alert">
           No SDA found
       </div>
