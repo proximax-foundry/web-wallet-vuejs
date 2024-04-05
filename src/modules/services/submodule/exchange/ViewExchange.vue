@@ -5,7 +5,7 @@
                 <div>SDA-SDA Exchange </div>
                     <div v-if="!selectedAddress" class="text-xs mt-3 text-blue-primary ">Select Account to Create / Initiate
                         Transaction</div>
-                    <SelectInputAccount :type="'sda exchange'" :label="'Create / Initiate Transaction'"/>
+                    <SelectInputAccount :label="'Create / Initiate Transaction'"/>
                     <SelectInputMultisigAccount class="md:mt-3 " :selected-address="selectedAddress" />
                 <!-- <div class="text-blue-primary mt-3">Price</div>
                 <div> {{/*  Math.trunc( */rate.toFixed(6) /* * Math.pow(10, offerInfo?.mosaicGiveDivisibility) )/ Math.pow(10,
