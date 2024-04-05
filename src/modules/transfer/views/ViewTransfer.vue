@@ -16,11 +16,11 @@
                     </div>
                     <div class="text-sm font-semibold ">{{ $t('transfer.newTransfer') }}</div>
                     <div class="flex gap-1 mt-3 items-center">
-                        <SelectInputAccount :type="'transfer'" :label="'create / initiate transfer'" />
-                        <SelectInputMultisigAccount :selected-address="selectedAddress" />
+                        <SelectInputAccount :type="'transfer'" :label="'create / initiate transfer'" @select-account="selectAccountAddress" />
+                        <SelectInputMultisigAccount :selected-address="selectedAddress" @select-multisig-account="selectMultisigAccount" />
                     </div>
                     <div v-if="selectedMultisigAddress" class="mt-3">
-                        <MultisigInput :select-default-address="selectedMultisigAddress" :select-default-name="selectedMultisigName" :type="'transfer'"/>
+                        <MultisigInput :select-default-address="selectedMultisigAddress" :select-default-name="selectedMultisigName" :type="'transfer'" @close-multisig="closeMultisig" />
                     </div>
                     <div class="text-blue-primary font-semibold uppercase mt-3 text-xxs">Transfer to</div>
 
@@ -498,19 +498,19 @@ watch(selectedMultisigAddress, async (mn, mo) => {
     }
 })
 
-emitter.on("select-account", (address: string) => {
+const selectAccountAddress = (address: string) => {
     selectedAddress.value = address
-})
+}
 
-emitter.on("select-multisig-account", (node: TreeNode) => {
+const selectMultisigAccount = (node: TreeNode) => {
     selectedMultisigName.value = node.label
     selectedMultisigAddress.value = node.value
-})
+}
 
-emitter.on("CLOSE_MULTISIG", () =>{
+const closeMultisig = () => {
     selectedMultisigName.value = null
     selectedMultisigAddress.value = null
-})
+}
 
 const onNodeSelect = (node: TreeNode) => {
     toggleContact.value = false

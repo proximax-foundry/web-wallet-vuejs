@@ -13,12 +13,12 @@
           <div class="error error_box" v-if="err != ''">{{ err }}</div>
           <div class="mt-4">
             <div class="flex gap-1 mt-3">
-              <SelectInputAccount :type="'namespace'" :label="'create namespace'"/>
-              <SelectInputMultisigAccount :selected-address="selectedAddress" />
+              <SelectInputAccount :type="'namespace'" :label="'create namespace'" @select-account="selectAccountAddress" />
+              <SelectInputMultisigAccount :selected-address="selectedAddress" @select-multisig-account="selectMultisigAccount" />
             </div>
             <div v-if="selectedMultisigAddress" class="mt-3">
               <MultisigInput :select-default-address="selectedMultisigAddress"
-                :select-default-name="selectedMultisigName" :type="'namespace'"/>
+                :select-default-name="selectedMultisigName" :type="'namespace'" @close-multisig="closeMultisig" />
             </div>
             <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace"
               ref="nsRef" v-model="selectNamespace"
@@ -449,18 +449,19 @@ watch(namespaceName, newValue => {
   }
 })
 
-emitter.on("select-account", (address: string) => {
-  selectedAddress.value = address
-})
+const selectAccountAddress = (address: string) => {
+    selectedAddress.value = address
+}
 
-emitter.on("select-multisig-account", (node: TreeNode) => {
-  selectedMultisigName.value = node.label
-  selectedMultisigAddress.value = node.value
-})
-emitter.on("CLOSE_MULTISIG", () => {
-  selectedMultisigName.value = null
-  selectedMultisigAddress.value = null
-})
+const selectMultisigAccount = (node: TreeNode) => {
+    selectedMultisigName.value = node.label
+    selectedMultisigAddress.value = node.value
+}
+
+const closeMultisig = () => {
+    selectedMultisigName.value = null
+    selectedMultisigAddress.value = null
+}
 
 </script>
 <style scoped lang="scss">

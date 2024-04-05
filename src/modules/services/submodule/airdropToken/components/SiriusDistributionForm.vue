@@ -515,14 +515,15 @@ if (isMultiSigBool.value) {
 })
 
   // Cancel transfer from multisig
-  emitter.on("CLOSE_MULTISIG", () =>{
+  const closeMultisig = () => {
     selectedMultisigName.value = null
     selectedMultisigAddress.value = null
     selectedMultisigPublicKey.value = ""
     scanDistributorAsset()
-  })
+}
+
   // account is clicked
-  emitter.on("select-account", (address: string) => {
+  const selectAccountAddress = (address: string) => {
     selectedAddress.value = address
     for (let i = 0; i < accounts.value.length; i++){
       if (accounts.value[i].address == address){
@@ -531,23 +532,24 @@ if (isMultiSigBool.value) {
         currentAccount.value = selectedAccount.value.address
       }
     }
-  })
-  emitter.on("select-multisig-account", (node: TreeNode) => {
+  }
+
+  const selectMultisigAccount = (node: TreeNode) => {
     selectedMultisigName.value = node.label
     selectedMultisigAddress.value = node.value
     scanDistributorAsset()
-  })
+}
 </script>
 
 <template>
   <div class="container">
     <div class="p-2">
       <div class="flex gap-1">
-        <SelectInputAccount :type="'airdrop'" :label="'create airdrop token'"/>
-        <SelectInputMultisigAccount :selected-address="selectedAddress" />
+        <SelectInputAccount :type="'airdrop'" :label="'create airdrop token'" @select-account="selectAccountAddress" />
+        <SelectInputMultisigAccount :selected-address="selectedAddress" @select-multisig-account="selectMultisigAccount" />
       </div>
       <div v-if="selectedMultisigAddress" class="mt-3">
-        <MultisigInput :select-default-address="selectedMultisigAddress" :select-default-name="selectedMultisigName" :type="'airdrop'" :label="'TRANSFER FROM MULTISIG'"/>
+        <MultisigInput :select-default-address="selectedMultisigAddress" :select-default-name="selectedMultisigName" :type="'airdrop'" :label="'TRANSFER FROM MULTISIG'" @close-multisig="closeMultisig" />
       </div>
       <div v-if="noAssetFound" class="error error_box" role="alert">
           No SDA found

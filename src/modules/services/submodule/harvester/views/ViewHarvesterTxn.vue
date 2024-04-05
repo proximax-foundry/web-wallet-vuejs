@@ -24,8 +24,8 @@
           <div class="error error_box" v-if="err != ''">{{ err }}</div>
           <div class="mt-4">
             <div class="flex gap-1 mt-3">
-              <SelectInputAccount :type="'dynamic'" :label="'Add Harvester'" />
-              <SelectInputMultisigAccount :selected-address="selectedAddress" />
+              <SelectInputAccount :type="'dynamic'" :label="'Add Harvester'" @select-account="selectAccountAddress" @select-account-public-key="selectedAccountPublicKey" />
+              <SelectInputMultisigAccount :selected-address="selectedAddress" @select-multisig-account="selectMultisigAccount" />
             </div>
             <div v-if="selectedMultisigAddress" class="mt-3">
               <MultisigInput
@@ -33,6 +33,7 @@
                 :select-default-name="selectedMultisigName"
                 label="Multisig account selected"
                 :type="'dynamic'"
+                @close-multisig="closeMultisig"
               />
             </div>
           </div>
@@ -363,29 +364,31 @@ const createTxn = async () => {
   router.push({ name: "ViewConfirmTransaction" });
 };
 
-emitter.on("select-account", (address: string) => {
-  selectedAddress.value = address;
-});
+const selectAccountAddress = (address: string) => {
+  selectedAddress.value = address
+}
 
-emitter.on("select-account-public-key", (publicKey: string) => {
+const selectedAccountPublicKey = (publicKey: string) => {
   ownerPublicAccount.value = WalletUtils.createPublicAccount(
     publicKey,
     AppState.networkType
   );
-});
+}
 
-emitter.on("select-multisig-account", (node: TreeNode) => {
+const selectMultisigAccount = (node: TreeNode) => {
   selectedMultisigName.value = node.label;
   selectedMultisigAddress.value = node.value;
   multisigPublicAccount.value = WalletUtils.createPublicAccount(
     node.publicKey,
     AppState.networkType
   );
-});
-emitter.on("CLOSE_MULTISIG", () => {
-  selectedMultisigName.value = null;
-  selectedMultisigAddress.value = null;
-});
+}
+
+const closeMultisig = () => {
+  selectedMultisigName.value = null
+  selectedMultisigAddress.value = null
+}
+
 </script>
 <style scoped>
 /* Chrome, Safari, Edge, Opera */

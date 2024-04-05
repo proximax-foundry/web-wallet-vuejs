@@ -10,12 +10,12 @@
         <div class="error error_box" v-if="err!=''">{{ err }}</div>
         <div class="mt-4">
           <div class="flex gap-1 mt-3">
-              <SelectInputAccount :type="'asset'" :label="'create asset'"/>
-              <SelectInputMultisigAccount :selected-address="selectedAddress" />
+              <SelectInputAccount :type="'asset'" :label="'create asset'" @select-account="selectAccountAddress" @select-account-public-key="selectedAccountPublicKey" />
+              <SelectInputMultisigAccount :selected-address="selectedAddress" @select-multisig-account="selectMultisigAccount" />
           </div>
           <div v-if="selectedMultisigAddress" class="mt-3">
             <MultisigInput :select-default-address="selectedMultisigAddress"
-              :select-default-name="selectedMultisigName" :type="'asset'"/>
+              :select-default-name="selectedMultisigName" :type="'asset'" @close-multisig="closeMultisig" />
           </div>
           <div class="lg:grid lg:grid-cols-2 mt-5">
             <div class="lg:mr-2"><SupplyInputClean :disabled="showNoBalance||disabledInput" v-model="supply" :balance="Number.MAX_VALUE" :placeholder="$t('general.supply')" type="text" @show-error="updateSupplyErr"  :decimal="Number(divisibility)" :toolTip="$t('asset.supplyMsg1') +' <br><br>' + $t('asset.supplyMsg2') + '<br>' + $t('asset.supplyMsg3')" /></div>
@@ -283,23 +283,24 @@ import { TransactionState } from '@/state/transactionState';
       router.push({ name: "ViewConfirmTransaction" })
     };
 
-    emitter.on("select-account", (address: string) => {
+    const selectAccountAddress = (address: string) => {
       selectedAddress.value = address
-    })
+    }
 
-    emitter.on("select-account-public-key", (publicKey: string) =>{
+    const selectedAccountPublicKey = (publicKey: string) => {
       ownerPublicAccount.value = WalletUtils.createPublicAccount(publicKey,AppState.networkType)
-    })
+    }
 
-    emitter.on("select-multisig-account", (node: TreeNode) => {
-      selectedMultisigName.value = node.label
-      selectedMultisigAddress.value = node.value
-      multisigPublicAccount.value = WalletUtils.createPublicAccount(node.publicKey,AppState.networkType)
-    })
-    emitter.on("CLOSE_MULTISIG", () => {
-      selectedMultisigName.value = null
-      selectedMultisigAddress.value = null
-    })
+    const selectMultisigAccount = (node: TreeNode) => {
+        selectedMultisigName.value = node.label
+        selectedMultisigAddress.value = node.value
+        multisigPublicAccount.value = WalletUtils.createPublicAccount(node.publicKey,AppState.networkType)
+    }
+
+    const closeMultisig = () => {
+        selectedMultisigName.value = null
+        selectedMultisigAddress.value = null
+    }
 
 </script>
 <style scoped>

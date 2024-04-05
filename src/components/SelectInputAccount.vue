@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 import { walletState } from '@/state/walletState';
-import { computed, ref, getCurrentInstance } from 'vue';
+import { computed, ref } from 'vue';
 import { toSvg } from "jdenticon";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 
@@ -49,12 +49,10 @@ const props = defineProps({
     }
 })
 
-defineEmits([
+const emit = defineEmits([
     'select-account', 'select-account-public-key', 'update:modelValue'
 ])
 
-const internalInstance = getCurrentInstance();
-const emitter = internalInstance.appContext.config.globalProperties.emitter;
 let themeConfig = new ThemeStyleConfig('ThemeStyleConfig');
 themeConfig.init();
 let jdenticonConfig = themeConfig.jdenticonConfig;
@@ -79,12 +77,12 @@ const selectedImg = ref(null);
 const selectAccount = (accountName: string, accountAddress: string, accountPublicKey: string) => {
     if (accountName == null && accountAddress == null && accountPublicKey == null) {
         selectedAccountInfo.value = null
-        emitter.emit("select-account", null)
-        emitter.emit("select-account-public-key", null)
+        emit("select-account", null)
+        emit("select-account-public-key", null)
         return
     }
-    emitter.emit("select-account", accountAddress)
-    emitter.emit("select-account-public-key", accountPublicKey)
+    emit("select-account", accountAddress)
+    emit("select-account-public-key", accountPublicKey)
     selectedAccountInfo.value.label = accountName;
     selectedAccountInfo.value.value = accountAddress;
     selectedAccountInfo.value.publicKey = accountPublicKey;
