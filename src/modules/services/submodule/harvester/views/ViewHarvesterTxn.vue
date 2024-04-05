@@ -4,10 +4,18 @@
       <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8">
         <div class="xl:col-span-2 p-12">
           <div class="font-semibold mb-4">Harvester Transaction</div>
-          <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
-            <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2">
-              <font-awesome-icon icon="times" class="text-red-500 h-3 w-3 absolute"
-                style="top: 3px; left: 4px"></font-awesome-icon>
+          <div
+            v-if="showNoBalance"
+            class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center"
+          >
+            <div
+              class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"
+            >
+              <font-awesome-icon
+                icon="times"
+                class="text-red-500 h-3 w-3 absolute"
+                style="top: 3px; left: 4px"
+              ></font-awesome-icon>
             </div>
             <div class="inline-block text-xs">
               {{ $t("general.insufficientBalance") }}
@@ -29,25 +37,47 @@
             </div>
           </div>
           <div class="mt-3">
-            <SelectActionType title="Type" v-model="actionType" :disabled="false" />
+            <SelectActionType
+              title="Type"
+              v-model="actionType"
+              :disabled="false"
+            />
           </div>
           <div class="">
-            <PublicKeyInputClean placeholder="Harvester Key" v-model="harvesterKey" v-debounce:1000="checkHarvester"
-              :showError="showHarvesterError" />
+            <PublicKeyInputClean
+              placeholder="Harvester Key"
+              v-model="harvesterKey"
+              v-debounce:1000="checkHarvester"
+              :showError="showHarvesterError"
+            />
           </div>
         </div>
         <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
-          <TxnSummary :signer-native-token-balance="balance" :native-token-balance="selectedMultisigAddress ? multisigBalance : balance
-            " :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee"
-            :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact"
-            :total-fee="Number(totalFeeFormatted)" />
-          <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white"
-            :disabled="disableSubmit" @click="createTxn">
+          <TxnSummary
+            :signer-native-token-balance="balance"
+            :native-token-balance="
+              selectedMultisigAddress ? multisigBalance : balance
+            "
+            :lock-fund="lockFund"
+            :lock-fund-tx-fee="lockFundTxFee"
+            :selected-multisig-address="selectedMultisigAddress"
+            :txn-fee="transactionFeeExact"
+            :total-fee="Number(totalFeeFormatted)"
+          />
+          <button
+            type="submit"
+            class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white"
+            :disabled="disableSubmit"
+            @click="createTxn"
+          >
             Create harvester transaction
           </button>
           <div class="text-center">
-            <router-link :to="{ name: 'ViewServices' }"
-              class="content-center text-xs text-white border-b-2 border-white">{{ $t("general.cancel") }}</router-link>
+            <router-link
+              :to="{ name: 'ViewServices' }"
+              class="content-center text-xs text-white border-b-2 border-white"
+              >{{ $t("general.cancel") }}</router-link
+            >
           </div>
         </div>
       </div>
@@ -60,7 +90,7 @@ import { computed, getCurrentInstance, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import PublicKeyInputClean from "@/modules/services/submodule/harvester/components/PublicKeyInputClean.vue";
-import SelectInputAccount from '@/components/SelectInputAccount.vue';
+import SelectInputAccount from "@/components/SelectInputAccount.vue";
 import SelectInputMultisigAccount from "@/components/SelectInputMultisigAccount.vue";
 import MultisigInput from "@/modules/transfer/components/MultisigInput.vue";
 import SelectActionType from "@/modules/services/submodule/harvester/components/SelectActionType.vue";
@@ -322,14 +352,14 @@ const createTxn = async () => {
     const txn = txnBuilder.harvesterKey(harvesterPublicAccount.value).build();
     const innerTxn = txn.toAggregateV1(multisigPublicAccount.value);
     const innerTxns = [innerTxn.serialize()];
-    unsignedTxnPayload = innerTxns
+    unsignedTxnPayload = innerTxns;
   } else {
     const txn = txnBuilder.harvesterKey(harvesterPublicAccount.value).build();
-    unsignedTxnPayload = txn.serialize()
+    unsignedTxnPayload = txn.serialize();
   }
-  TransactionState.unsignedTransactionPayload = unsignedTxnPayload
+  TransactionState.unsignedTransactionPayload = unsignedTxnPayload;
   TransactionState.selectedAddress = selectedAddress.value;
-  TransactionState.selectedMultisigAddress = selectedMultisigAddress.value
+  TransactionState.selectedMultisigAddress = selectedMultisigAddress.value;
   router.push({ name: "ViewConfirmTransaction" });
 };
 
