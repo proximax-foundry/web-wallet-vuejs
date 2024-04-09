@@ -1,10 +1,7 @@
 <template>
- <div>
-  
-  <div class='w-10/12 ml-auto mr-auto'>
-    <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8" >
-      <div class="xl:col-span-2 p-6 lg:p-12">
-        <div class="lg:flex lg:justify-between lg:items-center">
+  <TransactionLayout :type="'account'">
+    <template #white>
+      <div class="lg:flex lg:justify-between lg:items-center">
           <div class='font-semibold mb-4 inline-block mt-1'>{{$t('asset.modifyAssetSupply')}}</div>
           <div class="flex items-center">
             <div v-html="svgString" class="inline-block" />
@@ -64,30 +61,28 @@
           <SelectModificationType :title="$t('asset.modificationType')" class="lg:mr-4" v-model="selectIncreaseDecrease" />
           <SupplyInputClean :disabled="showNoBalance||isNotCosigner" v-model="supply" :balance="(maxAssetSupply - assetSupply.value)" :placeholder="$t('asset.quantityOf',{value:selectIncreaseDecrease})" type="text" icon="coins" :showError="showSupplyErr" :errorMessage="selectIncreaseDecrease == 'increase'? ' The total asset supply should not exceed 900T' : ' You have exceeded the maximum value for decrease asset supply.'" :decimal="Number(assetDivisibility)" class="lg:ml-4" />
         </div>
-      </div>
-      <div class="bg-navy-primary py-6 px-12 xl:col-span-1">
-        <TransactionFeeDisplay :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="balance" :selected-acc-add="selectedAccAdd"/>
+    </template>
+
+    <template #navy>
+      <TransactionFeeDisplay :transaction-fee="transactionFee" :total-fee-formatted="totalFeeFormatted" :get-multi-sig-cosigner="getMultiSigCosigner" :check-cosign-balance="checkCosignBalance" :lock-fund-currency="lockFundCurrency" :lock-fund-tx-fee="String(lockFundTxFee)" :balance="balance" :selected-acc-add="selectedAccAdd"/>
         <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white" :disabled="disableModify" @click="modifyAsset">{{$t('asset.modifyAssetSupply')}}</button>
         <div class="text-center">
           <router-link :to="{name: 'ViewDashboard'}" class='content-center text-xs text-white border-b-2 border-white'>{{$t('general.cancel')}}</router-link>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
+    </template>
+  </TransactionLayout>
 </template>
 <script>
 import { computed, ref, watch } from 'vue';
 import { useRouter } from "vue-router";
-import PasswordInput from '@/components/PasswordInput.vue';
 import SupplyInputClean from '@/components/SupplyInputClean.vue';
 import SelectModificationType from '@/modules/services/submodule/assets/components/SelectModificationType.vue';
 import TransactionFeeDisplay from '@/modules/services/components/TransactionFeeDisplay.vue';
+import TransactionLayout from "@/components/TransactionLayout.vue";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
 import { Helper } from '@/util/typeHelper';
 import { AssetsUtils } from '@/util/assetsUtils';
-import { WalletUtils } from '@/util/walletUtils';
 import { toSvg } from "jdenticon";
 import { useI18n } from 'vue-i18n';
 import { useToast } from "primevue/usetoast";
@@ -103,10 +98,10 @@ export default {
   name: 'ViewServicesAssetsModifySupplyChange',
   directives: { 'tooltip': Tooltip },
   components: {
-    PasswordInput,
     SupplyInputClean,
     SelectModificationType,
     TransactionFeeDisplay,
+    TransactionLayout,
   },
   props: {
     assetId: String,
