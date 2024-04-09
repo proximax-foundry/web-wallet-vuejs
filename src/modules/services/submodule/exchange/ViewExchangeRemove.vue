@@ -1,5 +1,5 @@
 <template>
-  <TransactionLayout>
+  <TransactionLayout class="mt-8">
     <template #white>
       <div>SDA-SDA Exchange - Remove Offer</div>
       <div v-if="cosignerList.length" class="text-blue-primary mt-3">

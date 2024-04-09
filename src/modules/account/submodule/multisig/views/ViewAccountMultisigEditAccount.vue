@@ -1,272 +1,273 @@
 <template>
-  <TransactionLayout>
-    <template #white>
-      <div class="text-left mt-2 mb-5">
-        <div v-if="walletCosignerList.length > 0">
-          <div class="text-tsm">
-            {{ $t("general.initiateBy") }}:
-            <span class="font-bold" v-if="walletCosignerList.length == 1">
-              {{ walletCosignerList[0].name }}
-            </span>
-            <span class="font-bold" v-else>
-              <select class="" v-model="selectedCosignPublicKey">
-                <option
-                  v-for="(element, item) in walletCosignerList"
-                  :value="
-                    findAcc(element.publicKey)
-                      ? findAcc(element.publicKey).publicKey
-                      : ''
-                  "
-                  :key="item"
-                >
-                  {{ element.name }}
-                </option>
-              </select>
-            </span>
+  <AccTabLayout :address="address" :selected="'multisig'">
+    <TransactionLayout>
+      <template #white>
+        <div class="text-left mt-2 mb-5">
+          <div v-if="walletCosignerList.length > 0">
+            <div class="text-tsm">
+              {{ $t("general.initiateBy") }}:
+              <span class="font-bold" v-if="walletCosignerList.length == 1">
+                {{ walletCosignerList[0].name }}
+              </span>
+              <span class="font-bold" v-else>
+                <select class="" v-model="selectedCosignPublicKey">
+                  <option
+                    v-for="(element, item) in walletCosignerList"
+                    :value="
+                      findAcc(element.publicKey)
+                        ? findAcc(element.publicKey).publicKey
+                        : ''
+                    "
+                    :key="item"
+                  >
+                    {{ element.name }}
+                  </option>
+                </select>
+              </span>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="font-semibold mb-4">{{ $t("transaction.modifyMultisig") }}</div>
-      <div class="text-xs font-semibold">
-        {{ $t("multisig.manageCosignatories") }}
-      </div>
-      <div>
-        <div class="error error_box mb-5 whitespace-pre" v-if="err != ''">
-          {{ err }}
+        <div class="text-xs font-semibold">
+          {{ $t("multisig.manageCosignatories") }}
         </div>
-        <div v-if="pkNotExistArray.length > 0">
-          <div v-for="inputPkNotExist in pkNotExistArray">
-            <div v-for="(publicKey, index) in coSign" :key="index">
-              <div
-                class="flex gap-2 bg-yellow-50 py-2 rounded-md px-2 my-3"
-                v-if="inputPkNotExist === publicKey"
-              >
-                <img
-                  src="@/modules/account/img/icon-warning.svg"
-                  class="w-5 h-5"
-                />
-                <div class="text-xs font-bold pt-1">
-                  {{
-                    contactName[index]
-                      ? contactName[index]
-                      : $t("multisig.cosignatory") + `${index + 1}`
-                  }}'s public key does not exist
+        <div>
+          <div class="error error_box mb-5 whitespace-pre" v-if="err != ''">
+            {{ err }}
+          </div>
+          <div v-if="pkNotExistArray.length > 0">
+            <div v-for="inputPkNotExist in pkNotExistArray">
+              <div v-for="(publicKey, index) in coSign" :key="index">
+                <div
+                  class="flex gap-2 bg-yellow-50 py-2 rounded-md px-2 my-3"
+                  v-if="inputPkNotExist === publicKey"
+                >
+                  <img
+                    src="@/modules/account/img/icon-warning.svg"
+                    class="w-5 h-5"
+                  />
+                  <div class="text-xs font-bold pt-1">
+                    {{
+                      contactName[index]
+                        ? contactName[index]
+                        : $t("multisig.cosignatory") + `${index + 1}`
+                    }}'s public key does not exist
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="error error_box mb-5" v-if="passwordErr != ''">
-          {{ passwordErr }}
-        </div>
-      </div>
-      <div class="mt-4"></div>
-      <div class="flex flex-col gap-2 ml-[-24px]">
-        <div v-for="(publicKey, index) in cosignaturies" :key="index">
-          <div class="flex">
-            <img
-              v-if="
-                checkRemoval(publicKey) && (!onPartial || enableEditPartial)
-              "
-              @click="restoreFromRemovalList(publicKey)"
-              src="@/modules/account/submodule/multisig/img/icon-delete-red.svg"
-              class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"
-            />
-            <img
-              v-else
-              @click="addToRemovalList(publicKey)"
-              src="@/modules/account/submodule/multisig/img/icon-delete-gray.svg"
-              class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"
-            />
-            <TextInput
-              class="w-5/12 mr-2"
-              v-model="cosignerName[index]"
-              :disabled="true"
-            />
-            <TextInput
-              class="w-7/12"
-              v-model="cosignaturies[index]"
-              :disabled="true"
-            />
+          <div class="error error_box mb-5" v-if="passwordErr != ''">
+            {{ passwordErr }}
           </div>
         </div>
-      </div>
-
-      <div
-        v-if="!onPartial || enableEditPartial"
-        class="flex flex-col gap-2 mt-2"
-      >
-        <div v-for="(coSignAddress, index) in coSign" :key="index">
-          <div class="flex">
-            <img
-              src="@/modules/account/submodule/multisig/img/icon-delete-red.svg"
-              @click="deleteCoSigAddressInput(index)"
-              class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"
-            />
-            <TextInput
-              class="w-5/12 mr-2"
-              :placeholder="$t('multisig.cosignatory') + `${index + 1}`"
-              v-model="contactName[index]"
-              :disabled="true"
-            />
-            <TextInputClean
-              class="w-7/12 mr-2"
-              :placeholder="$t('general.publicKey')"
-              :errorMessage="$t('general.invalidInput')"
-              :showError="showAddressError[index]"
-              v-model="coSign[index]"
-            />
-            <!-- <div v-if="showAddressError[index]==true " class=""/> -->
-            <div
-              @click="toggleContact[index] = !toggleContact[index]"
-              class="border cursor-pointer flex flex-col justify-center p-2"
-              style="height: 2.66rem"
-            >
-              <font-awesome-icon
-                icon="id-card-alt"
-                class="text-blue-primary ml-auto mr-auto"
-              ></font-awesome-icon>
-              <div class="text-xxs text-blue-primary font-semibold uppercase">
-                {{ $t("general.select") }}
-              </div>
+        <div class="mt-4"></div>
+        <div class="flex flex-col gap-2 ml-[-24px]">
+          <div v-for="(publicKey, index) in cosignaturies" :key="index">
+            <div class="flex">
+              <img
+                v-if="
+                  checkRemoval(publicKey) && (!onPartial || enableEditPartial)
+                "
+                @click="restoreFromRemovalList(publicKey)"
+                src="@/modules/account/submodule/multisig/img/icon-delete-red.svg"
+                class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"
+              />
+              <img
+                v-else
+                @click="addToRemovalList(publicKey)"
+                src="@/modules/account/submodule/multisig/img/icon-delete-gray.svg"
+                class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"
+              />
+              <TextInput
+                class="w-5/12 mr-2"
+                v-model="cosignerName[index]"
+                :disabled="true"
+              />
+              <TextInput
+                class="w-7/12"
+                v-model="cosignaturies[index]"
+                :disabled="true"
+              />
             </div>
           </div>
-          <div v-if="toggleContact[index]">
-            <Sidebar
-              v-model:visible="toggleContact[index]"
-              :baseZIndex="10000"
-              position="full"
-            >
-              <SelectAccountAndContact
-                v-bind="index"
-                :contacts="contact"
-                :index="index"
-                :selectedNode="selectedNode[index]"
-                @node-select="onNodeSelect($event, index)"
-              />
-            </Sidebar>
-          </div>
         </div>
-      </div>
-      <button
-        class="font-semibold text-xs mt-1 text-blue-primary outline-none focus:outline-none disabled:opacity-50 disabled:cursor-auto"
-        @click="addCoSig"
-        :disabled="addCoSigButton"
-      >
-        + {{ $t("multisig.addNewCosignatory") }}
-      </button>
-      <div class="my-7 gray-line" />
-      <div class="text-xs font-semibold mb-3">
-        {{ $t("general.scheme") }}
-      </div>
-      <div class="flex gap-2">
-        <div class="border w-6/12">
-          <div class="border-b-2 text-xxs text-center py-1 uppercase">
-            {{ $t("multisig.transactionsApproval") }}
-          </div>
-          <div class="flex justify-around">
-            <button
-              class="text-blue-primary disabled:opacity-50"
-              @click="numApproveTransaction--"
-              :disabled="numApproveTransaction <= 0"
-            >
-              -
-            </button>
-            <input
-              type="number"
-              class="w-4 outline-none text-xs font-bold"
-              :min="0"
-              @keypress="validateApproval"
-              :max="maxNumApproveTransaction"
-              v-model="numApproveTransaction"
-            />
-            <button
-              class="text-blue-primary disabled:opacity-50"
-              :disabled="numApproveTransaction >= maxNumApproveTransaction"
-              @click="numApproveTransaction++"
-            >
-              +
-            </button>
-          </div>
-          <div class="text-xxs border-t-2 text-center py-1 uppercase">
-            {{
-              $t("multisig.ofCosignatories", {
-                value: maxNumApproveTransaction,
-              })
-            }}
-          </div>
-        </div>
-        <div class="border w-6/12">
-          <div class="border-b-2 text-xxs text-center py-1 uppercase">
-            {{ $t("multisig.accountDeletionApproval") }}
-          </div>
-          <div class="flex justify-around">
-            <button
-              class="text-blue-primary disabled:opacity-50"
-              @click="numDeleteUser--"
-              :disabled="numDeleteUser <= 0"
-            >
-              -
-            </button>
-            <input
-              type="number"
-              class="w-4 outline-none text-xs font-bold"
-              :min="0"
-              @keypress="validateDelete"
-              :max="maxNumDeleteUser"
-              v-model="numDeleteUser"
-            />
-            <button
-              class="text-blue-primary disabled:opacity-50"
-              :disabled="numDeleteUser >= maxNumDeleteUser"
-              @click="numDeleteUser++"
-            >
-              +
-            </button>
-          </div>
-          <div class="text-xxs border-t-2 text-center py-1 uppercase">
-            {{ $t("multisig.ofCosignatories", { value: maxNumDeleteUser }) }}
-          </div>
-        </div>
-      </div>
-    </template>
 
-    <template #navy>
-      <TransactionFeeDisplay
-        @ticked="(val) => (enableEditPartial = val)"
-        :fund-status="fundStatus"
-        :is-multisig="isMultisig"
-        :is-cosigner="isCoSigner"
-        :on-partial="onPartial"
-        :transaction-fee="String(aggregateFee)"
-        :total-fee-formatted="totalFeeFormatted"
-        :get-multi-sig-cosigner="getMultiSigCosigner"
-        :check-cosign-balance="checkCosignBalance"
-        :lock-fund-currency="lockFundCurrency"
-        :lock-fund-tx-fee="String(lockFundTxFee)"
-        :balance="accBalance"
-        :selected-acc-add="selectedAccAdd"
-      />
-      <div class="mt-5" />
-      <div class="mt-3">
+        <div
+          v-if="!onPartial || enableEditPartial"
+          class="flex flex-col gap-2 mt-2"
+        >
+          <div v-for="(coSignAddress, index) in coSign" :key="index">
+            <div class="flex">
+              <img
+                src="@/modules/account/submodule/multisig/img/icon-delete-red.svg"
+                @click="deleteCoSigAddressInput(index)"
+                class="w-4 h-4 text-gray-500 cursor-pointer mt-3 mx-1"
+              />
+              <TextInput
+                class="w-5/12 mr-2"
+                :placeholder="$t('multisig.cosignatory') + `${index + 1}`"
+                v-model="contactName[index]"
+                :disabled="true"
+              />
+              <TextInputClean
+                class="w-7/12 mr-2"
+                :placeholder="$t('general.publicKey')"
+                :errorMessage="$t('general.invalidInput')"
+                :showError="showAddressError[index]"
+                v-model="coSign[index]"
+              />
+              <!-- <div v-if="showAddressError[index]==true " class=""/> -->
+              <div
+                @click="toggleContact[index] = !toggleContact[index]"
+                class="border cursor-pointer flex flex-col justify-center p-2"
+                style="height: 2.66rem"
+              >
+                <font-awesome-icon
+                  icon="id-card-alt"
+                  class="text-blue-primary ml-auto mr-auto"
+                ></font-awesome-icon>
+                <div class="text-xxs text-blue-primary font-semibold uppercase">
+                  {{ $t("general.select") }}
+                </div>
+              </div>
+            </div>
+            <div v-if="toggleContact[index]">
+              <Sidebar
+                v-model:visible="toggleContact[index]"
+                :baseZIndex="10000"
+                position="full"
+              >
+                <SelectAccountAndContact
+                  v-bind="index"
+                  :contacts="contact"
+                  :index="index"
+                  :selectedNode="selectedNode[index]"
+                  @node-select="onNodeSelect($event, index)"
+                />
+              </Sidebar>
+            </div>
+          </div>
+        </div>
         <button
-          type="submit"
-          class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
-          @click="modifyAccount()"
-          :disabled="disableSend"
+          class="font-semibold text-xs mt-1 text-blue-primary outline-none focus:outline-none disabled:opacity-50 disabled:cursor-auto"
+          @click="addCoSig"
+          :disabled="addCoSigButton"
         >
-          {{ $t("multisig.updateCosignatories") }}
+          + {{ $t("multisig.addNewCosignatory") }}
         </button>
-      </div>
-      <div class="text-center">
-        <router-link
-          :to="{ name: 'ViewMultisigHome', params: { address: address } }"
-          class="content-center text-xs text-white underline"
-          >{{ $t("general.cancel") }}</router-link
-        >
-      </div>
-    </template>
-  </TransactionLayout>
+        <div class="my-7 gray-line" />
+        <div class="text-xs font-semibold mb-3">
+          {{ $t("general.scheme") }}
+        </div>
+        <div class="flex gap-2">
+          <div class="border w-6/12">
+            <div class="border-b-2 text-xxs text-center py-1 uppercase">
+              {{ $t("multisig.transactionsApproval") }}
+            </div>
+            <div class="flex justify-around">
+              <button
+                class="text-blue-primary disabled:opacity-50"
+                @click="numApproveTransaction--"
+                :disabled="numApproveTransaction <= 0"
+              >
+                -
+              </button>
+              <input
+                type="number"
+                class="w-4 outline-none text-xs font-bold"
+                :min="0"
+                @keypress="validateApproval"
+                :max="maxNumApproveTransaction"
+                v-model="numApproveTransaction"
+              />
+              <button
+                class="text-blue-primary disabled:opacity-50"
+                :disabled="numApproveTransaction >= maxNumApproveTransaction"
+                @click="numApproveTransaction++"
+              >
+                +
+              </button>
+            </div>
+            <div class="text-xxs border-t-2 text-center py-1 uppercase">
+              {{
+                $t("multisig.ofCosignatories", {
+                  value: maxNumApproveTransaction,
+                })
+              }}
+            </div>
+          </div>
+          <div class="border w-6/12">
+            <div class="border-b-2 text-xxs text-center py-1 uppercase">
+              {{ $t("multisig.accountDeletionApproval") }}
+            </div>
+            <div class="flex justify-around">
+              <button
+                class="text-blue-primary disabled:opacity-50"
+                @click="numDeleteUser--"
+                :disabled="numDeleteUser <= 0"
+              >
+                -
+              </button>
+              <input
+                type="number"
+                class="w-4 outline-none text-xs font-bold"
+                :min="0"
+                @keypress="validateDelete"
+                :max="maxNumDeleteUser"
+                v-model="numDeleteUser"
+              />
+              <button
+                class="text-blue-primary disabled:opacity-50"
+                :disabled="numDeleteUser >= maxNumDeleteUser"
+                @click="numDeleteUser++"
+              >
+                +
+              </button>
+            </div>
+            <div class="text-xxs border-t-2 text-center py-1 uppercase">
+              {{ $t("multisig.ofCosignatories", { value: maxNumDeleteUser }) }}
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <template #navy>
+        <TransactionFeeDisplay
+          @ticked="(val) => (enableEditPartial = val)"
+          :fund-status="fundStatus"
+          :is-multisig="isMultisig"
+          :is-cosigner="isCoSigner"
+          :on-partial="onPartial"
+          :transaction-fee="String(aggregateFee)"
+          :total-fee-formatted="totalFeeFormatted"
+          :get-multi-sig-cosigner="getMultiSigCosigner"
+          :check-cosign-balance="checkCosignBalance"
+          :lock-fund-currency="lockFundCurrency"
+          :lock-fund-tx-fee="String(lockFundTxFee)"
+          :balance="accBalance"
+          :selected-acc-add="selectedAccAdd"
+        />
+        <div class="mt-5" />
+        <div class="mt-3">
+          <button
+            type="submit"
+            class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
+            @click="modifyAccount()"
+            :disabled="disableSend"
+          >
+            {{ $t("multisig.updateCosignatories") }}
+          </button>
+        </div>
+        <div class="text-center">
+          <router-link
+            :to="{ name: 'ViewMultisigHome', params: { address: address } }"
+            class="content-center text-xs text-white underline"
+            >{{ $t("general.cancel") }}</router-link
+          >
+        </div>
+      </template>
+    </TransactionLayout>
+  </AccTabLayout>
 </template>
 
 <script>
@@ -274,6 +275,7 @@ import { computed, ref, watch, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import TextInput from "@/components/TextInput.vue";
 import TransactionFeeDisplay from "@/modules/services/components/TransactionFeeDisplay.vue";
+import AccTabLayout from "@/components/AccTabLayout.vue";
 import TransactionLayout from "@/components/TransactionLayout.vue";
 import TextInputClean from "@/components/TextInputClean.vue";
 import { MultisigUtils } from "@/util/multisigUtils";
@@ -288,10 +290,8 @@ import { networkState } from "@/state/networkState";
 import { useI18n } from "vue-i18n";
 import { Helper } from "@/util/typeHelper";
 import SelectAccountAndContact from "@/components/SelectAccountAndContact.vue";
-import AccountComponent from "@/modules/account/components/AccountComponent.vue";
 import { TransactionUtils, findAcc } from "@/util/transactionUtils";
 import { AppState } from "@/state/appState";
-import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { TransactionState } from "@/state/transactionState";
 export default {
   name: "ViewMultisigEditAccount",
@@ -299,9 +299,8 @@ export default {
     TextInput,
     TextInputClean,
     SelectAccountAndContact,
-    AccountComponent,
-    AccountTabs,
     TransactionFeeDisplay,
+    AccTabLayout,
     TransactionLayout,
   },
   props: {

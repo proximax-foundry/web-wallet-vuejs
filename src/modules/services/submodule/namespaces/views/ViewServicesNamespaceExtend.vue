@@ -1,5 +1,5 @@
 <template>
-  <TransactionLayout>
+  <TransactionLayout class="mt-8">
     <template #white>
       <div class="lg:flex lg:justify-between lg:items-center">
         <div class="font-semibold mb-4 inline-block mt-1">

@@ -1,5 +1,5 @@
 <template>
-  <TransactionLayout>
+  <TransactionLayout class="mt-8">
     <template #white>
       <div class='font-semibold mb-4'>{{ $t('general.createNamespace') }}</div>
           <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">

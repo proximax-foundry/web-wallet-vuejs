@@ -3,7 +3,7 @@
     <SelectAccountAndContact :contacts="contacts" @node-select="onNodeSelect" />
   </Sidebar>
   <ConfirmSendModal :toggleModal="toggleConfirm" />
-  <TransactionLayout>
+  <TransactionLayout class="mt-8">
     <template #white>
       <div
         v-if="showBalanceErr"

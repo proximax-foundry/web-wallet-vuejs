@@ -1,5 +1,5 @@
 <template>
-  <TransactionLayout>
+  <TransactionLayout class="mt-8">
     <template #white>
       <div class="font-semibold mb-4">Harvester Transaction</div>
           <div

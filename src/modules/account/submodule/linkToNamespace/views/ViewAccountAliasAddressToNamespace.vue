@@ -2,125 +2,127 @@
   <Sidebar v-model:visible="toggleContact" :baseZIndex="10000" position="full">
     <SelectAccountAndContact :contacts="contacts" @node-select="onNodeSelect" />
   </Sidebar>
-  <TransactionLayout>
-    <template #white>
-      <div
-        v-if="walletCosignerList.cosignerList.length"
-        class="text-tsm flex gap-2 items-center"
-      >
-        <div>{{ $t("general.initiateBy") }}:</div>
-        <Dropdown
-          v-model="selectedCosigner"
-          :options="cosignerOptions"
-          class="text-tsm"
-          option-label="name"
+  <AccTabLayout :address="address" :selected="'details'">
+    <TransactionLayout>
+      <template #white>
+        <div
+          v-if="walletCosignerList.cosignerList.length"
+          class="text-tsm flex gap-2 items-center"
         >
-        </Dropdown>
-      </div>
-      <div class="font-semibold mt-3">
-        {{
-          selectedAction.value == "Link"
-            ? $t("general.linkToNamespace")
-            : $t("namespace.manageNamespace")
-        }}
-      </div>
-      <div class="flex flex-col">
-        <Dropdown
-          class="my-3"
-          :placeholder="$t('namespace.selectAction')"
-          v-model="selectedAction"
-          :options="actionsOptions"
-          option-label="label"
-          :disabled="disableNamespace"
-        ></Dropdown>
-        <Dropdown
-          :placeholder="$t('namespace.selectNamespace')"
-          v-model="selectedNamespace"
-          option-label="label"
-          :options="namespaceOptions"
-          option-disabled="disabled"
-          :disabled="disableNamespace"
-        ></Dropdown>
-      </div>
-      <div class="flex mt-3 gap-1">
-        <AddressInputClean
-          :placeholder="$t('general.addAccAddress')"
-          v-model="namespaceAddress"
-          :errorMessage="addressErrorMsg"
-          :showError="showAddressError"
-          :disabled="
-            disableNamespace ||
-            selectedAction.value == 'Unlink' ||
-            selectedNamespace == null
-          "
-        />
-        <button
-          class="border rounded-md cursor-pointer flex flex-col justify-around p-2"
-          @click="toggleContact = true"
-          :disabled="
-            disableNamespace ||
-            selectedAction.value == 'Unlink' ||
-            selectedNamespace == null
-          "
-        >
-          <font-awesome-icon
-            icon="id-card-alt"
-            :class="
-              selectedNamespace != null && selectedAction.value == 'Link'
-                ? 'text-blue-primary'
-                : 'text-gray-400'
-            "
-            class="ml-auto mr-auto"
-          ></font-awesome-icon>
-          <div
-            :class="
-              selectedNamespace != null && selectedAction.value == 'Link'
-                ? 'text-blue-primary'
-                : 'text-gray-400'
-            "
-            class="text-xxs font-semibold uppercase"
+          <div>{{ $t("general.initiateBy") }}:</div>
+          <Dropdown
+            v-model="selectedCosigner"
+            :options="cosignerOptions"
+            class="text-tsm"
+            option-label="name"
           >
-            {{ $t("general.select") }}
-          </div>
-        </button>
-      </div>
-    </template>
+          </Dropdown>
+        </div>
+        <div class="font-semibold mt-3">
+          {{
+            selectedAction.value == "Link"
+              ? $t("general.linkToNamespace")
+              : $t("namespace.manageNamespace")
+          }}
+        </div>
+        <div class="flex flex-col">
+          <Dropdown
+            class="my-3"
+            :placeholder="$t('namespace.selectAction')"
+            v-model="selectedAction"
+            :options="actionsOptions"
+            option-label="label"
+            :disabled="disableNamespace"
+          ></Dropdown>
+          <Dropdown
+            :placeholder="$t('namespace.selectNamespace')"
+            v-model="selectedNamespace"
+            option-label="label"
+            :options="namespaceOptions"
+            option-disabled="disabled"
+            :disabled="disableNamespace"
+          ></Dropdown>
+        </div>
+        <div class="flex mt-3 gap-1">
+          <AddressInputClean
+            :placeholder="$t('general.addAccAddress')"
+            v-model="namespaceAddress"
+            :errorMessage="addressErrorMsg"
+            :showError="showAddressError"
+            :disabled="
+              disableNamespace ||
+              selectedAction.value == 'Unlink' ||
+              selectedNamespace == null
+            "
+          />
+          <button
+            class="border rounded-md cursor-pointer flex flex-col justify-around p-2"
+            @click="toggleContact = true"
+            :disabled="
+              disableNamespace ||
+              selectedAction.value == 'Unlink' ||
+              selectedNamespace == null
+            "
+          >
+            <font-awesome-icon
+              icon="id-card-alt"
+              :class="
+                selectedNamespace != null && selectedAction.value == 'Link'
+                  ? 'text-blue-primary'
+                  : 'text-gray-400'
+              "
+              class="ml-auto mr-auto"
+            ></font-awesome-icon>
+            <div
+              :class="
+                selectedNamespace != null && selectedAction.value == 'Link'
+                  ? 'text-blue-primary'
+                  : 'text-gray-400'
+              "
+              class="text-xxs font-semibold uppercase"
+            >
+              {{ $t("general.select") }}
+            </div>
+          </button>
+        </div>
+      </template>
 
-    <template #navy>
-      <TransactionFeeDisplay
-        :transaction-fee="String(trxFee)"
-        :total-fee-formatted="String(totalFee)"
-        :get-multi-sig-cosigner="walletCosignerList"
-        :check-cosign-balance="String(checkCosignBalance)"
-        :lock-fund-currency="String(lockFund)"
-        :lock-fund-tx-fee="String(lockFundTxFee)"
-        :balance="accountDisplayBalance"
-        :selected-acc-add="address"
-        :is-cosigner="isCosigner"
-        :fund-status="fundStatus"
-      />
-      <div class="mt-3"></div>
-      <button
-        class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
-        @click="aliasAddressToNamespace"
-        :disabled="disableCreate"
-      >
-        {{
-          selectedAction.value == "Unlink"
-            ? $t("namespace.unlinkNamespace")
-            : $t("general.linkToNamespace")
-        }}
-      </button>
-
-      <div class="text-center">
-        <router-link
-          :to="{ name: 'ViewAccountDetails', params: { address: address } }"
-          class="content-center text-xs text-white underline"
-          >{{ $t("general.cancel") }}</router-link
+      <template #navy>
+        <TransactionFeeDisplay
+          :transaction-fee="String(trxFee)"
+          :total-fee-formatted="String(totalFee)"
+          :get-multi-sig-cosigner="walletCosignerList"
+          :check-cosign-balance="String(checkCosignBalance)"
+          :lock-fund-currency="String(lockFund)"
+          :lock-fund-tx-fee="String(lockFundTxFee)"
+          :balance="accountDisplayBalance"
+          :selected-acc-add="address"
+          :is-cosigner="isCosigner"
+          :fund-status="fundStatus"
+        />
+        <div class="mt-3"></div>
+        <button
+          class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
+          @click="aliasAddressToNamespace"
+          :disabled="disableCreate"
         >
-      </div>
-    </template>
-  </TransactionLayout>
+          {{
+            selectedAction.value == "Unlink"
+              ? $t("namespace.unlinkNamespace")
+              : $t("general.linkToNamespace")
+          }}
+        </button>
+
+        <div class="text-center">
+          <router-link
+            :to="{ name: 'ViewAccountDetails', params: { address: address } }"
+            class="content-center text-xs text-white underline"
+            >{{ $t("general.cancel") }}</router-link
+          >
+        </div>
+      </template>
+    </TransactionLayout>
+  </AccTabLayout>
 </template>
 
 <script setup lang="ts">
@@ -131,9 +133,8 @@ import { Address, AliasActionType, NamespaceId } from "tsjs-xpx-chain-sdk";
 import { ref, computed, watch } from "vue";
 import { Helper } from "@/util/typeHelper";
 import { useI18n } from "vue-i18n";
-import AccountComponent from "@/modules/account/components/AccountComponent.vue";
-import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import TransactionLayout from "@/components/TransactionLayout.vue";
+import AccTabLayout from "@/components/AccTabLayout.vue";
 import { MultisigUtils } from "@/util/multisigUtils";
 import AddressInputClean from "@/modules/transfer/components/AddressInputClean.vue";
 import { AppState } from "@/state/appState";

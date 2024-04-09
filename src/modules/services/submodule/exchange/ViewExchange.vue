@@ -1,5 +1,5 @@
 <template>
-  <TransactionLayout>
+  <TransactionLayout class="mt-8">
     <template #white>
       <div>SDA-SDA Exchange</div>
       <div v-if="!selectedAddress" class="text-xs mt-3 text-blue-primary">

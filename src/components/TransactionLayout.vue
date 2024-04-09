@@ -1,6 +1,6 @@
 <template>
   <div class="w-10/12 ml-auto mr-auto">
-    <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8">
+    <div class="border filter shadow-lg xl:grid xl:grid-cols-3">
       <div class="xl:col-span-2 p-12">
         <slot name="white" />
       </div>
