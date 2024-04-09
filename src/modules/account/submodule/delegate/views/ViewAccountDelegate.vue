@@ -1,150 +1,147 @@
 <template>
-  <AccTabLayout :address="address" :selected="'details'">
-    <TransactionLayout>
-      <template #white>
-        <div class="pl-6">
-          <div class="error error_box mb-5" v-if="err != ''">{{ err }}</div>
-        </div>
-        <div v-if="isMultisig" class="text-left mt-2 mb-5">
-          <div v-if="walletCosignerList.length > 0">
-            <div class="text-tsm">
-              {{ $t("general.initiateBy") }}:
-              <span class="font-bold" v-if="walletCosignerList.length == 1">
-                {{ walletCosignerList[0].name }}
-              </span>
-              <span class="font-bold" v-else>
-                <select class="" v-model="selectedCosignPublicKey">
-                  <option
-                    v-for="(element, item) in walletCosignerList"
-                    :value="findAcc(element.publicKey).publicKey"
-                    :key="item"
-                  >
-                    {{ element.name }}
-                  </option>
-                </select>
-              </span>
-            </div>
+  <AccTabLayout :address="address" :selected="'details'" />
+  <TransactionLayout>
+    <template #white>
+      <div class="pl-6">
+        <div class="error error_box mb-5" v-if="err != ''">{{ err }}</div>
+      </div>
+      <div v-if="isMultisig" class="text-left mt-2 mb-5">
+        <div v-if="walletCosignerList.length > 0">
+          <div class="text-tsm">
+            {{ $t("general.initiateBy") }}:
+            <span class="font-bold" v-if="walletCosignerList.length == 1">
+              {{ walletCosignerList[0].name }}
+            </span>
+            <span class="font-bold" v-else>
+              <select class="" v-model="selectedCosignPublicKey">
+                <option
+                  v-for="(element, item) in walletCosignerList"
+                  :value="findAcc(element.publicKey).publicKey"
+                  :key="item"
+                >
+                  {{ element.name }}
+                </option>
+              </select>
+            </span>
           </div>
         </div>
-        <div v-if="!delegateValue">
-          <div class="text-xs font-semibold">{{ $t("general.delegate") }}</div>
-          <div class="text-xxs mt-2">{{ $t("delegate.notLinked") }}</div>
-          <div class="mt-4"></div>
-          <div class="my-7 gray-line" />
-          <div>
+      </div>
+      <div v-if="!delegateValue">
+        <div class="text-xs font-semibold">{{ $t("general.delegate") }}</div>
+        <div class="text-xxs mt-2">{{ $t("delegate.notLinked") }}</div>
+        <div class="mt-4"></div>
+        <div class="my-7 gray-line" />
+        <div>
+          <div class="text-xs text-blue-primary mt-0.5 font-semibold uppercase">
+            {{ $t("general.privateKey") }}
+          </div>
+          <div class="flex">
             <div
-              class="text-xs text-blue-primary mt-0.5 font-semibold uppercase"
+              id="private"
+              class="truncate text-xs mt-1 font-semibold"
+              type="text"
+              :copyValue="privateKey"
+              :copySubject="$t('general.privateKey')"
             >
-              {{ $t("general.privateKey") }}
-            </div>
-            <div class="flex">
-              <div
-                id="private"
-                class="truncate text-xs mt-1 font-semibold"
-                type="text"
-                :copyValue="privateKey"
-                :copySubject="$t('general.privateKey')"
-              >
-                {{ privateKey }}
-              </div>
-              <font-awesome-icon
-                :title="$t('general.copy')"
-                icon="copy"
-                @click="copy('private')"
-                class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer"
-              ></font-awesome-icon>
-            </div>
-            <div
-              class="text-txs mt-1 text-red-400 border px-1.5 py-2 border-red-400 rounded-md"
-            >
-              {{ $t("general.pkWarning") }}
-            </div>
-          </div>
-        </div>
-        <div v-else>
-          <div class="text-xs font-semibold">
-            {{ $t("delegate.accDelegated") }}
-          </div>
-          <div class="px-3 py-2 mt-3 bg-green-100">
-            <img
-              src="@/assets/img/icon-blue-tick.svg"
-              class="h-3 w-3 inline-block mr-2"
-            />
-            <div class="text-xs mt-2 inline-block">
-              {{ $t("delegate.linked") }}
-            </div>
-          </div>
-
-          <div
-            class="border border-blue-300 rounded-md p-3 mt-3 bg-blue-50 overflow-x-auto"
-          >
-            <div class="text-xs inline-block">
-              {{ $t("delegate.publicKeyOfDelegate") }}
+              {{ privateKey }}
             </div>
             <font-awesome-icon
-              icon="copy"
-              @click="copy('delegatePublicKey')"
               :title="$t('general.copy')"
-              class="inline-block float-right mt-1 w-5 h-5 text-blue-link cursor-pointer"
+              icon="copy"
+              @click="copy('private')"
+              class="ml-2 pb-1 w-5 h-5 text-blue-link mt-0.5 cursor-pointer"
             ></font-awesome-icon>
-            <div
-              class="text-xs mt-0.5 font-semibold"
-              id="delegatePublicKey"
-              :copyValue="delegateAcc"
-              :copySubject="$t('delegate.delegatePublicKey')"
-            >
-              {{ delegateAcc }}
-            </div>
+          </div>
+          <div
+            class="text-txs mt-1 text-red-400 border px-1.5 py-2 border-red-400 rounded-md"
+          >
+            {{ $t("general.pkWarning") }}
           </div>
         </div>
-      </template>
+      </div>
+      <div v-else>
+        <div class="text-xs font-semibold">
+          {{ $t("delegate.accDelegated") }}
+        </div>
+        <div class="px-3 py-2 mt-3 bg-green-100">
+          <img
+            src="@/assets/img/icon-blue-tick.svg"
+            class="h-3 w-3 inline-block mr-2"
+          />
+          <div class="text-xs mt-2 inline-block">
+            {{ $t("delegate.linked") }}
+          </div>
+        </div>
 
-      <template #navy>
-        <TransactionFeeDisplay
-          :fund-status="fundStatus"
-          :is-multisig="isMultisig"
-          :is-cosigner="isCosigner"
-          :on-partial="onPartial"
-          :transaction-fee="transactionFee"
-          :total-fee-formatted="totalFeeFormatted"
-          :get-multi-sig-cosigner="getMultiSigCosigner"
-          :check-cosign-balance="checkCosignBalance"
-          :lock-fund-currency="lockFund"
-          :lock-fund-tx-fee="lockFundTxFee"
-          :balance="accBalance"
-          :selected-acc-add="selectedAccAdd"
-        />
-        <div class="mt-5" />
-        <div class="mt-3">
-          <button
-            type="submit"
-            class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
-            @click="createDelegate"
-            v-if="delegateValue"
-            :disabled="disableLinkBtn"
+        <div
+          class="border border-blue-300 rounded-md p-3 mt-3 bg-blue-50 overflow-x-auto"
+        >
+          <div class="text-xs inline-block">
+            {{ $t("delegate.publicKeyOfDelegate") }}
+          </div>
+          <font-awesome-icon
+            icon="copy"
+            @click="copy('delegatePublicKey')"
+            :title="$t('general.copy')"
+            class="inline-block float-right mt-1 w-5 h-5 text-blue-link cursor-pointer"
+          ></font-awesome-icon>
+          <div
+            class="text-xs mt-0.5 font-semibold"
+            id="delegatePublicKey"
+            :copyValue="delegateAcc"
+            :copySubject="$t('delegate.delegatePublicKey')"
           >
-            {{ $t("delegate.unlinkAcc") }}
-          </button>
-          <button
-            type="submit"
-            class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
-            @click="createDelegate"
-            v-if="!delegateValue"
-            :disabled="disableLinkBtn"
-          >
-            {{ $t("delegate.delegateAcc") }}
-          </button>
+            {{ delegateAcc }}
+          </div>
         </div>
-        <div class="text-center">
-          <router-link
-            :to="{ name: 'ViewAccountDetails', params: { address: address } }"
-            class="content-center text-xs text-white underline"
-            >{{ $t("general.cancel") }}</router-link
-          >
-        </div>
-      </template>
-    </TransactionLayout>
-  </AccTabLayout>
+      </div>
+    </template>
+
+    <template #navy>
+      <TransactionFeeDisplay
+        :fund-status="fundStatus"
+        :is-multisig="isMultisig"
+        :is-cosigner="isCosigner"
+        :on-partial="onPartial"
+        :transaction-fee="transactionFee"
+        :total-fee-formatted="totalFeeFormatted"
+        :get-multi-sig-cosigner="getMultiSigCosigner"
+        :check-cosign-balance="checkCosignBalance"
+        :lock-fund-currency="lockFund"
+        :lock-fund-tx-fee="lockFundTxFee"
+        :balance="accBalance"
+        :selected-acc-add="selectedAccAdd"
+      />
+      <div class="mt-5" />
+      <div class="mt-3">
+        <button
+          type="submit"
+          class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
+          @click="createDelegate"
+          v-if="delegateValue"
+          :disabled="disableLinkBtn"
+        >
+          {{ $t("delegate.unlinkAcc") }}
+        </button>
+        <button
+          type="submit"
+          class="w-full blue-btn px-3 py-3 disabled:opacity-50 disabled:cursor-auto"
+          @click="createDelegate"
+          v-if="!delegateValue"
+          :disabled="disableLinkBtn"
+        >
+          {{ $t("delegate.delegateAcc") }}
+        </button>
+      </div>
+      <div class="text-center">
+        <router-link
+          :to="{ name: 'ViewAccountDetails', params: { address: address } }"
+          class="content-center text-xs text-white underline"
+          >{{ $t("general.cancel") }}</router-link
+        >
+      </div>
+    </template>
+  </TransactionLayout>
 </template>
 <script>
 import { ref, computed, getCurrentInstance, watch } from "vue";

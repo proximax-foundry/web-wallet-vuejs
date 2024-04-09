@@ -3,7 +3,6 @@
         <AccountComponent :address="address" class="mb-6"/>
         <AccountTabs :address="address" :selected="selected"/>
     </div>
-    <slot />
 </template>
 
 <script setup lang="ts">

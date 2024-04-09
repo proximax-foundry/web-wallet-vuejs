@@ -7,218 +7,209 @@
       >{{ $t("general.back") }}</router-link
     >
   </div>
-  <AccTabLayout :address="accountAddress" :selected="'metadata'">
-    <TransactionLayout>
-      <template #white>
-        <div class="pl-6">
-          <div class="error error_box mb-5" v-if="err != ''">{{ err }}</div>
-        </div>
-        <div v-if="targetAccIsMultisig" class="text-left mt-2 mb-5">
-          <div v-if="cosigners.length > 0">
-            <div class="text-tsm">
-              {{ $t("general.initiateBy") }}:
-              <span class="font-bold" v-if="cosigners.length == 1">
-                {{ cosigners[0].name }}
-              </span>
-              <span class="font-bold" v-else>
-                <select class="" v-model="selectedCosigner">
-                  <option
-                    v-for="(cosigner, item) in cosigners"
-                    :value="findAcc(cosigner.publicKey).publicKey"
-                    :key="item"
-                  >
-                    {{ cosigner.name }}
-                  </option>
-                </select>
-              </span>
-            </div>
-          </div>
-          <div class="error" v-else>
-            {{ $t("general.noCosigner") }}
+  <AccTabLayout :address="accountAddress" :selected="'metadata'" />
+  <TransactionLayout>
+    <template #white>
+      <div class="pl-6">
+        <div class="error error_box mb-5" v-if="err != ''">{{ err }}</div>
+      </div>
+      <div v-if="targetAccIsMultisig" class="text-left mt-2 mb-5">
+        <div v-if="cosigners.length > 0">
+          <div class="text-tsm">
+            {{ $t("general.initiateBy") }}:
+            <span class="font-bold" v-if="cosigners.length == 1">
+              {{ cosigners[0].name }}
+            </span>
+            <span class="font-bold" v-else>
+              <select class="" v-model="selectedCosigner">
+                <option
+                  v-for="(cosigner, item) in cosigners"
+                  :value="findAcc(cosigner.publicKey).publicKey"
+                  :key="item"
+                >
+                  {{ cosigner.name }}
+                </option>
+              </select>
+            </span>
           </div>
         </div>
-        <div class="font-semibold mb-4">Update Account Metadata</div>
-        <div class="border border-blue-300 rounded-md p-3 mt-3 bg-blue-50">
-          <div class="flex items-center gap-2">
-            <div v-html="svgString" />
-            <div class="flex flex-col gap-0.5">
-              <div class="uppercase text-xxs text-blue-primary">
-                Selected Account
-              </div>
-              <div class="font-semibold">{{ accountName }}</div>
+        <div class="error" v-else>
+          {{ $t("general.noCosigner") }}
+        </div>
+      </div>
+      <div class="font-semibold mb-4">Update Account Metadata</div>
+      <div class="border border-blue-300 rounded-md p-3 mt-3 bg-blue-50">
+        <div class="flex items-center gap-2">
+          <div v-html="svgString" />
+          <div class="flex flex-col gap-0.5">
+            <div class="uppercase text-xxs text-blue-primary">
+              Selected Account
             </div>
+            <div class="font-semibold">{{ accountName }}</div>
           </div>
+        </div>
+      </div>
+      <div
+        class="mt-2"
+        v-if="existingScopedMetadataKeys.length && scopedMetadataKeySelectable"
+      >
+        <div
+          @click="showKeys = !showKeys"
+          class="text-blue-primary text-xs cursor-pointer mb-1.5"
+        >
+          Select Existing Scoped Metadata Key
         </div>
         <div
-          class="mt-2"
-          v-if="
-            existingScopedMetadataKeys.length && scopedMetadataKeySelectable
-          "
+          v-for="(metadata, index) in existingScopedMetadataKeys"
+          :key="index"
         >
           <div
-            @click="showKeys = !showKeys"
-            class="text-blue-primary text-xs cursor-pointer mb-1.5"
-          >
-            Select Existing Scoped Metadata Key
-          </div>
-          <div
-            v-for="(metadata, index) in existingScopedMetadataKeys"
-            :key="index"
+            v-if="showKeys"
+            class="flex justify-center cursor-pointer"
+            @click="
+              (scopedMetadataKeyType = metadata.type),
+                (inputScopedMetadataKey = metadata.value),
+                checkOldValue(),
+                (showKeys = false)
+            "
           >
             <div
-              v-if="showKeys"
-              class="flex justify-center cursor-pointer"
-              @click="
-                (scopedMetadataKeyType = metadata.type),
-                  (inputScopedMetadataKey = metadata.value),
-                  checkOldValue(),
-                  (showKeys = false)
-              "
+              v-if="index % 2 == 0"
+              class="text-xs py-2 bg-gray-100 pl-2 w-full"
             >
-              <div
-                v-if="index % 2 == 0"
-                class="text-xs py-2 bg-gray-100 pl-2 w-full"
-              >
-                {{ metadata.value }}
-              </div>
-              <div v-if="index % 2 == 1" class="text-xs py-2 pl-2 w-full">
-                {{ metadata.value }}
-              </div>
-              <div
-                v-if="index % 2 == 0"
-                class="ml-auto pr-2 text-xxs py-2 font-semibold uppercase text-blue-primary bg-gray-100"
-              >
-                {{ $t("general.select") }}
-              </div>
-              <div
-                v-if="index % 2 == 1"
-                class="ml-auto mr-2 text-xxs py-2 font-semibold uppercase text-blue-primary"
-              >
-                {{ $t("general.select") }}
-              </div>
+              {{ metadata.value }}
+            </div>
+            <div v-if="index % 2 == 1" class="text-xs py-2 pl-2 w-full">
+              {{ metadata.value }}
+            </div>
+            <div
+              v-if="index % 2 == 0"
+              class="ml-auto pr-2 text-xxs py-2 font-semibold uppercase text-blue-primary bg-gray-100"
+            >
+              {{ $t("general.select") }}
+            </div>
+            <div
+              v-if="index % 2 == 1"
+              class="ml-auto mr-2 text-xxs py-2 font-semibold uppercase text-blue-primary"
+            >
+              {{ $t("general.select") }}
             </div>
           </div>
         </div>
-        <div v-if="scopedMetadataKeySelectable">
-          <MetadataInput
-            :hex="scopedMetadataKeyType == 2"
-            class="mt-5"
-            v-model="inputScopedMetadataKey"
-            placeholder="Scoped Metadata Key"
-            v-debounce:1000="checkOldValue"
-            :toolTip="`${
-              scopedMetadataKeyType == 1
-                ? 'Accepts up to 8 bytes'
-                : 'Accepts up to 16 hexadecimals'
-            }`"
-            :showError="showScopedKeyErr"
-            :errorMessage="`${
-              scopedMetadataKeyType == 1
-                ? 'Exceeded 8 bytes'
-                : inputScopedMetadataKey.length > 16
-                ? 'Exceeded 16 hexadecimals'
-                : 'Input needs to be even number'
-            }`"
-          />
-          <div class="flex gap-3">
-            <div class="flex gap-2">
-              <input
-                type="radio"
-                id="regular"
-                value="1"
-                v-model="scopedMetadataKeyType"
-              />
-              <label for="regular">UTF-8</label>
-            </div>
-            <div class="flex gap-2">
-              <input
-                type="radio"
-                id="hexa"
-                value="2"
-                v-model="scopedMetadataKeyType"
-              />
-              <label for="hexa">Hexadecimal</label>
-            </div>
+      </div>
+      <div v-if="scopedMetadataKeySelectable">
+        <MetadataInput
+          :hex="scopedMetadataKeyType == 2"
+          class="mt-5"
+          v-model="inputScopedMetadataKey"
+          placeholder="Scoped Metadata Key"
+          v-debounce:1000="checkOldValue"
+          :toolTip="`${
+            scopedMetadataKeyType == 1
+              ? 'Accepts up to 8 bytes'
+              : 'Accepts up to 16 hexadecimals'
+          }`"
+          :showError="showScopedKeyErr"
+          :errorMessage="`${
+            scopedMetadataKeyType == 1
+              ? 'Exceeded 8 bytes'
+              : inputScopedMetadataKey.length > 16
+              ? 'Exceeded 16 hexadecimals'
+              : 'Input needs to be even number'
+          }`"
+        />
+        <div class="flex gap-3">
+          <div class="flex gap-2">
+            <input
+              type="radio"
+              id="regular"
+              value="1"
+              v-model="scopedMetadataKeyType"
+            />
+            <label for="regular">UTF-8</label>
           </div>
-          <MetadataInput
-            class="mt-2"
-            v-model="oldValue"
-            :disabled="true"
-            placeholder="Current Value"
-          />
-        </div>
-        <div class="my-3" v-else>
-          <div class="border border-blue-300 rounded-md p-3 mt-3 bg-blue-50">
-            <div class="flex flex-col gap-0.5">
-              <div class="uppercase text-xxs text-blue-primary">
-                Selected Scoped Metadata Key
-              </div>
-              <div class="flex">
-                <div class="font-semibold">{{ scopedMetadataKey }}</div>
-                <div class="ml-3 text-gray-400 font-semibold">
-                  {{ scopedMetadataKeyType == 1 ? "UTF-8" : "HEX" }}
-                </div>
-              </div>
-              <div class="flex">
-                <div class="font-semibold" v-if="scopedMetadataKeyType == 1">
-                  {{ scopedMetadataKeyHex }}
-                </div>
-                <div
-                  v-if="scopedMetadataKeyType == 1"
-                  class="ml-3 text-gray-400 font-semibold"
-                >
-                  HEX
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="border border-blue-300 rounded-md p-3 mt-3 bg-blue-50">
-            <div class="uppercase text-xxs text-blue-primary">
-              CURRENT VALUE
-            </div>
-            <div class="font-semibold">{{ oldValue }}</div>
+          <div class="flex gap-2">
+            <input
+              type="radio"
+              id="hexa"
+              value="2"
+              v-model="scopedMetadataKeyType"
+            />
+            <label for="hexa">Hexadecimal</label>
           </div>
         </div>
-
         <MetadataInput
           class="mt-2"
-          v-model="newValue"
-          placeholder="New Value"
+          v-model="oldValue"
+          :disabled="true"
+          placeholder="Current Value"
         />
-      </template>
-
-      <template #navy>
-        <TransactionFeeDisplay
-          :transaction-fee="transactionFee"
-          :total-fee-formatted="totalFeeFormatted"
-          :get-multi-sig-cosigner="getMultiSigCosigner"
-          :check-cosign-balance="checkCosignBalance"
-          :lock-fund-currency="String(lockFundCurrency)"
-          :lock-fund-tx-fee="String(lockFundTxFee)"
-          :balance="accBalance"
-          :selected-acc-add="selectedAccAdd"
-        />
-        <button
-          type="submit"
-          class="w-full blue-btn px-3 py-3 mt-3 disabled:opacity-50 disabled:cursor-auto"
-          @click="updateMetadata()"
-          :disabled="disableAddBtn"
-        >
-          Update Account Metadata
-        </button>
-        <div class="text-center">
-          <router-link
-            :to="{
-              name: 'ViewAccountMetadata',
-              params: { address: accountAddress },
-            }"
-            class="content-center text-xs text-white underline"
-            >{{ $t("general.cancel") }}</router-link
-          >
+      </div>
+      <div class="my-3" v-else>
+        <div class="border border-blue-300 rounded-md p-3 mt-3 bg-blue-50">
+          <div class="flex flex-col gap-0.5">
+            <div class="uppercase text-xxs text-blue-primary">
+              Selected Scoped Metadata Key
+            </div>
+            <div class="flex">
+              <div class="font-semibold">{{ scopedMetadataKey }}</div>
+              <div class="ml-3 text-gray-400 font-semibold">
+                {{ scopedMetadataKeyType == 1 ? "UTF-8" : "HEX" }}
+              </div>
+            </div>
+            <div class="flex">
+              <div class="font-semibold" v-if="scopedMetadataKeyType == 1">
+                {{ scopedMetadataKeyHex }}
+              </div>
+              <div
+                v-if="scopedMetadataKeyType == 1"
+                class="ml-3 text-gray-400 font-semibold"
+              >
+                HEX
+              </div>
+            </div>
+          </div>
         </div>
-      </template>
-    </TransactionLayout>
-  </AccTabLayout>
+        <div class="border border-blue-300 rounded-md p-3 mt-3 bg-blue-50">
+          <div class="uppercase text-xxs text-blue-primary">CURRENT VALUE</div>
+          <div class="font-semibold">{{ oldValue }}</div>
+        </div>
+      </div>
+
+      <MetadataInput class="mt-2" v-model="newValue" placeholder="New Value" />
+    </template>
+
+    <template #navy>
+      <TransactionFeeDisplay
+        :transaction-fee="transactionFee"
+        :total-fee-formatted="totalFeeFormatted"
+        :get-multi-sig-cosigner="getMultiSigCosigner"
+        :check-cosign-balance="checkCosignBalance"
+        :lock-fund-currency="String(lockFundCurrency)"
+        :lock-fund-tx-fee="String(lockFundTxFee)"
+        :balance="accBalance"
+        :selected-acc-add="selectedAccAdd"
+      />
+      <button
+        type="submit"
+        class="w-full blue-btn px-3 py-3 mt-3 disabled:opacity-50 disabled:cursor-auto"
+        @click="updateMetadata()"
+        :disabled="disableAddBtn"
+      >
+        Update Account Metadata
+      </button>
+      <div class="text-center">
+        <router-link
+          :to="{
+            name: 'ViewAccountMetadata',
+            params: { address: accountAddress },
+          }"
+          class="content-center text-xs text-white underline"
+          >{{ $t("general.cancel") }}</router-link
+        >
+      </div>
+    </template>
+  </TransactionLayout>
 </template>
 <script lang="ts">
 import { Helper } from "@/util/typeHelper";
