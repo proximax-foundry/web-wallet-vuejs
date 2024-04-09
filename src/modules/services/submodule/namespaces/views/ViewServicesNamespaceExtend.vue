@@ -1,5 +1,5 @@
 <template>
-  <TransactionLayout :type="'account'">
+  <TransactionLayout>
     <template #white>
       <div class="lg:flex lg:justify-between lg:items-center">
         <div class="font-semibold mb-4 inline-block mt-1">

@@ -2,12 +2,7 @@
   <Sidebar v-model:visible="toggleContact" :baseZIndex="10000" position="full">
     <SelectAccountAndContact :contacts="contacts" @node-select="onNodeSelect" />
   </Sidebar>
-  <TransactionLayout :type="'alias'" class="mt-5">
-    <template #accDetail>
-      <AccountComponent :address="address" class="mb-6" />
-      <AccountTabs :address="address" selected="details" />
-    </template>
-
+  <TransactionLayout>
     <template #white>
       <div
         v-if="walletCosignerList.cosignerList.length"

@@ -1,10 +1,5 @@
 <template>
-  <TransactionLayout :type="'accTabServices'">
-    <template #accDetail>
-      <AccountComponent :address="address" class="mb-6" />
-      <AccountTabs :address="address" selected="details" />
-    </template>
-
+  <TransactionLayout>
     <template #white>
       <div class="pl-6">
         <div class="error error_box mb-5" v-if="err != ''">{{ err }}</div>
@@ -30,6 +25,7 @@
           </div>
         </div>
       </div>
+      <div class="font-semibold mb-4">{{ $t("delegate.delegateAcc") }}</div>
       <div v-if="!delegateValue">
         <div class="text-xs font-semibold">{{ $t("general.delegate") }}</div>
         <div class="text-xxs mt-2">{{ $t("delegate.notLinked") }}</div>

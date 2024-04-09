@@ -1,11 +1,7 @@
 <template>
-  <TransactionLayout :type="'accTabServices'">
-    <template #accDetail>
-      <AccountComponent :address="address" class="mb-6" />
-      <AccountTabs :address="address" selected="multisig" />
-    </template>
-
+  <TransactionLayout>
     <template #white>
+      <div class="font-semibold mb-4"> {{ $t("general.convertMultisig") }}</div>
       <div class="text-xs font-semibold">
         {{ $t("multisig.manageCosignatories") }}
       </div>

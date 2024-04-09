@@ -1,5 +1,5 @@
 <template>
-  <TransactionLayout :type="'metadata'">
+  <TransactionLayout>
     <template #white>
       <div class="font-semibold mb-4">Update Namespace Metadata</div>
       <div

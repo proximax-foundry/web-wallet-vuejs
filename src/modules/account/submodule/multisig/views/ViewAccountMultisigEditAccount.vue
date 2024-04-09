@@ -1,10 +1,5 @@
 <template>
-  <TransactionLayout :type="'accTabServices'">
-    <template #accDetail>
-      <AccountComponent :address="address" class="mb-6" />
-      <AccountTabs :address="address" selected="multisig" />
-    </template>
-
+  <TransactionLayout>
     <template #white>
       <div class="text-left mt-2 mb-5">
         <div v-if="walletCosignerList.length > 0">
@@ -31,6 +26,7 @@
           </div>
         </div>
       </div>
+      <div class="font-semibold mb-4">{{ $t("transaction.modifyMultisig") }}</div>
       <div class="text-xs font-semibold">
         {{ $t("multisig.manageCosignatories") }}
       </div>

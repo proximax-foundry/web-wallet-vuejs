@@ -7,12 +7,7 @@
       >{{ $t("general.back") }}</router-link
     >
   </div>
-  <TransactionLayout :type="'accTabServices'">
-    <template #accDetail>
-      <AccountComponent :address="accountAddress" class="mb-10" />
-      <AccountTabs :address="accountAddress" selected="metadata" />
-    </template>
-
+  <TransactionLayout>
     <template #white>
       <div class="pl-6">
         <div class="error error_box mb-5" v-if="err != ''">{{ err }}</div>
