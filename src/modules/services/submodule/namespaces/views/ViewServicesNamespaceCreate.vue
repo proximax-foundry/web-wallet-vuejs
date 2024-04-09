@@ -1,10 +1,7 @@
 <template>
-  <div>
-
-    <div class='w-10/12 ml-auto mr-auto'>
-      <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8">
-        <div class="xl:col-span-2 p-12">
-          <div class='font-semibold mb-4'>{{ $t('general.createNamespace') }}</div>
+  <TransactionLayout class="mt-8">
+    <template #white>
+      <div class='font-semibold mb-4'>{{ $t('general.createNamespace') }}</div>
           <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
             <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon
                 icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div>
@@ -40,9 +37,10 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
-          <TxnSummary :signer-native-token-balance="balance" :namespace-rental-fee-currency="rentalFeeCurrency"
+    </template>
+
+    <template #navy>
+      <TxnSummary :signer-native-token-balance="balance" :namespace-rental-fee-currency="rentalFeeCurrency"
             :native-token-balance="selectedMultisigAddress ? multisigBalance : balance" :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee"
             :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact" :total-fee="totalFee" />
           <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white"
@@ -51,11 +49,10 @@
             <router-link :to="{ name: 'ViewDashboard' }"
               class='content-center text-xs text-white border-b-2 border-white'>{{ $t('general.cancel') }}</router-link>
           </div>
-        </div>
-      </div>
+    </template>
 
-      <div class="sm:grid sm:grid-cols-2 mt-10 lg:mt-16">
-        <div class="mb-8 sm:pr-1">
+    <template #description>
+      <div class="mb-8 sm:pr-1">
           <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new
             class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">{{ $t('general.namespaceQues')
             }}</a>
@@ -66,15 +63,13 @@
             class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">{{ $t('general.feedback') }}</a>
           <div class="text-gray-400 text-tsm my-3">{{ $t('general.feedbackDescription') }}</div>
         </div>
-      </div>
-    </div>
-  </div>
+    </template>
+  </TransactionLayout>
 </template>
  
 <script setup lang="ts">
 import { computed, getCurrentInstance, ref, watch } from 'vue';
 import { useRouter } from "vue-router";
-import PasswordInput from '@/components/PasswordInput.vue';
 import TextInputTooltip from '@/components/TextInputTooltip.vue';
 import SelectInputParentNamespace from '@/modules/services/submodule/namespaces/components/SelectInputParentNamespace.vue';
 import DurationInputClean from '@/modules/services/submodule/namespaces/components/DurationInputClean.vue';
@@ -82,7 +77,7 @@ import SelectInputAccount from '@/modules/transfer/components/SelectInputAccount
 import SelectInputMultisigAccount from '@/modules/transfer/components/SelectInputMultisigAccount.vue';
 import MultisigInput from "@/modules/transfer/components/MultisigInput.vue"
 import TxnSummary from "@/components/TxnSummary.vue"
-import { walletState } from "@/state/walletState";
+import TransactionLayout from "@/components/TransactionLayout.vue";
 import { networkState } from "@/state/networkState";
 import { Helper } from '@/util/typeHelper';
 import { NamespaceUtils } from '@/util/namespaceUtils';
@@ -92,7 +87,6 @@ import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
-import { WalletUtils } from '@/util/walletUtils';
 import type {TreeNode } from "primevue/treenode"
 import { Address, UInt64 } from 'tsjs-xpx-chain-sdk';
 import { TransactionState } from '@/state/transactionState';
