@@ -30,7 +30,6 @@ import { networkState } from "./state/networkState";
 import { WalletUtils } from "./util/walletUtils";
 import { UnitConverter } from "./util/unitConverter";
 import { TimeUnit } from "./models/const/timeUnit";
-import { NotificationUtils } from "./util/notificationUtils";
 import { TransactionGroupType } from "tsjs-xpx-chain-sdk";
 import { AnnounceType, listenerState } from "./state/listenerState";
 import type { ToastMessageOptions } from "primevue/toast";
@@ -39,7 +38,6 @@ import { useI18n } from "vue-i18n";
 import ding from "@/assets/audio/ding.ogg";
 import HomeLayoutVue from "./components/HomeLayout.vue";
 import ToastComponent from "./modules/transfer/components/ToastComponent.vue";
-import { faStopwatch } from "@fortawesome/free-solid-svg-icons";
 
 const isLoading = computed(() => !AppState.isReady);
 

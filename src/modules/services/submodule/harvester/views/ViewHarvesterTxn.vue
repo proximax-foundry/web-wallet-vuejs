@@ -1,9 +1,7 @@
 <template>
-  <div>
-    <div class="w-10/12 ml-auto mr-auto">
-      <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8">
-        <div class="xl:col-span-2 p-12">
-          <div class="font-semibold mb-4">Harvester Transaction</div>
+  <TransactionLayout class="mt-8">
+    <template #white>
+      <div class="font-semibold mb-4">Harvester Transaction</div>
           <div
             v-if="showNoBalance"
             class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center"
@@ -52,9 +50,10 @@
               :showError="showHarvesterError"
             />
           </div>
-        </div>
-        <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
-          <TxnSummary
+    </template>
+
+    <template #navy>
+      <TxnSummary
             :signer-native-token-balance="balance"
             :native-token-balance="
               selectedMultisigAddress ? multisigBalance : balance
@@ -80,10 +79,8 @@
               >{{ $t("general.cancel") }}</router-link
             >
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
+    </template>
+  </TransactionLayout>
 </template>
 
 <script setup lang="ts">
@@ -95,7 +92,10 @@ import SelectInputAccount from "@/components/SelectInputAccount.vue";
 import SelectInputMultisigAccount from "@/components/SelectInputMultisigAccount.vue";
 import MultisigInput from "@/components/MultisigInput.vue"
 import SelectActionType from "@/modules/services/submodule/harvester/components/SelectActionType.vue";
+import SelectInputMultisigAccount from "@/modules/transfer/components/SelectInputMultisigAccount.vue";
+import MultisigInput from "@/modules/transfer/components/MultisigInput.vue";
 import TxnSummary from "@/components/TxnSummary.vue";
+import TransactionLayout from "@/components/TransactionLayout.vue";
 import { useI18n } from "vue-i18n";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";

@@ -52,7 +52,6 @@ const props = defineProps({
     type: Boolean,
     required: false,
   },
-
   logo: {
     type: Boolean,
     required: false
@@ -162,6 +161,12 @@ watch(inputValue, (newValue, oldValue) => {
   }
     emit('update:modelValue', parseFloat(inputValue.value).toString());
 });
+
+watch(() => props.modelValue, (newValue,oldValue) => {
+  if(newValue !== oldValue){
+    handleInput(newValue)
+  }
+})
 
 </script>
 <style lang="scss" scoped>
