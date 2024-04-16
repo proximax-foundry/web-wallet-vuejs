@@ -71,21 +71,30 @@
       </div>
 
         <div v-if="!isMultiSig(selectedAccAdd)">
-          <div v-if="lockFundCurrencyConvert || lockFundTxFeeConvert">
+          <div v-if="lockFundCurrencyConvert">
             <TransactionFeeLayout>
               <template #transactionType>
-                <div v-if="lockFundCurrencyConvert">
+                <div>
                   {{ $t("general.lockFund") }}
                 </div>
-                <div v-else-if="lockFundTxFeeConvert">
+              </template>
+              <template #transactionTypeFee>
+                <div>
+                  <div v-html="splitCurrency(lockFundCurrencyConvert)"></div>
+                </div>
+              </template>
+            </TransactionFeeLayout>
+          </div>
+
+          <div v-if="lockFundTxFeeConvert">
+            <TransactionFeeLayout>
+              <template #transactionType>
+                <div>
                   {{ $t("general.lockFundTxFee") }}
                 </div>
               </template>
               <template #transactionTypeFee>
-                <div v-if="lockFundCurrencyConvert">
-                  <div v-html="splitCurrency(lockFundCurrencyConvert)"></div>
-                </div>
-                <div v-else-if="lockFundTxFeeConvert">
+                <div>
                   <div v-html="splitCurrency(lockFundTxFeeConvert)"></div>
                 </div>
               </template>
