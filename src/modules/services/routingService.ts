@@ -17,7 +17,14 @@ export const ServiceRoutes: RouteRecordRaw[] = [
       title: "View Portfolio"
     }
   },
- 
+  {
+    path: '/remote-delegated-harvesting',
+    name: 'ViewRemoteDelegatedHarvesting',
+    component: () => import('@/modules/services/submodule/remoteDelegatedHarvesting/views/RemoteDelegatedHarvestingView.vue'),
+    meta:{
+      title: "Remote Delegated Harvesting"
+    }
+  },
 
   {
     path: '/view-airdrop-token',

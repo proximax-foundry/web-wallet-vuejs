@@ -41,6 +41,11 @@
               <font-awesome-icon icon="fa-solid fa-wallet" class="ml-auto mr-auto mt-4 mb-3 h-20 w-20"/>
             <div class='text-center text-xs font-semibold'>Wallets</div>
           </router-link>
+          <router-link :to="{ name: 'ViewRemoteDelegatedHarvesting' }" class='mx-auto '>
+            <img src="@/modules/services/img/harvest.png"
+              class="ml-auto mr-auto mt-4 mb-3 h-18 w-18">
+            <div class='text-center text-xs font-semibold'>Remote Delegated Harvesting</div>
+          </router-link>
         </div>
       </div>
     </div>
