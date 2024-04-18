@@ -83,7 +83,7 @@ import { Helper } from "@/util/typeHelper";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
-import { LinkAction, PublicAccount, UInt64 } from "tsjs-xpx-chain-sdk";
+import { LinkAction, NetworkType, PublicAccount, UInt64 } from "tsjs-xpx-chain-sdk";
 import { useI18n } from 'vue-i18n';
 import { accountUtils } from "@/util/accountUtils";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
@@ -317,7 +317,7 @@ export default {
     });
 
     const generatePrivateKey = async() =>{
-          privateKey.value= Account.generateNewAccount().privateKey;
+          privateKey.value= Account.generateNewAccount(AppState.networkType,2).privateKey;
     }
     generatePrivateKey();
 

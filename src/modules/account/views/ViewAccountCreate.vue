@@ -31,6 +31,7 @@ import { Helper } from '@/util/typeHelper';
 import { WalletAccount } from "@/models/walletAccount"
 import {useI18n} from 'vue-i18n'
 import { AppState } from '@/state/appState';
+import { Account } from 'tsjs-xpx-chain-sdk';
 
 export default {
   name: 'ViewAccountCreate',
@@ -68,7 +69,7 @@ export default {
         } else { 
           // create account
           let password = WalletUtils.createPassword(walletPassword.value);
-          const account = WalletUtils.generateNewAccount(AppState.networkType);
+          const account = Account.generateNewAccount(AppState.networkType,2);
           const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, account.privateKey, AppState.networkType);
           
           let walletAccount = new WalletAccount(accountName.value, account.publicKey, account.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);

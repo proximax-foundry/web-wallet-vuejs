@@ -167,7 +167,7 @@ export default defineComponent({
         newWallet.value = data.wallet;
         privateKey.value = data.privateKey;
         accName.value = data.wallet.name
-        let account = Account.createFromPrivateKey(privateKey.value,selectedNetworkType.value,1)
+        let account = Account.createFromPrivateKey(privateKey.value,selectedNetworkType.value,2)
         address.value = account.address.pretty()
         publicKey.value = account.publicKey
       }

@@ -793,7 +793,7 @@ export class WalletUtils {
     }
 
     static generateNewAccount(network: NetworkType): Account {
-        return Account.generateNewAccount(network);
+        return Account.generateNewAccount(network,2);
     }
 
     static getNamespaceId(id: string | number[]): NamespaceId {
@@ -2718,7 +2718,7 @@ export class WalletUtils {
     }
 
     static addNewWallet(allWallets: Wallets, password: Password, walletName: string, networkName: string, networkType: NetworkType): tempNewWalletInterface {
-        const account = Account.generateNewAccount(networkType);
+        const account = Account.generateNewAccount(networkType,2);
         const wallet = WalletUtils.createAccountSimpleFromPrivateKey(walletName, password, account.privateKey, networkType);
         let walletAccounts: WalletAccount[] = [];
         let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.publicAccount.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
