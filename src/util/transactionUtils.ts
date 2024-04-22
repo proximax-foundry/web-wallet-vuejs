@@ -592,6 +592,16 @@ export class TransactionUtils {
     );
   }
 
+  static getAccVersion = async (address :string)=>{
+    try {
+      const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
+      return accInfo.version
+    } catch (error) {
+      return 2
+    }
+
+  }
+
   static signTxnWithPassword = async (
     selectedAddress: string,
     selectedMultisigAddress: string,
@@ -613,10 +623,11 @@ export class TransactionUtils {
       accountDetails.encrypted,
       accountDetails.iv
     );
+    const accVersion = await this.getAccVersion(selectedAddress)
     const account = Account.createFromPrivateKey(
       privateKey,
       AppState.networkType,
-      1
+      accVersion
     );
 
     if (!selectedMultisigAddress && typeof transaction === "string") {
@@ -632,33 +643,40 @@ export class TransactionUtils {
       );
       const multisigPublicAccount = PublicAccount.createFromPublicKey(
         accInfo.publicKey,
-        AppState.networkType, 1
+        AppState.networkType, accInfo.version
       );
       if(typeof transaction !== "string"){
         for(let i=0; i<transaction.length; ++i){
-          innerTxn.push(TransactionMapping.createFromPayload(transaction[i]).toAggregate(multisigPublicAccount))
+          innerTxn.push(accInfo.version == 2? TransactionMapping.createFromPayload(transaction[i]).toAggregate(multisigPublicAccount):TransactionMapping.createFromPayload(transaction[i]).toAggregateV1(multisigPublicAccount) )
         }
       }
       else{
         let txn = TransactionMapping.createFromPayload(transaction)
-        innerTxn = [txn.toAggregate(multisigPublicAccount)];
+        innerTxn = [accInfo.version == 2?txn.toAggregate(multisigPublicAccount): txn.toAggregateV1(multisigPublicAccount)];
       }
       const aggregateBondedTransaction = transactionBuilder.aggregateBonded(
         innerTxn,
         currentNodeTime
       );
-      const aggregateBondedTransactionSigned = account.sign(
+      const aggregateBondedTransactionSigned = accVersion == 2?  account.sign(
         aggregateBondedTransaction,
         genHash
-      );
+      ): account.preV2Sign(
+        aggregateBondedTransaction,
+        genHash
+      )
 
       const hashLockTransaction = TransactionUtils.lockFundTx(
         aggregateBondedTransactionSigned
       );
-      const hashLockTransactionSigned = account.sign(
+      const hashLockTransactionSigned =  accVersion == 2? account.sign(
         hashLockTransaction,
         genHash
-      );
+      ):account.preV2Sign(
+        hashLockTransaction,
+        genHash
+      )
+
       return {
         txnPayload: aggregateBondedTransactionSigned.payload,
         hashLockTxnPayload: hashLockTransactionSigned.payload,

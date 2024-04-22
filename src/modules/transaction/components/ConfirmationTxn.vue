@@ -8,7 +8,7 @@
                         <div class="flex justify-center px-12">
                             <div class="mb-3 border rounded-lg border-gray-900 w-full p-2 flex items-center justify-center break-all">{{ unsignedTxnPayload }}</div>
                         </div>
-                        <div class="flex justify-center text-blue-primary font-semibold uppercase ml-3.5 mt-3 text-sm xl:text-md xl:ml-0 cursor-pointer" @click="goPayloadExplorer(unsignedTxnPayload)">Click to view Unsigned Transaction Details in Explorer</div>
+                        <div class="flex justify-center text-blue-primary font-semibold uppercase ml-3.5 mt-3 text-sm xl:text-md xl:ml-0 cursor-pointer" @click="goPayloadExplorer(unsignedTxnPayload as string)">Click to view Unsigned Transaction Details in Explorer</div>
                     </div>
                     <div v-else v-for="unsignedTx in unsignedTxnPayload">
                         <div class="flex justify-center px-12">
