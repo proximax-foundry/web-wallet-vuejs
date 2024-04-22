@@ -1,20 +1,21 @@
 import { 
-    ChainConfigHttp, ChainConfig, RequestOptions
+      RequestOptions,NetworkConfigHttp,
+      NetworkConfig
 } from "tsjs-xpx-chain-sdk";
 import {RequestAuth} from './auth';
 import { lastValueFrom } from 'rxjs';
 export class ChainConfigAPI {
 
-    chainConfigHttp: ChainConfigHttp;
+    chainConfigHttp: NetworkConfigHttp;
     requestOptions: RequestOptions | undefined = undefined;
 
     constructor(endpoint: string){
-        this.chainConfigHttp = new ChainConfigHttp(endpoint);
+        this.chainConfigHttp = new NetworkConfigHttp(endpoint);
     }
 
-    getChainConfig(height: number): Promise<ChainConfig>{
+    getChainConfig(height: number): Promise<NetworkConfig>{
         let authHeader = this.requestOptions ? this.requestOptions : RequestAuth.getAuthHeader();
-        return lastValueFrom(this.chainConfigHttp.getChainConfig(height, authHeader));
+        return lastValueFrom(this.chainConfigHttp.getNetworkConfig(height, authHeader));
     }
 
 }

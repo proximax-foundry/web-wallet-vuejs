@@ -65,6 +65,7 @@ export class ChainUtils{
         }, {});
         const chainConfig = <NetworkConfig>
         {
+          accountVersion:Number(networkConfig['accountVersion']??'1'),
           supportedEntities  : JSON.parse( configString.supportedEntityVersions.trim().replace('\n','')).entities,
           chainHeight: chainHeight,
           publicKey: networkConfig['publicKey'],

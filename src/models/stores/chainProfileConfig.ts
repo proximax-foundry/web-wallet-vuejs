@@ -66,6 +66,8 @@ export interface NetworkConfig{
     downloadCacheEnabled: boolean | null;
     maxSuperContractsOnDrive: number | null
     supportedEntities: supportedEntityVersions[]
+    accountVersion? : number
+
 }
 
 export interface supportedEntityVersions {
@@ -76,6 +78,7 @@ export interface supportedEntityVersions {
 
 export class ChainProfileConfig extends StoreProperties implements NetworkConfig  {
     supportedEntities: supportedEntityVersions[];
+    accountVersion? : number
     chainHeight: number | null = null;
     publicKey: string = '';
     blockGenerationTargetTime: string = '';
