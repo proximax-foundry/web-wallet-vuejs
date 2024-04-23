@@ -147,7 +147,7 @@ export default {
     let showKeys = ref(false)
     let scopedMetadataKeySelectable = ref(true);
     let scopedMetadataKeyType = ref(1);
-    let targetPublicAccount = ref(null);
+    let targetPublicAccount = ref<PublicAccount>();
     let targetAccIsMultisig = ref(false);
     let scopedMetadataKeyHex = ref('');
     let inputScopedMetadataKey = ref(""); 
@@ -199,9 +199,15 @@ export default {
       })
     }
     const accountAddress = computed(()=>selectedAcc.value?selectedAcc.value.address:'0'.repeat(40))
-    const handleParamTargetPublicKey = ()=>{
+    const handleParamTargetPublicKey = async ()=>{
       if(props.targetPublicKey.length === 64 && Convert.isHexString(props.targetPublicKey)){
         targetPublicAccount.value = PublicAccount.createFromPublicKey(props.targetPublicKey, AppState.networkType);
+        try {
+          let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(targetPublicAccount.value.address);
+          targetPublicAccount.value = PublicAccount.createFromPublicKey(props.targetPublicKey, AppState.networkType, accInfo.version);
+        } catch (error) {
+          targetPublicAccount.value = PublicAccount.createFromPublicKey(props.targetPublicKey, AppState.networkType, 2);
+        }
         txnBuilder.targetPublicKey(targetPublicAccount.value);
       }
       if(!walletState.currentLoggedInWallet){
@@ -590,7 +596,7 @@ export default {
     })
     const init = async ()=>{
       await createTxnBuilder();
-      handleParamTargetPublicKey();
+      await handleParamTargetPublicKey();
       await handleParamScopedMetadataKey();
       await loadCurrentMetadataValue();
       await metadataTxnAssignNewValue();

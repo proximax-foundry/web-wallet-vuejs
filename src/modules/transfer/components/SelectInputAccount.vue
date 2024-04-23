@@ -8,7 +8,7 @@
         </div>
         <Dropdown v-model=selectedAccountInfo :style="{ 'width': '100%' }" :options=accounts :filter="true"
             :filterFields="['label','value','publicKey']" emptyFilterMessage=" "  placeholder="Select Account"
-            @change="selectAccount($event.value?.label, $event.value?.value, $event.value?.publicKey); $emit('update:modelValue', $event.value?.value); $emit('select-account', $event.value?.value); $emit('select-account-public-key', $event.value?.publicKey);">
+            @change="selectAccount($event.value?.label, $event.value?.value, $event.value?.publicKey, $event.value?.version); $emit('update:modelValue', $event.value?.value); $emit('select-account', $event.value?.value); $emit('select-account-public-key', $event.value?.publicKey);">
             <!-- For the display of  account information -->
             <template #value="slotProps">
                 <div v-if="slotProps.value" class="account-item-value account-item">
@@ -68,7 +68,7 @@ const props = defineProps({
 })
 
 defineEmits([
-    'select-account', 'select-account-public-key', 'update:modelValue'
+    'select-account', 'select-account-public-key', 'select-account-version', 'update:modelValue'
 ])
 
 const internalInstance = getCurrentInstance();
@@ -86,7 +86,8 @@ const accounts = computed(() => {
         return {
             value: cosignerAcc.address,
             label: walletState.currentLoggedInWallet.convertAddressToName(cosignerAcc.address, true),
-            publicKey: cosignerAcc.publicKey
+            publicKey: cosignerAcc.publicKey,
+            version: cosignerAcc.version
         }
     })
 })
@@ -94,15 +95,19 @@ const accounts = computed(() => {
 const selectedAccountInfo = ref(null)
 
 const selectedImg = ref(null);
-const selectAccount = (accountName: string, accountAddress: string, accountPublicKey: string) => {
+const selectAccount = (accountName: string, 
+    accountAddress: string, accountPublicKey: string,
+    accountVersion: number) => {
     if (accountName == null && accountAddress == null && accountPublicKey == null) {
         selectedAccountInfo.value = null
         emitter.emit("select-account", null)
         emitter.emit("select-account-public-key", null)
+        emitter.emit("select-account-version", 0)
         return
     }
     emitter.emit("select-account", accountAddress)
     emitter.emit("select-account-public-key", accountPublicKey)
+    emitter.emit("select-account-version", accountVersion)
     selectedAccountInfo.value.label = accountName;
     selectedAccountInfo.value.value = accountAddress;
     selectedAccountInfo.value.publicKey = accountPublicKey;
