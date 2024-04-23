@@ -597,7 +597,7 @@ export class TransactionUtils {
       const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
       return accInfo.version
     } catch (error) {
-      return 2
+      return networkState.currentNetworkProfileConfig.accountVersion
     }
 
   }
