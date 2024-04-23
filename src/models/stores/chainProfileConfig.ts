@@ -1,6 +1,7 @@
 import { StoreProperties } from "./storeProperties";
 
 export interface NetworkConfig{
+    accountVersion: number | null;
     chainHeight: number | null;
     publicKey: string;
     blockGenerationTargetTime: string;
@@ -75,6 +76,7 @@ export interface supportedEntityVersions {
 }
 
 export class ChainProfileConfig extends StoreProperties implements NetworkConfig  {
+    accountVersion: number | null = null;
     supportedEntities: supportedEntityVersions[];
     chainHeight: number | null = null;
     publicKey: string = '';

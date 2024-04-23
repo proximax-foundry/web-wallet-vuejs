@@ -59,7 +59,8 @@ watch(selectedAddress, (n) => {
                 walletState.currentLoggedInWallet.convertAddressToName(PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain())?
                 walletState.currentLoggedInWallet.convertAddressToName(PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain()) : PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain(),
             value: PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain(),
-            publicKey: x.publicKey
+            publicKey: x.publicKey,
+            version: findAcc.version
         }
     }) : []
 

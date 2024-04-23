@@ -201,7 +201,7 @@ export default {
     const accountAddress = computed(()=>selectedAcc.value?selectedAcc.value.address:'0'.repeat(40))
     const handleParamTargetPublicKey = ()=>{
       if(props.targetPublicKey.length === 64 && Convert.isHexString(props.targetPublicKey)){
-        targetPublicAccount.value = PublicAccount.createFromPublicKey(props.targetPublicKey, AppState.networkType, 1);
+        targetPublicAccount.value = PublicAccount.createFromPublicKey(props.targetPublicKey, AppState.networkType);
         txnBuilder.targetPublicKey(targetPublicAccount.value);
       }
       if(!walletState.currentLoggedInWallet){

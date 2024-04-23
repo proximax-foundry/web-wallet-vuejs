@@ -731,7 +731,7 @@ export class SwapUtils {
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
     const encryptedPassword = WalletUtils.createPassword(walletPassword);
     let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
-    const account = Account.createFromPrivateKey(privateKey, AppState.networkType,1);
+    const account = Account.createFromPrivateKey(privateKey, AppState.networkType, accountDetails.version);
     let signedTx = account.sign(aggreateCompleteTransaction, networkState.currentNetworkProfile.generationHash);
     return signedTx;
   }

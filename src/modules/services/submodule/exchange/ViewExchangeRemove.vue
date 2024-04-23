@@ -283,7 +283,7 @@ const txnFee = computed(() => {
         return removeSdaExchangeTxn.maxFee?.compact() / Math.pow(10, AppState.nativeToken.divisibility)
     }
     const multisigAcc = [...walletState.currentLoggedInWallet.accounts, ...walletState.currentLoggedInWallet.others].find(acc => acc.address == Address.createFromRawAddress(props.owner).plain())
-    const innerTxn = [removeSdaExchangeTxn.toAggregate(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType, 1))];
+    const innerTxn = [removeSdaExchangeTxn.toAggregate(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType, multisigAcc.version))];
     return AppState.buildTxn.aggregateBonded(innerTxn).maxFee.compact() / Math.pow(10, AppState.nativeToken.divisibility)
 
 })
@@ -345,14 +345,14 @@ const removeOffer = async() => {
         ], AppState.networkType
     )
 
-    const acc = Account.createFromPrivateKeyV1(privateKey, AppState.networkType)
+    const acc = Account.createFromPrivateKey(privateKey, AppState.networkType, initiatorAcc.version);
     const generationHash = networkState.currentNetworkProfile.generationHash
     if (!isMultisig.value) {
         const signedTransaction = acc.sign(removeSdaExchangeTxn, generationHash);
         await TransactionUtils.announceTransaction(signedTransaction)
     }else{
         const multisigAcc = [...walletState.currentLoggedInWallet.accounts, ...walletState.currentLoggedInWallet.others].find(acc => acc.address == plainAddress)
-        const innerTxn = [removeSdaExchangeTxn.toAggregate(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType, 1))];
+        const innerTxn = [removeSdaExchangeTxn.toAggregate(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType, multisigAcc.version))];
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
         const aggregateBondedTransaction = AppState.buildTxn.aggregateBonded(innerTxn, new UInt64(nodeTime.sendTimeStamp!));
         const aggregateBondedTransactionSigned = acc.sign(aggregateBondedTransaction, generationHash);

@@ -12,7 +12,7 @@ import {
     AggregateTransaction,
     AddressAliasTransaction,
     AddExchangeOfferTransaction,
-    ChainConfigTransaction,
+    NetworkConfigTransaction,
     ChainUpgradeTransaction,
     ExchangeOfferTransaction,
     RemoveExchangeOfferTransaction,
@@ -1537,7 +1537,7 @@ export class DashboardService {
             let txn = UnconfirmedTransaction.convertToSubClass(UnconfirmedChainTransaction, formattedTxn) as UnconfirmedChainTransaction;
 
             if(txns[i].type === TransactionType.CHAIN_CONFIGURE){
-                let chainConfigureTxn = txns[i] as ChainConfigTransaction;
+                let chainConfigureTxn = txns[i] as NetworkConfigTransaction;
 
                 txn.applyHeightDelta = chainConfigureTxn.applyHeightDelta.compact();
             }
@@ -1563,7 +1563,7 @@ export class DashboardService {
             let txn = ConfirmedTransaction.convertToSubClass(ConfirmedChainTransaction, formattedTxn) as ConfirmedChainTransaction;
             
             if(txns[i].type === TransactionType.CHAIN_CONFIGURE){
-                let chainConfigureTxn = txns[i] as ChainConfigTransaction;
+                let chainConfigureTxn = txns[i] as NetworkConfigTransaction;
 
                 txn.applyHeightDelta = chainConfigureTxn.applyHeightDelta.compact();
             }
@@ -1589,7 +1589,7 @@ export class DashboardService {
             let txn = PartialTransaction.convertToSubClass(PartialChainTransaction, formattedTxn) as PartialChainTransaction;
             
             if(txns[i].type === TransactionType.CHAIN_CONFIGURE){
-                let chainConfigureTxn = txns[i] as ChainConfigTransaction;
+                let chainConfigureTxn = txns[i] as NetworkConfigTransaction;
 
                 txn.applyHeightDelta = chainConfigureTxn.applyHeightDelta.compact();
             }
@@ -4538,7 +4538,7 @@ export class DashboardService {
     // --------------------------------------end------------------------------------------------------------------
 
     // -----------------------------------extract Chain Configure only---------------------------------------------------
-    extractChainConfig(chainConfigureTxn: ChainConfigTransaction): InnerChainTransaction {
+    extractChainConfig(chainConfigureTxn: NetworkConfigTransaction): InnerChainTransaction {
 
         let txnDetails = new InnerChainTransaction();
         
@@ -4827,7 +4827,7 @@ export class DashboardService {
                     let offer = exchangeOfferFormat.exchangeOffers[i];
                     let offeringAssetString = `${offer.amount} ${offer.assetId}` + offer.assetNamespace ? ` (${offer.assetNamespace})`: '';
                     let costString = `${offer.cost} ${AppState.nativeToken.label}`;
-                    let ownerPublicAccount = PublicAccount.createFromPublicKey(offer.owner, AppState.networkType, 1);
+                    let ownerPublicAccount = PublicAccount.createFromPublicKey(offer.owner, AppState.networkType);
                     let owner = this.wallet.convertAddressToName(ownerPublicAccount.address.plain());
                     let offerInfo: TxnDetails = {
                         type: offer.type === "Buy" ? MsgType.RED: MsgType.GREEN,
@@ -4877,7 +4877,7 @@ export class DashboardService {
             }
                 break;
             case TransactionType.CHAIN_CONFIGURE:{
-                let chainConfigureTx = innerTransaction as ChainConfigTransaction;
+                let chainConfigureTx = innerTransaction as NetworkConfigTransaction;
                 tempData = this.extractChainConfig(chainConfigureTx);
                 let chainConfigFormat = tempData as InnerChainTransaction;
 
@@ -5158,7 +5158,7 @@ export class DashboardService {
                 infos.push(minRemovalInfo);
 
                 for(let i =0; i < modifyMultisigFormat.addedCosigner.length; ++i){
-                    let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.addedCosigner[i], AppState.networkType, 1)
+                    let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.addedCosigner[i], AppState.networkType)
                     let tryShortName = this.wallet.convertAddressToName(publicAccount.address.plain());
                     let shortName = tryShortName === publicAccount.address.plain() ? '' : tryShortName;
                     let addCosignerInfo: TxnDetails = {
@@ -5171,7 +5171,7 @@ export class DashboardService {
                 }
 
                 for(let i =0; i < modifyMultisigFormat.removedCosigner.length; ++i){
-                    let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.removedCosigner[i], AppState.networkType, 1)
+                    let publicAccount = PublicAccount.createFromPublicKey(modifyMultisigFormat.removedCosigner[i], AppState.networkType)
                     let removeCosignerInfo: TxnDetails = {
                         type: MsgType.RED,
                         value: modifyMultisigFormat.removedCosigner[i],
@@ -5582,7 +5582,7 @@ export class DashboardService {
                 let accMetadataFormat = tempData as InnerMetadataTransaction;
                 let infos: TxnDetails[] = [];
 
-                let targetPublicAccount =  PublicAccount.createFromPublicKey(accMetadataFormat.targetPublicKey, AppState.networkType, 1);
+                let targetPublicAccount =  PublicAccount.createFromPublicKey(accMetadataFormat.targetPublicKey, AppState.networkType);
                 let targetAddress = targetPublicAccount.address.plain();
 
                 let accountInfo: TxnDetails = {

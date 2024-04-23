@@ -104,7 +104,7 @@ import { TransactionState } from '@/state/transactionState';
     const ownerPublicAccount = ref<PublicAccount | null>()
     const multisigPublicAccount = ref<PublicAccount | null>()
     try {
-      ownerPublicAccount.value = WalletUtils.createPublicAccount(walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount().publicKey:'', AppState.networkType)
+      ownerPublicAccount.value = PublicAccount.createFromPublicKey(walletState.currentLoggedInWallet?walletState.currentLoggedInWallet.selectDefaultAccount().publicKey:'', AppState.networkType)
     } catch (error) {
       console.log(error)
     }
@@ -303,13 +303,13 @@ import { TransactionState } from '@/state/transactionState';
     })
 
     emitter.on("select-account-public-key", (publicKey: string) =>{
-      ownerPublicAccount.value = WalletUtils.createPublicAccount(publicKey,AppState.networkType)
+      ownerPublicAccount.value = PublicAccount.createFromPublicKey(publicKey,AppState.networkType)
     })
 
     emitter.on("select-multisig-account", (node: TreeNode) => {
       selectedMultisigName.value = node.label
       selectedMultisigAddress.value = node.value
-      multisigPublicAccount.value = WalletUtils.createPublicAccount(node.publicKey,AppState.networkType)
+      multisigPublicAccount.value = PublicAccount.createFromPublicKey(node.publicKey,AppState.networkType)
     })
     emitter.on("CLOSE_MULTISIG", () => {
       selectedMultisigName.value = null

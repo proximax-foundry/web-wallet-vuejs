@@ -158,7 +158,7 @@ export default {
        if(!acc.value){
         return 
       }
-       MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType, 1))
+       MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType))
        .then(onPartialBoolean => onPartial.value = onPartialBoolean)
        .catch(err=>{
          onPartial.value = false
@@ -317,12 +317,12 @@ export default {
     });
 
     const generatePrivateKey = async() =>{
-          privateKey.value= Account.generateNewAccount(AppState.networkType,2).privateKey;
+          privateKey.value= Account.generateNewAccount(AppState.networkType, networkState.currentNetworkProfileConfig.accountVersion ?? 2).privateKey;
     }
     generatePrivateKey();
 
     const createDelegate = async() => {
-      const account = WalletUtils.createAccountFromPrivateKey(privateKey.value , AppState.networkType);
+      const account = WalletUtils.createAccountFromPrivateKey(privateKey.value , AppState.networkType, networkState.currentNetworkProfileConfig.accountVersion ?? 2);
       if(account){
         AccPublicKey.value = account.publicKey;
          

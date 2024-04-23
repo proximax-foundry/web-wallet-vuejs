@@ -138,8 +138,7 @@ const checkHarvester = () => {
   try {
     harvesterPublicAccount.value = PublicAccount.createFromPublicKey(
       harvesterKey.value,
-      AppState.networkType,
-      1
+      AppState.networkType
     );
     showHarvesterError.value = false;
   } catch (error) {
@@ -148,7 +147,7 @@ const checkHarvester = () => {
 };
 /** */
 try {
-  ownerPublicAccount.value = WalletUtils.createPublicAccount(
+  ownerPublicAccount.value = PublicAccount.createFromPublicKey(
     walletState.currentLoggedInWallet
       ? walletState.currentLoggedInWallet.selectDefaultAccount().publicKey
       : "",
@@ -370,7 +369,7 @@ emitter.on("select-account", (address: string) => {
 });
 
 emitter.on("select-account-public-key", (publicKey: string) => {
-  ownerPublicAccount.value = WalletUtils.createPublicAccount(
+  ownerPublicAccount.value = PublicAccount.createFromPublicKey(
     publicKey,
     AppState.networkType
   );
@@ -379,9 +378,10 @@ emitter.on("select-account-public-key", (publicKey: string) => {
 emitter.on("select-multisig-account", (node: TreeNode) => {
   selectedMultisigName.value = node.label;
   selectedMultisigAddress.value = node.value;
-  multisigPublicAccount.value = WalletUtils.createPublicAccount(
+  multisigPublicAccount.value = PublicAccount.createFromPublicKey(
     node.publicKey,
-    AppState.networkType
+    AppState.networkType,
+    node.version
   );
 });
 emitter.on("CLOSE_MULTISIG", () => {

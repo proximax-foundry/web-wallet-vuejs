@@ -180,6 +180,7 @@ export default {
     const selectedAccountName = ref("");
     const selectedAccountAddress = ref("");
     const selectedAccountPublicKey = ref("");
+    const selectedAccountVersion = ref(0);
     const selectedAccountBalance = ref(0);
     const selectAccount = (name, address) => {
       currentPage.value = 2;
@@ -250,12 +251,14 @@ export default {
         selectedAccountAddress.value = account.address;
         selectedAccountBalance.value = account.balance;
         selectedAccountPublicKey.value = account.publicKey;
+        selectedAccountVersion.value = account.version;
         maxSwapAmount.value = Helper.convertNumberMinimumFormat(account.balance - txFee.value - gasPriceInXPX.value, 6);
       }else{
         selectedAccountName.value = '';
         selectedAccountAddress.value = '';
         selectedAccountBalance.value = '';
         selectedAccountPublicKey.value = '';
+        selectedAccountVersion.value = 0;
       }
     });
 
@@ -344,7 +347,7 @@ export default {
                         .message(Helper.createPlainMessage(JSON.stringify(message2)))
                         .build();
       aggreateCompleteTransaction = aggregateBuilder
-                        .innerTransactions(Helper.createInnerTransaction([transferTx, feetransferTx], "0".repeat(64)))
+                        .innerTransactions(Helper.createInnerTransaction([transferTx, feetransferTx], "0".repeat(64), 1))
                         .build();
 
       txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(), 6);
@@ -374,7 +377,7 @@ export default {
                         .message(Helper.createPlainMessage(JSON.stringify(message2)))
                         .build();
       aggreateCompleteTransaction = aggregateBuilder
-                        .innerTransactions(Helper.createInnerTransaction([transferTx, feetransferTx], selectedAccountPublicKey.value))
+                        .innerTransactions(Helper.createInnerTransaction([transferTx, feetransferTx], selectedAccountPublicKey.value, selectedAccountVersion.value))
                         .build();
 
       txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(), 6);

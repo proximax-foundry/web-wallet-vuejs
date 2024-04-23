@@ -285,7 +285,7 @@ export class WalletUtils {
             return;
         }
 
-        let wallet = walletState.currentLoggedInWallet;
+        let wallet = walletState.currentLoggedInWallet as Wallet;
 
         let relatedWalletAccs = wallet.accounts.filter(x => relatedAddress.includes(x.address));
         let relatedOtherAccs = wallet.others.filter(x => relatedAddress.includes(x.address));
@@ -354,7 +354,7 @@ export class WalletUtils {
             return;
         }
 
-        let wallet = walletState.currentLoggedInWallet;
+        let wallet = walletState.currentLoggedInWallet as Wallet;
 
         let accs = WalletUtils.getAllAccs(wallet);
         let accsPubKey = accs.map(x => x.publicKey);
@@ -464,8 +464,8 @@ export class WalletUtils {
         txnQP.sortField = TransactionSortingField.BLOCK;
         txnQP.order = Order_v2.DESC;
     
-        let accAccount = walletState.currentLoggedInWallet.accounts.map(x=> x as MyAccount);
-        let otherAccount = walletState.currentLoggedInWallet.others.map(x => x as MyAccount);
+        let accAccount = (walletState.currentLoggedInWallet as Wallet).accounts.map(x=> x as MyAccount);
+        let otherAccount = (walletState.currentLoggedInWallet as Wallet).others.map(x => x as MyAccount);
         let allAccounts: MyAccount[] = accAccount.concat(otherAccount);
         let allPubKey = allAccounts.map(x => x.publicKey);
         let txnSearchResults: TransactionSearch[] = [];
@@ -567,7 +567,7 @@ export class WalletUtils {
                     return false;
                 }
                 else {
-                    const checkingAddress = Account.createFromPrivateKey(common.privateKey, AppState.networkType,1).address.plain();
+                    const checkingAddress = Account.createFromPrivateKey(common.privateKey, AppState.networkType, account.version).address.plain();
 
                     if (checkingAddress !== account.address) {
                         return false;
@@ -583,7 +583,7 @@ export class WalletUtils {
 
     static fetchAccountInfoCurrentWalletAccounts(): false | Promise<AccountInfo[]> {
 
-        const wallet = walletState.currentLoggedInWallet;
+        const wallet = walletState.currentLoggedInWallet as Wallet;
         const networkType = AppState.networkType;
 
         if (!wallet || !networkType) {
@@ -693,16 +693,16 @@ export class WalletUtils {
      * @param {number} network
      * @returns {SimpleWallet}
      */
-    static createAccountSimple(walletName: string, password: Password, network: NetworkType): SimpleWallet {
-        return SimpleWallet.create(walletName, password, network);
+    static createAccountSimple(walletName: string, password: Password, network: NetworkType, version: number): SimpleWallet {
+        return SimpleWallet.create(walletName, password, network, version);
     }
 
-    static createAccountSimpleFromPrivateKey(walletName: string, password: Password, privateKey: string, network: NetworkType): SimpleWallet {
-        return SimpleWallet.createFromPrivateKey(walletName, password, privateKey, network)
+    static createAccountSimpleFromPrivateKey(walletName: string, password: Password, privateKey: string, network: NetworkType, version: number): SimpleWallet {
+        return SimpleWallet.createFromPrivateKey(walletName, password, privateKey, network, version)
     }
 
-    static createAccountSimpleFromEncryptedPrivateKey(walletName: string, encryptedPrivateKey: string, iv: string, publicKey: string, network: NetworkType): SimpleWallet {
-        return SimpleWallet.createFromEncryptedKey(walletName, encryptedPrivateKey, iv, publicKey, network);
+    static createAccountSimpleFromEncryptedPrivateKey(walletName: string, encryptedPrivateKey: string, iv: string, publicKey: string, network: NetworkType, version: number): SimpleWallet {
+        return SimpleWallet.createFromEncryptedKey(walletName, encryptedPrivateKey, iv, publicKey, network, version);
     }
 
     /**
@@ -721,8 +721,8 @@ export class WalletUtils {
      * @param {NetworkType} network
      * @returns {Account}
      */
-    static createAccountFromPrivateKey(privateKey: string, network: NetworkType): Account {
-        return Account.createFromPrivateKey(privateKey, network,1);
+    static createAccountFromPrivateKey(privateKey: string, network: NetworkType, version: number): Account {
+        return Account.createFromPrivateKey(privateKey, network, version);
     }
 
     /**
@@ -754,13 +754,13 @@ export class WalletUtils {
      * @param address address
      * @return checkAddress
      */
-    static checkAddress(privateKey: string, net: NetworkType, address: string): boolean {
-        return (Account.createFromPrivateKey(privateKey, net,1).address.plain() === address) ? true : false;
+    static checkAddress(privateKey: string, net: NetworkType, address: string, version: number): boolean {
+        return (Account.createFromPrivateKey(privateKey, net, version).address.plain() === address) ? true : false;
     }
 
-    static createPublicAccount(publicKey: string, network: NetworkType, version: number = 1): PublicAccount {
-        return PublicAccount.createFromPublicKey(publicKey, network, version);
-    }
+    // static createPublicAccount(publicKey: string, network: NetworkType, version: number): PublicAccount {
+    //     return PublicAccount.createFromPublicKey(publicKey, network, version);
+    // }
 
     static createAddressFromPublicKey(publicKey: string, networkType: NetworkType): Address {
         return Address.createFromPublicKey(publicKey, networkType);
@@ -788,12 +788,12 @@ export class WalletUtils {
         return Address.createFromRawAddress(address);
     }
 
-    static getPublicAccountFromPrivateKey(privateKey: string, net: NetworkType): PublicAccount {
-        return Account.createFromPrivateKey(privateKey, net,1).publicAccount;
+    static getPublicAccountFromPrivateKey(privateKey: string, net: NetworkType, version: number): PublicAccount {
+        return Account.createFromPrivateKey(privateKey, net, version).publicAccount;
     }
 
-    static generateNewAccount(network: NetworkType): Account {
-        return Account.generateNewAccount(network,2);
+    static generateNewAccount(network: NetworkType, version: number): Account {
+        return Account.generateNewAccount(network, version);
     }
 
     static getNamespaceId(id: string | number[]): NamespaceId {
@@ -921,7 +921,7 @@ export class WalletUtils {
         wltFile.accounts.filter(acc => acc.encrypted).forEach((account) => {
             const walletAccount = new WalletAccount(account.name,
                 account.publicAccount.publicKey, account.publicAccount.address.address, account.algo,
-                account.encrypted, account.iv);
+                account.encrypted, account.iv, 0);
 
             if (account.nis1Account) {
                 walletAccount.nis1Account = new nis1Account(account.nis1Account.address, account.nis1Account.publicKey);
@@ -954,7 +954,7 @@ export class WalletUtils {
         wltFile.accounts.forEach((account) => {
             const walletAccount = new WalletAccount(account.name,
                 account.publicKey, account.address, account.algo,
-                account.encrypted, account.iv);
+                account.encrypted, account.iv, 0);
 
             if (account.nis1Account) {
                 walletAccount.nis1Account = new nis1Account(account.nis1Account.address, account.nis1Account.publicKey);
@@ -1005,7 +1005,7 @@ export class WalletUtils {
 
         const walletAccount = new WalletAccount(wltAccount.name,
             wltAccount.publicAccount.publicKey, wltAccount.publicAccount.address.address, wltAccount.algo,
-            wltAccount.encrypted, wltAccount.iv);
+            wltAccount.encrypted, wltAccount.iv, 0);
 
         if (wltAccount.nis1Account) {
             walletAccount.nis1Account = new nis1Account(wltAccount.nis1Account.address, wltAccount.nis1Account.publicKey);
@@ -1197,7 +1197,7 @@ export class WalletUtils {
 
             let stripedAddress = address.substring(address.length - 4);
 
-            let newOtherAccount = new OtherAccount("MULTISIG-" + stripedAddress, publicKeys[y], address, Helper.getOtherWalletAccountType().MULTISIG_CHILD);
+            let newOtherAccount = new OtherAccount("MULTISIG-" + stripedAddress, publicKeys[y], address, Helper.getOtherWalletAccountType().MULTISIG_CHILD, 0);
 
             walletState.currentLoggedInWallet.others.push(newOtherAccount);
         }
@@ -1230,7 +1230,7 @@ export class WalletUtils {
 
                 let stripedAddress = address.substring(address.length - 4);
 
-                let newOtherAccount = new OtherAccount("MULTISIG-" + stripedAddress, publicKeys[y], address, Helper.getOtherWalletAccountType().MULTISIG_CHILD);
+                let newOtherAccount = new OtherAccount("MULTISIG-" + stripedAddress, publicKeys[y], address, Helper.getOtherWalletAccountType().MULTISIG_CHILD, 0);
 
                 wallet.others.push(newOtherAccount);
             }
@@ -1278,33 +1278,35 @@ export class WalletUtils {
             let oldLinkedPublicKey = accs[i].linkedPublicKey;
             let isWalletAccount = accs[i] instanceof WalletAccount;
 
-            if(oldLinkedPublicKey && oldLinkedPublicKey !== accountInfo.linkedAccountKey){
+            // if(oldLinkedPublicKey && oldLinkedPublicKey !== accountInfo.linkedAccountKey){
                 // if(accs[i] instanceof WalletAccount){
                 //     walletState.currentLoggedInWallet.removeOtherAccount(oldLinkedPublicKey);
                 // }
                 // else if(accs[i] instanceof OtherAccount){
                 //     walletState.currentLoggedInWallet.removeOtherAccount(oldLinkedPublicKey);
                 // }
-                walletState.currentLoggedInWallet.removeOtherAccount(oldLinkedPublicKey);
-            }
+                // walletState.currentLoggedInWallet.removeOtherAccount(oldLinkedPublicKey);
+            // }
 
+            accs[i].version = accountInfo.version ?? 1;
             accs[i].linkedPublicKey = accountInfo.linkedAccountKey ?? "";
+            accs[i].supplementalPublicKeys = accountInfo.supplementalPublicKeys ?? null;
 
-            if (addInLinkedAccount && isWalletAccount && accountInfo.linkedAccountKey && accountInfo.linkedAccountKey !== "0".repeat(64)) {
+            // if (addInLinkedAccount && isWalletAccount && accountInfo.linkedAccountKey && accountInfo.linkedAccountKey !== "0".repeat(64)) {
 
-                let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, AppState.networkType);
+            //     let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, AppState.networkType);
 
-                let newAddress = linkedPublicAccount.address.plain();
-                let stripedAddress = newAddress.substring(newAddress.length - 4);
+            //     let newAddress = linkedPublicAccount.address.plain();
+            //     let stripedAddress = newAddress.substring(newAddress.length - 4);
 
-                let newOtherAccount = new OtherAccount("ACCOUNT-LINK-" + stripedAddress, accountInfo.linkedAccountKey, newAddress, Helper.getOtherWalletAccountType().DELEGATE_VALIDATE);
+            //     let newOtherAccount = new OtherAccount("ACCOUNT-LINK-" + stripedAddress, accountInfo.linkedAccountKey, newAddress, Helper.getOtherWalletAccountType().DELEGATE_VALIDATE, 0);
 
-                if (!allWalletAccountPubKey.includes(accountInfo.linkedAccountKey)) {
-                    walletState.currentLoggedInWallet.others.push(newOtherAccount);
+            //     if (!allWalletAccountPubKey.includes(accountInfo.linkedAccountKey)) {
+            //         walletState.currentLoggedInWallet.others.push(newOtherAccount);
 
-                    tempLinkedList.push(accountInfo.linkedAccountKey);
-                }
-            }
+            //         tempLinkedList.push(accountInfo.linkedAccountKey);
+            //     }
+            // }
 
             let oldAccAssets: string[] = accs[i].assets.map(x => x.idHex);
 
@@ -1419,23 +1421,25 @@ export class WalletUtils {
 
             let isWalletAccount = accs[i] instanceof WalletAccount;
 
+            accs[i].version = accountInfo.version ?? 1;
             accs[i].linkedPublicKey = accountInfo.linkedAccountKey;
+            accs[i].supplementalPublicKeys = accountInfo.supplementalPublicKeys ?? null;
 
-            if (addInLinkedAccount && isWalletAccount && accountInfo.linkedAccountKey && accountInfo.linkedAccountKey !== "0".repeat(64)) {
+            // if (addInLinkedAccount && isWalletAccount && accountInfo.linkedAccountKey && accountInfo.linkedAccountKey !== "0".repeat(64)) {
 
-                let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, AppState.networkType);
+            //     let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, AppState.networkType);
 
-                let newAddress = linkedPublicAccount.address.plain();
-                let stripedAddress = newAddress.substring(newAddress.length - 4);
+            //     let newAddress = linkedPublicAccount.address.plain();
+            //     let stripedAddress = newAddress.substring(newAddress.length - 4);
 
-                let newOtherAccount = new OtherAccount("ACCOUNT-LINK-" + stripedAddress, accountInfo.linkedAccountKey, newAddress, Helper.getOtherWalletAccountType().DELEGATE_VALIDATE);
+            //     let newOtherAccount = new OtherAccount("ACCOUNT-LINK-" + stripedAddress, accountInfo.linkedAccountKey, newAddress, Helper.getOtherWalletAccountType().DELEGATE_VALIDATE);
 
-                if (!allWalletAccountPubKey.includes(accountInfo.linkedAccountKey)) {
-                    walletState.currentLoggedInWallet.others.push(newOtherAccount);
+            //     if (!allWalletAccountPubKey.includes(accountInfo.linkedAccountKey)) {
+            //         walletState.currentLoggedInWallet.others.push(newOtherAccount);
 
-                    tempLinkedList.push(accountInfo.linkedAccountKey);
-                }
-            }
+            //         tempLinkedList.push(accountInfo.linkedAccountKey);
+            //     }
+            // }
 
             // let assets: Asset[] = [];
 
@@ -1516,27 +1520,30 @@ export class WalletUtils {
                 continue;
             }
 
-            if (addInLinkedAccount && accountInfo.linkedAccountKey && accountInfo.linkedAccountKey !== "0".repeat(64)) {
+            wallet.accounts[i].linkedPublicKey = accountInfo.linkedAccountKey ?? "";
+            wallet.accounts[i].supplementalPublicKeys = accountInfo.supplementalPublicKeys ?? null;
 
-                wallet.accounts[i].linkedPublicKey = accountInfo.linkedAccountKey;
+            // if (addInLinkedAccount && accountInfo.linkedAccountKey && accountInfo.linkedAccountKey !== "0".repeat(64)) {
 
-                let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, AppState.networkType);
+            //     wallet.accounts[i].linkedPublicKey = accountInfo.linkedAccountKey;
 
-                let newAddress = linkedPublicAccount.address.plain();
-                let stripedAddress = newAddress.substring(newAddress.length - 4);
+            //     let linkedPublicAccount = Helper.createPublicAccount(accountInfo.linkedAccountKey, AppState.networkType);
 
-                let newOtherAccount = new OtherAccount("ACCOUNT-LINK-" + stripedAddress, accountInfo.linkedAccountKey, newAddress, Helper.getOtherWalletAccountType().DELEGATE_VALIDATE);
+            //     let newAddress = linkedPublicAccount.address.plain();
+            //     let stripedAddress = newAddress.substring(newAddress.length - 4);
 
-                if (!wallet.others.find((other) => other.publicKey === accountInfo.linkedAccountKey)) {
-                    wallet.others.push(newOtherAccount);
-                }
+            //     let newOtherAccount = new OtherAccount("ACCOUNT-LINK-" + stripedAddress, accountInfo.linkedAccountKey, newAddress, Helper.getOtherWalletAccountType().DELEGATE_VALIDATE);
 
-                if (!allWalletAccountPubKey.includes(accountInfo.linkedAccountKey)) {
-                    wallet.others.push(newOtherAccount);
+            //     if (!wallet.others.find((other) => other.publicKey === accountInfo.linkedAccountKey)) {
+            //         wallet.others.push(newOtherAccount);
+            //     }
 
-                    tempLinkedList.push(accountInfo.linkedAccountKey);
-                }
-            }
+            //     if (!allWalletAccountPubKey.includes(accountInfo.linkedAccountKey)) {
+            //         wallet.others.push(newOtherAccount);
+
+            //         tempLinkedList.push(accountInfo.linkedAccountKey);
+            //     }
+            // }
 
             let assets: Asset[] = [];
 
@@ -1577,10 +1584,8 @@ export class WalletUtils {
                 continue;
             }
 
-            if (accountInfo.linkedAccountKey !== "0".repeat(64)) {
-
-                wallet.others[i].linkedPublicKey = accountInfo.linkedAccountKey;
-            }
+            wallet.others[i].linkedPublicKey = accountInfo.linkedAccountKey ?? "";
+            wallet.others[i].supplementalPublicKeys = accountInfo.supplementalPublicKeys ?? null;
 
             let assets: Asset[] = [];
 
@@ -1919,7 +1924,7 @@ export class WalletUtils {
         if (walletState.currentLoggedInWallet === null) {
             return;
         }
-        let acc = walletState.currentLoggedInWallet.accounts.find(x => x.name === accountName);
+        let acc = (walletState.currentLoggedInWallet as Wallet).accounts.find(x => x.name === accountName);
 
         if (!acc) {
             return;
@@ -1970,7 +1975,7 @@ export class WalletUtils {
             return;
         }
 
-        let accs: MyAccount[] = walletState.currentLoggedInWallet.others.filter(x => allAddedAccPubKey.includes(x.publicKey));
+        let accs: MyAccount[] = (walletState.currentLoggedInWallet as Wallet).others.filter(x => allAddedAccPubKey.includes(x.publicKey));
 
         for (let i = 0; i < accs.length; ++i) {
             WalletUtils.updateMultisigDetails(accs[i]);
@@ -1993,7 +1998,7 @@ export class WalletUtils {
         AppState.readBlockHeight = chainHeight;
 
         let allPubKey = accs.map(x => x.publicKey);
-        let otherAccounts = walletState.currentLoggedInWallet.others.filter(x => x.type === OtherAcountType.MULTISIG_CHILD && allPubKey.includes(x.publicKey));
+        let otherAccounts = (walletState.currentLoggedInWallet as Wallet).others.filter(x => x.type === OtherAcountType.MULTISIG_CHILD && allPubKey.includes(x.publicKey));
 
         for(let i = 0; i < accs.length; ++i){
             await WalletUtils.updateMultisigDetails(accs[i]);
@@ -2717,11 +2722,12 @@ export class WalletUtils {
         return newWallet;
     }
 
-    static addNewWallet(allWallets: Wallets, password: Password, walletName: string, networkName: string, networkType: NetworkType): tempNewWalletInterface {
-        const account = Account.generateNewAccount(networkType,2);
-        const wallet = WalletUtils.createAccountSimpleFromPrivateKey(walletName, password, account.privateKey, networkType);
+    static addNewWallet(allWallets: Wallets, password: Password, walletName: string, networkName: string, networkType: NetworkType, version: number): tempNewWalletInterface {
+        const account = Account.generateNewAccount(networkType, version);
+        const wallet = WalletUtils.createAccountSimpleFromPrivateKey(walletName, password, account.privateKey, networkType, version);
         let walletAccounts: WalletAccount[] = [];
-        let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.publicAccount.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
+        let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.publicAccount.address.plain(), "pass:bip32", 
+                wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv, wallet.version);
         walletAccount.isBrain = true;
         walletAccount.default = true;
         walletAccounts.push(walletAccount);
@@ -2738,11 +2744,11 @@ export class WalletUtils {
         return data;
     }
 
-    static addNewWalletWithPrivateKey(allWallets: Wallets, privateKey: string, password: Password, walletName: string, networkName: string, networkType: NetworkType): WalletAccount {
-        const account = Account.createFromPrivateKey(privateKey, networkType,1);
-        const wallet = WalletUtils.createAccountSimpleFromPrivateKey(walletName, password, privateKey, networkType);
+    static addNewWalletWithPrivateKey(allWallets: Wallets, privateKey: string, password: Password, walletName: string, networkName: string, networkType: NetworkType, version: number): WalletAccount {
+        const account = Account.createFromPrivateKey(privateKey, networkType, version);
+        const wallet = WalletUtils.createAccountSimpleFromPrivateKey(walletName, password, privateKey, networkType, version);
         let walletAccounts: WalletAccount[] = [];
-        let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.publicAccount.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
+        let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.publicAccount.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv, version);
         walletAccount.isBrain = true;
         walletAccount.default = true;
         walletAccounts.push(walletAccount);
@@ -2863,6 +2869,56 @@ export class WalletUtils {
         cosigner = selfMultisigInfo[0].cosignaturies;
 
         return cosigner;
+    }
+
+    static async updateAddressBookGetVersion(contacts: AddressBook[]){
+
+        const nonUpdatedContacts = contacts.filter(x => x.version === 0);
+        const addresses = nonUpdatedContacts.map(x => Address.createFromRawAddress(x.address));
+        const splitAmount = 80;
+
+        if(addresses.length === 0){
+            return;
+        }
+
+        const lastPage = Math.ceil(addresses.length/ splitAmount);
+
+        let accountsInfo: AccountInfo[] = [];
+
+        for(let i =0; i < lastPage; ++i){
+
+            const startIndex = i * splitAmount;
+            const splitAddresses = addresses.slice(startIndex, startIndex + splitAmount);
+            const tempAccountsInfo = await AppState.chainAPI.accountAPI.getAccountsInfo(splitAddresses);
+
+            accountsInfo = accountsInfo.concat(tempAccountsInfo)
+            
+            if(i !== (lastPage - 1)){
+                await delay(250);
+            }
+        }
+
+        for (let i = 0; i < nonUpdatedContacts.length; ++i) {
+
+            let contact = nonUpdatedContacts[i];
+            let accountInfo = accountsInfo.find(x => x.address.plain() === contact.address);
+
+            if (!accountInfo) {
+                continue;
+            }
+
+            contact.version = accountInfo.version;
+        }
+    }
+
+    static removeUnknownVersionAcc(wallet: Wallet){
+
+        const deletingAccs = wallet.accounts.filter(x => x.version === 0); 
+        wallet.accounts = wallet.accounts.filter(x => x.version !== 0);
+        // wallet.others = wallet.others.filter(x => x.version !== 0);
+
+        const deletingContacts = wallet.contacts.filter(x => x.version === 0);
+        wallet.contacts = wallet.contacts.filter(x => x.version !== 0);
     }
 }
 
