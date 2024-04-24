@@ -62,20 +62,25 @@
                   >
                 </div>
                 <div class="mt-1 text-xs md:text-tsm">{{ data.address }}</div>
-                <div
-                  class="mt-1 text-xs md:text-tsm flex items-center bg-green-100 w-24"
-                >
-                  <div>{{ $t("general.publicKey") }}</div>
-                  <font-awesome-icon
-                    icon="check"
-                    class="w-3 h-3 ml-3 inline-block text-blue-primary"
-                    v-if="data.publicKey"
-                  ></font-awesome-icon>
-                  <font-awesome-icon
-                    icon="times"
-                    class="w-3 h-3 ml-3 inline-block text-blue-primary"
-                    v-else
-                  ></font-awesome-icon>
+                <div class='flex gap-2'> 
+                    <div class = ' px-1 py-0.5 flex mt-0.5 bg-blue-primary  rounded-sm ' title="Account Version">
+                      <p class = 'font-semibold text-white text-xxs pt-px cursor-default uppercase' >v{{ data.version }}</p>
+                    </div>
+                    <div class = ' px-1 py-0.5 flex mt-0.5 bg-green-100 rounded-sm'>
+                      <p class = 'font-semibold text-xxs pt-px cursor-default uppercase'  >
+                        {{ $t("general.publicKey") }}
+                        <font-awesome-icon
+                          icon="check"
+                          class="w-3 h-3 ml-3 inline-block text-blue-primary"
+                          v-if="data.publicKey"
+                        ></font-awesome-icon>
+                        <font-awesome-icon
+                          icon="times"
+                          class="w-3 h-3 ml-3 inline-block text-blue-primary"
+                          v-else
+                        ></font-awesome-icon>
+                      </p>
+                    </div>
                 </div>
               </div>
             </div>
@@ -145,6 +150,7 @@ const formattedContacts = computed(() => {
         group: contact.group,
         publicKey: contact.publicKey ? contact.publicKey : null,
         svgString: toSvg(contact.address, 45, themeConfig.jdenticonConfig),
+        version: contact.version
       };
     }
   );

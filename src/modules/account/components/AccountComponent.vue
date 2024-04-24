@@ -15,13 +15,16 @@
                     <font-awesome-icon icon="copy" :title="$t('general.copy')" @click="copy('address')" class=" w-5 h-5 text-blue-link cursor-pointer "></font-awesome-icon>
                 </div>
                 <div class='flex gap-2'> 
+                    <div class = ' px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm ' title="Account Version">
+                      <p class = 'font-semibold text-white text-xxs pt-px cursor-default uppercase' >v{{ accVersion }}</p>
+                    </div>
                     <div  v-if='isDefault' class = ' px-1 py-0.5 flex mt-0.5 bg-blue-primary rounded-sm' :title="$t('general.defaultTitle')">
-                    <img src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4 ' >
-                    <p class = 'font-semibold text-white text-xxs pt-px cursor-default uppercase'  >{{$t('general.default')}}</p>
+                      <img src="@/modules/account/img/icon-pin.svg" class = 'h-4 w-4 ' >
+                      <p class = 'font-semibold text-white text-xxs pt-px cursor-default uppercase'  >{{$t('general.default')}}</p>
                     </div>
                     <div v-if='isMultiSig' class = ' px-1 py-0.5 flex mt-0.5 bg-orange-primary rounded-sm ' :title="$t('general.multisigTitle')">
-                        <img v-if='isMultiSig' src="@/assets/img/icon-key.svg" class = 'h-4 w-4 mr-1' >
-                        <p v-if='isMultiSig' class = 'font-semibold text-white text-xxs pt-px cursor-default uppercase' >{{$t('general.multisig')}}</p>
+                      <img v-if='isMultiSig' src="@/assets/img/icon-key.svg" class = 'h-4 w-4 mr-1' >
+                      <p v-if='isMultiSig' class = 'font-semibold text-white text-xxs pt-px cursor-default uppercase' >{{$t('general.multisig')}}</p>
                     </div>
                 </div>
             </div>
@@ -80,6 +83,12 @@ setup(p){
     themeConfig.init();
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
+    const accVersion = computed(()=> {
+      if(!acc.value){
+        return 0
+      }
+      return acc.value.version
+    })
     const isDefault = computed(()=> {
       if(!acc.value){
         return false
@@ -152,6 +161,7 @@ setup(p){
         svgString,
         isDefault,
         isMultiSig,
+        accVersion,
         prettyAddress,
         changeName,
         copy,
