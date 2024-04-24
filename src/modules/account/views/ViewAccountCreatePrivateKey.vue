@@ -80,13 +80,35 @@ export default {
             privKey.value = privKey.value.substring(2)
           }
           const account = Account.createFromPrivateKey(privKey.value,AppState.networkType, networkState.currentNetworkProfileConfig.accountVersion ?? 2);
-          const verifyExistingAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.publicKey == account.publicKey);
+          const verifyExistingAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.publicKey == account.publicKey && element.version === account.version);
           if (verifyExistingAccount) {
             err.value = t('account.privateKeyExist');
-          } else {          
+          } else {
+            
+            try {
+              const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(account.address);
+
+            } catch (error) {
+              
+              try {
+                let accountV1 = Account.createFromPrivateKey(privKey.value, AppState.networkType, 1);
+
+                const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(accountV1.address);
+
+                if(accInfo.accountType !== AccountType.Locked){
+                  account = Account.createFromPrivateKey(privKey.value, AppState.networkType, 1);
+                }
+                else{
+                  account = Account.createFromPrivateKey(privKey.value, AppState.networkType, 2);
+                }
+              } catch (error) {
+                
+              }
+            }
+
             let password = WalletUtils.createPassword(walletPassword.value);
             const wallet = WalletUtils.createAccountSimpleFromPrivateKey(accountName.value, password, privKey.value,AppState.networkType);
-            let walletAccount = new WalletAccount(accountName.value, account.publicKey, account.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv);
+            let walletAccount = new WalletAccount(accountName.value, account.publicKey, account.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv, account.version);
             // code for NIS 1 checking
             // if(nis1Swap.value == true){
             //   const Nis1 = WalletUtils.createNis1AccountWithPrivateKey(privKey.value);
