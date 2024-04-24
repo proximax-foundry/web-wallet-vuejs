@@ -79,7 +79,7 @@ export default {
           if (privKey.value.substring(0,2) == "0x") {
             privKey.value = privKey.value.substring(2)
           }
-          const account = Account.createFromPrivateKey(privKey.value,AppState.networkType, networkState.currentNetworkProfileConfig.accountVersion ?? 2);
+          let account = Account.createFromPrivateKey(privKey.value,AppState.networkType, networkState.currentNetworkProfileConfig.accountVersion ?? 2);
           const verifyExistingAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.publicKey == account.publicKey && element.version === account.version);
           if (verifyExistingAccount) {
             err.value = t('account.privateKeyExist');
