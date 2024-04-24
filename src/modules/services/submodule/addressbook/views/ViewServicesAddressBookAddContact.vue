@@ -226,10 +226,11 @@ import { Wallet } from "@/models/wallet";
           publicKey.value = null;
         } else {
           publicKey.value = accInfo.publicKey;
-          accVersion.value = accInfo.version ?? 2;
         }
+        accVersion.value = accInfo.version ?? 2;
       } catch {
         publicKey.value = null;
+        accVersion.value = 2;
       }
     };
 

@@ -5,7 +5,7 @@ export class AddressBook{
     address: string;
     group: string;
     publicKey: string | null;
-    version: number = 0;
+    version: number;
 
     constructor(name: string, address: string, group: string, version: number = 0, publicKey: string =null){
         this.name = name;
