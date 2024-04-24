@@ -38,6 +38,16 @@
         </div>
         <div class="flex gap-2">
           <div
+            class="px-1 py-0.5 flex items-center bg-blue-primary rounded-sm"
+            title="Account Version"
+          >
+            <p
+              class="font-semibold text-white text-xxs pt-px cursor-default uppercase"
+            >
+              v{{ accVersion }}
+            </p>
+          </div>
+          <div
             v-if="(account as WalletAccount)?.default"
             class="px-1 py-0.5 flex items-center bg-blue-primary rounded-sm"
             :title="$t('general.defaultTitle')"
@@ -115,10 +125,12 @@ import { OtherAccount } from "@/models/otherAccount";
 import { WalletAccount } from "@/models/walletAccount";
 import EditLabelModal from "./EditLabelModal.vue";
 import Menu from "primevue/menu";
+import { Wallet } from "@/models/wallet";
 
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance.appContext.config.globalProperties.emitter;
 const { account } = defineProps<{ account: WalletAccount | OtherAccount }>();
+console.log(account);
 const menu = ref();
 const toggleLabelChange = ref(false)
 const toast = useToast();
@@ -181,7 +193,7 @@ const updateLabel = async (name) => {
   if (index >= 0) {
     label.removeAddress(index);
     walletState.wallets.saveMyWalletOnlytoLocalStorage(
-      walletState.currentLoggedInWallet
+      walletState.currentLoggedInWallet as Wallet
     );
     toast.add({
       severity: "info",
@@ -194,7 +206,7 @@ const updateLabel = async (name) => {
   }
   label.addresses.push(address);
   walletState.wallets.saveMyWalletOnlytoLocalStorage(
-    walletState.currentLoggedInWallet
+    walletState.currentLoggedInWallet as Wallet
   );
   toast.add({
     severity: "info",
@@ -249,6 +261,12 @@ const copy = (id) => {
     life: 3000,
   });
 };
+const accVersion = computed(()=> {
+  if(!account){
+    return 0
+  }
+  return account.version
+})
 const isMultiSig = computed(() => {
   let isMulti = account.getDirectParentMultisig().length ? true : false;
   return isMulti;

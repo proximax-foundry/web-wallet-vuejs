@@ -120,7 +120,8 @@ import {
   MetadataQueryParams, MetadataType, NamespaceMetadataTransaction,
   NamespaceId,
   Account,
-AggregateBondedTransactionBuilder
+AggregateBondedTransactionBuilder,
+PublicAccount
 } from 'tsjs-xpx-chain-sdk';
 import { WalletAccount } from '@/models/walletAccount';
 import { OtherAccount } from '@/models/otherAccount';
@@ -148,7 +149,7 @@ export default {
     let showKeys = ref(false)
     let scopedMetadataKeySelectable = ref(true);
     let scopedMetadataKeyType = ref(1);
-    let targetPublicAccount = ref(null);
+    let targetPublicAccount = ref<PublicAccount>();
     let targetNamespace = ref(null);
     let targetAccIsMultisig = ref(false);
     let scopedMetadataKeyHex = ref("");
@@ -217,7 +218,8 @@ export default {
       }
 
       let namespaceInfo = await AppState.chainAPI.namespaceAPI.getNamespace(targetNamespace.value);
-      targetPublicAccount.value = namespaceInfo.owner;
+      let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(namespaceInfo.owner.address);
+      targetPublicAccount.value = accInfo.publicAccount;
       txnBuilder.targetPublicKey(targetPublicAccount.value);
 
        if(!walletState.currentLoggedInWallet){

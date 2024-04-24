@@ -35,6 +35,9 @@ import MultiSelect from 'primevue/multiselect';
 import { AddressBookUtils } from '@/util/addressBookUtils';
 import { AddressBook } from '@/models/addressBook';
 import { useToast } from "primevue/usetoast";
+import { Wallet } from "@/models/wallet";
+import { AppState } from "@/state/appState";
+import { Address } from "tsjs-xpx-chain-sdk";
 
 const {t} = useI18n();
 const toast = useToast();
@@ -43,6 +46,7 @@ const emitter = internalInstance.appContext.config.globalProperties.emitter;
 const list = ref([]);
 const contactAdded = ref(0);
 const contactExisted = ref(0);
+const ignored = ref(false);
 const selectedAccount = ref([])
 
 const contactName = (acc) =>{
@@ -63,7 +67,8 @@ const accounts = computed(() => {
                 name: contactName(acc),
                 address: acc.address,
                 publicKey: acc.publicKey,
-                group: 'Account'
+                group: 'Account',
+                version: acc.version
             }
         }
     )
@@ -73,7 +78,8 @@ const accounts = computed(() => {
                 name: contactName(acc),
                 address: acc.address,
                 publicKey: acc.publicKey,
-                group: 'OtherAccount'
+                group: 'OtherAccount',
+                version: acc.version
             }
         }
     )
@@ -109,48 +115,78 @@ if (status) {
 }
 });
 
-const importAccount = () => {
+const importAccount = async () => {
     if(!walletState.currentLoggedInWallet){
         return;
     }
     const wallet = walletState.currentLoggedInWallet;
     let exist = [];
     let addContact = [];
-    selectedAccount.value.forEach(element => {
-        let label = element.name
-        let address = element.address
-        let group = element.group
-        let publicKey = element.publicKey
+    let ignoredList = [];
+    for (const acc of selectedAccount.value) {
+        let label = acc.name
+        let address = acc.address
+        let group = acc.group
+        let publicKey = acc.publicKey
+        let version = acc.version;
 
         const contactAddIndex = (wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.address == address):(-1);
         const contactNameIndex =(wallet.contacts!=undefined)?wallet.contacts.findIndex((contact) => contact.name.toLowerCase() == label.toLowerCase()):(-1);
 
         const defaultAccount = walletState.currentLoggedInWallet.accounts.find((account) => account.default == true);
 
-        if(contactAddIndex >= 0){
-            exist.push({label, address, group, publicKey });
-        }else if( contactNameIndex >= 0 ){
-            const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address);
-            if(verifyContactAddress.isPassed){
-                addContact.push({label: label + ' - 2', address, group, publicKey });
-            }
-        }else{
-            const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address);
-            if(verifyContactAddress.isPassed){
-                addContact.push({label, address, group, publicKey });
+        const verifyContactAddress = AddressBookUtils.verifyNetworkAddress(defaultAccount.address, address);
+
+        if(!verifyContactAddress){
+            continue;
+        }
+
+        if(!version || version > 2 || version <= 0){
+            try {
+                const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address));
+
+                version = accInfo.version ?? 2;
+                
+                if(accInfo.publicKey !== "0".repeat(64)){
+                    publicKey = accInfo.publicKey;
+                }
+
+            } catch (error) {
+                ignoredList.push({label, address, publicKey });
+                continue;
             }
         }
-    })
+        else if(!publicKey){
+            try {
+                const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address));
+                
+                if(accInfo.publicKey !== "0".repeat(64)){
+                    publicKey = accInfo.publicKey;
+                }
+
+            } catch (error) {
+
+            }
+        }
+
+        if(contactAddIndex >= 0){
+            exist.push({label, address, group, version, publicKey });
+        }else if( contactNameIndex >= 0 ){
+            addContact.push({label: label + ' - 2', address, group, version, publicKey });
+        }else{
+            addContact.push({label, address, group, version, publicKey });
+        }
+    }
     if(exist.length > 0){
         // display error
         contactExisted.value = exist.length;
     }
     if(addContact.length > 0){
         addContact.forEach((element) => {
-          let addressBook = new AddressBook(element.label, element.address, element.group, element.publicKey);
+          let addressBook = new AddressBook(element.label, element.address, element.group, element.version, element.publicKey);
           walletState.currentLoggedInWallet.addAddressBook(addressBook);
         });
-        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet as Wallet);
         contactAdded.value = addContact.length;
         emitter.emit('REFRESH_CONTACT_LIST', true);
         toast.add({severity:'info', summary: t('general.addressBook'), detail: t('addressBook.newContactImported',contactAdded.value) , group: 'br-custom', life: 5000});

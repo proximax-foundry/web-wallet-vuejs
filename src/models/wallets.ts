@@ -327,7 +327,7 @@ class Reconstruct{
         }else{
             group = addressBook.group;
         }
-        let newAddressBook = new AddressBook(addressBook.name, addressBook.address, group, addressBook.publicKey);
+        let newAddressBook = new AddressBook(addressBook.name, addressBook.address, group, addressBook.version, addressBook.publicKey);
         return newAddressBook;
     }
 
@@ -352,7 +352,7 @@ class Reconstruct{
         }
 
         let newAccount = new OtherAccount(tempAccount.name, tempAccount.publicKey, 
-            tempAccount.address, accountType);
+            tempAccount.address, accountType, tempAccount.version);
 
         newAccount.balance = tempAccount.balance ? tempAccount.balance : 0;
 
@@ -361,7 +361,8 @@ class Reconstruct{
 
     static recreateWalletAccount(tempAccount: WalletAccount): WalletAccount{
         let newAccount = new WalletAccount(tempAccount.name, tempAccount.publicKey, 
-            tempAccount.address, tempAccount.algo, tempAccount.encrypted, tempAccount.iv);
+            tempAccount.address, tempAccount.algo, tempAccount.encrypted, tempAccount.iv,
+            tempAccount.version);
 
         newAccount.balance = tempAccount.balance ? tempAccount.balance : 0;
         newAccount.default = tempAccount.default ? tempAccount.default : false;
@@ -372,7 +373,7 @@ class Reconstruct{
 
     static recreateWalletAccountFromSimpleAccount(tempAccount: SimpleAccount): WalletAccount{
         let newAccount = new WalletAccount(tempAccount.name, tempAccount.publicKey, 
-            tempAccount.address, tempAccount.algo, tempAccount.encrypted, tempAccount.iv);
+            tempAccount.address, tempAccount.algo, tempAccount.encrypted, tempAccount.iv, tempAccount.version);
 
         newAccount.balance = 0;
         newAccount.default = false;

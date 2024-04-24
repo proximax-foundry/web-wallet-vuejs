@@ -83,7 +83,7 @@ import { Helper } from "@/util/typeHelper";
 import { copyToClipboard } from '@/util/functions';
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
-import { LinkAction, PublicAccount, UInt64 } from "tsjs-xpx-chain-sdk";
+import { LinkAction, NetworkType, PublicAccount, UInt64 } from "tsjs-xpx-chain-sdk";
 import { useI18n } from 'vue-i18n';
 import { accountUtils } from "@/util/accountUtils";
 import AccountComponent from "@/modules/account/components/AccountComponent.vue";
@@ -158,7 +158,7 @@ export default {
        if(!acc.value){
         return 
       }
-       MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType, 1))
+       MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType))
        .then(onPartialBoolean => onPartial.value = onPartialBoolean)
        .catch(err=>{
          onPartial.value = false
@@ -317,12 +317,12 @@ export default {
     });
 
     const generatePrivateKey = async() =>{
-          privateKey.value= Account.generateNewAccount().privateKey;
+          privateKey.value= Account.generateNewAccount(AppState.networkType, networkState.currentNetworkProfileConfig.accountVersion ?? 2).privateKey;
     }
     generatePrivateKey();
 
     const createDelegate = async() => {
-      const account = WalletUtils.createAccountFromPrivateKey(privateKey.value , AppState.networkType);
+      const account = WalletUtils.createAccountFromPrivateKey(privateKey.value , AppState.networkType, networkState.currentNetworkProfileConfig.accountVersion ?? 2);
       if(account){
         AccPublicKey.value = account.publicKey;
          

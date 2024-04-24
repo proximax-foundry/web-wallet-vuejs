@@ -40,6 +40,7 @@ import ding from "@/assets/audio/ding.ogg";
 import HomeLayoutVue from "./components/HomeLayout.vue";
 import ToastComponent from "./modules/transfer/components/ToastComponent.vue";
 import { faStopwatch } from "@fortawesome/free-solid-svg-icons";
+import { Wallet } from "./models/wallet";
 
 const isLoading = computed(() => !AppState.isReady);
 
@@ -278,9 +279,16 @@ const doTxnChecking = () => {
 
 const doLogin = async () => {
   await WalletUtils.refreshAllAccountDetails(
-    walletState.currentLoggedInWallet!,
+    walletState.currentLoggedInWallet as Wallet,
     networkState.currentNetworkProfile!
   );
+  await WalletUtils.updateAddressBookGetVersion((walletState.currentLoggedInWallet as Wallet).contacts);
+  WalletUtils.removeUnknownVersionAcc(walletState.currentLoggedInWallet as Wallet);
+  walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet as Wallet);
+
+  if((walletState.currentLoggedInWallet as Wallet).accounts.length === 0){
+    logout();
+  }
 };
 
 const doLogout = () => {

@@ -284,7 +284,7 @@ const txnFee = computed(() => {
         return sdaExchangeOfferTxn.maxFee?.compact() / Math.pow(10, AppState.nativeToken.divisibility)
     }
     const multisigAcc = [...walletState.currentLoggedInWallet.accounts, ...walletState.currentLoggedInWallet.others].find(acc => acc.address == selectedMultisigAddress.value)
-    const innerTxn = [sdaExchangeOfferTxn.toAggregate(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType, 1))];
+    const innerTxn = [sdaExchangeOfferTxn.toAggregate(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType, multisigAcc.version))];
     return AppState.buildTxn.aggregateBonded(innerTxn).maxFee.compact() / Math.pow(10, AppState.nativeToken.divisibility)
 
 })
@@ -521,11 +521,11 @@ const exchangeCreate = async () => {
     const privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword.value), initiatorAcc.encrypted, initiatorAcc.iv)
     walletPassword.value = ""
 
-    const acc = Account.createFromPrivateKeyV1(privateKey, AppState.networkType)
+    const acc = Account.createFromPrivateKey(privateKey, AppState.networkType, initiatorAcc.version)
     const generationHash = networkState.currentNetworkProfile.generationHash
     if (isMultisig.value) {
         const multisigAcc = [...walletState.currentLoggedInWallet.accounts, ...walletState.currentLoggedInWallet.others].find(acc => acc.address == selectedMultisigAddress.value)
-        const innerTxn = [sdaExchangeOfferTxn.toAggregate(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType, 1))];
+        const innerTxn = [sdaExchangeOfferTxn.toAggregate(PublicAccount.createFromPublicKey(multisigAcc.publicKey, AppState.networkType, multisigAcc.version))];
         const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
         const aggregateBondedTransaction = AppState.buildTxn.aggregateBonded(innerTxn, new UInt64(nodeTime.sendTimeStamp!))
         const aggregateBondedTransactionSigned = acc.sign(aggregateBondedTransaction, generationHash);

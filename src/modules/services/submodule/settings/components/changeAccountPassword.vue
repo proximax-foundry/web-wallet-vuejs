@@ -105,6 +105,7 @@ import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
+import { Wallet } from "@/models/wallet"
 
 const { t } = useI18n();
 const toggleModal = ref(false);
@@ -182,7 +183,8 @@ const changeWalletPasswd = () => {
       currentAccount.name,
       password,
       walletPrivateKey,
-      AppState.networkType
+      AppState.networkType,
+      currentAccount.version
     );
     let walletAccount = new WalletAccount(
       currentAccount.name,
@@ -190,14 +192,15 @@ const changeWalletPasswd = () => {
       wallet.publicAccount.address.plain(),
       "pass:bip32",
       wallet.encryptedPrivateKey.encryptedKey,
-      wallet.encryptedPrivateKey.iv
+      wallet.encryptedPrivateKey.iv,
+      currentAccount.version
     );
     walletState.currentLoggedInWallet.accounts[i].encrypted =
       walletAccount.encrypted;
     walletState.currentLoggedInWallet.accounts[i].iv = walletAccount.iv;
   }
   walletState.wallets.saveMyWalletOnlytoLocalStorage(
-    walletState.currentLoggedInWallet
+    walletState.currentLoggedInWallet as Wallet
   );
   showSuccess();
   logout();

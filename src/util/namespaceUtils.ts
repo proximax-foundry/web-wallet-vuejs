@@ -232,7 +232,7 @@ export class NamespaceUtils {
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
     const encryptedPassword = WalletUtils.createPassword(walletPassword);
     let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
-    const account = Account.createFromPrivateKey(privateKey, AppState.networkType,1);
+    const account = Account.createFromPrivateKey(privateKey, AppState.networkType, accountDetails.version);
     return account;
   }
 
@@ -259,8 +259,9 @@ export class NamespaceUtils {
     const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
     const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
     const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
+    const multisigVersion = multisSigAccount?multisSigAccount.version :multisSigOther.version;
 
-    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType, 1);
+    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType, multisigVersion);
     const innerTxn = [registerRootNamespaceTransaction.toAggregate(multisigPublicAccount)];
     const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn, currentNodeTime);
     const aggregateBondedTxSigned = account.sign(aggregateBondedTx, networkState.currentNetworkProfile.generationHash);
@@ -278,8 +279,9 @@ export class NamespaceUtils {
     const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
     const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
     const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
+    const multisigVersion = multisSigAccount?multisSigAccount.version :multisSigOther.version;
 
-    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType, 1);
+    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType, multisigVersion);
     const innerTxn = [registerSubNamespaceTransaction.toAggregate(multisigPublicAccount)];
     const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn, currentNodeTime);
     const aggregateBondedTxSigned = account.sign(aggregateBondedTx, networkState.currentNetworkProfile.generationHash);
@@ -304,8 +306,9 @@ export class NamespaceUtils {
     const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
     const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
     const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
+    const multisigVersion = multisSigAccount?multisSigAccount.version :multisSigOther.version;
 
-    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType, 1);
+    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType, multisigVersion);
     const innerTxn = [extendNamespaceTx.toAggregate(multisigPublicAccount)];
     const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn, currentNodeTime);
     const aggregateBondedTxSigned = account.sign(aggregateBondedTx, networkState.currentNetworkProfile.generationHash);

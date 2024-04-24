@@ -42,10 +42,10 @@ export class Helper {
         return PlainMessage.create(message);
     }
 
-    static createEncryptedMessage(message: string, recipientPublicKey: string, networkType: NetworkType, senderPrivateKey: string): EncryptedMessage {
-        const publicAccount = PublicAccount.createFromPublicKey(recipientPublicKey, networkType, 1);
-        return EncryptedMessage.create(message, publicAccount, senderPrivateKey);
-    }
+    // static createEncryptedMessage(message: string, recipientPublicKey: string, networkType: NetworkType, senderPrivateKey: string): EncryptedMessage {
+    //     const publicAccount = PublicAccount.createFromPublicKey(recipientPublicKey, networkType, 1);
+    //     return EncryptedMessage.create(message, publicAccount, senderPrivateKey);
+    // }
 
     static createEncryptedMessageFromEncoded(payload: string): EncryptedMessage {
         return EncryptedMessage.createFromPayload(payload);
@@ -67,20 +67,20 @@ export class Helper {
         return new NamespaceId(name)
     }
 
-    static appendInnerTransaction(transactions: Transaction[], publicKeyTosign: string, innerTransactions: InnerTransaction[]): InnerTransaction[] {
+    // static appendInnerTransaction(transactions: Transaction[], publicKeyTosign: string, innerTransactions: InnerTransaction[]): InnerTransaction[] {
+    //     const networkType = transactions[0].version.networkType;
+    //     const publicAccount = PublicAccount.createFromPublicKey(publicKeyTosign, networkType, 1);
+
+    //     transactions.forEach((transaction) => {
+    //         innerTransactions.push(transaction.toAggregate(publicAccount));
+    //     });
+
+    //     return innerTransactions;
+    // }
+
+    static createInnerTransaction(transactions: Transaction[], publicKeyTosign: string, version: number): InnerTransaction[] {
         const networkType = transactions[0].version.networkType;
-        const publicAccount = PublicAccount.createFromPublicKey(publicKeyTosign, networkType, 1);
-
-        transactions.forEach((transaction) => {
-            innerTransactions.push(transaction.toAggregate(publicAccount));
-        });
-
-        return innerTransactions;
-    }
-
-    static createInnerTransaction(transactions: Transaction[], publicKeyTosign: string): InnerTransaction[] {
-        const networkType = transactions[0].version.networkType;
-        const publicAccount = PublicAccount.createFromPublicKey(publicKeyTosign, networkType, 1);
+        const publicAccount = PublicAccount.createFromPublicKey(publicKeyTosign, networkType, version);
         const newInnerTransaction: InnerTransaction[] = [];
 
         transactions.forEach((transaction) => {
@@ -102,12 +102,12 @@ export class Helper {
         return MosaicSupplyType;
     }
 
-    static createPublicAccount(publicKey: string, network: NetworkType, version: number = 1): PublicAccount {
+    static createPublicAccount(publicKey: string, network: NetworkType, version?: number): PublicAccount {
         return PublicAccount.createFromPublicKey(publicKey, network, version);
     }
 
-    static createAccount(privateKey: string, network: NetworkType): Account {
-        return Account.createFromPrivateKey(privateKey, network,1);
+    static createAccount(privateKey: string, network: NetworkType, version: number): Account {
+        return Account.createFromPrivateKey(privateKey, network, version);
     }
 
     static createNonceRandom(): MosaicNonce {
