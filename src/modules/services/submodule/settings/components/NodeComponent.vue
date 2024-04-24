@@ -40,6 +40,7 @@ import { walletState } from "@/state/walletState";
 import { WalletUtils } from "@/util/walletUtils";
 import { useI18n } from "vue-i18n";
 import { DropdownChangeEvent } from "primevue/dropdown";
+import { Wallet } from "@/models/wallet";
 
 const toast = useToast();
 const { t } = useI18n();
@@ -86,7 +87,7 @@ const makeNodeSelection = async (event: DropdownChangeEvent) => {
     showSelectTitle.value = true;
     NetworkStateUtils.updateChainNode(event.value);
     await WalletUtils.refreshAllAccountDetails(
-      walletState.currentLoggedInWallet,
+      walletState.currentLoggedInWallet as Wallet,
       networkState.currentNetworkProfile
     );
     toast.add({

@@ -44,6 +44,7 @@ import TextInputClean from '@/components/TextInputClean.vue';
 import { Address } from "tsjs-xpx-chain-sdk";
 import { AddressBook } from "@/models/addressBook";
 import { AppState } from "@/state/appState";
+import { Wallet } from "@/models/wallet";
 
 const props = defineProps({
     isOther: Boolean,
@@ -89,7 +90,7 @@ const changeName = () => {
         walletState.currentLoggedInWallet.accounts[acc_index].name = accountName.value;
         emitter.emit("change-name", accountName.value)
         }
-        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet as Wallet);
         err.value=""
         accountName.value = ""
         toggleModal.value = false
@@ -130,13 +131,15 @@ const saveContact = () => {
     err.value = t('addressBook.nameExist');
     }else{
     walletState.currentLoggedInWallet.addAddressBook(addressBook);
-    walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+    walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet as Wallet);
     err.value = '';
     contactName.value = ''
     toggleModal.value = false
     }
 }
 const publicKey = ref('');
+const accVersion = ref(2);
+
 const getPublicKey = async(address) =>{
       try{
         let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(address))
@@ -146,9 +149,12 @@ const getPublicKey = async(address) =>{
         else{
           publicKey.value = accInfo.publicKey
         }
+
+        accVersion.value = accInfo.version ?? 2;
       }
       catch{
         publicKey.value = null
+        accVersion.value = 2;
       }
     }
 getPublicKey(props.address)
@@ -170,8 +176,14 @@ const editContact = ()=>{
     }else if(findAddressInTempContact!=undefined){
         err.value = t('addressBook.addressExist');
     }else{
-        walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { name: contactName.value.trim(), address: Address.createFromRawAddress(props.address).plain(), group:'-none-', publicKey: publicKey.value});
-        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet);
+        walletState.currentLoggedInWallet.updateAddressBook(contactIndex, { 
+            name: contactName.value.trim(), 
+            address: Address.createFromRawAddress(props.address).plain(), 
+            group:'-none-', 
+            publicKey: publicKey.value,
+            version: accVersion.value
+        });
+        walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet as Wallet);
         err.value = '';
         contactName.value = ''
         toggleModal.value = false

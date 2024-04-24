@@ -148,7 +148,7 @@ export default defineComponent({
 
       showAPIKeyError.value = false;
 
-      var result = WalletUtils.verifyWalletPassword(selectedWallet.value, networkState.chainNetworkName, walletPassword.value);   
+      var result = WalletUtils.signInVerifyWalletPassword(selectedWallet.value, networkState.chainNetworkName, walletPassword.value);   
       
       if (!result) {
         err.value = t('general.walletPasswordInvalid',{name:selectedWallet.value});

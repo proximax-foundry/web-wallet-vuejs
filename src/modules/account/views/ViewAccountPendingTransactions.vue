@@ -47,6 +47,7 @@ import { computed, ref, watch } from "vue";
 import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { TransactionUtils } from "@/util/transactionUtils";
 import { AppState } from "@/state/appState";
+import { Wallet } from "@/models/wallet";
 
 const props = defineProps({
   address: String,
@@ -61,10 +62,10 @@ const acc = computed(() => {
     return null;
   }
   let acc =
-    walletState.currentLoggedInWallet.accounts.find(
+    (walletState.currentLoggedInWallet as Wallet).accounts.find(
       (add) => add.address == props.address
     ) ||
-    walletState.currentLoggedInWallet.others.find(
+    (walletState.currentLoggedInWallet as Wallet).others.find(
       (add) => add.address == props.address
     );
   if (!acc) {
@@ -82,7 +83,7 @@ const transactions = computed(() => {
 });
 
 let dashboardService = new DashboardService(
-  walletState.currentLoggedInWallet,
+  walletState.currentLoggedInWallet as Wallet,
   acc.value
 );
 let transactionGroupType = Helper.getTransactionGroupType();
@@ -111,7 +112,7 @@ let loadPartialTransactions = async () => {
     return;
   }
   let dashboardService = new DashboardService(
-    walletState.currentLoggedInWallet,
+    walletState.currentLoggedInWallet as Wallet,
     acc.value
   );
   let txnQueryParams = Helper.createTransactionQueryParams();

@@ -169,6 +169,7 @@ const formattedContacts = computed(() => {
         address: Helper.createAddress(contact.address).pretty(),
         group: contact.group,
         publicKey: contact.publicKey ? contact.publicKey : null,
+        version: contact.version
       };
     }
   );

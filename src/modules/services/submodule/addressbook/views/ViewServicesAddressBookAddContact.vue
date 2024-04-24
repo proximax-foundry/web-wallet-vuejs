@@ -111,6 +111,7 @@ import { useI18n } from "vue-i18n";
 import { WalletUtils } from "@/util/walletUtils";
 import { AppState } from "@/state/appState";
 import Dialog from "primevue/dialog";
+import { Wallet } from "@/models/wallet";
 
     const customGroup = ref("");
     const customGroupPattern = "^[0-9A-Za-z]{1,}$";
@@ -124,6 +125,7 @@ import Dialog from "primevue/dialog";
     const address = ref("");
     const addressOrPk = ref("");
     const publicKey = ref("");
+    const accVersion = ref(2);
     const err = ref("");
     const verifyAdd = ref(false);
     const addMsg = ref("");
@@ -200,6 +202,18 @@ import Dialog from "primevue/dialog";
       }
     });
 
+    const getAccVersion = async (publicKey) => {
+      try {
+        let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(
+          Address.createFromPublicKey(publicKey, AppState.networkType)
+        );
+        
+        accVersion.value = accInfo.version ?? 2;
+      } catch {
+        accVersion.value = 2;
+      }
+    };
+
     const getPublicKey = async (address) => {
       try {
         let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(
@@ -213,8 +227,10 @@ import Dialog from "primevue/dialog";
         } else {
           publicKey.value = accInfo.publicKey;
         }
+        accVersion.value = accInfo.version ?? 2;
       } catch {
         publicKey.value = null;
+        accVersion.value = 2;
       }
     };
 
@@ -225,15 +241,18 @@ import Dialog from "primevue/dialog";
       }
       if (addressOrPk.value.length == 64) {
         publicKey.value = addressOrPk.value;
+        await getAccVersion(publicKey.value);
       } else {
         await getPublicKey(address.value);
       }
+      
       const rawAddress = Address.createFromRawAddress(address.value);
       // let addressBook = new AddressBook(contactName.value, rawAddress.address);
       let addressBook = new AddressBook(
         contactName.value.trim(),
         rawAddress.plain(),
         selectContactGroups.value.value,
+        accVersion.value,
         publicKey.value
       );
       const wallet = walletState.currentLoggedInWallet;
@@ -267,7 +286,7 @@ import Dialog from "primevue/dialog";
       } else {
         walletState.currentLoggedInWallet.addAddressBook(addressBook);
         walletState.wallets.saveMyWalletOnlytoLocalStorage(
-          walletState.currentLoggedInWallet
+          walletState.currentLoggedInWallet as Wallet
         );
         err.value = "";
         contactName.value = "";

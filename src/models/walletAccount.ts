@@ -11,8 +11,12 @@ export class WalletAccount extends Account{
     iv: string;
     nis1Account: nis1Account | null = null;
 
-    constructor(name: string, publicKey: string, address: string, algo: string, encrypted: string, iv: string){
-        super(name, publicKey, address);
+    constructor(name: string, 
+        publicKey: string, address: string, 
+        algo: string, encrypted: string, iv: string,
+        version: number){
+            
+        super(name, publicKey, address, version);
         
         this.algo = algo;
         this.encrypted = encrypted;
@@ -20,6 +24,6 @@ export class WalletAccount extends Account{
     }
 
     convertToSimpleAccount(): SimpleAccount{
-        return new SimpleAccount(this.name, this.publicKey, this.address, this.algo, this.encrypted, this.iv);
+        return new SimpleAccount(this.name, this.publicKey, this.address, this.algo, this.encrypted, this.iv, this.version);
     }
 }

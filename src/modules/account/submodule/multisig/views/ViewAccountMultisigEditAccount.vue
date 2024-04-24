@@ -340,8 +340,20 @@ export default {
             cosignatory[index] = PublicAccount.createFromPublicKey(
               cosignKey,
               AppState.networkType,
-              1
+              2
             );
+            try {
+              const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(
+                cosignatory[index].address
+              );
+              cosignatory[index] = PublicAccount.createFromPublicKey(
+                cosignKey,
+                AppState.networkType,
+                accInfo.version
+              );
+            } catch (error) {
+              console.log(error);
+            }
           } else if (cosignKey.length == 40 || cosignKey.length == 46) {
             // option to accept address
             const address = Address.createFromRawAddress(cosignKey);
@@ -352,7 +364,7 @@ export default {
               cosignatory[index] = PublicAccount.createFromPublicKey(
                 accInfo.publicKey,
                 AppState.networkType,
-                1
+                accInfo.version
               );
             } catch (error) {
               console.log(error);
@@ -370,8 +382,7 @@ export default {
         removeCosign.value.forEach((element, index) => {
           cosignatory[coSign.value.length + index] = PublicAccount.createFromPublicKey(
             element,
-            AppState.networkType,
-            1
+            AppState.networkType
           );
           multisigCosignatory.push(
             new MultisigCosignatoryModification(
@@ -813,7 +824,7 @@ export default {
     })
 
     const checkValidAcc = async (publicKey) => {
-      const acc = PublicAccount.createFromPublicKey(publicKey,AppState.networkType, 1);
+      const acc = PublicAccount.createFromPublicKey(publicKey,AppState.networkType);
       try{
         const isValidAcc = await AppState.chainAPI.accountAPI.getAccountInfo(acc.address) ? true : false
         if(isValidAcc){

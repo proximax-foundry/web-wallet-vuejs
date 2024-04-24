@@ -377,7 +377,7 @@ export default {
         );
         const accountToConvert = Account.createFromPrivateKey(
           privateKey,
-          AppState.networkType,1
+          AppState.networkType, accountDetails.version
         );
         if (!AppState.chainAPI) {
           throw new Error("Service unavailable");
@@ -388,8 +388,20 @@ export default {
             cosignatory = PublicAccount.createFromPublicKey(
               cosignKey,
               AppState.networkType,
-              1
+              2
             );
+            try {
+              const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(
+                cosignatory.address
+              );
+              cosignatory = PublicAccount.createFromPublicKey(
+                accInfo.publicKey,
+                AppState.networkType,
+                accInfo.version ?? (networkState.currentNetworkProfileConfig.accountVersion ?? 2)
+              );
+            } catch (error) {
+              console.log(error);
+            }
           } else if (cosignKey.length == 40 || cosignKey.length == 46) {
             const address = Address.createFromRawAddress(cosignKey);
     
@@ -400,7 +412,7 @@ export default {
               cosignatory = PublicAccount.createFromPublicKey(
                 accInfo.publicKey,
                 AppState.networkType,
-                1
+                accInfo.version
               );
             } catch (error) {
               console.log(error);
@@ -580,7 +592,7 @@ export default {
    
     // check if onPartial
     if(acc.value){
-      MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType, 1)).then(verify=>
+      MultisigUtils.onPartial(PublicAccount.createFromPublicKey(acc.value.publicKey,AppState.networkType)).then(verify=>
       onPartial.value = verify
     )
     }
@@ -607,7 +619,7 @@ export default {
     });
 
     const checkValidAcc = async (publicKey) => {
-      const acc = PublicAccount.createFromPublicKey(publicKey,AppState.networkType, 1)
+      const acc = PublicAccount.createFromPublicKey(publicKey,AppState.networkType)
       try{
         const isValidAcc = await AppState.chainAPI.accountAPI.getAccountInfo(acc.address) ? true : false
         if(isValidAcc){

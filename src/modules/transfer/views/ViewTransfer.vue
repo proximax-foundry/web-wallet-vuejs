@@ -122,6 +122,7 @@ import ConfirmSendModal from "@/modules/transfer/components/ConfirmSendModal.vue
 import { WalletUtils } from '@/util/walletUtils';
 import { TransactionState } from '@/state/transactionState'
 import { WalletAccount } from '@/models/walletAccount';
+import { Wallet } from '@/models/wallet';
 
 const addressPatternShort = "^[0-9A-Za-z]{40}$";
 
@@ -380,7 +381,7 @@ const makeTransferPayload = async () => {
     }
         let transactionBuilder = AppState.buildTxn
 
-        let initiatorAcc: WalletAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedAddress.value)
+        let initiatorAcc: WalletAccount = (walletState.currentLoggedInWallet as Wallet).accounts.find((element) => element.address === selectedAddress.value)
 
         // sending encrypted message
 
@@ -390,9 +391,9 @@ const makeTransferPayload = async () => {
         let privateKey = WalletUtils.decryptPrivateKey(new Password(walletPassword.value), initiatorAcc.encrypted, initiatorAcc.iv)
         try {
             const accountInfo = await AppState.chainAPI.accountAPI.getAccountInfo(Address.createFromRawAddress(recipientInput.value))
-            msg = EncryptedMessage.create(message.value, accountInfo.publicAccount, privateKey);
+            msg = EncryptedMessage.create(message.value, accountInfo.publicAccount, privateKey, initiatorAcc.version);
         } catch (error) {
-            msg = EncryptedMessage.create(message.value, PublicAccount.createFromPublicKey(publicKeyInput.value,AppState.networkType, 1) , privateKey)
+            msg = EncryptedMessage.create(message.value, PublicAccount.createFromPublicKey(publicKeyInput.value,AppState.networkType) , privateKey, initiatorAcc.version)
         }
         } else {
         msg = PlainMessage.create(message.value);
@@ -591,7 +592,7 @@ const checkEncryptable = () => {
 
 const checkPublicKey = () => {
     try {
-        const publicAccount = PublicAccount.createFromPublicKey(publicKeyInput.value, AppState.networkType, 1)
+        const publicAccount = PublicAccount.createFromPublicKey(publicKeyInput.value, AppState.networkType)
         if (publicAccount.address.plain() == Address.createFromRawAddress(recipientInput.value).plain()) {
             showPublicKeyError.value = false;
         }

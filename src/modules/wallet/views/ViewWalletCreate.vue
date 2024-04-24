@@ -163,11 +163,12 @@ export default defineComponent({
       }else{
         let password = WalletUtils.createPassword(passwd.value);
         
-        const data = WalletUtils.addNewWallet(walletState.wallets, password, walletName.value, selectedNetworkName.value, selectedNetworkType.value);
+        const data = WalletUtils.addNewWallet(walletState.wallets, password, walletName.value, selectedNetworkName.value, selectedNetworkType.value,
+            networkState.currentNetworkProfileConfig.accountVersion ?? 2);
         newWallet.value = data.wallet;
         privateKey.value = data.privateKey;
         accName.value = data.wallet.name
-        let account = Account.createFromPrivateKey(privateKey.value,selectedNetworkType.value,1)
+        let account = Account.createFromPrivateKey(privateKey.value,selectedNetworkType.value, networkState.currentNetworkProfileConfig.accountVersion ?? 2)
         address.value = account.address.pretty()
         publicKey.value = account.publicKey
       }

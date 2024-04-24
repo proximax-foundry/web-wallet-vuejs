@@ -121,6 +121,7 @@ import { AppState } from "@/state/appState";
 import { WalletUtils } from "@/util/walletUtils";
 import { AddressBook } from "@/models/addressBook";
 import Dialog from "primevue/dialog";
+import { Wallet } from "@/models/wallet";
 
 const props = defineProps<{
   contactAddress: string;
@@ -150,6 +151,7 @@ const contactName = ref(contact ? contact.name : "");
 const addressOrPk = ref(props.contactAddress);
 const address = ref("");
 const publicKey = ref("");
+const accVersion = ref(2);
 address.value = addressOrPk.value;
 
 const existingPublicKey = ref(false);
@@ -205,6 +207,18 @@ const addErr = computed(() => {
   return addMsg.value ? addMsg.value : addErrDefault;
 });
 
+const getAccVersion = async (publicKey) => {
+  try {
+    let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(
+      Address.createFromPublicKey(publicKey, AppState.networkType)
+    );
+    
+    accVersion.value = accInfo.version ?? 2;
+  } catch {
+    accVersion.value = 2;
+  }
+};
+
 const getPublicKey = async (address) => {
   try {
     let accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(
@@ -220,9 +234,12 @@ const getPublicKey = async (address) => {
       publicKey.value = accInfo.publicKey;
       isLoaded.value = true;
     }
+
+    accVersion.value = accInfo.version ?? 2;
   } catch {
     publicKey.value = null;
     isLoaded.value = true;
+    accVersion.value = 2;
   }
 };
 
@@ -263,6 +280,7 @@ const SaveContact = async () => {
 
   if (addressOrPk.value.length == 64) {
     publicKey.value = addressOrPk.value;
+    await getAccVersion(publicKey.value);
   } else {
     await getPublicKey(address.value);
   }
@@ -293,14 +311,15 @@ const SaveContact = async () => {
   } else if (findAddressInTempContact != undefined) {
     err.value = t("addressBook.addressExist");
   } else {
-    walletState.currentLoggedInWallet.updateAddressBook(contactIndex, {
+    (walletState.currentLoggedInWallet as Wallet).updateAddressBook(contactIndex, {
       name: contactName.value.trim(),
       address: Address.createFromRawAddress(address.value).plain(),
       group: selectContactGroups.value.value,
       publicKey: publicKey.value,
+      version: accVersion.value
     });
     walletState.wallets.saveMyWalletOnlytoLocalStorage(
-      walletState.currentLoggedInWallet
+      walletState.currentLoggedInWallet as Wallet
     );
     toast.add({
       severity: "info",

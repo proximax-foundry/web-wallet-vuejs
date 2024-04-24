@@ -272,6 +272,7 @@ export default {
     const selectedAccountAddress = ref("");
     const selectedAccountPublicKey = ref("");
     const selectedAccountBalance = ref(0);
+    const selectedAccountVersion = ref(0);
     const selectErr = ref(false)
     const selectAccount = (name, address) => {
       currentPage.value = 2;
@@ -350,12 +351,14 @@ export default {
         }
         
         selectedAccountPublicKey.value = account.publicKey;
+        selectedAccountVersion.value = account.version;
         
       }else{
         selectedAccountName.value = '';
         selectedAccountAddress.value = '';
         selectedAccountBalance.value = '';
         selectedAccountPublicKey.value = '';
+        selectedAccountVersion.value = 0;
       }
     });
     watch(selectedToken, async (token) => {
@@ -493,7 +496,7 @@ export default {
                         .message(Helper.createPlainMessage(JSON.stringify(message2)))
                         .build();
       aggreateCompleteTransaction = aggregateBuilder
-                        .innerTransactions(Helper.createInnerTransaction([transferTx, feetransferTx], "0".repeat(64)))
+                        .innerTransactions(Helper.createInnerTransaction([transferTx, feetransferTx], "0".repeat(64), 1))
                         .build();
 
       txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(), AppState.nativeToken.divisibility);
@@ -525,7 +528,7 @@ export default {
                         .message(Helper.createPlainMessage(JSON.stringify(message2)))
                         .build();
       aggreateCompleteTransaction = aggregateBuilder
-                        .innerTransactions(Helper.createInnerTransaction([transferTx, feetransferTx], selectedAccountPublicKey.value))
+                        .innerTransactions(Helper.createInnerTransaction([transferTx, feetransferTx], selectedAccountPublicKey.value, selectedAccountVersion.value))
                         .build();
 
       txFee.value = Helper.convertToExact(aggreateCompleteTransaction.maxFee.compact(),  AppState.nativeToken.divisibility);

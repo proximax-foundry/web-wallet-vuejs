@@ -444,7 +444,7 @@ export default {
     const signAggTxn = (pswd) => {
       if(aggregateTxn !== null){
           let privateKey = WalletUtils.decryptPrivateKey(new Password(pswd), currentAccount.encrypted, currentAccount.iv);
-          const account = Account.createFromPrivateKey(privateKey, AppState.networkType,1);
+          const account = Account.createFromPrivateKey(privateKey, AppState.networkType, currentAccount.version);
           let signedTxn = TransactionUtils.cosignTransaction(aggregateTxn, account);
           AppState.chainAPI.transactionAPI.announceAggregateBondedCosignature(signedTxn);
           router.push({ name : 'ViewAccountPendingTransactions', params: {address:currentAddress.value }});

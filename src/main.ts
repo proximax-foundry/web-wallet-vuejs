@@ -157,7 +157,7 @@ const chainProfileIntegration = async () => {
       chainProfileStore.init();
       const chainProfileData = chainProfilesData[chainProfileName];
 
-      if (chainProfileStore.getVersion() !== chainProfileData['version']) {
+      // if (chainProfileStore.getVersion() !== chainProfileData['version']) {
 
         chainProfileStore.version = chainProfileData['version'];
         chainProfileStore.apiNodes = chainProfileData['apiNodes'];
@@ -213,7 +213,7 @@ const chainProfileIntegration = async () => {
             console.log(error);
           }
         }
-      }
+      // }
     }
 
     NetworkStateUtils.refreshAvailableNetwork();

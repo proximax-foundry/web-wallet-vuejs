@@ -91,6 +91,8 @@ import AccountTabs from "@/modules/account/components/AccountTabs.vue";
 import { networkState } from "@/state/networkState";
 import { ConfirmedSdaExchangeTransaction } from "@/modules/dashboard/model/transactions/confirmed/sdaExchange";
 import SdaExchangeTxnDT from "@/modules/dashboard/components/TransactionDataTable/SdaExchangeTxnDT.vue";
+import { Wallet } from "@/models/wallet";
+import { WalletAccount } from "@/models/walletAccount";
 
     const props = defineProps({
         address: String
@@ -124,14 +126,17 @@ import SdaExchangeTxnDT from "@/modules/dashboard/components/TransactionDataTabl
         if(!walletState.currentLoggedInWallet){
             return null
         }
-        let acc = walletState.currentLoggedInWallet.accounts.find((add) => add.address == props.address) || walletState.currentLoggedInWallet.others.find((add) => add.address == props.address);
+        let acc = 
+          (walletState.currentLoggedInWallet as Wallet).accounts.find((add) => add.address == props.address) || 
+          (walletState.currentLoggedInWallet as Wallet).others.find((add) => add.address == props.address);
+        
         if(!acc){
             return null
         }
         return acc
     })
     const accAddress = computed(()=> acc.value?acc.value.address:'');
-    let dashboardService = new DashboardService(walletState.currentLoggedInWallet, acc.value);
+    let dashboardService = new DashboardService(walletState.currentLoggedInWallet as Wallet, acc.value);
     const formatConfirmedTransaction = async(transactions :Transaction[])=>{
         let formattedTxns = [];
         allTxnQueryParams.embedded = true;

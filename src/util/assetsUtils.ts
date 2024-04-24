@@ -181,7 +181,7 @@ export class AssetsUtils {
     const accountDetails = walletState.currentLoggedInWallet.accounts.find((account) => account.address == accAddress.plain());
     const encryptedPassword = WalletUtils.createPassword(walletPassword);
     let privateKey = WalletUtils.decryptPrivateKey(encryptedPassword, accountDetails.encrypted, accountDetails.iv);
-    const account = Account.createFromPrivateKey(privateKey, AppState.networkType,1);
+    const account = Account.createFromPrivateKey(privateKey, AppState.networkType, accountDetails.version);
     return account;
   }
 
@@ -195,24 +195,24 @@ export class AssetsUtils {
     TransactionUtils.announceTransaction(signedTx);
   }
 
-  static createAssetMultiSig = (selectedAddress: string, walletPassword: string, owner:PublicAccount, supply:number, 
-    supplyMutable: boolean, transferable:boolean, restrictable: boolean, supplyForceImmutable: boolean, disableLocking: boolean,
-    divisibility: number, currentNodeTime: UInt64, durationInDays?: number) => {
-    const assetDefinition = AppState.buildTxn.mosaicDefinition(owner, 
-      supplyMutable, transferable, restrictable, supplyForceImmutable, disableLocking,
-      divisibility, durationInDays ? UInt64.fromUint(AssetsUtils.calculateDuration(durationInDays)): undefined);
-    const assetDefinitionTx = assetDefinition.toAggregate(owner);
-    let supplyChangeType: MosaicSupplyType;
-    supplyChangeType = MosaicSupplyType.Increase;
-    const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply))).toAggregate(owner);
-    const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
-    const innerTxn = [assetDefinitionTx,assetSupplyChangeTx];
-    const aggregateBondedTx = AppState.buildTxn.aggregateBonded(innerTxn, currentNodeTime);
-    const aggregateBondedTxSigned = account.sign(aggregateBondedTx, networkState.currentNetworkProfile.generationHash);
-    let hashLockTx = TransactionUtils.lockFundTx(aggregateBondedTxSigned)
-    let signedHashlock = account.sign(hashLockTx, networkState.currentNetworkProfile.generationHash);
-    TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedHashlock,aggregateBondedTxSigned);
-  }
+  // static createAssetMultiSig = (selectedAddress: string, walletPassword: string, owner:PublicAccount, supply:number, 
+  //   supplyMutable: boolean, transferable:boolean, restrictable: boolean, supplyForceImmutable: boolean, disableLocking: boolean,
+  //   divisibility: number, currentNodeTime: UInt64, durationInDays?: number) => {
+  //   const assetDefinition = AppState.buildTxn.mosaicDefinition(owner, 
+  //     supplyMutable, transferable, restrictable, supplyForceImmutable, disableLocking,
+  //     divisibility, durationInDays ? UInt64.fromUint(AssetsUtils.calculateDuration(durationInDays)): undefined);
+  //   const assetDefinitionTx = assetDefinition.toAggregate(owner);
+  //   let supplyChangeType: MosaicSupplyType;
+  //   supplyChangeType = MosaicSupplyType.Increase;
+  //   const assetSupplyChangeTx = AppState.buildTxn.buildMosaicSupplyChange(assetDefinition.mosaicId, supplyChangeType, UInt64.fromUint(AssetsUtils.addZeros(divisibility, supply))).toAggregate(owner);
+  //   const account = AssetsUtils.getSenderAccount(selectedAddress, walletPassword);
+  //   const innerTxn = [assetDefinitionTx,assetSupplyChangeTx];
+  //   const aggregateBondedTx = AppState.buildTxn.aggregateBonded(innerTxn, currentNodeTime);
+  //   const aggregateBondedTxSigned = account.sign(aggregateBondedTx, networkState.currentNetworkProfile.generationHash);
+  //   let hashLockTx = TransactionUtils.lockFundTx(aggregateBondedTxSigned)
+  //   let signedHashlock = account.sign(hashLockTx, networkState.currentNetworkProfile.generationHash);
+  //   TransactionUtils.announceLF_AND_addAutoAnnounceABT(signedHashlock,aggregateBondedTxSigned);
+  // }
 
   static changeAssetSupply = (selectedAddress: string, walletPassword: string, mosaicId: string, changeType: string, supply: number, divisibility: number) => {
     let createAssetAggregateTransaction = AssetsUtils.assetSupplyChangeTransaction(mosaicId, changeType, supply, divisibility);
@@ -228,7 +228,9 @@ export class AssetsUtils {
     const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
     const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
     const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
-    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType, 1);
+    const multisigVersion = multisSigAccount?multisSigAccount.version :multisSigOther.version;
+    
+    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType, multisigVersion);
     const innerTxn = [createAssetAggregateTransaction.toAggregate(multisigPublicAccount)];
     const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn, currentNodeTime);
     const aggregateBondedTxSigned = account.sign(aggregateBondedTx, networkState.currentNetworkProfile.generationHash);
@@ -251,7 +253,9 @@ export class AssetsUtils {
     const multisSigAccount = walletState.currentLoggedInWallet.accounts.find((element) => element.address === multiSigAddress);
     const multisSigOther = walletState.currentLoggedInWallet.others.find((element) => element.address === multiSigAddress);
     const multisigPublicKey = multisSigAccount?multisSigAccount.publicKey:multisSigOther.publicKey;
-    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType, 1);
+    const multisigVersion = multisSigAccount?multisSigAccount.version :multisSigOther.version;
+
+    const multisigPublicAccount = PublicAccount.createFromPublicKey(multisigPublicKey, AppState.networkType, multisigVersion);
     const innerTxn = [linkAssetToNamespaceTx.toAggregate(multisigPublicAccount)];
     const aggregateBondedTx = buildTransactions.aggregateBonded(innerTxn, currentNodeTime);
     const aggregateBondedTxSigned = account.sign(aggregateBondedTx, networkState.currentNetworkProfile.generationHash);

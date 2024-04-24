@@ -3,6 +3,9 @@ import { MultisigInfo } from './multisigInfo';
 import { Asset } from './asset';
 import { Namespace } from './namespace';
 import { walletState } from '@/state/walletState';
+import { SupplementalPublicKeys } from 'tsjs-xpx-chain-sdk';
+// import { WalletAccount } from './walletAccount';
+// import { OtherAccount } from './otherAccount';
 
 export class Account{
     name: string;
@@ -14,14 +17,17 @@ export class Account{
     nonHoldingAssets: Asset[] = [];
     namespaces: Namespace[] = [];
     linkedPublicKey: string = "";
+    supplementalPublicKeys: SupplementalPublicKeys = null;
     totalCreatedAsset: number | null = null;
     totalTxns: number = -1; // temp store total txns number, -1 to indicate not updated - include embedded, exclude cosigning
     assetsLastUpdate: number = Date.now();
+    version: number = 0;
 
-    constructor(name: string, publicKey: string, address: string){
+    constructor(name: string, publicKey: string, address: string, version: number){
         this.name = name;
         this.publicKey = publicKey;
         this.address = address;
+        this.version = version;
     }
 
     fixAddress(networkType: NetworkType): void{
@@ -110,6 +116,20 @@ export class Account{
 
         return publicKeyArray;
     }
+
+    // static createFromWalletAccount(wltAcc: WalletAccount){
+    //     return new Account(wltAcc.name, 
+    //         wltAcc.publicKey, wltAcc.address, 
+    //         wltAcc.version    
+    //     );
+    // }
+
+    // static createFromOtherAccount(otherAcc: OtherAccount){
+    //     return new Account(otherAcc.name, 
+    //         otherAcc.publicKey, otherAcc.address, 
+    //         otherAcc.version    
+    //     );
+    // }
 }
 
 export const setDefaultAccInStorage = (address) =>{

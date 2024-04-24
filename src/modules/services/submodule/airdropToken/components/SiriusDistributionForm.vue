@@ -2,7 +2,8 @@
 import { ref, watch, computed, getCurrentInstance } from 'vue'
 import { 
   AccountHttp, MosaicHttp, Convert, Address,
-  UInt64
+  UInt64,
+PublicAccount
 } from 'tsjs-xpx-chain-sdk';
 
 import { SimpleSDA } from '@/models/sda'
@@ -25,6 +26,7 @@ import SelectInputAccount from "@/modules/services/submodule/airdropToken/compon
 import type { Account } from '@/models/account';
 import type { WalletAccount } from '@/models/walletAccount';
 import { parse } from 'csv-parse';
+import { Wallet } from '@/models/wallet';
 
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -69,6 +71,7 @@ let sdaError = ref("");
 let recipientError = ref("");
 let distributionError = ref("");
 let distributing = ref(false);
+let distributorPublicAcc = ref<PublicAccount>();
 let knownToken = [{
     namespace: "prx.xpx",
     name: "XPX"
@@ -84,7 +87,9 @@ let knownToken = [{
 let scanDistributorAsset = async() =>{
   noAssetFound.value = false;
   assetSelected.value = null;
-  let assets = await Sirius.scanAsset(selectedMultisigPublicKey.value ? selectedMultisigPublicKey.value : selectedAccount.value ? selectedAccount.value.publicKey : "");
+  const publicKey = selectedMultisigPublicKey.value ? selectedMultisigPublicKey.value : selectedAccount.value ? selectedAccount.value.publicKey : "";
+  distributorPublicAcc.value = PublicAccount.createFromPublicKey(publicKey, AppState.networkType)
+  let assets = await Sirius.scanAsset(distributorPublicAcc.value);
 
   assetList.value = assets;
 
@@ -134,7 +139,7 @@ let distribute = async()=>{
   let selectedSda = assetList.value.find(x => x.id === assetSelected.value.id);
   const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
   let aggregateTxns = Sirius.createDistributeAggregateTransactions(
-    selectedMultisigPublicKey.value ? selectedMultisigPublicKey.value : selectedAccount.value.publicKey, 
+    distributorPublicAcc.value, 
     distributionList.value, 
     aggregateNum.value, 
     selectedSda!,
@@ -154,7 +159,7 @@ let distribute = async()=>{
       selectedCosign = findAccount ? findAccount.address : ""
     }
    }
-  let initiatorAcc;
+  let initiatorAcc: WalletAccount;
   if(!selectedCosign){
     initiatorAcc = walletState.currentLoggedInWallet.accounts.find((element) => element.address === selectedAccount.value.address) as WalletAccount;
   }else{
@@ -162,8 +167,8 @@ let distribute = async()=>{
   }
   const walletPrivateKey = WalletUtils.decryptPrivateKey(passwordInstance,initiatorAcc.encrypted, initiatorAcc.iv);
   let privateKey = walletPrivateKey.toUpperCase();
-  let initiator = Sirius.createAccount(privateKey);
-  let initiatorSda = await Sirius.scanAsset(initiator.publicKey);
+  let initiator = Sirius.createAccount(privateKey, initiatorAcc.version);
+  let initiatorSda = await Sirius.scanAsset(initiator.publicAccount);
 
   let initiatorXPX = initiatorSda.find(x => x.namespaceName === AppState.nativeToken.fullNamespace.trim());
 
@@ -367,12 +372,12 @@ const accounts = computed(
       return []
     }
     if (walletState.currentLoggedInWallet.others) {
-      const accounts = walletState.currentLoggedInWallet.accounts.map((acc) => acc as Account)
-      const filteredOthers = walletState.currentLoggedInWallet.others.filter(acc => acc.type != "DELEGATE")
+      const accounts = (walletState.currentLoggedInWallet as Wallet).accounts.map((acc) => acc as Account)
+      const filteredOthers = (walletState.currentLoggedInWallet as Wallet).others.filter(acc => acc.type != "DELEGATE")
       const otherAccounts = filteredOthers.map((acc) => acc as Account)
       return accounts.concat(otherAccounts)
     } else {
-      const accounts = walletState.currentLoggedInWallet.accounts.map((acc) => acc as Account)
+      const accounts = (walletState.currentLoggedInWallet as Wallet).accounts.map((acc) => acc as Account)
       return accounts
     }
   }

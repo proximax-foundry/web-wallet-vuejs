@@ -193,7 +193,7 @@ export class TransactionUtils {
     return EncryptedMessage.create(
       message,
       PublicAccount.createFromPublicKey("0".repeat(64), AppState.networkType, 1),
-      "0".repeat(64)
+      "0".repeat(64), 1
     ).size();
   }
 
@@ -509,7 +509,7 @@ export class TransactionUtils {
           let tempTxn = txn as AccountLinkTransaction;
           let linkAccountAddress = PublicAccount.createFromPublicKey(
             tempTxn.remoteAccountKey,
-            AppState.networkType, 1
+            AppState.networkType
           ).address;
           addresses.push(linkAccountAddress);
         }
@@ -616,7 +616,7 @@ export class TransactionUtils {
     const account = Account.createFromPrivateKey(
       privateKey,
       AppState.networkType,
-      1
+      accountDetails.version
     );
 
     if (!selectedMultisigAddress && typeof transaction === "string") {
@@ -632,7 +632,8 @@ export class TransactionUtils {
       );
       const multisigPublicAccount = PublicAccount.createFromPublicKey(
         accInfo.publicKey,
-        AppState.networkType, 1
+        AppState.networkType,
+        accInfo.version
       );
       if(typeof transaction !== "string"){
         for(let i=0; i<transaction.length; ++i){

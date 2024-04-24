@@ -104,13 +104,13 @@ const decryptMessage = () =>{
   err.value = ''
   let privateKey = WalletUtils.decryptPrivateKey(Helper.createPasswordInstance(walletPassword.value), recipientAcc.value.encrypted, recipientAcc.value.iv);
   let initiatorPublicAccount = Helper.createPublicAccount(p.initiator, AppState.networkType)
-  let decryptedMsg =EncryptedMessage.decrypt(encryptedMsg,privateKey,initiatorPublicAccount).payload
+  let decryptedMsg =EncryptedMessage.decrypt(encryptedMsg,privateKey,initiatorPublicAccount, recipientAcc.value.version).payload
   if(decryptedMsg=== ""){
     err.value = "Error when trying to decrypt"
   }
   else{
     showPassword.value=false
-    decryptedMessage.value = EncryptedMessage.decrypt(encryptedMsg,privateKey,initiatorPublicAccount).payload
+    decryptedMessage.value = EncryptedMessage.decrypt(encryptedMsg,privateKey,initiatorPublicAccount, recipientAcc.value.version).payload
   }
 }
 

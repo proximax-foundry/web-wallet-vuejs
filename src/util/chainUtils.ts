@@ -1,4 +1,4 @@
-import { ChainConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Convert,
+import { NetworkConfigHttp, ChainHttp, AccountHttp, NamespaceHttp, MosaicHttp, Convert,
   NetworkType, 
   NamespaceId,
   MosaicId, Address, PublicAccount, CosignatureSignedTransaction, Statement,
@@ -65,6 +65,7 @@ export class ChainUtils{
         }, {});
         const chainConfig = <NetworkConfig>
         {
+          accountVersion: networkConfig['accountVersion'] ? Number(networkConfig['accountVersion']): null,
           supportedEntities  : JSON.parse( configString.supportedEntityVersions.trim().replace('\n','')).entities,
           chainHeight: chainHeight,
           publicKey: networkConfig['publicKey'],

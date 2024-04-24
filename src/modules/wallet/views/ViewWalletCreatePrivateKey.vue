@@ -100,7 +100,7 @@ import {useI18n} from 'vue-i18n'
 import IntroTextComponent from '@/components/IntroTextComponent.vue'
 import SelectNetworkInput from '@/components/SelectNetworkInput.vue';
 import { AppState } from '@/state/appState';
-import { Account } from "tsjs-xpx-chain-sdk";
+import { Account, AccountType } from "tsjs-xpx-chain-sdk";
 import { ThemeStyleConfig } from '@/models/stores/themeStyleConfig';
 import { toSvg } from "jdenticon";
 import jsPDF from 'jspdf';
@@ -166,7 +166,7 @@ export default defineComponent({
       () => (confirmPasswd.value != passwd.value && confirmPasswd.value != '')
     );
 
-    const createWallet = () => {
+    const createWallet = async () => {
       err.value = "";
       let wallets = new Wallets();
 
@@ -178,11 +178,36 @@ export default defineComponent({
         if (privateKeyInput.value.substring(0,2) == "0x") {
           privateKeyInput.value = privateKeyInput.value.substring(2)
         }
-        const walletAccount = WalletUtils.addNewWalletWithPrivateKey(walletState.wallets, privateKeyInput.value, password, walletName.value, selectedNetworkName.value, selectedNetworkType.value);
+
         privateKey.value = privateKeyInput.value;
+        let account = Account.createFromPrivateKey(privateKey.value,selectedNetworkType.value, networkState.currentNetworkProfileConfig.accountVersion ?? 2)
+
+        try {
+          const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(account.address);
+
+        } catch (error) {
+          
+          try {
+            let accountV1 = Account.createFromPrivateKey(privateKey.value,selectedNetworkType.value, 1);
+
+            const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(accountV1.address);
+
+            if(accInfo.accountType !== AccountType.Locked){
+              account = Account.createFromPrivateKey(privateKey.value,selectedNetworkType.value, 1);
+            }
+            else{
+              account = Account.createFromPrivateKey(privateKey.value,selectedNetworkType.value, 2);
+            }
+          } catch (error) {
+            
+          }
+        }
+
+        const walletAccount = WalletUtils.addNewWalletWithPrivateKey(walletState.wallets, privateKeyInput.value, password, walletName.value, selectedNetworkName.value, selectedNetworkType.value, account.version);
+        
         newWallet.value = walletAccount;
         accName.value = walletAccount.name
-        let account = Account.createFromPrivateKey(privateKey.value,selectedNetworkType.value,1)
+        
         address.value = account.address.pretty()
         publicKey.value = account.publicKey
       }

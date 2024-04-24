@@ -12,6 +12,7 @@ import { ChainAPICall } from "@/models/REST/chainAPICall";
 import { DashboardService } from '@/modules/dashboard/service/dashboardService';
 import { AppState } from '@/state/appState';
 import { WalletAccount } from '@/models/walletAccount';
+import { OtherAccount } from '@/models/otherAccount';
 import { Wallet } from '@/models/wallet';
 import { computed } from 'vue';
 import { listenerState } from '@/state/listenerState';
@@ -104,7 +105,7 @@ const loadPartialTransactions = async(): Promise<Notification[]> => {
     return;
   }
 
-  let wallet = walletState.currentLoggedInWallet;
+  let wallet = walletState.currentLoggedInWallet as Wallet;
 
   // const notifications:Notification[] = [];
   let accounts = wallet.accounts as WalletAccount[];//.map(x => x as MyAccount); //.concat(wallet.others.map(x => x as MyAccount));
@@ -136,7 +137,7 @@ const loadExpiringNamespace = (): Notification[] => {
 
   let minBlockBeforeExpire = Math.ceil(daysInSeconds/blockTargetTime);
 
-  let allAccs = wallet.accounts.map(x => x as MyAccount).concat(wallet.others.map(x => x as MyAccount));
+  let allAccs = (wallet.accounts as WalletAccount[]).map(x => x as MyAccount).concat((wallet.others as OtherAccount[]).map(x => x as MyAccount));
   let allAccsPubKey = allAccs.map(x => x.publicKey);
 
   let namespaces = AppState.namespacesInfo.filter(x => allAccsPubKey.includes(x.owner));

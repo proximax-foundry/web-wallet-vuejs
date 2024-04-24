@@ -42,15 +42,18 @@ let knownToken = [{
 
 export class Sirius {
 
-    static createAccount(privateKey: string) {
-        return Account.createFromPrivateKey(privateKey, AppState.networkType,1);
+    static createAccount(privateKey: string, version: number) {
+        return Account.createFromPrivateKey(privateKey, AppState.networkType, version);
     }
 
-    static async scanAsset(publicKey: string): Promise<SimpleSDA[]> {
-        let distributorPublicAccount = PublicAccount.createFromPublicKey(publicKey, AppState.networkType, 1);
+    static async scanAsset(publicAcc: PublicAccount): Promise<SimpleSDA[]> {
+        
+        // let distributorPublicAccount = PublicAccount.createFromPublicKey(publicKey, AppState.networkType);
 
         try {
-            let accountInfo = await AppState.chainAPI!.accountAPI.getAccountInfo(distributorPublicAccount.address);
+            let accountInfo = await AppState.chainAPI!.accountAPI.getAccountInfo(publicAcc.address);
+
+            publicAcc = PublicAccount.createFromPublicKey(publicAcc.publicKey, AppState.networkType, accountInfo.version);
 
             let assetIds: MosaicId[] = accountInfo.mosaics.map(asset => asset.id as MosaicId);
 
@@ -144,9 +147,9 @@ export class Sirius {
         }
         }
         */
-    static createDistributeAggregateTransactions(distributorPublicKey: string, distributionList: DistributeListInterface[], aggregateNum: number, sda: SimpleSDA, currentNodeTime: UInt64): AggregateTransaction[] {
+    static createDistributeAggregateTransactions(distributorPublicAccount: PublicAccount, distributionList: DistributeListInterface[], aggregateNum: number, sda: SimpleSDA, currentNodeTime: UInt64): AggregateTransaction[] {
 
-        let distributorPublicAccount = PublicAccount.createFromPublicKey(distributorPublicKey, AppState.networkType, 1);
+        // let distributorPublicAccount = PublicAccount.createFromPublicKey(distributorPublicKey, AppState.networkType, accVersion);
         let txns: AggregateTransaction[] = [];
 
         let totalTxnCount = Math.ceil(distributionList.length / aggregateNum);
@@ -163,7 +166,7 @@ export class Sirius {
             let recipient: Address;
 
             if(distributionList[i].publicKeyOrAddress.length === 64){
-                let publicAccount = PublicAccount.createFromPublicKey(distributionList[i].publicKeyOrAddress, AppState.networkType, 1);
+                let publicAccount = PublicAccount.createFromPublicKey(distributionList[i].publicKeyOrAddress, AppState.networkType);
                 recipient = publicAccount.address;
             }
             else{

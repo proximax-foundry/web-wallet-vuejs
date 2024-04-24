@@ -16,6 +16,7 @@ import {
   import type { WalletAccount } from "@/models/walletAccount";
   import { AppState } from "@/state/appState";
   import type { OtherAccount } from "@/models/otherAccount";
+  import { Wallet } from "../models/wallet";
   
   export class MultisigUtils {
     static verifyContactPublicKey(
@@ -152,7 +153,7 @@ import {
       );
       const accountToConvert = Account.createFromPrivateKey(
         privateKey,
-        AppState.networkType,1
+        AppState.networkType, accountDetails.version
       );
       if (!AppState.chainAPI) {
         throw new Error("Service unavailable");
@@ -162,7 +163,7 @@ import {
         if (cosignKey.length == 64) {
           cosignatory = PublicAccount.createFromPublicKey(
             cosignKey,
-            AppState.networkType, 1
+            AppState.networkType
           );
         } else if (cosignKey.length == 40 || cosignKey.length == 46) {
           const address = Address.createFromRawAddress(cosignKey);
@@ -173,7 +174,8 @@ import {
             );
             cosignatory = PublicAccount.createFromPublicKey(
               accInfo.publicKey,
-              AppState.networkType, 1
+              AppState.networkType, 
+              accInfo.version
             );
           } catch (error) {
             console.log(error);
@@ -265,7 +267,7 @@ import {
   
     static checkIsMultiSig(accountAddress: string): boolean {
       /* let account = walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress)?walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress):  walletState.currentLoggedInWallet.others.find(element=>element.address ===accountAddress) */
-      const wallet = walletState.currentLoggedInWallet;
+      const wallet = walletState.currentLoggedInWallet as Wallet;
       if (!wallet) {
         throw new Error("Service unavailable");
       }
@@ -280,7 +282,7 @@ import {
   
     static checkHasMultiSig(accountAddress: string): boolean {
       /* let account = walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress)?walletState.currentLoggedInWallet.accounts.find(element=>element.address ===accountAddress):  walletState.currentLoggedInWallet.others.find(element=>element.address ===accountAddress) */
-      const wallet = walletState.currentLoggedInWallet;
+      const wallet = walletState.currentLoggedInWallet as Wallet;
       if (!wallet) {
         throw new Error("Service unavailable");
       }
@@ -427,7 +429,7 @@ import {
         if (cosignKey.length == 64) {
           cosignatory[index] = PublicAccount.createFromPublicKey(
             cosignKey,
-            AppState.networkType, 1
+            AppState.networkType
           );
         } else if (cosignKey.length == 40 || cosignKey.length == 46) {
           // option to accept address
@@ -438,7 +440,8 @@ import {
             );
             cosignatory[index] = PublicAccount.createFromPublicKey(
               accInfo.publicKey,
-              AppState.networkType, 1
+              AppState.networkType,
+              accInfo.version
             );
           } catch (error) {
             console.log(error);
@@ -456,7 +459,7 @@ import {
       removeCosign.forEach((element, index) => {
         cosignatory[coSign.length + index] = PublicAccount.createFromPublicKey(
           element,
-          AppState.networkType, 1
+          AppState.networkType
         );
         multisigCosignatory.push(
           new MultisigCosignatoryModification(
@@ -487,7 +490,8 @@ import {
   
       const publicAcc = PublicAccount.createFromPublicKey(
         multisigAccount.publicKey,
-        AppState.networkType, 1
+        AppState.networkType,
+        multisigAccount.version
       );
 
       const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
@@ -513,7 +517,7 @@ import {
       );
       const initiatorAccount = Account.createFromPrivateKey(
         initiatorPrivateKey,
-        AppState.networkType,1
+        AppState.networkType, initiator.version
       );
       const signedAggregateBondedTransaction = initiatorAccount.sign(
         aggregateBondedTransaction,
