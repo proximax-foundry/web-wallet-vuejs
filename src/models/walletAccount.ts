@@ -24,6 +24,6 @@ export class WalletAccount extends Account{
     }
 
     convertToSimpleAccount(): SimpleAccount{
-        return new SimpleAccount(this.name, this.publicKey, this.address, this.algo, this.encrypted, this.iv);
+        return new SimpleAccount(this.name, this.publicKey, this.address, this.algo, this.encrypted, this.iv, this.version);
     }
 }

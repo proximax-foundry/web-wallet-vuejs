@@ -285,6 +285,10 @@ const doLogin = async () => {
   await WalletUtils.updateAddressBookGetVersion((walletState.currentLoggedInWallet as Wallet).contacts);
   WalletUtils.removeUnknownVersionAcc(walletState.currentLoggedInWallet as Wallet);
   walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet as Wallet);
+
+  if((walletState.currentLoggedInWallet as Wallet).accounts.length === 0){
+    logout();
+  }
 };
 
 const doLogout = () => {

@@ -537,10 +537,50 @@ export class WalletUtils {
         }
     }
 
-    static verifyWalletPassword(name: string, networkName: string, password: string): boolean {
+    /**
+     * Auto detect version, use only at login
+     * @param name 
+     * @param networkName 
+     * @param password 
+     * @returns detectedSchemeVersion
+     */
+    static signInVerifyWalletPassword(name: string, networkName: string, password: string): number {
+        try {
+            const returnData = WalletUtils.decryptWalletPrivateKey(name, networkName, password);
+
+            const defaultVersion = returnData.version ?? 2;
+
+            const checkingAddress = Account.createFromPrivateKey(returnData.privateKey, AppState.networkType, defaultVersion).address.plain();
+
+            if (checkingAddress === returnData.address) {
+                return defaultVersion;
+            }
+            else{
+                const checkingAddressV2 = Account.createFromPrivateKey(returnData.privateKey, AppState.networkType, 2).address.plain();
+
+                if (checkingAddressV2 === returnData.address) {
+                    return 2;
+                }
+
+                const checkingAddressV1 = Account.createFromPrivateKey(returnData.privateKey, AppState.networkType, 1).address.plain();
+
+                if (checkingAddressV1 === returnData.address) {
+                    return 1;
+                }
+            }
+
+            return 0;
+        } catch (error) {
+            return 0;
+        }
+
+    }
+
+    static decryptWalletPrivateKey(name: string, networkName: string, password: string){
+
         const wallet = walletState.wallets.filterByNetworkNameAndName(networkName, name);
         if (!wallet) {
-            return false;
+            throw new Error("Wallet not found");
         }
 
         const account = wallet.accounts[0];
@@ -558,27 +598,40 @@ export class WalletUtils {
                     account.algo == "pass:bip32" ? WalletAlgorithm.Pass_bip32 : account.algo
                 )
             ) {
-                console.log('fail');
-                return false;
+                throw new Error("Unable to decrypt private key");
             }
             else {
                 if (!ChainUtils.isPrivateKeyValid(common.privateKey)) {
-                    console.log("Not valid private key");
-                    return false;
+                    throw new Error("Not valid private key");
                 }
-                else {
-                    const checkingAddress = Account.createFromPrivateKey(common.privateKey, AppState.networkType, account.version).address.plain();
 
-                    if (checkingAddress !== account.address) {
-                        return false;
-                    }
-                }
+                return {
+                    privateKey: common.privateKey,
+                    publicKey: account.publicKey,
+                    address: account.address, 
+                    version: account.version
+                };
             }
-            return true;
         }
 
-        return false;
+        throw new Error("Unable to proceed decrypt private key");
+    }
 
+    static verifyWalletPassword(name: string, networkName: string, password: string): boolean {
+        
+        try {
+            const returnData = WalletUtils.decryptWalletPrivateKey(name, networkName, password);
+
+            const checkingAddress = Account.createFromPrivateKey(returnData.privateKey, AppState.networkType, returnData.version).address.plain();
+
+            if (checkingAddress !== returnData.address) {
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 
     static fetchAccountInfoCurrentWalletAccounts(): false | Promise<AccountInfo[]> {
@@ -954,7 +1007,7 @@ export class WalletUtils {
         wltFile.accounts.forEach((account) => {
             const walletAccount = new WalletAccount(account.name,
                 account.publicKey, account.address, account.algo,
-                account.encrypted, account.iv, 0);
+                account.encrypted, account.iv, account.version ?? 0);
 
             if (account.nis1Account) {
                 walletAccount.nis1Account = new nis1Account(account.nis1Account.address, account.nis1Account.publicKey);
@@ -974,7 +1027,7 @@ export class WalletUtils {
             try {
                 for (let i = 0; i < wltFile.contacts.length; ++i) {
                     let group = wltFile.contacts[i].group ? wltFile.contacts[i].group : '';
-                    let newAddressBook = new AddressBook(wltFile.contacts[i].name, wltFile.contacts[i].address, group);
+                    let newAddressBook = new AddressBook(wltFile.contacts[i].name, wltFile.contacts[i].address, group, wltFile.contacts[i].version ?? 0, wltFile.contacts[i].publicKey);
                     newWallet.addAddressBook(newAddressBook);
                 }
             } catch (error) {
@@ -1520,6 +1573,7 @@ export class WalletUtils {
                 continue;
             }
 
+            wallet.accounts[i].version = accountInfo.version ?? 2;
             wallet.accounts[i].linkedPublicKey = accountInfo.linkedAccountKey ?? "";
             wallet.accounts[i].supplementalPublicKeys = accountInfo.supplementalPublicKeys ?? null;
 
@@ -1584,6 +1638,7 @@ export class WalletUtils {
                 continue;
             }
 
+            wallet.others[i].version = accountInfo.version;
             wallet.others[i].linkedPublicKey = accountInfo.linkedAccountKey ?? "";
             wallet.others[i].supplementalPublicKeys = accountInfo.supplementalPublicKeys ?? null;
 
@@ -2745,10 +2800,13 @@ export class WalletUtils {
     }
 
     static addNewWalletWithPrivateKey(allWallets: Wallets, privateKey: string, password: Password, walletName: string, networkName: string, networkType: NetworkType, version: number): WalletAccount {
+        console.log(version);
         const account = Account.createFromPrivateKey(privateKey, networkType, version);
         const wallet = WalletUtils.createAccountSimpleFromPrivateKey(walletName, password, privateKey, networkType, version);
+        console.log(wallet);
         let walletAccounts: WalletAccount[] = [];
         let walletAccount = new WalletAccount('Primary', account.publicKey, wallet.publicAccount.address.plain(), "pass:bip32", wallet.encryptedPrivateKey.encryptedKey, wallet.encryptedPrivateKey.iv, version);
+        console.log(walletAccount);
         walletAccount.isBrain = true;
         walletAccount.default = true;
         walletAccounts.push(walletAccount);
