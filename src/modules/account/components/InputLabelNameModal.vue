@@ -16,6 +16,7 @@
 </template>
 
 <script setup lang="ts">
+import { Wallet } from '@/models/wallet';
 import { walletState } from '@/state/walletState';
 import { useToast } from 'primevue/usetoast';
 import { getCurrentInstance, ref } from 'vue';
@@ -53,7 +54,7 @@ const confirmChange = () => {
     else{
         label.name = modelValue.value
         walletState.wallets.saveMyWalletOnlytoLocalStorage(
-            walletState.currentLoggedInWallet
+            walletState.currentLoggedInWallet as Wallet
         );
         toast.add({
             severity: "info",

@@ -93,6 +93,7 @@ import Menu from "primevue/menu";
 import { useRouter } from "vue-router";
 import { walletState } from "@/state/walletState";
 import Dialog from "primevue/dialog";
+import { Wallet } from "@/models/wallet";
 const { address, publicKey, name } = defineProps<{
   name: string;
   group: string;
@@ -133,7 +134,7 @@ const deleteContact = () => {
       (contact) => contact.name != name
     );
   walletState.wallets.saveMyWalletOnlytoLocalStorage(
-    walletState.currentLoggedInWallet
+    walletState.currentLoggedInWallet as Wallet
   );
   toggleModal.value = false;
 };

@@ -48,6 +48,7 @@ import { computed, getCurrentInstance, ref, watch } from 'vue'
 import { walletState } from '@/state/walletState';
 import { Label } from '@/models/label';
 import { useToast } from 'primevue/usetoast';
+import { Wallet } from '@/models/wallet';
 
     const internalInstance = getCurrentInstance();
     const emitter = internalInstance.appContext.config.globalProperties.emitter;
@@ -103,7 +104,7 @@ import { useToast } from 'primevue/usetoast';
         }
         let label = new Label(labelName.value,[])
         walletState.currentLoggedInWallet.addLabel(label) 
-        await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
+        await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet as Wallet)
         err.value = ''
         labelName.value = ""
         toast.add({severity:'info', summary: 'Label', detail: 'New Label is Created', group: 'br-custom', life: 5000});
@@ -115,7 +116,7 @@ import { useToast } from 'primevue/usetoast';
             return 
         }
         walletState.currentLoggedInWallet.removeLabel(index)
-        await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet)
+        await walletState.wallets.saveMyWalletOnlytoLocalStorage(walletState.currentLoggedInWallet as Wallet)
         toast.add({severity:'info', summary: 'Label', detail: 'Label is removed', group: 'br-custom', life: 5000});
         isHover.value = false
     }
