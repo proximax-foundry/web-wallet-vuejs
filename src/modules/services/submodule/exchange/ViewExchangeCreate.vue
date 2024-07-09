@@ -383,6 +383,8 @@ const assetToGive = ref<{
   amount: number;
   namespace: string;
   divisibility: number;
+  isCreator: boolean; 
+  isTransferable: boolean;
 }>(null);
 
 const assetValid = ref(false);
@@ -523,6 +525,8 @@ emitter.on(
     amount: number;
     namespace: string;
     divisibility: number;
+    isCreator: boolean;
+    isTransferable: boolean;
   }) => {
     assetToGive.value = asset;
   }
@@ -623,6 +627,19 @@ const exchangeCreate = async () => {
       life: 1000,
     });
     return;
+  }
+
+  if (!assetToGive.value.isCreator) {
+    if(!assetToGive.value.isTransferable){
+      toast.add({
+        severity: "error",
+        summary: "Error",
+        detail: "Asset to give is not transferable",
+        group: "br-custom",
+        life: 1000,
+      });
+      return;
+    }
   }
 
   if (
