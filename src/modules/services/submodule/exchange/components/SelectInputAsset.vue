@@ -75,7 +75,7 @@ defineEmits([
 
 const { selectedAddress, selectedMultisigAddress } = toRefs(props);
 
-const assetOptions = ref<{ id: string, amount: number, namespace: string, divisibility: number, isCreator: boolean, isTransferable: boolean, hasUpdated: boolean }[]>([])
+const assetOptions = ref<{ id: string, amount: number, namespace: string, divisibility: number, isTransferable: boolean, hasUpdated: boolean }[]>([])
 const loading = ref(false);
 
 const fetchAssets = async (address: string | null) => {
@@ -96,7 +96,6 @@ const fetchAssets = async (address: string | null) => {
             amount: asset.amount.compact(),
             divisibility: 0,
             namespace: '',
-            isCreator: false,
             isTransferable: false,
             hasUpdated: false
         })
@@ -168,7 +167,6 @@ const onLazyLoad = async (event: VirtualScrollerLazyEvent) => {
         asset.namespace = names[nameIndex].names.length ? names[nameIndex].names[0].name : '';
         asset.amount = asset.amount / Math.pow(10, assetProperties[propertyIndex].divisibility)
         asset.divisibility = assetProperties[propertyIndex].divisibility
-        asset.isCreator = selectedMultisigAddress.value? (selectedMultisigAddress.value === assetProperties[propertyIndex].owner.address.plain() ? true : false) : (selectedMultisigAddress.value === assetProperties[propertyIndex].owner.address.plain() ? true : false)
         asset.isTransferable = assetProperties[propertyIndex].isTransferable()
         asset.hasUpdated = true;
 
@@ -185,7 +183,7 @@ const onLazyLoad = async (event: VirtualScrollerLazyEvent) => {
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance.appContext.config.globalProperties.emitter;
 
-const selectAsset = (asset: { id: string, amount: number, namespace: string, divisibility: number, isCreator: boolean, isTransferable: boolean }) => {
+const selectAsset = (asset: { id: string, amount: number, namespace: string, divisibility: number, isTransferable: boolean }) => {
     emitter.emit("select-asset", asset)
     selectedAsset.value = asset;
 
