@@ -94,7 +94,7 @@ setup(p){
       return isMulti;
     }); 
     const accountName = ref('');
-    const accountNameChange = ref(acc.value?acc.value.name: '');
+    const accountNameChange = computed(() => acc.value ? acc.value.name: '');
     accountName.value = acc.value?acc.value.name: ''
     const accountNameDisplay = computed(()=>{
       if(!walletState.currentLoggedInWallet){
@@ -104,7 +104,6 @@ setup(p){
     });
     const svgString = ref(toSvg(p.address, 75, themeConfig.jdenticonConfig));    
     const showName = ref(true);
-    const showNameChange = ref(false);
     const changeName = () => {
       if (accountName.value.trim()) {
         const exist_account = walletState.currentLoggedInWallet.accounts.find((accName) => accName.name == accountName.value.trim());
