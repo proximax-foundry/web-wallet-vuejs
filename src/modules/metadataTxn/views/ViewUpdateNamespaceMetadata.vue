@@ -691,7 +691,6 @@ export default {
       if (!walletState.currentLoggedInWallet) {
         return;
       }
-
       let tempHexData = "";
       let unsignedTxnPayload: string | string[];
       if (scopedMetadataKeyType.value == 1) {

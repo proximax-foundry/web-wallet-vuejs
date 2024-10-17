@@ -745,6 +745,7 @@ export class TransactionUtils {
 
     return plainAddress == pubAcc.address.plain()
   }
+
 }
 
 export const isMultiSig = (address) => {

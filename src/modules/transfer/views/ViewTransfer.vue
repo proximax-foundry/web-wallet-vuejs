@@ -468,6 +468,7 @@ const updateAmountToMax = () => {
 };
 
 const clearInput = () => {
+
   selectedAddress.value = null;
   walletPassword.value = "";
   recipientInput.value = "";
@@ -550,6 +551,7 @@ const makeTransferPayload = async () => {
           );
         }
       });
+
     }
     let transactionBuilder = AppState.buildTxn;
 
