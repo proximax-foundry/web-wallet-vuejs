@@ -181,9 +181,9 @@
 
 <script setup lang="ts">
 import { ref, getCurrentInstance, computed, watch } from "vue";
-import SelectInputAccount from "../components/SelectInputAccount.vue";
-import SelectInputMultisigAccount from "../components/SelectInputMultisigAccount.vue";
-import MultisigInput from "../components/MultisigInput.vue";
+import SelectInputAccount from "@/components/SelectInputAccount.vue";
+import SelectInputMultisigAccount from "@/components/SelectInputMultisigAccount.vue";
+import MultisigInput from "@/components/MultisigInput.vue";
 import TransactionLayout from "@/components/TransactionLayout.vue";
 import { Helper } from "@/util/typeHelper";
 import { AppState } from "@/state/appState";

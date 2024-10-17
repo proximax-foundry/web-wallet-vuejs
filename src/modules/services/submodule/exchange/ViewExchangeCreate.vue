@@ -284,7 +284,7 @@
 
 <script setup lang="ts">
 import { ref, getCurrentInstance, computed, watch } from "vue";
-import SelectInputAccount from "./components/SelectInputAccount.vue";
+import SelectInputAccount from "@/components/SelectInputAccount.vue";
 import SelectInputAsset from "./components/SelectInputAsset.vue";
 import InputAmount from "./components/InputAmount.vue";
 import InputId from "./components/InputId.vue";

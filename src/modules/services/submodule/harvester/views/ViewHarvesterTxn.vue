@@ -92,8 +92,6 @@ import SelectInputAccount from "@/components/SelectInputAccount.vue";
 import SelectInputMultisigAccount from "@/components/SelectInputMultisigAccount.vue";
 import MultisigInput from "@/components/MultisigInput.vue"
 import SelectActionType from "@/modules/services/submodule/harvester/components/SelectActionType.vue";
-import SelectInputMultisigAccount from "@/modules/transfer/components/SelectInputMultisigAccount.vue";
-import MultisigInput from "@/modules/transfer/components/MultisigInput.vue";
 import TxnSummary from "@/components/TxnSummary.vue";
 import TransactionLayout from "@/components/TransactionLayout.vue";
 import { useI18n } from "vue-i18n";

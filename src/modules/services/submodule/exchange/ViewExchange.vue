@@ -353,8 +353,8 @@ import {
 } from "tsjs-xpx-chain-sdk";
 import { computed, getCurrentInstance, ref, watch } from "vue";
 import InputAmount from "./components/InputAmount.vue";
-import SelectInputAccount from "./components/SelectInputAccount.vue";
-import SelectInputMultisigAccount from "./components/SelectInputMultisigAccount.vue";
+import SelectInputAccount from "@/components/SelectInputAccount.vue";
+import SelectInputMultisigAccount from "@/components/SelectInputMultisigAccount.vue";
 import TransactionLayout from "@/components/TransactionLayout.vue";
 import { Helper } from "@/util/typeHelper";
 import { walletState } from "@/state/walletState";

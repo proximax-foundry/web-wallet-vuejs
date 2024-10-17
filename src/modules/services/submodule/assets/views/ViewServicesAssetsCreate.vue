@@ -151,9 +151,9 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import SelectInputAccount from "@/modules/transfer/components/SelectInputAccount.vue";
-import SelectInputMultisigAccount from "@/modules/transfer/components/SelectInputMultisigAccount.vue";
-import MultisigInput from "@/modules/transfer/components/MultisigInput.vue";
+import SelectInputAccount from "@/components/SelectInputAccount.vue";
+import SelectInputMultisigAccount from "@/components/SelectInputMultisigAccount.vue";
+import MultisigInput from "@/components/MultisigInput.vue";
 import SupplyInputClean from "@/components/SupplyInputClean.vue";
 import CheckInput from "@/components/CheckInput.vue";
 import NumberInputClean from "@/modules/services/submodule/assets/components/NumberInputClean.vue";
