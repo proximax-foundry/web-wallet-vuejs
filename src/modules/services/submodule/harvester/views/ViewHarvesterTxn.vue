@@ -22,8 +22,8 @@
           <div class="error error_box" v-if="err != ''">{{ err }}</div>
           <div class="mt-4">
             <div class="flex gap-1 mt-3">
-              <SelectInputAccount :type="'dynamic'" :label="'Add Harvester'" />
-              <SelectInputMultisigAccount :selected-address="selectedAddress" />
+              <SelectInputAccount :type="'dynamic'" :label="'Add Harvester'" @select-account="selectAccountAddress" @select-account-public-key="selectedAccountPublicKey" />
+              <SelectInputMultisigAccount :selected-address="selectedAddress" @select-multisig-account="selectMultisigAccount" />
             </div>
             <div v-if="selectedMultisigAddress" class="mt-3">
               <MultisigInput
@@ -31,6 +31,7 @@
                 :select-default-name="selectedMultisigName"
                 label="Multisig account selected"
                 :type="'dynamic'"
+                @close-multisig="closeMultisig"
               />
             </div>
           </div>
@@ -87,7 +88,9 @@ import { computed, getCurrentInstance, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import PublicKeyInputClean from "@/modules/services/submodule/harvester/components/PublicKeyInputClean.vue";
-import SelectInputAccount from "@/modules/transfer/components/SelectInputAccount.vue";
+import SelectInputAccount from "@/components/SelectInputAccount.vue";
+import SelectInputMultisigAccount from "@/components/SelectInputMultisigAccount.vue";
+import MultisigInput from "@/components/MultisigInput.vue"
 import SelectActionType from "@/modules/services/submodule/harvester/components/SelectActionType.vue";
 import SelectInputMultisigAccount from "@/modules/transfer/components/SelectInputMultisigAccount.vue";
 import MultisigInput from "@/modules/transfer/components/MultisigInput.vue";
@@ -350,40 +353,42 @@ const createTxn = async () => {
     const txn = txnBuilder.harvesterKey(harvesterPublicAccount.value).build();
     const innerTxn = txn.toAggregateV1(multisigPublicAccount.value);
     const innerTxns = [innerTxn.serialize()];
-    unsignedTxnPayload = innerTxns
+    unsignedTxnPayload = innerTxns;
   } else {
     const txn = txnBuilder.harvesterKey(harvesterPublicAccount.value).build();
-    unsignedTxnPayload = txn.serialize()
+    unsignedTxnPayload = txn.serialize();
   }
-  TransactionState.unsignedTransactionPayload = unsignedTxnPayload
+  TransactionState.unsignedTransactionPayload = unsignedTxnPayload;
   TransactionState.selectedAddress = selectedAddress.value;
-  TransactionState.selectedMultisigAddress = selectedMultisigAddress.value
+  TransactionState.selectedMultisigAddress = selectedMultisigAddress.value;
   router.push({ name: "ViewConfirmTransaction" });
 };
 
-emitter.on("select-account", (address: string) => {
-  selectedAddress.value = address;
-});
+const selectAccountAddress = (address: string) => {
+  selectedAddress.value = address
+}
 
-emitter.on("select-account-public-key", (publicKey: string) => {
+const selectedAccountPublicKey = (publicKey: string) => {
   ownerPublicAccount.value = WalletUtils.createPublicAccount(
     publicKey,
     AppState.networkType
   );
-});
+}
 
-emitter.on("select-multisig-account", (node: TreeNode) => {
+const selectMultisigAccount = (node: TreeNode) => {
   selectedMultisigName.value = node.label;
   selectedMultisigAddress.value = node.value;
   multisigPublicAccount.value = WalletUtils.createPublicAccount(
     node.publicKey,
     AppState.networkType
   );
-});
-emitter.on("CLOSE_MULTISIG", () => {
-  selectedMultisigName.value = null;
-  selectedMultisigAddress.value = null;
-});
+}
+
+const closeMultisig = () => {
+  selectedMultisigName.value = null
+  selectedMultisigAddress.value = null
+}
+
 </script>
 <style scoped>
 /* Chrome, Safari, Edge, Opera */

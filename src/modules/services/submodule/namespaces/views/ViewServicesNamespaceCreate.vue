@@ -10,12 +10,12 @@
           <div class="error error_box" v-if="err != ''">{{ err }}</div>
           <div class="mt-4">
             <div class="flex gap-1 mt-3">
-              <SelectInputAccount :type="'namespace'"/>
-              <SelectInputMultisigAccount :selected-address="selectedAddress" />
+              <SelectInputAccount :type="'namespace'" :label="'create namespace'" @select-account="selectAccountAddress" />
+              <SelectInputMultisigAccount :selected-address="selectedAddress" @select-multisig-account="selectMultisigAccount" />
             </div>
             <div v-if="selectedMultisigAddress" class="mt-3">
               <MultisigInput :select-default-address="selectedMultisigAddress"
-                :select-default-name="selectedMultisigName" :type="'namespace'"/>
+                :select-default-name="selectedMultisigName" :type="'namespace'" @close-multisig="closeMultisig" />
             </div>
             <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace"
               ref="nsRef" v-model="selectNamespace"
@@ -73,9 +73,9 @@ import { useRouter } from "vue-router";
 import TextInputTooltip from '@/components/TextInputTooltip.vue';
 import SelectInputParentNamespace from '@/modules/services/submodule/namespaces/components/SelectInputParentNamespace.vue';
 import DurationInputClean from '@/modules/services/submodule/namespaces/components/DurationInputClean.vue';
-import SelectInputAccount from '@/modules/transfer/components/SelectInputAccount.vue';
-import SelectInputMultisigAccount from '@/modules/transfer/components/SelectInputMultisigAccount.vue';
-import MultisigInput from "@/modules/transfer/components/MultisigInput.vue"
+import SelectInputAccount from '@/components/SelectInputAccount.vue';
+import SelectInputMultisigAccount from '@/components/SelectInputMultisigAccount.vue';
+import MultisigInput from "@/components/MultisigInput.vue"
 import TxnSummary from "@/components/TxnSummary.vue"
 import TransactionLayout from "@/components/TransactionLayout.vue";
 import { networkState } from "@/state/networkState";
@@ -444,18 +444,19 @@ watch(namespaceName, newValue => {
   }
 })
 
-emitter.on("select-account", (address: string) => {
-  selectedAddress.value = address
-})
+const selectAccountAddress = (address: string) => {
+    selectedAddress.value = address
+}
 
-emitter.on("select-multisig-account", (node: TreeNode) => {
-  selectedMultisigName.value = node.label
-  selectedMultisigAddress.value = node.value
-})
-emitter.on("CLOSE_MULTISIG", () => {
-  selectedMultisigName.value = null
-  selectedMultisigAddress.value = null
-})
+const selectMultisigAccount = (node: TreeNode) => {
+    selectedMultisigName.value = node.label
+    selectedMultisigAddress.value = node.value
+}
+
+const closeMultisig = () => {
+    selectedMultisigName.value = null
+    selectedMultisigAddress.value = null
+}
 
 </script>
 <style scoped lang="scss">
