@@ -30,6 +30,7 @@ import {
   Password,
   TransactionMapping,
 } from "tsjs-xpx-chain-sdk";
+import { Account as LocalAcc } from "../models/account"
 import { AppState } from "@/state/appState";
 import { ChainConfigUtils } from "./chainConfigUtils";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
@@ -635,14 +636,48 @@ export class TransactionUtils {
       return { txnPayload: signedTransaction.payload };
     } else {
       // there is a cosigner, aggregate  bonded transaction
+      let selectedMultisig: LocalAcc;
+      let selectedMultisigPublicKey: string;
+      let multisigPublicAccount: PublicAccount;
+
+      selectedMultisig = walletState.currentLoggedInWallet.others.find(
+        (account) => account.address == selectedMultisigAddress
+      );
+
+      if(!selectedMultisig){
+        selectedMultisig = walletState.currentLoggedInWallet.accounts.find(
+          (account) => account.address == selectedMultisigAddress
+        );
+      }
+
+      selectedMultisigPublicKey = selectedMultisig ? selectedMultisig.publicKey: "";
       let innerTxn = []
-      const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(
-        Address.createFromRawAddress(selectedMultisigAddress)
-      );
-      const multisigPublicAccount = PublicAccount.createFromPublicKey(
-        accInfo.publicKey,
-        AppState.networkType
-      );
+
+      if(selectedMultisigPublicKey){
+        multisigPublicAccount = PublicAccount.createFromPublicKey(
+          selectedMultisigPublicKey,
+          AppState.networkType
+        );
+      }
+      else{
+        const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(
+          Address.createFromRawAddress(selectedMultisigAddress)
+        );
+
+        if(accInfo.publicKey == "0".repeat(64)){
+
+          if(!TransactionUtils.checkAllZeroPublicKeyAddress(selectedMultisigAddress, AppState.networkType)){
+            
+            throw new Error("No usable public key found for multisig account");
+          }
+        }
+
+        multisigPublicAccount = PublicAccount.createFromPublicKey(
+          accInfo.publicKey,
+          AppState.networkType
+        );
+      }
+      
       if(typeof transaction !== "string"){
         for(let i=0; i<transaction.length; ++i){
           innerTxn.push(TransactionMapping.createFromPayload(transaction[i]).toAggregateV1(multisigPublicAccount))
@@ -701,6 +736,15 @@ export class TransactionUtils {
       );
     }
   };
+
+  static checkAllZeroPublicKeyAddress(plainAddress: string, network: number){
+
+    const pubKey = "0".repeat(64);
+
+    const pubAcc = PublicAccount.createFromPublicKey(pubKey, network);
+
+    return plainAddress == pubAcc.address.plain()
+  }
 }
 
 export const isMultiSig = (address) => {
