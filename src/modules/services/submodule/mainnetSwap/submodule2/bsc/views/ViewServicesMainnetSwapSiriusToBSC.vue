@@ -781,7 +781,7 @@ export default {
       swapInProgress.value = true;
       isDisabledCancel.value = true;
       try{
-        let validateAddress = ethers.utils.getAddress(bscAddress.value);
+        let validateAddress = ethers.getAddress(bscAddress.value);
         if(validateAddress){
           showAddressErr.value = false;
         }
@@ -954,7 +954,7 @@ export default {
         selectErr.value = false
       }
       try{
-        let validateAddress = ethers.utils.getAddress(bscAddress.value);
+        let validateAddress = ethers.getAddress(bscAddress.value);
         if(validateAddress && !showAmountErr.value){
           showAddressErr.value = false;
           currentPage.value = 2;

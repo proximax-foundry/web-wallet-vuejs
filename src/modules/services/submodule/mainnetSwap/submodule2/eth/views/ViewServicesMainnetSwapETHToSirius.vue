@@ -345,7 +345,7 @@ export default {
     let signer;
 
     if (typeof window.ethereum !== 'undefined') {
-      provider = new ethers.providers.Web3Provider(window.ethereum);
+      provider = new ethers.BrowserProvider(window.ethereum);
       signer = provider.getSigner();
 
       isInstallMetamask.value = true;
@@ -462,7 +462,7 @@ export default {
       if(newTokenAddress != undefined && newTokenAddress != ''){
         (async () => {
           try{
-            provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+            provider = new ethers.BrowserProvider(window.ethereum, 'any');
             signer = provider.getSigner();
             const contract = new ethers.Contract(newTokenAddress, abi, signer);
             const tokenBalance = await contract.balanceOf(newCurrentAccount);
@@ -578,7 +578,7 @@ export default {
       try{
         err.value = '';
         isInvalidConfirmedMeta.value = false;
-        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+        provider = new ethers.BrowserProvider(window.ethereum, 'any');
         signer = provider.getSigner();
         const Contract = new ethers.Contract(tokenAddress.value, abi, signer);
         const data = await SwapUtils.getETH_GasLimit(swapData.gasPriceConsultURL);
@@ -587,7 +587,7 @@ export default {
         };
         const receipt = await Contract.transfer(
           custodian.value,
-          ethers.utils.parseUnits(amount.value, 6),
+          ethers.parseUnits(amount.value, 6),
           options,
         );
         validationHash.value = receipt.hash;
@@ -655,7 +655,7 @@ export default {
     const getSigned = async () => {
       try{
         isInvalidSignedMeta.value = false;
-        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+        provider = new ethers.BrowserProvider(window.ethereum, 'any');
         signer = provider.getSigner();
         const messageSignature = await signer.signMessage(siriusAddress.value);
         messageHash.value = messageSignature;

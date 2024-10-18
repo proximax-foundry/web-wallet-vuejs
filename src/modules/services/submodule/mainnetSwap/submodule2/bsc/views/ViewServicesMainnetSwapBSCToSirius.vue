@@ -519,7 +519,7 @@ export default {
 
     const initMetamask = ()=>{
        if (typeof window.ethereum !== 'undefined') {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
+        provider = new ethers.BrowserProvider(window.ethereum);
         signer = provider.getSigner();
         isInstallMetamask.value = true;
         isMetamaskConnected.value = ethereum.isConnected()?true:false;
@@ -665,7 +665,7 @@ export default {
       if(newTokenAddress != undefined && newTokenAddress != ''){
         (async () => {
           try{
-            provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+            provider = new ethers.BrowserProvider(window.ethereum, 'any');
             signer = provider.getSigner();
             const contract = new ethers.Contract(newTokenAddress, abi, signer);
             const tokenBalance = await contract.balanceOf(newCurrentAccount);
@@ -775,7 +775,7 @@ export default {
       try{
         err.value = '';
         isInvalidConfirmedMeta.value = false;
-        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+        provider = new ethers.BrowserProvider(window.ethereum, 'any');
         signer = provider.getSigner();
         const Contract = new ethers.Contract(tokenAddress.value, abi, signer);
         const data = await SwapUtils.getBSC_GasLimit(swapData.gasPriceConsultURL);
@@ -784,7 +784,7 @@ export default {
         };
         const receipt = await Contract.transfer(
           custodian.value,
-          ethers.utils.parseUnits(amount.value, tokenDivisibility.value),
+          ethers.parseUnits(amount.value, tokenDivisibility.value),
           options,
         );
         validationHash.value = receipt.hash;
@@ -852,7 +852,7 @@ export default {
     const getSigned = async () => {
       try{
         isInvalidSignedMeta.value = false;
-        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+        provider = new ethers.BrowserProvider(window.ethereum, 'any');
         signer = provider.getSigner();
         const messageSignature = await signer.signMessage(Address.createFromRawAddress(siriusAddress.value).pretty());
         messageHash.value = messageSignature;
