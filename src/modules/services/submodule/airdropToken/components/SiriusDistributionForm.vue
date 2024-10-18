@@ -25,7 +25,7 @@ import MultisigInput from "@/components/MultisigInput.vue"
 import type { Account } from '@/models/account';
 import type { WalletAccount } from '@/models/walletAccount';
 import { parse } from 'csv-parse';
-import { TreeNode } from 'primevue/treenode';
+import type { TreeNode } from 'primevue/treenode';
 
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance.appContext.config.globalProperties.emitter;

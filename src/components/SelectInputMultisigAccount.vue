@@ -39,7 +39,7 @@ const emit = defineEmits([
 
 const { selectedAddress } = toRefs(props)
 
-const accounts = ref<{ label: string, value: string }[]>([])
+const accounts = ref<{ key: string, label: string, value: string }[]>([])
 
 const selectedMultisigAddress = ref<string | null>(null)
 
@@ -60,7 +60,8 @@ watch(selectedAddress, (n) => {
                 walletState.currentLoggedInWallet.convertAddressToName(PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain())?
                 walletState.currentLoggedInWallet.convertAddressToName(PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain()) : PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain(),
             value: PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain(),
-            publicKey: x.publicKey
+            publicKey: x.publicKey,
+            key: x.publicKey
         }
     }) : []
 
