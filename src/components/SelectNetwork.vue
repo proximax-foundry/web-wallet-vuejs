@@ -16,9 +16,9 @@
           >
           {{$t('general.network')}}
           </div>
-          <div v-if="value" class="font-bold text-xs">{{ value.label }}</div>
+          <div v-if="value" class="flex-auto font-bold text-xs">{{ value.label }}</div>
           <div v-else class="text-xs font-bold">
-            {{ $t("home.selectWallet") }}
+            {{ $t("general.selectNetwork") }}
           </div>
         </div>
       </div>
@@ -33,16 +33,16 @@
     </template>
 
     <template #option="{ option }">
-      <div class="flex items-center justify-between">
-        <div class="flex gap-2 items-center">
-          <img v-if='option.label== "Sirius Mainnet"' src="@/assets/img/icon-mainnet-block.svg" class='h-5 w-5 mt-auto mb-auto'>
-        <img v-else src="@/assets/img/icon-testnet-block.svg" class='h-5 w-5 mt-auto mb-auto'>
-          <div class="font-bold text-xs">{{ option.label }}</div>
-        </div>
-        <div
-          class="cursor-pointer text-blue-primary text-xxs font-semibold uppercase"
-        >
-          {{ $t("general.select") }}
+      <div class="w-full flex items-center justify-between">
+        <div class="w-full flex gap-2 items-center">
+          <img v-if='option.label== "Sirius Mainnet"' src="@/assets/img/icon-mainnet-block.svg" class='flex-none h-5 w-5 mt-auto mb-auto'>
+          <img v-else src="@/assets/img/icon-testnet-block.svg" class='flex-none h-5 w-5 mt-auto mb-auto'>
+          <div class="flex-auto font-bold text-xs">{{ option.label }}</div>
+          <div
+            class="flex-1 cursor-pointer text-right text-blue-primary text-xxs font-semibold uppercase"
+          >
+            {{ $t("general.select") }}
+          </div>
         </div>
       </div>
     </template>

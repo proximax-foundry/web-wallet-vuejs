@@ -37,16 +37,17 @@
       </template>
 
       <template #option="{ option }">
-        <div class="flex items-center justify-between">
-          <div class="flex gap-2 items-center">
-            <img src="@/assets/img/icon-wallet.svg" class="h-5 w-5" />
-            <div class="font-bold text-xs">{{ option.label }}</div>
+        <div class="w-full flex items-center justify-between">
+          <div class="w-full flex gap-2 items-center">
+            <img src="@/assets/img/icon-wallet.svg" class="flex-none h-5 w-5" />
+            <div class="flex-auto font-bold text-xs">{{ option.label }}</div>
+            <div
+              class="flex-1 cursor-pointer text-right text-blue-primary text-xxs font-semibold uppercase"
+            >
+              {{ $t("general.select") }}
+            </div>
           </div>
-          <div
-            class="cursor-pointer text-blue-primary text-xxs font-semibold uppercase"
-          >
-            {{ $t("general.select") }}
-          </div>
+          
         </div>
       </template>
     </Dropdown>
