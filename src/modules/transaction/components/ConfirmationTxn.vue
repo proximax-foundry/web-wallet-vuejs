@@ -2,19 +2,24 @@
     <div>
         <div class='w-10/12 ml-auto mr-auto mt-5'>
             <div class="border filter shadow-lg mt-8">
+                
                 <div v-if="unsignedTxnPayload">
                     <div class="text-lg font-semibold m-7">Unsigned Transaction</div>
+                    <div class="ml-7 my-2 text-sm">To be signed by <span class="font-bold">{{ selectedAddressPretty }}</span></div>
+                    <div v-if="selectedMultisigAddress" class="ml-7 mt-1 mb-4 text-sm">Transaction(s) for <span class="font-bold">{{ selectedMultisigAddressPretty }}</span></div>
                     <div v-if="(typeof unsignedTxnPayload === `string`)">
                         <div class="flex justify-center px-12">
                             <div class="mb-3 border rounded-lg border-gray-900 w-full p-2 flex items-center justify-center break-all">{{ unsignedTxnPayload }}</div>
                         </div>
                         <div class="flex justify-center text-blue-primary font-semibold uppercase ml-3.5 mt-3 text-sm xl:text-md xl:ml-0 cursor-pointer" @click="goPayloadExplorer(unsignedTxnPayload)">Click to view Unsigned Transaction Details in Explorer</div>
                     </div>
-                    <div v-else v-for="unsignedTx in unsignedTxnPayload">
-                        <div class="flex justify-center px-12">
-                            <div class="mb-3 border rounded-lg border-gray-900 w-full p-2 flex items-center justify-center break-all">{{ unsignedTx }}</div>
+                    <div v-else >
+                        <div v-for="unsignedTx in unsignedTxnPayload">
+                            <div class="flex justify-center px-12">
+                                <div class="mb-3 border rounded-lg border-gray-900 w-full p-2 flex items-center justify-center break-all">{{ unsignedTx }}</div>
+                            </div>
+                            <div class="flex justify-center text-blue-primary font-semibold uppercase ml-3.5 my-3 text-sm xl:text-md xl:ml-0 cursor-pointer" @click="goPayloadExplorer(unsignedTx)">Click to view Unsigned Transaction Details in Explorer</div>
                         </div>
-                        <div class="flex justify-center text-blue-primary font-semibold uppercase ml-3.5 my-3 text-sm xl:text-md xl:ml-0 cursor-pointer" @click="goPayloadExplorer(unsignedTx)">Click to view Unsigned Transaction Details in Explorer</div>
                     </div>
                 </div>
                 <div class="flex justify-center my-3">
@@ -56,12 +61,21 @@ import { WalletUtils } from '@/util/walletUtils';
 import { UInt64 } from 'tsjs-xpx-chain-sdk';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { Helper } from "@/util/typeHelper";
 
 const router = useRouter()
 
 const toggleModal = ref(false)
 const walletPasswd = ref('');
 const err = ref('');
+const selectedAddressPretty = computed(()=>{
+    return selectedAddress.value ? Helper.createAddress(selectedAddress.value).pretty() : "";
+})
+
+const selectedMultisigAddressPretty = computed(()=>{
+    return selectedMultisigAddress.value ? Helper.createAddress(selectedMultisigAddress.value).pretty() : "";
+})
+
 
 const explorerBaseURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.url);
 const payloadExplorerURL = computed(()=> networkState.currentNetworkProfile.chainExplorer.payloadInfoRoute);
