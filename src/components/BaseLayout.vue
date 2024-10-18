@@ -3,7 +3,7 @@
     <NavigationMenu />
 
     <div class="flex-1 flex flex-col overflow-hidden">
-      <HeaderComponentVue />
+      <HeaderComponentVue class="z-50"/>
       <main class="flex-1 overflow-x-hidden overflow-y-auto bg-white flex flex-col justify-between" >
         <div class="    flex flex-col">
           <slot />

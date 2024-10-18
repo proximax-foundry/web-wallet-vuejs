@@ -367,7 +367,7 @@ export default {
     let signer;
 
     if (typeof window.ethereum !== 'undefined') {
-      provider = new ethers.providers.Web3Provider(window.ethereum);
+      provider = new ethers.BrowserProvider(window.ethereum);
       signer = provider.getSigner();
 
       isInstallMetamask.value = true;
@@ -699,7 +699,7 @@ export default {
     const getSigned = async () => {
       try{
         isInvalidSignedMeta.value = false;
-        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+        provider = new ethers.BrowserProvider(window.ethereum, 'any');
         signer = provider.getSigner();
         const messageSignature = await signer.signMessage(siriusAddressSelected.value);
         messageHash.value = messageSignature;

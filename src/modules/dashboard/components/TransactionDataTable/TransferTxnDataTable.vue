@@ -125,7 +125,7 @@
       <Column :header="$t('general.sda')" headerStyle="width:40px;" v-if="wideScreen">
         <template #body="{data}">
           <div>
-            <img src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="{ value: '<tiptitle>' +$t('general.sdaFull')+ '</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>', escape: true}">
+            <img src="@/modules/dashboard/img/icon-proximax-logo-gray.svg" class="inline-block" v-if="checkOtherAsset(data.sda)" v-tooltip.left="{ value: '<tiptitle>' +$t('general.sdaFull')+ '</tiptitle><tiptext>' + displaySDAs(data.sda) + '</tiptext>', escape: false}">
             <span v-else>-</span>
           </div>
         </template>
@@ -133,7 +133,7 @@
       <Column :header="$t('general.message')" headerStyle="width:40px;" v-if="wideScreen">
         <template #body="{data}">
           <div class="flex justify-center">
-            <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="{ value:'<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>', escape: true}" v-if="data.message && data.messageType !== 1">
+            <img src="@/modules/dashboard/img/icon-message.svg" v-tooltip.left="{ value:'<tiptitle>' + data.messageTypeTitle + '</tiptitle><tiptext>' + data.message + '</tiptext>', escape: false}" v-if="data.message && data.messageType !== 1">
             <DecryptMessageModal v-else-if="data.message && data.messageType !== 0"  :messageTypeTitle="data.messageTypeTitle" :message="data.message" :recipientAddress="data.recipient" :initiator="data.initiator"/>
             <div v-else class="w-full text-center">-</div>
           </div>

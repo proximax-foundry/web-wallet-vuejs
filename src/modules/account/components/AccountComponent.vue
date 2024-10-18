@@ -6,6 +6,7 @@
                 <div class="text-red-500 text-xs" v-if="err!=''">{{ err }}</div>
                 <div class='flex '>
                     <div class = '  font-semibold text-md' v-if='showName'>{{ accountNameDisplay }}</div>
+                    <div class='font-semibold text-xs mt-1.5' v-if="accountNameChange !== accountNameDisplay">({{ accountNameChange }})</div>
                     <input class='outline-none ml-4 font-semibold text-md'  v-model='accountName' v-if='!showName'/>
                     <changeNameModal :address="address" :isOther="other_acc==null?false:true"/>
                 </div>
@@ -93,6 +94,7 @@ setup(p){
       return isMulti;
     }); 
     const accountName = ref('');
+    const accountNameChange = computed(() => acc.value ? acc.value.name: '');
     accountName.value = acc.value?acc.value.name: ''
     const accountNameDisplay = computed(()=>{
       if(!walletState.currentLoggedInWallet){
@@ -137,6 +139,10 @@ setup(p){
 
       toast.add({severity:'info', detail: copySubject +' '+ t('general.copied'), group: 'br-custom', life: 3000});
     };
+
+    emitter.on("change-name", (name) => {
+      accountNameChange.value = name
+    })
     
     return{
         accountName,
@@ -149,7 +155,8 @@ setup(p){
         changeName,
         copy,
         err,
-        other_acc
+        other_acc,
+        accountNameChange
     }
 }
 }

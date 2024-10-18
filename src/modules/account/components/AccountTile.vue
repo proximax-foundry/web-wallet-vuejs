@@ -95,10 +95,11 @@
       <Menu ref="menu" :model="items" :popup="true"> </Menu>
     </div>
   </div>
+  <EditLabelModal :toggleModal="toggleLabelChange"/>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, getCurrentInstance, ref } from "vue";
 import { copyToClipboard } from "@/util/functions";
 import { useToast } from "primevue/usetoast";
 import { walletState } from "@/state/walletState";
@@ -112,11 +113,14 @@ import { useRouter } from "vue-router";
 import { setDefaultAccInStorage } from "@/models/account";
 import { OtherAccount } from "@/models/otherAccount";
 import { WalletAccount } from "@/models/walletAccount";
+import EditLabelModal from "./EditLabelModal.vue";
 import Menu from "primevue/menu";
 
+const internalInstance = getCurrentInstance();
+const emitter = internalInstance.appContext.config.globalProperties.emitter;
 const { account } = defineProps<{ account: WalletAccount | OtherAccount }>();
 const menu = ref();
-
+const toggleLabelChange = ref(false)
 const toast = useToast();
 const { t } = useI18n();
 const multisig_add = ref("");
@@ -147,7 +151,9 @@ const items = computed(() => {
   return [
     {
       label: "Change Labels",
-      command: () => {},
+      command: () => {
+        toggleLabelChange.value = true
+      },
     },
   ].concat(
     labels.value.map((label) => {
@@ -290,6 +296,11 @@ const navigate = () => {
     });
   }
 };
+
+emitter.on("cancel-change-label", (toggle: boolean) => {
+    toggleLabelChange.value = toggle
+})
+
 </script>
 <style scoped>
 

@@ -28,7 +28,9 @@ import {
   TransferTransaction,
   NetworkType,
   Password,
+  TransactionMapping,
 } from "tsjs-xpx-chain-sdk";
+import { Account as LocalAcc } from "../models/account"
 import { AppState } from "@/state/appState";
 import { ChainConfigUtils } from "./chainConfigUtils";
 import { ListenerStateUtils } from "@/state/utils/listenerStateUtils";
@@ -588,7 +590,7 @@ export class TransactionUtils {
     selectedAddress: string,
     selectedMultisigAddress: string,
     walletPassword: string,
-    transaction: Transaction,
+    transaction?: string|string[],
     currentNodeTime?: UInt64
   ): Promise<{ txnPayload: string; hashLockTxnPayload?: string }> {
     return await TransactionUtils.signTxnWithPassword(
@@ -596,7 +598,6 @@ export class TransactionUtils {
       selectedMultisigAddress,
       walletPassword,
       transaction,
-      undefined,
       currentNodeTime
     );
   }
@@ -605,8 +606,7 @@ export class TransactionUtils {
     selectedAddress: string,
     selectedMultisigAddress: string,
     walletPassword: string,
-    transaction?: Transaction,
-    innerTransactions?: InnerTransaction[],
+    transaction?: string|string[],
     currentNodeTime?: UInt64
   ): Promise<{ txnPayload: string; hashLockTxnPayload?: string }> => {
     const genHash = networkState.currentNetworkProfile.generationHash;
@@ -629,21 +629,64 @@ export class TransactionUtils {
       1
     );
 
-    if (!selectedMultisigAddress) {
+    if (!selectedMultisigAddress && typeof transaction === "string") {
       // no cosigner, normal transaction
-      const signedTransaction = account.preV2Sign(transaction, genHash);
+      let txn = TransactionMapping.createFromPayload(transaction)
+      const signedTransaction = account.preV2Sign(txn, genHash);
       return { txnPayload: signedTransaction.payload };
     } else {
       // there is a cosigner, aggregate  bonded transaction
-      let innerTxn: InnerTransaction[] = innerTransactions ?? [];
-      const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(
-        Address.createFromRawAddress(selectedMultisigAddress)
+      let selectedMultisig: LocalAcc;
+      let selectedMultisigPublicKey: string;
+      let multisigPublicAccount: PublicAccount;
+
+      selectedMultisig = walletState.currentLoggedInWallet.others.find(
+        (account) => account.address == selectedMultisigAddress
       );
-      const multisigPublicAccount = PublicAccount.createFromPublicKey(
-        accInfo.publicKey,
-        AppState.networkType
-      );
-      innerTxn = [transaction.toAggregateV1(multisigPublicAccount)];
+
+      if(!selectedMultisig){
+        selectedMultisig = walletState.currentLoggedInWallet.accounts.find(
+          (account) => account.address == selectedMultisigAddress
+        );
+      }
+
+      selectedMultisigPublicKey = selectedMultisig ? selectedMultisig.publicKey: "";
+      let innerTxn = []
+
+      if(selectedMultisigPublicKey){
+        multisigPublicAccount = PublicAccount.createFromPublicKey(
+          selectedMultisigPublicKey,
+          AppState.networkType
+        );
+      }
+      else{
+        const accInfo = await AppState.chainAPI.accountAPI.getAccountInfo(
+          Address.createFromRawAddress(selectedMultisigAddress)
+        );
+
+        if(accInfo.publicKey == "0".repeat(64)){
+
+          if(!TransactionUtils.checkAllZeroPublicKeyAddress(selectedMultisigAddress, AppState.networkType)){
+            
+            throw new Error("No usable public key found for multisig account");
+          }
+        }
+
+        multisigPublicAccount = PublicAccount.createFromPublicKey(
+          accInfo.publicKey,
+          AppState.networkType
+        );
+      }
+      
+      if(typeof transaction !== "string"){
+        for(let i=0; i<transaction.length; ++i){
+          innerTxn.push(TransactionMapping.createFromPayload(transaction[i]).toAggregateV1(multisigPublicAccount))
+        }
+      }
+      else{
+        let txn = TransactionMapping.createFromPayload(transaction)
+        innerTxn = [txn.toAggregateV1(multisigPublicAccount)];
+      }
       const aggregateBondedTransaction = transactionBuilder.aggregateBonded(
         innerTxn,
         currentNodeTime
@@ -693,6 +736,16 @@ export class TransactionUtils {
       );
     }
   };
+
+  static checkAllZeroPublicKeyAddress(plainAddress: string, network: number){
+
+    const pubKey = "0".repeat(64);
+
+    const pubAcc = PublicAccount.createFromPublicKey(pubKey, network);
+
+    return plainAddress == pubAcc.address.plain()
+  }
+
 }
 
 export const isMultiSig = (address) => {

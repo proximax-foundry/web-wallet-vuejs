@@ -1,5 +1,5 @@
 <template>
-  <header class="fixed w-full" v-if="!walletState.isLogin">
+  <header class=" w-full" v-if="!walletState.isLogin">
     <div
       class="container mx-auto px-8 flex bg-gold-100 items-center justify-between h-12 pt-8"
     >

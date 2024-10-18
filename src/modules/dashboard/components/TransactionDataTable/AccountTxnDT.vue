@@ -53,10 +53,10 @@
           <div>
             <div class="uppercase text-xxs text-gray-300 font-bold mb-1 mt-5">{{$t('dashboard.info')}}</div>
             <div class="flex items-center">
-              <span v-bind:key="cosigner" v-tooltip.bottom="$t('dashboard.addingAcc') +'<br><br>' + cosigner" v-for="cosigner in data.addedCosigner" class="inline-block bg-green-200 font-bold text-green-700 text-txs rounded py-1 px-2 my-1">
+              <span v-bind:key="cosigner" v-tooltip.bottom="{ value: $t('dashboard.addingAcc') +'<br><br>' + cosigner, escape: false}" v-for="cosigner in data.addedCosigner" class="inline-block bg-green-200 font-bold text-green-700 text-txs rounded py-1 px-2 my-1">
                 {{ cosigner.substring(0, 20) }}...
               </span>
-              <span v-bind:key="cosigner" v-tooltip.bottom="$t('dashboard.removingAcc') +'<br><br>' + cosigner" v-for="cosigner in data.removedCosigner" class="inline-block bg-red-200 font-bold text-red-700 text-txs py-1 px-1 my-1">
+              <span v-bind:key="cosigner" v-tooltip.bottom="{ value: $t('dashboard.removingAcc') +'<br><br>' + cosigner, escape: false}" v-for="cosigner in data.removedCosigner" class="inline-block bg-red-200 font-bold text-red-700 text-txs py-1 px-1 my-1">
                 {{ cosigner.substring(0, 20) }}...
               </span>
               <span v-if="data.addedCosigner.length ==0  && data.removedCosigner.length ==0">-</span>
@@ -113,10 +113,10 @@
       </Column>
       <Column :header="$t('dashboard.info')" headerStyle="width:40px;" v-if="wideScreen">
         <template #body="{data}">
-          <span v-bind:key="cosigner" v-tooltip.bottom="$t('dashboard.addingAcc') +'<br><br>' + cosigner" v-for="cosigner in data.addedCosigner" class="inline-block bg-green-200 font-bold text-green-700 text-txs rounded py-1 px-2 my-1 mx-1">
+          <span v-bind:key="cosigner" v-tooltip.bottom="{ value: $t('dashboard.addingAcc') +'<br><br>' + cosigner, escape: false}" v-for="cosigner in data.addedCosigner" class="inline-block bg-green-200 font-bold text-green-700 text-txs rounded py-1 px-2 my-1 mx-1">
             {{ cosigner.substring(0, 20) }}...
           </span>
-          <span v-bind:key="cosigner" v-tooltip.bottom="$t('dashboard.removingAcc') +'<br><br>' + cosigner" v-for="cosigner in data.removedCosigner" class="inline-block bg-red-200 font-bold text-red-700 text-txs rounded py-1 px-1 my-1 mx-1">
+          <span v-bind:key="cosigner" v-tooltip.bottom="{ value: $t('dashboard.removingAcc') +'<br><br>' + cosigner, escape: false}" v-for="cosigner in data.removedCosigner" class="inline-block bg-red-200 font-bold text-red-700 text-txs rounded py-1 px-1 my-1 mx-1">
             {{ cosigner.substring(0, 20) }}...
           </span>
           <span v-if="data.addedCosigner.length ==0  && data.removedCosigner.length ==0">-</span>

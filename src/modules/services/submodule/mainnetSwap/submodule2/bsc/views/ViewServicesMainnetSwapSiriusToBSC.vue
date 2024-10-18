@@ -64,6 +64,7 @@
               </div>
             </div>
           </div>
+          <div class="error error_box mb-5" v-if="selectErr===true">Please select one of options</div>
           <div class="text-sm text-center mb-2 sm:mb-4">{{$t('swap.feesValidDuration')}}: {{ timerMinutes }}:{{ timerSecondsDisplay >= 10 ? timerSecondsDisplay : "0" + timerSecondsDisplay }}</div>
           <div class="tex-center font-bold text-sm mb-2">{{$t('general.transactionFee')}} ({{$t('swap.siriusNetwork')}}):</div>
           <div class="rounded-2xl bg-gray-100 p-5 mb-5">
@@ -165,7 +166,7 @@
           <button type="button" class="w-40 hover:shadow-lg bg-blue-primary text-white text-xs hover:opacity-50 rounded font-bold px-4 py-3 border border-blue-primary outline-none mr-4 mt-6" @click="saveCertificate">{{$t('general.downloadCertificate')}}</button>
           <div class="mt-5">
             <a :href="swapLink" target=_new class="underline self-center text-xs font-bold text-blue-primary">{{$t('swap.viewTxInBsc')}}<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a><br>
-            <a :href="xpxExplorerUrl" target=_new class="underline self-center text-xs font-bold text-blue-primary">{{$t('swap.viewTxInExplorer')}}<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a>
+            <a :href="xpxExplorerUrl+siriusTransactionHash" target=_new class="underline self-center text-xs font-bold text-blue-primary">{{$t('swap.viewTxInExplorer')}}<font-awesome-icon icon="external-link-alt" class="ml-2 text-blue-500 w-3 h-3 self-center inline-block"></font-awesome-icon></a>
           </div>
           <div class="md:mx-20 lg:mx-40 font-bold text-center text-tsm py-5 sm:py-10 mt-5 sm:mt-10 border-t border-gray-200">{{$t('swap.swapDetails')}}</div>
           <div class="md:mx-20 lg:mx-10 xl:mx-40 border-2 border-gray-200 mt-4 p-5 text-xs font-bold filter shadow-lg">
@@ -271,6 +272,7 @@ export default {
     const selectedAccountAddress = ref("");
     const selectedAccountPublicKey = ref("");
     const selectedAccountBalance = ref(0);
+    const selectErr = ref(false)
     const selectAccount = (name, address) => {
       currentPage.value = 2;
       selectedAccountName.value = name;
@@ -779,7 +781,7 @@ export default {
       swapInProgress.value = true;
       isDisabledCancel.value = true;
       try{
-        let validateAddress = ethers.utils.getAddress(bscAddress.value);
+        let validateAddress = ethers.getAddress(bscAddress.value);
         if(validateAddress){
           showAddressErr.value = false;
         }
@@ -945,8 +947,14 @@ export default {
     };
 
     const validated = () => {
+      if(bscGasStrategy.value === ""){
+        selectErr.value = true
+        return
+      }else{
+        selectErr.value = false
+      }
       try{
-        let validateAddress = ethers.utils.getAddress(bscAddress.value);
+        let validateAddress = ethers.getAddress(bscAddress.value);
         if(validateAddress && !showAmountErr.value){
           showAddressErr.value = false;
           currentPage.value = 2;
@@ -1020,7 +1028,8 @@ export default {
       tokenList,
       selectedToken,
       selectedTokenName,
-      validated
+      validated,
+      selectErr
     };
   }
 }

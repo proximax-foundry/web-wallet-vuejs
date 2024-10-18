@@ -293,7 +293,7 @@ export default {
       selectedStableCoins.value = contracts;
 
       let promises = [];
-      const web3Provider = new ethers.providers.Web3Provider(provider);
+      const web3Provider = new ethers.BrowserProvider(provider);
       const signer = web3Provider.getSigner();
       const address = await signer.getAddress();
 
@@ -588,7 +588,7 @@ export default {
 
       try {
         isSubmit.value = true;
-        const web3Provider = new ethers.providers.Web3Provider(provider);
+        const web3Provider = new ethers.BrowserProvider(provider);
         const signer = web3Provider.getSigner();
         const address = await signer.getAddress();
 
@@ -597,7 +597,7 @@ export default {
         if (provider.wc) {
           signedMessageSignature = await provider.send(
               'personal_sign',
-              [ ethers.utils.hexlify(ethers.utils.toUtf8Bytes(siriusAddress.value)), address.toLowerCase() ]
+              [ ethers.hexlify(ethers.toUtf8Bytes(siriusAddress.value)), address.toLowerCase() ]
           );
         }
         else { 
@@ -612,8 +612,8 @@ export default {
         let ABI = [
         "function transfer(address to, uint amount)"
         ];
-        let iface = new ethers.utils.Interface(ABI);
-        let dataPayload = iface.encodeFunctionData("transfer", [ address, ethers.utils.parseUnits(fromInputAmount.value.toString(), decimals) ])
+        let iface = new ethers.Interface(ABI);
+        let dataPayload = iface.encodeFunctionData("transfer", [ address, ethers.parseUnits(fromInputAmount.value.toString(), decimals) ])
 
         console.log(dataPayload);
         
@@ -630,7 +630,7 @@ export default {
           data: dataPayload
         };
 
-        let receipt = await signer.sendTransaction(tx);
+        let receipt = await signer.broadcastTransaction(tx);
 
         console.log(receipt);
         */
@@ -640,7 +640,7 @@ export default {
         };
         const receipt = await contract.transfer(
           selectedRemoteSinkAddress.value,
-          ethers.utils.parseUnits(fromInputAmount.value.toString(), decimals)
+          ethers.parseUnits(fromInputAmount.value.toString(), decimals)
           //options,
         );
 

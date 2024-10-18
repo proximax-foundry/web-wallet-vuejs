@@ -548,7 +548,7 @@ export default {
       swapInProgress.value = true;
       isDisabledCancel.value = true;
       try{
-        let validateAddress = ethers.utils.getAddress(ethAddress.value);
+        let validateAddress = ethers.getAddress(ethAddress.value);
         if(validateAddress){
           showAddressErr.value = false;
         }
