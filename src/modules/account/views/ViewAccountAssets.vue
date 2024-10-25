@@ -17,7 +17,7 @@
                         <template #body="{ data }" headerClass="w-96">
                             <a :href="explorerLink(data.id)" target=_new class="col-span-2">
                                 <div
-                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointertext-blue-primary pr-7 ">
+                                    class="text-blue-primary uppercase w-min-max text-xs mt-1.5 cursor-pointer text-blue-primary pr-7 ">
                                     {{ data.id }}</div>
                             </a>
                         </template>

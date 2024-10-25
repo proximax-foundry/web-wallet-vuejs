@@ -1,10 +1,7 @@
 <template>
-  <div>
-
-    <div class='w-10/12 ml-auto mr-auto'>
-      <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8">
-        <div class="xl:col-span-2 p-12">
-          <div class='font-semibold mb-4'>{{ $t('general.createNamespace') }}</div>
+  <TransactionLayout class="mt-8">
+    <template #white>
+      <div class='font-semibold mb-4'>{{ $t('general.createNamespace') }}</div>
           <div v-if="showNoBalance" class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center">
             <div class="rounded-full w-5 h-5 border border-red-500 inline-block relative mr-2"><font-awesome-icon
                 icon="times" class="text-red-500 h-3 w-3 absolute" style="top: 3px; left:4px"></font-awesome-icon></div>
@@ -13,12 +10,12 @@
           <div class="error error_box" v-if="err != ''">{{ err }}</div>
           <div class="mt-4">
             <div class="flex gap-1 mt-3">
-              <SelectInputAccount :type="'namespace'"/>
-              <SelectInputMultisigAccount :selected-address="selectedAddress" />
+              <SelectInputAccount :type="'namespace'" :label="'create namespace'" @select-account="selectAccountAddress" />
+              <SelectInputMultisigAccount :selected-address="selectedAddress" @select-multisig-account="selectMultisigAccount" />
             </div>
             <div v-if="selectedMultisigAddress" class="mt-3">
               <MultisigInput :select-default-address="selectedMultisigAddress"
-                :select-default-name="selectedMultisigName" :type="'namespace'"/>
+                :select-default-name="selectedMultisigName" :type="'namespace'" @close-multisig="closeMultisig" />
             </div>
             <SelectInputParentNamespace @select-namespace="updateNamespaceSelection" @clear-namespace="removeNamespace"
               ref="nsRef" v-model="selectNamespace"
@@ -40,25 +37,22 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
-          <TxnSummary :signer-native-token-balance="balance" :namespace-rental-fee-currency="rentalFeeCurrency"
+    </template>
+
+    <template #navy>
+      <TxnSummary :signer-native-token-balance="balance" :namespace-rental-fee-currency="rentalFeeCurrency"
             :native-token-balance="selectedMultisigAddress ? multisigBalance : balance" :lock-fund="lockFund" :lock-fund-tx-fee="lockFundTxFee"
             :selected-multisig-address="selectedMultisigAddress" :txn-fee="transactionFeeExact" :total-fee="totalFee" />
-          <div class='text-xs text-white my-5'>{{ $t('general.enterPasswordContinue') }}</div>
-          <PasswordInput :placeholder="$t('general.password')" :errorMessage="$t('general.passwordRequired')"
-            :showError="showPasswdError" v-model="walletPassword" :disabled="disabledPassword" />
           <button type="submit" class="mt-3 w-full blue-btn py-4 disabled:opacity-50 disabled:cursor-auto text-white"
             :disabled="disableCreate" @click="createNamespace">{{ $t('namespace.registerNamespace') }}</button>
           <div class="text-center">
             <router-link :to="{ name: 'ViewDashboard' }"
               class='content-center text-xs text-white border-b-2 border-white'>{{ $t('general.cancel') }}</router-link>
           </div>
-        </div>
-      </div>
+    </template>
 
-      <div class="sm:grid sm:grid-cols-2 mt-10 lg:mt-16">
-        <div class="mb-8 sm:pr-1">
+    <template #description>
+      <div class="mb-8 sm:pr-1">
           <a href="https://bcdocs.xpxsirius.io/docs/built-in-features/namespace/" target=_new
             class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">{{ $t('general.namespaceQues')
             }}</a>
@@ -69,23 +63,21 @@
             class="sm:h-9 lg:h-5 text-blue-primary font-bold text-tsm items-start flex">{{ $t('general.feedback') }}</a>
           <div class="text-gray-400 text-tsm my-3">{{ $t('general.feedbackDescription') }}</div>
         </div>
-      </div>
-    </div>
-  </div>
+    </template>
+  </TransactionLayout>
 </template>
  
 <script setup lang="ts">
 import { computed, getCurrentInstance, ref, watch } from 'vue';
 import { useRouter } from "vue-router";
-import PasswordInput from '@/components/PasswordInput.vue';
 import TextInputTooltip from '@/components/TextInputTooltip.vue';
 import SelectInputParentNamespace from '@/modules/services/submodule/namespaces/components/SelectInputParentNamespace.vue';
 import DurationInputClean from '@/modules/services/submodule/namespaces/components/DurationInputClean.vue';
-import SelectInputAccount from '@/modules/transfer/components/SelectInputAccount.vue';
-import SelectInputMultisigAccount from '@/modules/transfer/components/SelectInputMultisigAccount.vue';
-import MultisigInput from "@/modules/transfer/components/MultisigInput.vue"
+import SelectInputAccount from '@/components/SelectInputAccount.vue';
+import SelectInputMultisigAccount from '@/components/SelectInputMultisigAccount.vue';
+import MultisigInput from "@/components/MultisigInput.vue"
 import TxnSummary from "@/components/TxnSummary.vue"
-import { walletState } from "@/state/walletState";
+import TransactionLayout from "@/components/TransactionLayout.vue";
 import { networkState } from "@/state/networkState";
 import { Helper } from '@/util/typeHelper';
 import { NamespaceUtils } from '@/util/namespaceUtils';
@@ -95,7 +87,6 @@ import { UnitConverter } from '@/util/unitConverter';
 import { TimeUnit } from '@/models/const/timeUnit';
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
-import { WalletUtils } from '@/util/walletUtils';
 import type {TreeNode } from "primevue/treenode"
 import { Address, UInt64 } from 'tsjs-xpx-chain-sdk';
 import { TransactionState } from '@/state/transactionState';
@@ -111,11 +102,9 @@ const disableSelectNamespace = ref(false);
 const namespaceName = ref('');
 const showDurationErr = ref(false);
 const duration = ref('1');
-const walletPassword = ref('');
 const err = ref('');
 const namespaceErrorMessage = ref(t('namespace.validName'));
 const currentSelectedName = ref('');
-const disabledPassword = ref(false);
 const disabledDuration = ref(false);
 const disabledClear = ref(false);
 const passwdPattern = "^[^ ]{8,}$";
@@ -174,7 +163,7 @@ const lockFundTxFee = computed(() => {
 const lockFundTotalFee = computed(() => lockFund.value + lockFundTxFee.value);
 
 const disableCreate = computed(() => !(
-  walletPassword.value.match(passwdPattern) && namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && !showNamespaceNameError.value && selectNamespace.value
+  namespaceName.value.match(namespacePattern) && (!showDurationErr.value) && (!showNoBalance.value) && !showNamespaceNameError.value && selectNamespace.value
 ));
 
 const selectedMultisigAddress = ref<string | null>(null)
@@ -226,13 +215,11 @@ const showNoBalance = computed(() => {
 
 // validate enough fee to create namespace
 if (balance.value < rentalFee.value) {
-  disabledPassword.value = true;
   disabledClear.value = true;
   disabledDuration.value = true;
   disableNamespaceName.value = true;
   disableSelectNamespace.value = true;
 } else {
-  disabledPassword.value = false;
   disabledClear.value = false;
   disabledDuration.value = false;
   disableNamespaceName.value = false;
@@ -273,50 +260,22 @@ watch(selectNamespace, newValue => {
   if (!newValue) {
     disableNamespaceName.value = true;
     disabledDuration.value = true;
-    disabledPassword.value = true;
   } else {
     disableNamespaceName.value = false;
-    disabledDuration.value = false;
-    disabledPassword.value = false;
   }
 }, { immediate: true })
 
-const createNamespace = async() => {
-  let verifyPassword = WalletUtils.verifyWalletPassword(walletState.currentLoggedInWallet.name, networkState.chainNetworkName, walletPassword.value)
-  if (!verifyPassword) {
-    err.value = t('general.walletPasswordInvalid', { name: walletState.currentLoggedInWallet.name })
-    return
-  }
-  let namespacePayload : {
-    txnPayload: string,
-    hashLockTxnPayload?: string
-  },{} = {}
+const createNamespace = () => {
   let buildTransactions = AppState.buildTxn;
-  const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime(); 
   if (selectNamespace.value === '1') {
-    let registerRootNamespaceTransaction = buildTransactions.registerRootNamespace(namespaceName.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value))));
-    namespacePayload = await TransactionUtils.signTxnWithPassword(
-      selectedAddress.value,
-      selectedMultisigAddress.value,
-      walletPassword.value,
-      registerRootNamespaceTransaction,
-      undefined,
-      new UInt64(nodeTime.sendTimeStamp)
-    );
+    let unsignedRegisterRootNamespaceTransaction = buildTransactions.registerRootNamespace(namespaceName.value, UInt64.fromUint(NamespaceUtils.calculateDuration(Number(duration.value)))).serialize();
+    TransactionState.unsignedTransactionPayload = unsignedRegisterRootNamespaceTransaction
   } else {
-    let registerSubNamespaceTransaction = buildTransactions.registersubNamespace(selectNamespace.value, namespaceName.value);
-    namespacePayload = await TransactionUtils.signTxnWithPassword(
-      selectedAddress.value,
-      selectedMultisigAddress.value,
-      walletPassword.value,
-      registerSubNamespaceTransaction, 
-      undefined, 
-      new UInt64(nodeTime.sendTimeStamp)
-    );
+    let unsignedRegisterSubNamespaceTransaction = buildTransactions.registersubNamespace(selectNamespace.value, namespaceName.value).serialize();
+    TransactionState.unsignedTransactionPayload = unsignedRegisterSubNamespaceTransaction
   }
-  TransactionState.lockHashPayload = namespacePayload.hashLockTxnPayload
-  TransactionState.transactionPayload = namespacePayload.txnPayload
   TransactionState.selectedAddress = selectedAddress.value
+  TransactionState.selectedMultisigAddress = selectedMultisigAddress.value
   router.push({ name: "ViewConfirmTransaction" })
 };
 
@@ -343,10 +302,8 @@ const totalFee = computed(() => {
 
 watch(totalFee, (newValue) => {
   if (balance.value < newValue) {
-    disabledPassword.value = true;
     disableSelectNamespace.value = true;
   } else {
-    disabledPassword.value = false;
     disableSelectNamespace.value = false;
   }
 });
@@ -487,18 +444,19 @@ watch(namespaceName, newValue => {
   }
 })
 
-emitter.on("select-account", (address: string) => {
-  selectedAddress.value = address
-})
+const selectAccountAddress = (address: string) => {
+    selectedAddress.value = address
+}
 
-emitter.on("select-multisig-account", (node: TreeNode) => {
-  selectedMultisigName.value = node.label
-  selectedMultisigAddress.value = node.value
-})
-emitter.on("CLOSE_MULTISIG", () => {
-  selectedMultisigName.value = null
-  selectedMultisigAddress.value = null
-})
+const selectMultisigAccount = (node: TreeNode) => {
+    selectedMultisigName.value = node.label
+    selectedMultisigAddress.value = node.value
+}
+
+const closeMultisig = () => {
+    selectedMultisigName.value = null
+    selectedMultisigAddress.value = null
+}
 
 </script>
 <style scoped lang="scss">

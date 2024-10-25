@@ -91,7 +91,7 @@
       </button>
       <div
         class="text-center cursor-pointer font-semibold text-xs text-gray-500 mt-2"
-        @click="isDisplayAddCustomPanel = false"
+        @click="isDisplayAddCustomPanel = false, selectContactGroups = { value: `-none-`, label: ` - ` }"
       >
         {{ $t("general.cancel") }}
       </div>

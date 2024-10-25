@@ -1,7 +1,7 @@
 <template>
-    <Tree :value="account" selectionMode="single" v-on:update:selection-keys="selectedMultisig" :expandedKeys="expandedKeys"
+    <Tree :value="account" selectionMode="single" :expandedKeys="expandedKeys"
       :filter="true" filterMode="strict" v-on:node-select="onSelect" @node-expand="expandTree"
-      @node-collapse="collapseTree">
+      @node-collapse="collapseTree" v-model:selection-keys="selectedMultisig">
     </Tree>
   </template>
 

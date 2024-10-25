@@ -39,54 +39,57 @@
           <div class="bg-yellow-200 text-yellow-900 text-tsm p-3 mb-5 rounded-2xl" v-if="!verifyMetaMaskPlugin">{{$t('swap.noOtherExtension')}} <b>{{$t('swap.metamask')}}</b>.<div class="my-2">{{$t('swap.referTo')}}<a href="https://bit.ly/3mVayCu" target=_new class="text-blue-primary">{{$t('swap.walkthrough')}}<font-awesome-icon icon="external-link-alt" class="text-blue-primary w-3 h-3 self-center inline-block ml-1"></font-awesome-icon></a>{{$t('swap.forMoreDetails')}}</div>{{$t('swap.refreshMsg')}}</div>
           <div class="error error_box mb-5" v-if="serviceErr!=''">{{ serviceErr }}</div>
           <div class="error error_box mb-5" v-if="err!=''">{{ err }}</div>
-          <div class="mb-5 md:flex md:justify-between border border-gray-200 rounded">
-            <div class="flex justify-left">
-              <div class="w-18 flex items-center justify-center py-5 sm:h-20">
-                <img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask-fox.svg" class="w-8 h-8 inline-block">
+          <div class="mb-5">
+            <div class="md:flex md:justify-between border border-gray-200 rounded">
+              <div class="flex justify-left">
+                <div class="w-18 flex items-center justify-center py-5 sm:h-20">
+                  <img src="@/modules/services/submodule/mainnetSwap/img/icon-metamask-fox.svg" class="w-8 h-8 inline-block">
+                </div>
+                <div class="text-left flex items-center">
+                  <div>
+                    <div class="text-xxs uppercase text-blue-primary font-bold mb-1">{{$t('swap.fromMetamaskAddress')}}</div>
+                    <div class="font-bold text-black text-tsm break-all mr-2">{{ isMetamaskConnected?(currentAccount?currentAccount:$t('swap.notConnected')):$t('swap.notConnected') }}</div>
+                  </div>
+                </div>
               </div>
-              <div class="text-left flex items-center">
-                <div>
-                  <div class="text-xxs uppercase text-blue-primary font-bold mb-1">{{$t('swap.fromMetamaskAddress')}}</div>
-                  <div class="font-bold text-black text-tsm break-all mr-2">{{ isMetamaskConnected?(currentAccount?currentAccount:$t('swap.notConnected')):$t('swap.notConnected') }}</div>
+              <div class="md:grid hidden " :class="currentAccount?'grid-cols-2':'grid-cols-1'">
+                <div class="border-l border-gray-200 text-green-500 font-semibold text-xxs w-16 lg:w-20 flex items-center justify-center uppercase" v-if="currentAccount">
+                  <div>
+                    <img src="@/modules/services/submodule/mainnetSwap/img/icon-connected.svg" class="inline-block">
+                    <div>{{$t('swap.connected')}}</div>
+                  </div>
+                </div>
+                <div class="border-l border-gray-200 text-blue-primary text-tsm font-bold w-16 lg:w-20 flex justify-center items-center">
+                  <div v-if="isInstallMetamask">
+                    <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">{{$t('swap.connect')}}</div>
+                    <div class="cursor-pointer" @click="changeMetamask()" v-else>{{$t('general.change')}}</div>
+                  </div>
+                  <div v-else>
+                    <a href="https://metamask.io/" target=_new>{{$t('general.download')}}</a>
+                  </div>
+                </div>
+              </div>
+              <div class="md:hidden">
+                <div class="border-t border-gray-200 text-green-500 font-semibold text-xxs uppercase p-2" v-if="currentAccount">
+                  <div class="flex items-center justify-center">
+                    <img src="@/modules/services/submodule/mainnetSwap/img/icon-connected.svg" class="inline-block mr-2 w-4 h-4">
+                    {{$t('swap.connected')}}
+                  </div>
+                </div>
+                <div class="border-t border-gray-200 text-blue-primary text-tsm font-bold p-3">
+                  <div v-if="isInstallMetamask">
+                    <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">{{$t('swap.connect')}}</div>
+                    <div class="cursor-pointer" @click="changeMetamask()" v-else>{{$t('general.change')}}</div>
+                  </div>
+                  <div v-else>
+                    <a href="https://metamask.io/" target=_new>{{$t('general.download')}}</a>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="md:grid hidden " :class="currentAccount?'grid-cols-2':'grid-cols-1'">
-              <div class="border-l border-gray-200 text-green-500 font-semibold text-xxs w-16 lg:w-20 flex items-center justify-center uppercase" v-if="currentAccount">
-                <div>
-                  <img src="@/modules/services/submodule/mainnetSwap/img/icon-connected.svg" class="inline-block">
-                  <div>{{$t('swap.connected')}}</div>
-                </div>
-              </div>
-              <div class="border-l border-gray-200 text-blue-primary text-tsm font-bold w-16 lg:w-20 flex justify-center items-center">
-                <div v-if="isInstallMetamask">
-                  <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">{{$t('swap.connect')}}</div>
-                  <div class="cursor-pointer" @click="connectMetamask()" v-else>{{$t('general.change')}}</div>
-                </div>
-                <div v-else>
-                  <a href="https://metamask.io/" target=_new>{{$t('general.download')}}</a>
-                </div>
-              </div>
-            </div>
-            <div class="md:hidden">
-              <div class="border-t border-gray-200 text-green-500 font-semibold text-xxs uppercase p-2" v-if="currentAccount">
-                <div class="flex items-center justify-center">
-                  <img src="@/modules/services/submodule/mainnetSwap/img/icon-connected.svg" class="inline-block mr-2 w-4 h-4">
-                  {{$t('swap.connected')}}
-                </div>
-              </div>
-              <div class="border-t border-gray-200 text-blue-primary text-tsm font-bold p-3">
-                <div v-if="isInstallMetamask">
-                  <div class="cursor-pointer" @click="connectMetamask()" v-if="!currentAccount">{{$t('swap.connect')}}</div>
-                  <div class="cursor-pointer" @click="connectMetamask()" v-else>{{$t('general.change')}}</div>
-                </div>
-                <div v-else>
-                  <a href="https://metamask.io/" target=_new>{{$t('general.download')}}</a>
-                </div>
-              </div>
-            </div>
+            <div class="mt-1 text-xs">Please connect your account and switch to it in MetaMask</div>
           </div>
-          <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'BEP20 ' + `${selectedToken?selectedToken.name:''}`" type="text" :showError="showAmountErr" :errorMessage="(!amount)?'Required Field':amount>=minAmount?$t('swap.insufficientTokenBalance'):`Min. amount is ${minAmount}(${feeAmount} ${selectedToken.name.toUpperCase()} will deducted for transaction fee)`" :decimal="tokenDivisibility"  />
+          <SupplyInputClean :disabled="disableAmount" v-model="amount" :balance="balance" :placeholder="'BEP20 ' + `${selectedToken?selectedToken.name:''}`" type="text" :showError="showAmountErr" :errorMessage="checkTokenAmount()" :decimal="tokenDivisibility"  />
           <div class="flex">
             <AddressInputClean :placeholder="$t('transfer.transferPlaceholder')" v-model="siriusAddress" v-debounce:1000="checkRecipient" :showError="showAddressError" />
             <div @click="toggleContact=!toggleContact" class=' border rounded-md cursor-pointer flex flex-col justify-around p-2 ' >
@@ -516,7 +519,7 @@ export default {
 
     const initMetamask = ()=>{
        if (typeof window.ethereum !== 'undefined') {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
+        provider = new ethers.BrowserProvider(window.ethereum);
         signer = provider.getSigner();
         isInstallMetamask.value = true;
         isMetamaskConnected.value = ethereum.isConnected()?true:false;
@@ -552,12 +555,32 @@ export default {
     }
 
     const recheckMetamask = () =>{
-      if(window.ethereum){
-        initMetamask()
-        if(!window.ethereum.isMetaMask){
-          verifyMetaMaskPlugin.value = false;
-        }
-      }
+      window.location.reload();
+    }
+
+    function changeMetamask() {
+      ethereum
+          .request({
+              method: "wallet_requestPermissions",
+              params: [{ eth_accounts: {} }],
+          })
+          .then((permissions) => {
+              const accountsPermission = permissions.find(
+                  (permission) => permission.parentCapability === "eth_accounts"
+              );
+              console.log(accountsPermission)
+              if (accountsPermission) {
+                  console.log("eth_accounts permission successfully requested!");
+              }
+          })
+          .catch((error) => {
+              if (error.code === 4001) {
+                  // EIP-1193 userRejectedRequest error
+                  console.log("Permissions needed to continue.");
+              } else {
+                  console.error(error);
+              }
+          });
     }
 
     function fetchMetaAccount(accounts) {
@@ -642,11 +665,12 @@ export default {
       if(newTokenAddress != undefined && newTokenAddress != ''){
         (async () => {
           try{
-            provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-            signer = provider.getSigner();
-            const contract = new ethers.Contract(newTokenAddress, abi, signer);
+            provider = new ethers.BrowserProvider(window.ethereum, 'any');
+            //signer = provider.getSigner();
+            const contract = new ethers.Contract(newTokenAddress, abi, provider);
+            // tokenBalance will be in BigNumber, with suffix n
             const tokenBalance = await contract.balanceOf(newCurrentAccount);
-            balance.value = tokenBalance.toNumber()/Math.pow(10, tokenDivisibility.value);
+            balance.value = bigNumStringToNumber(tokenBalance.toString(), tokenDivisibility.value);
           }catch(err) {
             balance.value = 0;
           }
@@ -654,7 +678,17 @@ export default {
       }
     });
 
-   
+    const bigNumStringToNumber = (stringNum, divisibility)=>{
+      const stringLength = stringNum.length;
+      if(stringLength > divisibility){
+        return Number(
+          stringNum.substring(0, stringLength - divisibility)+
+            "."+ stringNum.substring(stringLength - divisibility)
+          )
+      }else{
+        return Number("0."+ stringNum.padStart(divisibility, "0"))
+      }
+    }
 
     const step1 = ref(false);
     const step2 = ref(false);
@@ -752,8 +786,8 @@ export default {
       try{
         err.value = '';
         isInvalidConfirmedMeta.value = false;
-        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-        signer = provider.getSigner();
+        provider = new ethers.BrowserProvider(window.ethereum, 'any');
+        signer = await provider.getSigner();
         const Contract = new ethers.Contract(tokenAddress.value, abi, signer);
         const data = await SwapUtils.getBSC_GasLimit(swapData.gasPriceConsultURL);
         var options = {
@@ -761,7 +795,7 @@ export default {
         };
         const receipt = await Contract.transfer(
           custodian.value,
-          ethers.utils.parseUnits(amount.value, tokenDivisibility.value),
+          ethers.parseUnits(amount.value, tokenDivisibility.value),
           options,
         );
         validationHash.value = receipt.hash;
@@ -776,10 +810,10 @@ export default {
           //   isInvalidConfirmedMeta.value = true;
           // }
         }
-      }catch(err){
+      }catch(error){
         isInvalidConfirmedMeta.value = true;
-        if(err.code = '-32000'){
-          err.value = err.message;
+        if(error.code == '-32000'){
+          err.value = error.message;
         }
       }
     };
@@ -829,8 +863,8 @@ export default {
     const getSigned = async () => {
       try{
         isInvalidSignedMeta.value = false;
-        provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-        signer = provider.getSigner();
+        provider = new ethers.BrowserProvider(window.ethereum, 'any');
+        signer = await provider.getSigner();
         const messageSignature = await signer.signMessage(Address.createFromRawAddress(siriusAddress.value).pretty());
         messageHash.value = messageSignature;
         const data = {
@@ -925,8 +959,29 @@ export default {
     };
 
     const savedCheck = ref(false);
+    const checkTokenAmount = ()=>{
+      if(!selectedToken.value){
+        return "";
+      }
+
+      if(!amount.value){
+        return 'Required Field';
+      }
+      else{
+        if(amount.value <= minAmount.value){
+          return `Min. amount is ${minAmount.value}(${feeAmount.value} ${selectedToken.value.name.toUpperCase()} will deducted for transaction fee)`;
+        }
+        else if(balance.value < amount.value){
+          return t('swap.insufficientTokenBalance')
+        }
+        else{
+          return "";
+        }
+      }
+    }
 
     return {
+      checkTokenAmount,
       recheckMetamask,
       contacts,
       err,
@@ -993,6 +1048,7 @@ export default {
       selectedToken,
       checkRecipient,
       showAddressError,
+      changeMetamask,
     };
   },
 }

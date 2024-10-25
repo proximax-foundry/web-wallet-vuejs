@@ -18,7 +18,7 @@
 </template>
   
 <script setup lang="ts">
-import { ref, getCurrentInstance, toRefs, watch, PropType } from 'vue';
+import { ref, toRefs, watch, PropType } from 'vue';
 import { walletState } from '@/state/walletState';
 import {  PublicAccount } from 'tsjs-xpx-chain-sdk';
 import { AppState } from '@/state/appState';
@@ -33,16 +33,17 @@ const props = defineProps({
     }
 })
 
-defineEmits([
+const emit = defineEmits([
     'select-multisig-account', 'update:modelValue'
 ])
 
 const { selectedAddress } = toRefs(props)
 
-const accounts = ref<{ label: string, value: string }[]>([])
+const accounts = ref<{ key: string, label: string, value: string }[]>([])
 
-const internalInstance = getCurrentInstance();
-const emitter = internalInstance.appContext.config.globalProperties.emitter;
+const selectedMultisigAddress = ref<string | null>(null)
+
+const selectedMultisigName = ref<string | null>(null)
 
 watch(selectedAddress, (n) => {
     if(n == null){
@@ -59,15 +60,16 @@ watch(selectedAddress, (n) => {
                 walletState.currentLoggedInWallet.convertAddressToName(PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain())?
                 walletState.currentLoggedInWallet.convertAddressToName(PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain()) : PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain(),
             value: PublicAccount.createFromPublicKey(x.publicKey,AppState.networkType).address.plain(),
-            publicKey: x.publicKey
+            publicKey: x.publicKey,
+            key: x.publicKey
         }
     }) : []
 
 })
 
 const onNodeSelect = (node: TreeNode) => {
-    emitter.emit('update:modelValue', node?.value); 
-    emitter.emit('select-multisig-account', node);
+    emit('update:modelValue', node?.value); 
+    emit('select-multisig-account', node);
     isSelected.value = false;
 };
 

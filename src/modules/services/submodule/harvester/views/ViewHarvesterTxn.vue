@@ -1,9 +1,7 @@
 <template>
-  <div>
-    <div class="w-10/12 ml-auto mr-auto">
-      <div class="border filter shadow-lg xl:grid xl:grid-cols-3 mt-8">
-        <div class="xl:col-span-2 p-12">
-          <div class="font-semibold mb-4">Harvester Transaction</div>
+  <TransactionLayout class="mt-8">
+    <template #white>
+      <div class="font-semibold mb-4">Harvester Transaction</div>
           <div
             v-if="showNoBalance"
             class="rounded-md bg-red-200 w-full p-2 flex items-center justify-center"
@@ -24,8 +22,8 @@
           <div class="error error_box" v-if="err != ''">{{ err }}</div>
           <div class="mt-4">
             <div class="flex gap-1 mt-3">
-              <SelectInputAccount :type="'dynamic'" :label="'Add Harvester'" />
-              <SelectInputMultisigAccount :selected-address="selectedAddress" />
+              <SelectInputAccount :type="'dynamic'" :label="'Add Harvester'" @select-account="selectAccountAddress" @select-account-public-key="selectedAccountPublicKey" />
+              <SelectInputMultisigAccount :selected-address="selectedAddress" @select-multisig-account="selectMultisigAccount" />
             </div>
             <div v-if="selectedMultisigAddress" class="mt-3">
               <MultisigInput
@@ -33,6 +31,7 @@
                 :select-default-name="selectedMultisigName"
                 label="Multisig account selected"
                 :type="'dynamic'"
+                @close-multisig="closeMultisig"
               />
             </div>
           </div>
@@ -51,9 +50,10 @@
               :showError="showHarvesterError"
             />
           </div>
-        </div>
-        <div class="bg-navy-primary py-6 px-6 xl:col-span-1">
-          <TxnSummary
+    </template>
+
+    <template #navy>
+      <TxnSummary
             :signer-native-token-balance="balance"
             :native-token-balance="
               selectedMultisigAddress ? multisigBalance : balance
@@ -63,16 +63,6 @@
             :selected-multisig-address="selectedMultisigAddress"
             :txn-fee="transactionFeeExact"
             :total-fee="Number(totalFeeFormatted)"
-          />
-          <div class="text-xs text-white my-5">
-            {{ $t("general.enterPasswordContinue") }}
-          </div>
-          <PasswordInput
-            :placeholder="$t('general.password')"
-            :errorMessage="$t('general.passwordRequired')"
-            :showError="showPasswdError"
-            v-model="walletPassword"
-            :disabled="disabledPassword"
           />
           <button
             type="submit"
@@ -89,10 +79,8 @@
               >{{ $t("general.cancel") }}</router-link
             >
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
+    </template>
+  </TransactionLayout>
 </template>
 
 <script setup lang="ts">
@@ -100,12 +88,12 @@ import { computed, getCurrentInstance, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import PublicKeyInputClean from "@/modules/services/submodule/harvester/components/PublicKeyInputClean.vue";
-import SelectInputAccount from "@/modules/transfer/components/SelectInputAccount.vue";
+import SelectInputAccount from "@/components/SelectInputAccount.vue";
+import SelectInputMultisigAccount from "@/components/SelectInputMultisigAccount.vue";
+import MultisigInput from "@/components/MultisigInput.vue"
 import SelectActionType from "@/modules/services/submodule/harvester/components/SelectActionType.vue";
-import SelectInputMultisigAccount from "@/modules/transfer/components/SelectInputMultisigAccount.vue";
-import MultisigInput from "@/modules/transfer/components/MultisigInput.vue";
-import PasswordInput from "@/components/PasswordInput.vue";
 import TxnSummary from "@/components/TxnSummary.vue";
+import TransactionLayout from "@/components/TransactionLayout.vue";
 import { useI18n } from "vue-i18n";
 import { walletState } from "@/state/walletState";
 import { networkState } from "@/state/networkState";
@@ -119,7 +107,7 @@ import {
   HarvesterInfo,
   PublicAccount,
   RemoveHarvesterTransactionBuilder,
-  UInt64
+  UInt64,
 } from "tsjs-xpx-chain-sdk";
 import type { TreeNode } from "primevue/treenode";
 import { TransactionState } from "@/state/transactionState";
@@ -129,7 +117,6 @@ const router = useRouter();
 
 const internalInstance = getCurrentInstance();
 const emitter = internalInstance.appContext.config.globalProperties.emitter;
-const walletPassword = ref("");
 const { t } = useI18n();
 const err = ref("");
 const passwdPattern = "^[^ ]{8,}$";
@@ -221,7 +208,6 @@ const lockFundTotalFee = computed(() => lockFund.value + lockFundTxFee.value);
 
 const disableSubmit = computed(
   () =>
-    !walletPassword.value.match(passwdPattern) ||
     harvesterKey.value == "" ||
     showHarvesterError.value ||
     showNoBalance.value ||
@@ -319,22 +305,7 @@ const totalFeeFormatted = computed(() => {
 });
 
 const createTxn = async () => {
-  let verifyPassword = WalletUtils.verifyWalletPassword(
-    walletState.currentLoggedInWallet.name,
-    networkState.chainNetworkName,
-    walletPassword.value
-  );
-  if (!verifyPassword) {
-    err.value = t("general.walletPasswordInvalid", {
-      name: walletState.currentLoggedInWallet.name,
-    });
-    return;
-  }
-  let txnObj: {
-      txnPayload: string;
-      hashLockTxnPayload?: string;
-    },
-    {} = {};
+  let unsignedTxnPayload: string | string[];
 
   let txnBuilder:
     | AddHarvesterTransactionBuilder
@@ -379,54 +350,43 @@ const createTxn = async () => {
   if (selectedMultisigAddress.value) {
     const txn = txnBuilder.harvesterKey(harvesterPublicAccount.value).build();
     const innerTxn = txn.toAggregateV1(multisigPublicAccount.value);
-    const innerTxns = [innerTxn];
-    const nodeTime = await AppState.chainAPI.nodeAPI.getNodeTime();
-    txnObj = await TransactionUtils.signTxnWithPassword(
-      selectedAddress.value,
-      selectedMultisigAddress.value,
-      walletPassword.value,
-      null,
-      innerTxns,
-      new UInt64(nodeTime.sendTimeStamp!)
-    );
+    const innerTxns = [innerTxn.serialize()];
+    unsignedTxnPayload = innerTxns;
   } else {
     const txn = txnBuilder.harvesterKey(harvesterPublicAccount.value).build();
-    txnObj = await TransactionUtils.signTxnWithPassword(
-      selectedAddress.value,
-      null,
-      walletPassword.value,
-      txn
-    );
+    unsignedTxnPayload = txn.serialize();
   }
-  TransactionState.lockHashPayload = txnObj.hashLockTxnPayload;
-  TransactionState.transactionPayload = txnObj.txnPayload;
+  TransactionState.unsignedTransactionPayload = unsignedTxnPayload;
   TransactionState.selectedAddress = selectedAddress.value;
+  TransactionState.selectedMultisigAddress = selectedMultisigAddress.value;
   router.push({ name: "ViewConfirmTransaction" });
 };
 
-emitter.on("select-account", (address: string) => {
-  selectedAddress.value = address;
-});
+const selectAccountAddress = (address: string) => {
+  selectedAddress.value = address
+}
 
-emitter.on("select-account-public-key", (publicKey: string) => {
+const selectedAccountPublicKey = (publicKey: string) => {
   ownerPublicAccount.value = WalletUtils.createPublicAccount(
     publicKey,
     AppState.networkType
   );
-});
+}
 
-emitter.on("select-multisig-account", (node: TreeNode) => {
+const selectMultisigAccount = (node: TreeNode) => {
   selectedMultisigName.value = node.label;
   selectedMultisigAddress.value = node.value;
   multisigPublicAccount.value = WalletUtils.createPublicAccount(
     node.publicKey,
     AppState.networkType
   );
-});
-emitter.on("CLOSE_MULTISIG", () => {
-  selectedMultisigName.value = null;
-  selectedMultisigAddress.value = null;
-});
+}
+
+const closeMultisig = () => {
+  selectedMultisigName.value = null
+  selectedMultisigAddress.value = null
+}
+
 </script>
 <style scoped>
 /* Chrome, Safari, Edge, Opera */

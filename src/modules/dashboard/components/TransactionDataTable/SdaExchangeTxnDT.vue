@@ -75,7 +75,7 @@
                 item.duration
               )} Day${durationTime(item.duration) > 1 ? 's' : ''}</tiptext>`,
               disabled: Boolean(item.duration === undefined),
-              escape: true,
+              escape: false,
             }"
           >
             <div>
