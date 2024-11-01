@@ -4,7 +4,8 @@ on:
   push:
     tags: 
       - release-v*
-  
+    branches:
+    - 'rollback-v*'
 jobs:
   build:
     runs-on: ubuntu-latest
