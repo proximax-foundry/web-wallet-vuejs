@@ -517,10 +517,10 @@ export default {
     let provider;
     let signer;
 
-    const initMetamask = ()=>{
+    const initMetamask = async ()=>{
        if (typeof window.ethereum !== 'undefined') {
         provider = new ethers.BrowserProvider(window.ethereum);
-        signer = provider.getSigner();
+        signer = await provider.getSigner();
         isInstallMetamask.value = true;
         isMetamaskConnected.value = ethereum.isConnected()?true:false;
         ethereum
@@ -666,7 +666,7 @@ export default {
         (async () => {
           try{
             provider = new ethers.BrowserProvider(window.ethereum, 'any');
-            //signer = provider.getSigner();
+            //signer = await provider.getSigner();
             const contract = new ethers.Contract(newTokenAddress, abi, provider);
             // tokenBalance will be in BigNumber, with suffix n
             const tokenBalance = await contract.balanceOf(newCurrentAccount);

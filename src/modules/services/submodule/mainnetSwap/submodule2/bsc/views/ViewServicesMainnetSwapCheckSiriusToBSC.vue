@@ -245,10 +245,10 @@ export default {
     let provider;
     let signer;
 
-    const initMetamask = ()=>{
+    const initMetamask = async ()=>{
        if (typeof window.ethereum !== 'undefined') {
         provider = new ethers.BrowserProvider(window.ethereum);
-        signer = provider.getSigner();
+        signer = await provider.getSigner();
         isInstallMetamask.value = true;
         isMetamaskConnected.value = ethereum.isConnected()?true:false;
         ethereum
