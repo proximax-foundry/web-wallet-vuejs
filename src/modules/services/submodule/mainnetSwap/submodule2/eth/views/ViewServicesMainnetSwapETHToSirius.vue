@@ -346,7 +346,9 @@ export default {
 
     if (typeof window.ethereum !== 'undefined') {
       provider = new ethers.BrowserProvider(window.ethereum);
-      signer = provider.getSigner();
+      (async()=>{
+        signer = await provider.getSigner();
+      })();
 
       isInstallMetamask.value = true;
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
@@ -463,7 +465,7 @@ export default {
         (async () => {
           try{
             provider = new ethers.BrowserProvider(window.ethereum, 'any');
-            signer = provider.getSigner();
+            signer = await provider.getSigner();
             const contract = new ethers.Contract(newTokenAddress, abi, signer);
             const tokenBalance = await contract.balanceOf(newCurrentAccount);
             balance.value = tokenBalance.toNumber()/Math.pow(10, 6);
@@ -579,7 +581,7 @@ export default {
         err.value = '';
         isInvalidConfirmedMeta.value = false;
         provider = new ethers.BrowserProvider(window.ethereum, 'any');
-        signer = provider.getSigner();
+        signer = await provider.getSigner();
         const Contract = new ethers.Contract(tokenAddress.value, abi, signer);
         const data = await SwapUtils.getETH_GasLimit(swapData.gasPriceConsultURL);
         var options = {
@@ -656,7 +658,7 @@ export default {
       try{
         isInvalidSignedMeta.value = false;
         provider = new ethers.BrowserProvider(window.ethereum, 'any');
-        signer = provider.getSigner();
+        signer = await provider.getSigner();
         const messageSignature = await signer.signMessage(siriusAddress.value);
         messageHash.value = messageSignature;
         const data = {
