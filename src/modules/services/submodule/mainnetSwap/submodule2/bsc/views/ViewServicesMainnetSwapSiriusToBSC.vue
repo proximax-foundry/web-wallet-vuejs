@@ -218,7 +218,7 @@ import { SwapUtils } from '@/util/swapUtils';
 import { MosaicId, NetworkType } from "tsjs-xpx-chain-sdk";
 import { AppState } from '@/state/appState';
 import { useI18n } from 'vue-i18n';
-
+import { multiply, bignumber } from 'mathjs'
 
 export default {
   name: 'ViewServicesMainnetSwapMetxToBSC',
@@ -544,15 +544,15 @@ export default {
     });
 
     const standardGasPriceInUSD = computed(()=>{
-       return Helper.convertNumberMinimumFormat(standardGasPrice.value * currentBSC_USD.value, 2);
+       return Helper.convertNumberMinimumFormat(standardGasPrice.value * currentBSC_USD.value, 5);
     });
 
     const fastGasPriceInUSD = computed(()=>{
-       return Helper.convertNumberMinimumFormat(fastGasPrice.value * currentBSC_USD.value, 2);
+       return Helper.convertNumberMinimumFormat(fastGasPrice.value * currentBSC_USD.value, 5);
     });
 
     const rapidGasPriceInUSD = computed(()=>{
-       return Helper.convertNumberMinimumFormat(rapidGasPrice.value * currentBSC_USD.value, 2);
+       return Helper.convertNumberMinimumFormat(rapidGasPrice.value * currentBSC_USD.value, 5);
     });
 
     const xpxAmountInStandardGasPrice = computed(()=>{
@@ -577,24 +577,35 @@ export default {
 
     const updateGasPrice = async ()=>{
 
-      if(AppState.networkType === NetworkType.TEST_NET){
-        standardGasPriceInGwei.value = 10;
-        fastGasPriceInGwei.value = 10;
-        rapidGasPriceInGwei.value = 10;
-      }else{
+      // if(AppState.networkType === NetworkType.TEST_NET){
+      //   standardGasPriceInGwei.value = 10;
+      //   fastGasPriceInGwei.value = 10;
+      //   rapidGasPriceInGwei.value = 10;
+      // }else{
         let data = await SwapUtils.getBSC_SafeGwei(swapData.gasPriceConsultURL);
 
         if(data.status === 0){
           console.log("Error, no data found. Please try again later");
         }
         else{
-          let result = data.result;
+          
+          let temp = {
+            "status":"1",
+            "message":"OK",
+            "result":{
+              "LastBlock":"49561015",
+              "SafeGasPrice":"0.1",
+              "ProposeGasPrice":"0.1",
+              "FastGasPrice":"0.1",
+              "UsdPrice":"723.55"}
+            };
+          let result = temp.result;
 
-          standardGasPriceInGwei.value = result.ProposeGasPrice;
-          fastGasPriceInGwei.value = result.FastGasPrice;
-          rapidGasPriceInGwei.value = Math.ceil(fastGasPriceInGwei.value * 1.1);
+          standardGasPriceInGwei.value = parseFloat(result.ProposeGasPrice);
+          fastGasPriceInGwei.value = parseFloat(result.FastGasPrice);
+          rapidGasPriceInGwei.value = multiply(bignumber(fastGasPriceInGwei.value), bignumber(1.1));
         }
-      }
+      // }
     }
     updateGasPrice();
 
@@ -695,10 +706,11 @@ export default {
       message2.gasPrice = selectedGasPriceInGwei.value;
       message2.gasLimit = selectedGasLimit.value;
 
+      rebuildTranction();
+
       minNativeBalanceAmount.value = Helper.convertNumberMinimumFormat(txFee.value + gasPriceInXPX.value, AppState.nativeToken.divisibility);
      
-      checkMinimumBalance();
-      rebuildTranction();
+      checkMinimumBalance(); 
     }
 
     const checkMinimumBalance = async ()=>{
