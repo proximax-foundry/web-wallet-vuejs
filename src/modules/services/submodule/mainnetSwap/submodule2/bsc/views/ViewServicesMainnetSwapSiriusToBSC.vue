@@ -577,35 +577,24 @@ export default {
 
     const updateGasPrice = async ()=>{
 
-      // if(AppState.networkType === NetworkType.TEST_NET){
-      //   standardGasPriceInGwei.value = 10;
-      //   fastGasPriceInGwei.value = 10;
-      //   rapidGasPriceInGwei.value = 10;
-      // }else{
+      if(AppState.networkType === NetworkType.TEST_NET){
+        standardGasPriceInGwei.value = 10;
+        fastGasPriceInGwei.value = 10;
+        rapidGasPriceInGwei.value = 10;
+      }else{
         let data = await SwapUtils.getBSC_SafeGwei(swapData.gasPriceConsultURL);
 
         if(data.status === 0){
           console.log("Error, no data found. Please try again later");
         }
         else{
-          
-          let temp = {
-            "status":"1",
-            "message":"OK",
-            "result":{
-              "LastBlock":"49561015",
-              "SafeGasPrice":"0.1",
-              "ProposeGasPrice":"0.1",
-              "FastGasPrice":"0.1",
-              "UsdPrice":"723.55"}
-            };
-          let result = temp.result;
+          let result = data.result;
 
           standardGasPriceInGwei.value = parseFloat(result.ProposeGasPrice);
           fastGasPriceInGwei.value = parseFloat(result.FastGasPrice);
           rapidGasPriceInGwei.value = multiply(bignumber(fastGasPriceInGwei.value), bignumber(1.1));
         }
-      // }
+      }
     }
     updateGasPrice();
 
