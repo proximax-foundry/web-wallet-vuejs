@@ -129,6 +129,7 @@ import { AppState } from '@/state/appState';
 //import { ChainAPICall } from "@/models/REST/chainAPICall";
 //import { listenerState } from "@/state/listenerState";
 
+// **Totally outdated, please refer to the BSC version
 export default {
   name: 'ViewServicesMainnetSwapSiriusToETH',
 
