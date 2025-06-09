@@ -590,9 +590,9 @@ export default {
         else{
           let result = data.result;
 
-          standardGasPriceInGwei.value = parseFloat(result.ProposeGasPrice);
-          fastGasPriceInGwei.value = parseFloat(result.FastGasPrice);
-          rapidGasPriceInGwei.value = multiply(bignumber(fastGasPriceInGwei.value), bignumber(1.1));
+          standardGasPriceInGwei.value = parseFloat(result.SafeGasPrice);
+          fastGasPriceInGwei.value = parseFloat(result.ProposeGasPrice);
+          rapidGasPriceInGwei.value = parseFloat(result.FastGasPrice);
         }
       }
     }
