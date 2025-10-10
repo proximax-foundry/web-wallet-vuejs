@@ -190,7 +190,7 @@ import MixedTxnDataTable from "@/modules/dashboard/components/TransactionDataTab
 import DashboardAssetDataTable from "@/modules/dashboard/components/DashboardAssetDataTable.vue";
 import AddressQRModal from "@/modules/dashboard/components/AddressQRModal.vue";
 import { copyToClipboard } from "@/util/functions";
-import { Helper } from "@/util/typeHelper";
+import { Helper, LooseObject } from "@/util/typeHelper";
 import { useToast } from "primevue/usetoast";
 import { walletState } from "@/state/walletState";
 import { ChainUtils } from "@/util/chainUtils";
@@ -498,7 +498,7 @@ const formatRecentTransfer = (transactions) => {
   let transferTxn = [];
   let nativeTokenTxns = transactions.filter((txn) => txn.amountTransfer > 0);
   for (const txn of nativeTokenTxns) {
-    let formattedTransferTxn ;
+    let formattedTransferTxn: LooseObject = {};
     if (
       selectedAccountAddressPlain.value == txn.sender &&
       selectedAccountAddressPlain.value == txn.recipient
@@ -552,7 +552,7 @@ emitter.on("DEFAULT_ACCOUNT_SWITCHED", async (payload) => {
   // recentTransferTxn();
   updateAccountTransactionCount();
   loadRecentTransactions();
-  loadRecentTransferTransactions();
+  // loadRecentTransferTransactions();
   await loadUnconfirmedTransactions();
   await loadPartialTransactions();
   loadInQueueTransactions();
@@ -642,7 +642,7 @@ let loadInQueueTransactions = () => {
 const init = async () => {
   updateAccountTransactionCount();
   loadRecentTransactions();
-  loadRecentTransferTransactions();
+  // loadRecentTransferTransactions();
   await loadUnconfirmedTransactions();
   await loadPartialTransactions();
   loadInQueueTransactions();

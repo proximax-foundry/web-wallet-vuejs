@@ -263,33 +263,39 @@ export class Sirius {
  
         let announcedABTsHash: string[] = [];
 
-        while(!allABTAnnounced){
-             await new Promise(r => setTimeout(r, 15000));
-             console.log("Checking LockHash Txn confirmation...");
- 
-             let latestBlock = await AppState.chainAPI!.chainAPI.getBlockchainHeight();
-             let blockHeight = latestBlock;
-             let transactionWaiting = signedABTs.filter( x => !announcedABTsHash.includes(x.hash))
- 
-             for(let i=0; i < transactionWaiting.length; ++i){
-                 let lockHashTxnHash = txnLockingSet.find(x => x.txnHash === transactionWaiting[i].hash)!.hashLockHash;
-                 let txnStatus = await AppState.chainAPI!.transactionAPI.getTransactionStatus(lockHashTxnHash);
- 
-                 if(txnStatus.group === TransactionGroupType.CONFIRMED){
-                     let confirmedAtHeight = txnStatus.height!.compact();
-                     let blockConfirmation = txnsConfirmationBlock.find(x => x.txnHash === lockHashTxnHash);
-                     blockConfirmation!.block = confirmedAtHeight;
- 
-                     if(blockHeight >= (blockConfirmation!.block + 1)){
-                         await AppState.chainAPI!.transactionAPI.announceAggregateBonded(transactionWaiting[i]);
-                         announcedABTsHash.push(transactionWaiting[i].hash);
-                     }
-                 }
-             }
- 
-             if(announcedABTsHash.length === signedABTs.length){
-                 allABTAnnounced = true;
-             }
+        try {
+            
+            while(!allABTAnnounced){
+                await new Promise(r => setTimeout(r, 15000));
+                console.log("Checking LockHash Txn confirmation...");
+    
+                let latestBlock = await AppState.chainAPI!.chainAPI.getBlockchainHeight();
+                let blockHeight = latestBlock;
+                let transactionWaiting = signedABTs.filter( x => !announcedABTsHash.includes(x.hash))
+    
+                for(let i=0; i < transactionWaiting.length; ++i){
+                    let lockHashTxnHash = txnLockingSet.find(x => x.txnHash === transactionWaiting[i].hash)!.hashLockHash;
+                    let txnStatus = await AppState.chainAPI!.transactionAPI.getTransactionStatus(lockHashTxnHash);
+    
+                    if(txnStatus.group === TransactionGroupType.CONFIRMED){
+                        let confirmedAtHeight = txnStatus.height!.compact();
+                        let blockConfirmation = txnsConfirmationBlock.find(x => x.txnHash === lockHashTxnHash);
+                        blockConfirmation!.block = confirmedAtHeight;
+    
+                        if(blockHeight >= (blockConfirmation!.block + 1)){
+                            await AppState.chainAPI!.transactionAPI.announceAggregateBonded(transactionWaiting[i]);
+                            announcedABTsHash.push(transactionWaiting[i].hash);
+                        }
+                    }
+                }
+    
+                if(announcedABTsHash.length === signedABTs.length){
+                    allABTAnnounced = true;
+                }
+            }
+
+         } catch (error) {
+            console.log("There are some issue with LockHash Txn confirmation checking, please check the node status or try again later");
          }
 
          return announcedABTsHash;

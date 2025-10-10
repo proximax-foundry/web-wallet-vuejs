@@ -108,6 +108,11 @@ let aggregateOption = [
 let distribute = async()=>{
   distributionError.value = "";
   distributeDone.value = false;
+
+  sdaError.value = "";
+  recipientError.value = "";
+  showPasswdError.value = false;
+
   if(distributing.value){
     return;
   }
@@ -121,6 +126,10 @@ let distribute = async()=>{
   }
   else if(totalRecipients.value === 0){
     recipientError.value = "No recipient to distribute";
+    return;
+  }
+  else if(!walletPassword.value){
+    showPasswdError.value = true;
     return;
   }
   else if(walletPassword.value){
