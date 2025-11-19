@@ -541,7 +541,7 @@ swap:
   rejectMetamask: Approval in MetaMask is rejected
   requestFromSwap: Requesting from swap service
   retry: Retry
-  selectNetworkToSwap: 'Please select {network} on MetaMask to swap'
+  selectNetworkToSwap: 'Please switch to {network} on MetaMask to swap'
   sendMsgFail: Unable to send message to swap service
   sendRequest: Send Request
   sendingMsg: Sending message to MetaMask

@@ -456,12 +456,16 @@ export default {
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
 
-    function verifyChain(chainId){
+    async function verifyChain(chainId){
       currentNetwork.value = chainId;
       if(bscChainId === parseInt(chainId)){
         err.value = '';
       }else{
         err.value = t('swap.selectNetworkToSwap',{network: bscNetworkName});
+        await ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x38' }]
+        });
       }
     }
     const recheckMetamask = () =>{

@@ -613,7 +613,7 @@ export default {
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
 
-    function verifyChain(chainId, updateTokenBol = false){
+    async function verifyChain(chainId, updateTokenBol = false){
       currentNetwork.value = chainId;
       if(bscChainId === parseInt(chainId)){
         err.value = '';
@@ -622,6 +622,10 @@ export default {
         }
       }else{
         err.value = t('swap.selectNetworkToSwap',{network: bscNetworkName});
+        await ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x38' }]
+        });
       }
     }
 
