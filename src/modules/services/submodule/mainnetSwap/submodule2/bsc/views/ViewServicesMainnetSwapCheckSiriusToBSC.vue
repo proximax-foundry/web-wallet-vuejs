@@ -196,6 +196,13 @@ export default {
       }
     }
 
+    onBeforeUnmount(() => {
+      if(window.ethereum){
+        ethereum.removeListener("accountsChanged", handleAccountsChanged);
+        ethereum.removeListener("chainChanged", handleChainChanged);
+      }
+    })
+
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
     swapData.init();
 
@@ -247,6 +254,7 @@ export default {
 
     const initMetamask = async ()=>{
        if (typeof window.ethereum !== 'undefined') {
+        ethereum.removeAllListeners();
         provider = new ethers.BrowserProvider(window.ethereum);
         signer = await provider.getSigner();
         isInstallMetamask.value = true;
@@ -266,9 +274,7 @@ export default {
             console.error(err);
           });
         ethereum.on('accountsChanged', handleAccountsChanged);
-        ethereum.on('chainChanged', (metaChainId) => {
-          verifyChain(metaChainId);
-        });
+        ethereum.on('chainChanged', handleChainChanged);
       }else{
         console.log('MetaMask not installed')
       }
@@ -285,8 +291,12 @@ export default {
       }
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
+
+    const handleChainChanged = (metaChainId)=>{
+      verifyChain(metaChainId);
+    }
     // For now, 'eth_accounts' will continue to always return an array
-    function handleAccountsChanged(accounts) {
+    const handleAccountsChanged = (accounts)=>{
       if(window.ethereum.isMetaMask){
         if (accounts.length === 0) {
           // MetaMask is locked or the user has not connected any accounts
@@ -304,12 +314,36 @@ export default {
         err.value = '';
       }else{
         err.value = t('swap.selectNetworkToSwap',{network: bscNetworkName});
-        await ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x38' }]
-        });
+        switchNetwork(bscChainId);
       }
     }
+
+    async function switchNetwork(chainId){
+      
+      try{
+        await ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x' + chainId.toString(16) }]
+        });
+      }
+      catch(error){
+        console.log(error);
+
+        if(bscChainId === 97){
+          await ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+                chainName: 'BNB Smart Chain Testnet',
+                chainId: '0x61',
+                nativeCurrency: { name: 'tBNB', decimals: 18, symbol: 'tBNB' },
+                rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
+                blockExplorerUrls: ["https://testnet.bscscan.com/"]
+            }]
+          });
+        }
+      }
+    }
+
     const connectMetamask = () => {
       if(window.ethereum.isMetaMask == undefined){
         verifyMetaMaskPlugin.value = false;

@@ -421,9 +421,15 @@ export default {
       return uniqueContact;
     });
     onBeforeUnmount(() => {
-       if(verifyingTxn){
-         clearInterval(verifyingTxn);
-       }
+      // console.log("beforeUnmount");
+      if(verifyingTxn){
+        clearInterval(verifyingTxn);
+      }
+
+      if(window.ethereum){
+        ethereum.removeListener("accountsChanged", handleAccountsChanged);
+        ethereum.removeListener("chainChanged", handleChainChanged);
+      }
     })
 
     let swapData = new ChainSwapConfig(networkState.chainNetworkName);
@@ -519,6 +525,7 @@ export default {
 
     const initMetamask = async ()=>{
        if (typeof window.ethereum !== 'undefined') {
+        ethereum.removeAllListeners();
         provider = new ethers.BrowserProvider(window.ethereum);
         signer = await provider.getSigner();
         isInstallMetamask.value = true;
@@ -532,15 +539,14 @@ export default {
         ethereum
           .request({ method: 'eth_chainId' })
           .then((metaChainId) => {
+            // console.log("Get chainId - from request");
             verifyChain(metaChainId, false);
           })
           .catch((err) => {
             console.error(err);
           });
         ethereum.on('accountsChanged', handleAccountsChanged);
-        ethereum.on('chainChanged', (metaChainId) => {
-          verifyChain(metaChainId, true);
-        });
+        ethereum.on('chainChanged', handleChainChanged);
       }else{
         console.log('MetaMask not installed')
       }
@@ -596,8 +602,14 @@ export default {
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
 
+    const handleChainChanged = (metaChainId)=>{
+      // console.log("Chain changed - handle");
+      verifyChain(metaChainId, true);
+    }
+
     // For now, 'eth_accounts' will continue to always return an array
-    function handleAccountsChanged(accounts) {
+    const handleAccountsChanged = (accounts)=> {
+      // console.log(accounts);
       if(window.ethereum.isMetaMask){
         if (accounts.length === 0) {
           // MetaMask is locked or the user has not connected any accounts
@@ -613,7 +625,8 @@ export default {
       isMetamaskConnected.value = ethereum.isConnected()?true:false;
     }
 
-    async function verifyChain(chainId, updateTokenBol = false){
+    function verifyChain(chainId, updateTokenBol = false){
+      // console.log("Verifying: " + chainId);
       currentNetwork.value = chainId;
       if(bscChainId === parseInt(chainId)){
         err.value = '';
@@ -622,10 +635,36 @@ export default {
         }
       }else{
         err.value = t('swap.selectNetworkToSwap',{network: bscNetworkName});
+        
+        switchNetwork(bscChainId);
+      }
+    }
+
+    async function switchNetwork(chainId){
+      
+      // console.log("Switching to: " + chainId);
+
+      try{
         await ethereum.request({
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x38' }]
+            params: [{ chainId: '0x' + chainId.toString(16) }]
         });
+      }
+      catch(error){
+        console.log(error);
+
+        if(bscChainId === 97){
+          await ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+                chainName: 'BNB Smart Chain Testnet',
+                chainId: '0x61',
+                nativeCurrency: { name: 'tBNB', decimals: 18, symbol: 'tBNB' },
+                rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
+                blockExplorerUrls: ["https://testnet.bscscan.com/"]
+            }]
+          });
+        }
       }
     }
 
