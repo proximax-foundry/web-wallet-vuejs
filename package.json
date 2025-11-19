@@ -1,6 +1,6 @@
 {
   "name": "web-wallet-vuejs",
-  "version": "1.7.11",
+  "version": "1.7.10",
   "private": true,
   "scripts": {
     "dev": "vite ",
